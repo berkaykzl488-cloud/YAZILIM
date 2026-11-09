@@ -1398,6 +1398,8 @@ svg.cover,img.cover{display:block;width:100%;height:100%;object-fit:cover}
 .egp-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:700;background:var(--ok-soft);color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 32%,transparent);font-family:var(--f-mono)}
 /* ===================== Yönetim paneli kabuğu (v2) ===================== */
 body.adm-mode #strip,body.adm-mode #cats,body.adm-mode #ftr,body.adm-mode .hdr .search,body.adm-mode .hdr .hilan,body.adm-mode .hdr .balwrap,body.adm-mode .sidead{display:none!important}
+/* R7: yönetimde tek tema düğmesi: masaüstünde üst çubuktaki (.atop), mobilde menü çekmecesindeki; site başlığındaki gizlenir */
+body.adm-mode .hdr .icob.thm{display:none!important}
 body.adm-mode #app{padding:0;min-height:0}
 body.adm-mode .hdr-in{max-width:none;padding-block:10px}
 .ash{display:grid;grid-template-columns:252px minmax(0,1fr);align-items:start;min-height:calc(100vh - var(--hdrh,56px))}
@@ -2202,11 +2204,15 @@ function egpDescFor(w, tpl){
     .replace(/\{banka\}/g,w.bank||'Banka').replace(/\{iban\}/g,fmtIban(w.iban||'')).replace(/\{uye\}/g,U.name||'');
 }
 // Pusula her zaman üyenin sistemde kayıtlı kimliğiyle kesilir (IBAN hesap sahibi adıyla değil).
-function egpIdent(w){ const U=user(w.u)||{}, tc=U.tc||{};
-  return {name:fullName(U)||U.name||'Üye', tckn:tc.no||tc.mask||tc.masked||w.tckn||'-', tel:U.tel||'-'}; }
+// Gider pusulasında TAM T.C. kimlik no zorunlu: yalnızca u.tc.no (11 hane) kullanılır; maskeli/yedek değer basılmaz.
+function egpIdent(w){ const U=user(w.u)||{};
+  return {name:fullName(U)||U.name||'Üye', tckn:tcFull(U)?U.tc.no:'', tel:U.tel||'-', u:U}; }
+const EGP_NOTC='Üyenin tam T.C. kimlik numarası kayıtlı değil';
 function issueEgp(w, opts){
   const E=egpCfg(), U=user(w.u)||{}; opts=opts||{};
   const prev=w.egp||null, preview=!!opts.preview;
+  // Tam TC yoksa belge kesilmez/güncellenmez (yalnızca taslak önizleme çizilebilir).
+  if(!preview&&!tcFull(U)) return null;
   // Ödenmiş çekimde tutarlar kilitli: defterdeki ödenen net/stopaj ile belge aynı kalır.
   const lock=opts.lockAmounts!=null?!!opts.lockAmounts:!!prev;
   const yr=new Date(w.pt||now()).getFullYear();
@@ -2283,7 +2289,7 @@ function egpDocHtml(w, gIn){
     <div style="font-size:11px;color:#475569;margin-bottom:10px;font-family:var(--f-mono)"><b>ETTN:</b> ${esc(g.ettn)}</div>
     <div class="egp-party">
       <div><b>Satıcı (Ödeme Yapılan Kişi):</b> ${esc(g.sellerName)} ${g.userName?`(@${esc(g.userName)})`:''}</div>
-      <div><b>T.C. Kimlik No:</b> <span class="mono">${esc(g.tckn)}</span></div>
+      <div><b>T.C. Kimlik No:</b> ${g.tckn?`<span class="mono">${esc(g.tckn)}</span>`:`<span style="color:#b91c1c;font-weight:700">${EGP_NOTC}</span>`}</div>
       <div><b>Vergi Mükellefiyeti:</b> Yok (VUK Md. 234 Gerçek Kişi)</div>
       <div><b>Telefon / İletişim:</b> <span class="mono">${esc(g.tel)}</span></div>
       <div><b>Ödeme Yapılan Banka:</b> ${esc(g.bank)}</div>
@@ -2370,11 +2376,17 @@ function mEgpModal(id){
   const stAmt=paid?r2(+w.stopaj||0):r2(brut*stPct/100), net=paid&&w.net!=null?r2(w.net):r2(brut-stAmt);
   const desc=egpDescFor(w);
   const mism=I.name&&w.name&&w.name.toLocaleLowerCase('tr-TR')!==I.name.toLocaleLowerCase('tr-TR');
-  modal(mWrap(`e-Gider Pusulası Kes & Ödemeyi Onayla · #${w.id}`,`<form class="stack" data-form="egpissue" data-id="${w.id}">
+  const U=I.u, noTc=!I.tckn, msk=U.tc&&(U.tc.mask||U.tc.masked)||'';
+  const tcBox=noTc?`<form class="stack egptc" data-form="egptc" data-id="${w.id}" novalidate>
+    <div class="note note-bad" role="alert"><b>${EGP_NOTC}.</b> Gider pusulasında tam numara zorunlu olduğundan pusula kesilemez. Üyenin tam numarasını girin ya da üyeden yeniden doğrulama isteyin.${tcOk(U)?` <span class="muted">Kayıtlı maske: <span class="mono">${esc(msk)}</span></span>`:' <span class="muted">Üyenin kimlik doğrulaması yok.</span>'}${U.tcAsk?`<br><span class="muted" style="font-size:12px">Üyeden doğrulama istendi: ${dtstr(U.tcAsk)}</span>`:''}</div>
+    <div class="hstack egptc-r" style="align-items:flex-end;flex-wrap:wrap;gap:8px"><div class="fld" style="flex:1 1 200px;min-width:0"><label for="egi_tcfull">Üyenin tam T.C. kimlik no (11 hane)</label><input class="inp mono" id="egi_tcfull" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="${esc(msk||'11 haneli')}" aria-describedby="egi_tcerr"></div><button class="btn btn-primary">Doğrula ve kaydet</button><button type="button" class="btn" data-act="tc-ask" data-id="${U.id||''}" data-w="${w.id}">Üyeden yeniden doğrulama iste</button></div>
+    <div class="neg" id="egi_tcerr" style="font-size:12.5px" aria-live="polite"></div>
+  </form>`:'';
+  modal(mWrap(`e-Gider Pusulası Kes & Ödemeyi Onayla · #${w.id}`,`${tcBox}<form class="stack" data-form="egpissue" data-id="${w.id}"${noTc?' style="margin-top:14px"':''}>
     <div class="note note-info">Şirket hesabınızdan <b>${esc(fmtIban(w.iban))}</b> IBAN'ına yapılan EFT/Havale çıkışı için üyenin sistemde kayıtlı bilgileriyle (<b>${esc(I.name)}</b>) resmi <b>e-Gider Pusulası</b> oluşturulur.${mism?`<br><span class="pill p-itiraz">İsim uyuşmuyor</span> IBAN hesap sahibi: <b>${esc(w.name)}</b>`:''}</div>
     <div class="row3">
       <div class="fld"><label for="egi_name">Ad Soyad (sistem kaydı)</label><input class="inp" id="egi_name" value="${esc(I.name)}" readonly></div>
-      <div class="fld"><label for="egi_tckn">T.C. Kimlik No (sistem kaydı)</label><input class="inp mono" id="egi_tckn" value="${esc(I.tckn)}" readonly></div>
+      <div class="fld"><label for="egi_tckn">T.C. Kimlik No (sistem kaydı)</label><input class="inp mono" id="egi_tckn" value="${esc(I.tckn)}" placeholder="Kayıtlı değil" readonly${noTc?' aria-invalid="true" style="border-color:var(--bad,#dc2626)"':''}></div>
       <div class="fld"><label for="egi_tel">Telefon (sistem kaydı)</label><input class="inp mono" id="egi_tel" value="${esc(I.tel)}" readonly></div>
     </div>
     <div class="row3">
@@ -2390,7 +2402,7 @@ function mEgpModal(id){
       </div>
       <textarea class="inp" id="egi_desc" rows="2" required>${esc(desc)}</textarea>
     </div>
-    <div class="hstack"><button class="btn btn-ok">${w.status==='bekliyor'?'Ödemeyi Onayla & e-Gider Pusulası Kes':w.egp?'e-Gider Pusulasını Güncelle':'e-Gider Pusulası Kes'}</button><button type="button" class="btn btn-ghost" data-act="close">İptal</button></div>
+    <div class="hstack"><button class="btn btn-ok"${noTc?' disabled title="'+EGP_NOTC+'"':''}>${w.status==='bekliyor'?'Ödemeyi Onayla & e-Gider Pusulası Kes':w.egp?'e-Gider Pusulasını Güncelle':'e-Gider Pusulası Kes'}</button><button type="button" class="btn btn-ghost" data-act="close">İptal</button></div>
   </form>`));
 }
 
@@ -2545,7 +2557,7 @@ function bannerHtml(a){const s=srv(a.server)||{name:a.title,c:['#333','#777'],id
 const sqNorm = v => String(v||'').toLocaleLowerCase('tr-TR').replace(/\s+/g,'');
 
 function egpApply(v){
-  ui.egpQ = v; const q = sqNorm(v); let n = 0;
+  ui.egpQ = v; if($('.wdtbl')) admRepl({q:v||null}); const q = sqNorm(v); let n = 0;
   document.querySelectorAll('.wdtbl tbody tr').forEach(tr => {
     const hay = tr.dataset.hay || '';
     const ok = !q || hay.includes(q);
@@ -2607,7 +2619,7 @@ function vServer(id,cat){
   const CD={yang:s.sec==='tr'?'1 Won = 100M yang · anında teslim':'100M bazında yang satışı',ep:'Server nesne market parası',item:'Silah, zırh, takı, simya, kostüm',karakter:'Hazır karakter ve hesaplar'};
   const hero=`<div class="shero ${cat?'sm':''}" style="--c1:${s.c[0]};--c2:${s.c[1]}">${logo(s,cat?58:90)}<div style="flex:1;min-width:200px"><h1>${esc(s.name)}${cat?' · '+cl(cat):''}</h1>${cat?'':`<p>${esc(s.desc||'')}</p>`}
     <div class="chips" style="margin-top:8px"><span class="chip">${secName(s.sec)}</span>${s.sec==='pvp'?`${s.lv?`<span class="chip">${esc(s.lv)}</span>`:''}${s.type&&s.type!=='PVP'?`<span class="chip">${esc(s.type)}</span>`:''}${s.open?`<span class="chip">${open?'Açılış: '+dtstr(s.open):'Açıldı: '+dstr(s.open)}</span>`:''}`:''}<span class="chip">${all.length} aktif ilan</span></div></div>
-    ${cat?'':`<div class="hstack shero-btns">${s.sec==='pvp'?`<a class="btn" style="background:#fff;color:#111;border-color:#fff" href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener">Web sitesi ↗</a>`:''}<a class="btn" style="background:rgba(0,0,0,.3);color:#fff;border-color:rgba(255,255,255,.5)" href="#ilan-ver" data-act="sell-here" data-s="${s.id}">Bu servera ilan ver</a></div>`}</div>`;
+    ${cat?'':`<div class="hstack shero-btns">${s.sec==='pvp'&&srvWeb(s.url)?`<a class="btn" style="background:#fff;color:#111;border-color:#fff" href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener">Web sitesi ↗</a>`:''}<a class="btn" style="background:rgba(0,0,0,.3);color:#fff;border-color:rgba(255,255,255,.5)" href="#ilan-ver" data-act="sell-here" data-s="${s.id}">Bu servera ilan ver</a></div>`}</div>`;
   const crumbs=`<div class="crumbs"><a href="#home">Ana Sayfa</a> › <a href="#metin2-${s.sec}">${secName(s.sec)}</a> › ${cat?`<a href="#server-${s.id}">${esc(s.name)}</a> › ${cl(cat)}`:esc(s.name)}</div>`;
   if(!cat){
     const vit=sortL(all.filter(l=>on(l,'vitrin'))).slice(0,8); const top=sortL(all.filter(l=>!on(l,'vitrin'))).slice(0,8);
@@ -2757,10 +2769,10 @@ function migrate(o){
   if(!o.set.egpSeed1){
     o.set.egpSeed1=1; const T=Date.now();
     if(!o.wd.some(w=>w.id==='w0')){
-      o.wd.push({id:'w0',u:'u2',amount:850,fee:0,brut:850,stopajPct:0,stopaj:0,net:850,bank:'Garanti BBVA',iban:'TR42 0006 2000 1230 0006 2987 11',name:'Deniz Kaya',tckn:'24*******96',taxpayer:false,status:'onaylandı',t:T-3*D,pt:T-3*D+2*H,egp:{no:'YGP2026000000101',ettn:'8a41b2c0-7d12-49e1-a831-99120481cf21',t:T-3*D+2*H,sellerName:'Deniz Kaya',userName:'Deniz_TR',tckn:'24*******96 (NVİ Doğrulamalı)',tel:'0532 410 22 88',email:'deniz@ornek.com',addr:'Türkiye (Bireysel / Vergi Mükellefi Değil)',bank:'Garanti BBVA',iban:'TR42 0006 2000 1230 0006 2987 11',amount:850,fee:0,brut:850,stopajPct:0,stopaj:0,net:850,desc:'213 Sayılı VUK Md. 234 kapsamında vergi mükellefi olmayan gerçek kişiden dijital oyun içi varlık / yang / item tedariki ve bakiye ödemesi (Garanti BBVA - TR42 0006 2000 1230 0006 2987 11)',company:'YangPazar Bilişim ve Dijital Oyun Hizmetleri Ltd. Şti.',vd:'Muğla Vergi Dairesi',vkn:'9340812450',mersis:'0934081245000001',compAddr:'Menteşe / Muğla, Türkiye',provider:'GİB e-Belge / QNB eFinans'}});
+      o.wd.push({id:'w0',u:'u2',amount:850,fee:0,brut:850,stopajPct:0,stopaj:0,net:850,bank:'Garanti BBVA',iban:'TR42 0006 2000 1230 0006 2987 11',name:'Deniz Kaya',tckn:'24*******96',taxpayer:false,status:'onaylandı',t:T-3*D,pt:T-3*D+2*H,egp:{no:'YGP2026000000101',ettn:'8a41b2c0-7d12-49e1-a831-99120481cf21',t:T-3*D+2*H,sellerName:'Deniz Kaya',userName:'Deniz_TR',tckn:'',tel:'0532 410 22 88',email:'deniz@ornek.com',addr:'Türkiye (Bireysel / Vergi Mükellefi Değil)',bank:'Garanti BBVA',iban:'TR42 0006 2000 1230 0006 2987 11',amount:850,fee:0,brut:850,stopajPct:0,stopaj:0,net:850,desc:'213 Sayılı VUK Md. 234 kapsamında vergi mükellefi olmayan gerçek kişiden dijital oyun içi varlık / yang / item tedariki ve bakiye ödemesi (Garanti BBVA - TR42 0006 2000 1230 0006 2987 11)',company:'YangPazar Bilişim ve Dijital Oyun Hizmetleri Ltd. Şti.',vd:'Muğla Vergi Dairesi',vkn:'9340812450',mersis:'0934081245000001',compAddr:'Menteşe / Muğla, Türkiye',provider:'GİB e-Belge / QNB eFinans'}});
     }
     if(!o.wd.some(w=>w.id==='w2')){
-      o.wd.push({id:'w2',u:'u1',amount:2400,fee:0,brut:2400,stopajPct:0,stopaj:0,net:2400,bank:'Ziraat Bankası',iban:'TR19 0001 0012 3456 7890 1234 01',name:'Burak Demir',tckn:'41*******18',taxpayer:false,status:'onaylandı',t:T-5*D,pt:T-5*D+3*H,egp:{no:'YGP2026000000102',ettn:'c9104e82-15b9-41d0-a710-3351908ab104',t:T-5*D+3*H,sellerName:'Burak Demir',userName:'KurtPazar',tckn:'41*******18 (NVİ Doğrulamalı)',tel:'0532 000 00 01',email:'kurt@ornek.com',addr:'Türkiye (Bireysel / Vergi Mükellefi Değil)',bank:'Ziraat Bankası',iban:'TR19 0001 0012 3456 7890 1234 01',amount:2400,fee:0,brut:2400,stopajPct:0,stopaj:0,net:2400,desc:'213 Sayılı VUK Md. 234 kapsamında vergi mükellefi olmayan gerçek kişiden dijital oyun içi varlık / yang / item tedariki ve bakiye ödemesi (Ziraat Bankası - TR19 0001 0012 3456 7890 1234 01)',company:'YangPazar Bilişim ve Dijital Oyun Hizmetleri Ltd. Şti.',vd:'Muğla Vergi Dairesi',vkn:'9340812450',mersis:'0934081245000001',compAddr:'Menteşe / Muğla, Türkiye',provider:'GİB e-Belge / QNB eFinans'}});
+      o.wd.push({id:'w2',u:'u1',amount:2400,fee:0,brut:2400,stopajPct:0,stopaj:0,net:2400,bank:'Ziraat Bankası',iban:'TR19 0001 0012 3456 7890 1234 01',name:'Burak Demir',tckn:'41*******18',taxpayer:false,status:'onaylandı',t:T-5*D,pt:T-5*D+3*H,egp:{no:'YGP2026000000102',ettn:'c9104e82-15b9-41d0-a710-3351908ab104',t:T-5*D+3*H,sellerName:'Burak Demir',userName:'KurtPazar',tckn:'',tel:'0532 000 00 01',email:'kurt@ornek.com',addr:'Türkiye (Bireysel / Vergi Mükellefi Değil)',bank:'Ziraat Bankası',iban:'TR19 0001 0012 3456 7890 1234 01',amount:2400,fee:0,brut:2400,stopajPct:0,stopaj:0,net:2400,desc:'213 Sayılı VUK Md. 234 kapsamında vergi mükellefi olmayan gerçek kişiden dijital oyun içi varlık / yang / item tedariki ve bakiye ödemesi (Ziraat Bankası - TR19 0001 0012 3456 7890 1234 01)',company:'YangPazar Bilişim ve Dijital Oyun Hizmetleri Ltd. Şti.',vd:'Muğla Vergi Dairesi',vkn:'9340812450',mersis:'0934081245000001',compAddr:'Menteşe / Muğla, Türkiye',provider:'GİB e-Belge / QNB eFinans'}});
     }
   }
   if(!o.exOrders.some(x=>x.id==='B5010')){
@@ -2929,6 +2941,20 @@ function migrate(o){
   if(!o.set.rm_takas){ o.set.rm_takas=1; (o.users||[]).forEach(u=>{ if(Array.isArray(u.perms)) u.perms=u.perms.filter(p=>p!=='oda'); }); if(Array.isArray(o.notifs)) o.notifs=o.notifs.filter(n=>!/^#ozel-takas/.test(n.link||'')); (o.posts||[]).forEach(p=>{ if(typeof p.body==='string') p.body=p.body.replace(/^- Anlaştığınız kişiyle bile \[.*$/m,'- Ödemeyi her zaman site üzerinden yapın; para teslim onaylanana kadar havuzda bekler.'); }); }
   (o.users||[]).forEach(u=>{ if(Array.isArray(u.perms)) u.perms=[...new Set(u.perms.map(p=>PERM_ALIAS[p]||p))].filter(p=>PERMS[p]); });
   o.support.canned=o.support.canned.map(c=>c[0]==='Teslim garantisi'?['İptal talebi','Siparişinizi kontrol ediyorum. Satıcı teslim etmediyse siparişi iptal edip tutarı bakiyenize iade edeceğim.']:c);
+  /* R6: e-Gider Pusulası için tam T.C. no. Yalnızca demo veriler: tc23'te maskeli (hash'siz) TC verilen üyeler ve u2.
+     Numara TC algoritmasına uygun üretilir, mümkünse mevcut maskenin ilk 3 / son 2 hanesi korunur; hash yüklemeden sonra (tcHashFill) yazılır.
+     Gerçek doğrulamalar (hash'li, tam numarasız) dokunulmaz: onlar admin girişi / üyenin yeniden onayıyla tamamlanır. */
+  if(!o.set.tcfull32){ o.set.tcfull32=1; const used=new Set((o.users||[]).map(u=>u.tc&&u.tc.no).filter(Boolean));
+    const ok11=t=>{ if(!/^[1-9]\d{10}$/.test(t)) return false; const d=[...t].map(Number); const a=d[0]+d[2]+d[4]+d[6]+d[8], e=d[1]+d[3]+d[5]+d[7]; return (((a*7-e)%10)+10)%10===d[9]&&d.slice(0,10).reduce((x,y)=>x+y,0)%10===d[10]; };
+    const gen=(pre,suf,seed)=>{ pre=String(pre||'').replace(/\D/g,'').slice(0,3); suf=String(suf||'').replace(/\D/g,'').slice(-2); if(!/^[1-9]/.test(pre)) pre='';
+      let sd=(seed>>>0)||7; const R=()=>((sd=(Math.imul(sd,1103515245)+12345)>>>0)>>>8);
+      for(let k=0;k<40000;k++){ let b=pre||String(1+R()%9); while(b.length<9) b+=String(R()%10); const d=[...b].map(Number); const a=d[0]+d[2]+d[4]+d[6]+d[8], e=d[1]+d[3]+d[5]+d[7]; const d10=(((a*7-e)%10)+10)%10; const t=b+d10+((d.reduce((x,y)=>x+y,0)+d10)%10);
+        if((k<20000&&suf&&!t.endsWith(suf))||used.has(t)||!ok11(t)) continue; used.add(t); return t; } return null; };
+    const msk=t=>t.slice(0,3)+'******'+t.slice(-2), sid=id=>[...String(id)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,17);
+    (o.users||[]).forEach(u=>{ if(u.admin||u.staff||!u.tc||!u.tc.ok||u.tc.no||u.tc.h) return; const m=String(u.tc.mask||u.tc.masked||''); const t=gen((m.match(/^\d+/)||[''])[0],(m.match(/\d+$/)||[''])[0],sid(u.id)); if(t){ u.tc.no=t; u.tc.mask=msk(t); } });
+    const u2=(o.users||[]).find(u=>u.id==='u2'); if(u2&&!u2.tc){ const w0=(o.wd||[]).find(w=>w.id==='w0'&&w.u==='u2'), m=String((w0&&w0.tckn)||''); const t=gen((m.match(/^\d+/)||[''])[0],(m.match(/\d+$/)||[''])[0],sid('u2')); if(t) u2.tc={ok:true,t:Date.now()-30*D,no:t,mask:msk(t),yil:1996,by:'nvi'}; }
+    // Demo pusulalar: belge no / ETTN aynı kalır, yalnızca maskeli/boş tckn tam numarayla değişir.
+    (o.wd||[]).forEach(w=>{ if(!w.egp) return; const U=(o.users||[]).find(u=>u.id===w.u); const no=U&&U.tc&&U.tc.no; if(no&&!/^\d{11}$/.test(String(w.egp.tckn||''))){ w.egp.tckn=no; w.tckn=msk(no); } }); }
   return o;
 }
 /* ================== v3: tohum verisi ek ================== */
@@ -3312,7 +3338,7 @@ function vAccount(){
   if(ui.tab==='hareket'){const tx=S.tx.filter(t=>t.u===u.id); body=`<div class="panel">${tx.length?`<div class="tbl-w"><table class="tbl"><thead><tr><th>Tarih</th><th>İşlem</th><th class="num">Tutar</th></tr></thead><tbody>${tx.map(t=>`<tr><td class="mono" style="white-space:nowrap">${dtstr(t.t)}</td><td>${esc(t.l)}</td><td class="num ${t.a<0?'neg':'pos'}">${t.a>0?'+':''}${TL(t.a)}</td></tr>`).join('')}</tbody></table></div>`:emptyBox('Hareket yok','')}</div>`;}
   if(ui.tab==='cek'){ const IB=u.ibans||[];
     body=`<div class="kpis"><div class="kpi hl"><small>Çekilebilir bakiye</small><b>${TL(u.bal)}</b><span class="muted" style="font-size:12px">Satışlar ve Havale/EFT yüklemeleri</span></div><div class="kpi"><small>Sadece alışveriş</small><b>${TL(u.bonus||0)}</b><span class="muted" style="font-size:12px">Kart, mobil, cüzdan yüklemeleri ve bonuslar</span></div></div>
-    ${tcNeed(u)?tcGate(u):`<div class="panel panel-b"><form class="stack" data-form="withdraw" style="max-width:560px">
+    ${tcNeed(u)?tcGate(u):tcNeedFull(u)?tcConfirm(u):`<div class="panel panel-b"><form class="stack" data-form="withdraw" style="max-width:560px">
       <div class="note note-info">En az ${TL(S.set.minWithdraw)} çekebilirsiniz. İşlem ücreti: <b>${wdFeeTxt()}</b>. Talepler mesai saatlerinde 2-6 saatte IBAN'ınıza gönderilir. IBAN ${esc(fullName(u)||'sizin')} adına kayıtlı olmalıdır.</div>
       <div class="fld"><span class="lbl">Hangi hesaba?</span><div class="ibl">${IB.map((b,i)=>`<label for="wi_${b.id}"><input type="radio" name="wiban" id="wi_${b.id}" value="${b.id}" ${i===0?'checked':''} data-change="wiban"><b>${esc(b.bank)}</b><span class="mono">${esc(maskIban(b.iban))}</span><span class="muted">${esc(b.name)}</span></label>`).join('')}<label for="wi_new"><input type="radio" name="wiban" id="wi_new" value="_new" ${IB.length?'':'checked'} data-change="wiban"><b>+ Yeni IBAN</b><span class="muted">Banka hesabı ekle</span></label></div></div>
       <div class="stack" id="wNew" ${IB.length?'hidden':''}><div class="row2"><div class="fld"><label for="w_bank">Banka</label><select class="inp" id="w_bank">${TRBANKS.map(b=>`<option>${b}</option>`).join('')}</select></div><div class="fld"><label for="w_name">Hesap sahibi adı soyadı</label><input class="inp" id="w_name" value="${esc(fullName(u))}"></div></div>
@@ -3404,7 +3430,7 @@ function vSafe(){
 const PAGES={hakkimizda:['Hakkımızda','yangpazar.com, Metin2 oyuncularının item, won, yang, EP ve karakterlerini güvenle alıp sattığı bir ilan pazarıdır. Ürünleri biz satmayız; alıcı ile satıcıyı buluşturur, ödemeyi teslim onaylanana kadar güvence altında tutarız.'],kvkk:['KVKK Aydınlatma Metni','Bu alana şirketinizin 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamındaki aydınlatma metnini ekleyin. Metni bir hukukçuya hazırlatmanız önerilir.'],mesafeli:['Mesafeli Satış Sözleşmesi','Bu alana mesafeli satış sözleşmenizi ekleyin. Dijital ürünlerde cayma hakkının istisnaları ve aracı hizmet koşulları açıkça yazılmalıdır.'],iletisim:['İletişim','Destek: 7/24 canlı destek (sağ alttaki buton). WhatsApp: +90 5xx xxx xx xx. Adres ve vergi bilgilerinizi bu alana ekleyin.']};
 function vPage(k){const p=PAGES[k]; if(!p) return vNotFound(); return `<div class="wrap" style="max-width:760px"><div class="page-h"><h1>${p[0]}</h1></div><div class="panel panel-b" style="line-height:1.7">${esc(p[1]).replace('yangpazar.com',esc(S.set.siteName))}</div></div>`}
 function vNotFound(){return `<div class="wrap">${emptyBox('Sayfa bulunamadı','Aradığınız ilan kaldırılmış veya bağlantı hatalı olabilir.','<a class="btn btn-primary" href="#home">Ana sayfaya dön</a>')}</div>`}
-S = migrate(load()); VIP = S.vip;
+S = migrate(load()); VIP = S.vip; setTimeout(()=>tcHashFill().catch(()=>{}),0);
 /* ================== reklam ver (görsel / video) ================== */
 function vAds(){
   const u=me(); const t=ui.adType; const P=S.packs[t]; const SZ=AD_SIZE[t]; const free=can('reklam');
@@ -3671,10 +3697,13 @@ const admItem = k => admItems().find(i=>i.k===k) || ADM_HIDDEN.find(i=>i.k===k);
 const admSubs = it => (it&&it.subs||[]).filter(s=>admCan(s.p||it.p));
 const admVis = it => it.k==='panel' ? isPanel() : admCan(it.p) && (!it.subs || admSubs(it).length>0);
 const isAdmRoute = r => r==='yonetim' || String(r||'').startsWith('yonetim/') || String(r||'').startsWith('yonetim?');
-function admParse(r){ r=String(r||'yonetim'); const i=r.indexOf('?'); const path=i<0?r:r.slice(0,i), sp=new URLSearchParams(i<0?'':r.slice(i+1)); const a=path.split('/'); return {k:a[1]||'panel', sub:a[2]||null, f:sp.get('f'), q:sp.get('q'), id:sp.get('id')}; }
-function admHash(k,sub,o){ o=o||{}; let h='yonetim'+(k&&k!=='panel'?'/'+k+(sub?'/'+sub:''):''); const sp=new URLSearchParams(); ['f','q','id'].forEach(x=>{ if(o[x]!=null&&o[x]!=='') sp.set(x,o[x]); }); const s=sp.toString(); return h+(s?'?'+s:''); }
+function admParse(r){ r=String(r||'yonetim'); const i=r.indexOf('?'); const path=i<0?r:r.slice(0,i), sp=new URLSearchParams(i<0?'':r.slice(i+1)); const a=path.split('/'); return {k:a[1]||'panel', sub:a[2]||null, f:sp.get('f'), q:sp.get('q'), id:sp.get('id'), sort:sp.get('sort'), page:sp.get('page')}; }
+function admHash(k,sub,o){ o=o||{}; let h='yonetim'+(k&&k!=='panel'?'/'+k+(sub?'/'+sub:''):''); const sp=new URLSearchParams(); ADM_QK.forEach(x=>{ if(o[x]!=null&&o[x]!=='') sp.set(x,o[x]); }); const s=sp.toString(); return h+(s?'?'+s:''); }
 function admGo(k,sub,params){ ui.aq=''; ui.exOpen=null; document.body.classList.remove('adm-menu'); const h=admHash(k,sub,params); if(route()===h){ render(); window.scrollTo(0,0); } else location.hash=h; }
-function admSet(o){ const P=admParse(route()); const n=Object.assign({f:P.f,q:P.q,id:P.id},o); try{ history.replaceState(null,'','#'+admHash(P.k,P.sub,n)); }catch(e){ location.hash=admHash(P.k,P.sub,n); return; } render(); }
+const ADM_QK=['f','q','id','sort','page'];
+function admSet(o){ const P=admParse(route()); const n=Object.assign({f:P.f,q:P.q,id:P.id,sort:P.sort,page:P.page},o); try{ history.replaceState(null,'','#'+admHash(P.k,P.sub,n)); }catch(e){ location.hash=admHash(P.k,P.sub,n); return; } render(); }
+// R7: filtre/arama durumunu yeniden çizmeden adrese yazar (yazarken odak kaybolmaz; yenileme / geri tuşu aynı görünümü açar).
+function admRepl(o){ const r=route(); if(!isAdmRoute(r)) return; const P=admParse(r); const sub=P.sub||(ui.asub||{})[P.k]||null; const n=Object.assign({f:P.f,q:P.q,id:P.id,sort:P.sort,page:P.page},o); const h='#'+admHash(P.k,sub,n); if(h!==location.hash) try{ history.replaceState(null,'',h); }catch(e){} }
 const ADM_SLA_TXT = ms => ms>=7*D?Math.round(ms/(7*D))+' hafta':ms>=D?Math.round(ms/D)+' gün':ms>=H?Math.round(ms/H)+' sa':Math.round(ms/60000)+' dk';
 function ageTxt(ms){ ms=Math.max(0,ms); const m=Math.floor(ms/60000); if(m<60) return m+' dk'; const h=Math.floor(m/60); if(h<24) return h+' sa'+(m%60?' '+(m%60)+' dk':''); const d=Math.floor(h/24); return d+' gün'+(h%24?' '+(h%24)+' sa':''); }
 const dispT = o => { const L=(o.log||[]).filter(x=>/itiraz/i.test(x.x||'')); return (L.length?L[L.length-1].t:0)||o.t; };
@@ -3803,7 +3832,7 @@ const CFM={
   'dep-no':d=>{ const x=S.deps.find(y=>y.id===d.id)||{}; return ['Yükleme reddedilsin mi?',`${TL(x.amount||0)} · ${esc((user(x.u)||{}).name||'')} bildirimi reddedilir.`,'Reddet',1]; },
   'dep-ok':d=>{ const x=S.deps.find(y=>y.id===d.id)||{}; return ['Yükleme onaylansın mı?',`<b>${TL(x.amount||0)}</b> ${esc((user(x.u)||{}).name||'')} bakiyesine eklenecek.`,'Onayla',0]; },
   'wd-no':d=>{ const w=cfmW(d.id); return ['Çekim talebi reddedilsin mi?',`${TL(w.amount||0)} ${esc((user(w.u)||{}).name||'')} bakiyesine iade edilir.`,'Reddet',1]; },
-  'wd-ok':d=>{ const w=cfmW(d.id); const ib=String(w.iban||'').replace(/\s/g,''); return ['Para gönderildi mi?',`<b>${esc(w.name||'')}</b> hesabına (IBAN …${esc(ib.slice(-4))}) <b>${TL(w.net!=null?w.net:(w.amount||0))}</b> gönderdiniz mi? Onaylayınca talep kapanır ve e-Gider Pusulası kesilir.`,'Evet, gönderildi',0]; },
+  'wd-ok':d=>{ const w=cfmW(d.id); const ib=String(w.iban||'').replace(/\s/g,''); return ['Para gönderildi mi?',`<b>${esc(w.name||'')}</b> hesabına (IBAN …${esc(ib.slice(-4))}) <b>${TL(w.net!=null?w.net:(w.amount||0))}</b> gönderdiniz mi? ${!w.taxpayer&&!w.egp&&egpCfg().autoOnApprove!==false&&!tcFull(user(w.u))?`Onaylayınca talep kapanır; <b class="neg">${EGP_NOTC}</b>, bu yüzden e-Gider Pusulası kesilmez.`:'Onaylayınca talep kapanır ve e-Gider Pusulası kesilir.'}`,'Evet, gönderildi',0]; },
   'of-cancel':()=>['Satış emri iptal edilsin mi?','Emir iptal edilir ve satıcıya bildirim gider.','Emri iptal et',1],
   'ex-cancel':()=>['Borsa siparişi iptal edilsin mi?','Sipariş iptal edilir, ödeme alıcının bakiyesine iade edilir.','Siparişi iptal et',1],
   'draw':()=>['Kazanan çekilsin mi?','Kazanan rastgele seçilir; bu işlem geri alınamaz.','Kazananı çek',0],
@@ -3820,9 +3849,11 @@ const CFM={
   'ex-unpair-all':()=>['Tüm eşleşmeler kaldırılsın mı?','Siparişe eşlenen tüm satış emirleri serbest bırakılır.','Eşleşmeleri kaldır',1]
 };
 /* --- Serverlar: istemci tarafı süzme --- */
+// R7: boş adres ve varsayılan yer tutucu (https://example.com) "web sitesi eksik" sayılır (çip sayısı ve satır aynı kuralı kullanır).
+const srvWeb = u => { u=String(u||'').trim(); return !!u && !/^https?:\/\/(www\.)?example\.com\/?$/i.test(u); };
 const SVFX={ilan:d=>+d.ilan>0, ep:d=>d.ep==='1', ad:d=>d.ad==='1', noweb:d=>d.web==='0', noseo:d=>d.seo==='0'};
 const SVSORT={ad:(a,b)=>a.dataset.name.localeCompare(b.dataset.name,'tr'), ilan:(a,b)=>(+b.dataset.ilan)-(+a.dataset.ilan)||a.dataset.name.localeCompare(b.dataset.name,'tr'), yeni:(a,b)=>(+b.dataset.added)-(+a.dataset.added)||a.dataset.name.localeCompare(b.dataset.name,'tr')};
-function svApply(){ const tb=$('#svRows'); if(!tb) return; const q=String(ui.svQ||'').toLocaleLowerCase('tr-TR').trim(), F=ui.svF||[], rows=[...tb.querySelectorAll('tr[data-id]')];
+function svApply(){ const tb=$('#svRows'); if(!tb) return; admRepl({q:ui.svQ||null,f:(ui.svF||[]).join(',')||null,sort:ui.svSort&&ui.svSort!=='ad'?ui.svSort:null,page:(ui.svPage||1)>1?ui.svPage:null}); const q=String(ui.svQ||'').toLocaleLowerCase('tr-TR').trim(), F=ui.svF||[], rows=[...tb.querySelectorAll('tr[data-id]')];
   const ok=r=>(!q||r.dataset.hay.includes(q))&&F.every(k=>SVFX[k]&&SVFX[k](r.dataset)); const M=rows.filter(ok).sort(SVSORT[ui.svSort||'ad']||SVSORT.ad);
   const lim=(ui.svPage||1)*50; rows.forEach(r=>{ r.hidden=true; }); M.forEach(r=>tb.appendChild(r)); M.slice(0,lim).forEach(r=>{ r.hidden=false; });
   rows.forEach(r=>r.classList.toggle('sel',r.dataset.id===ui.svEdit||r.dataset.id===ui.svHi));
@@ -3844,7 +3875,7 @@ function svDrawer(id){ const isNew=id==='new'; const s=isNew?null:srv(id); if(!i
   else { const i=s.id; form=`<form class="sdform" data-form="srvsave" data-id="${i}"><div class="sdrawer-b">
     <div class="sdsec"><h3>Genel</h3><div class="fld"><label for="sv_name_${i}">Server adı</label><input class="inp" id="sv_name_${i}" value="${esc(s.name)}"></div>
       <div class="row3"><div class="fld"><label for="sv_lv_${i}">Level aralığı</label><input class="inp" id="sv_lv_${i}" value="${esc(s.lv)}"></div><div class="fld"><label for="sv_type_${i}">Tür</label><input class="inp" id="sv_type_${i}" value="${esc(s.type)}"></div><div class="fld"><label for="sv_sec_${i}">Bölüm (taşı)</label><select class="inp" id="sv_sec_${i}"><option value="tr" ${s.sec==='tr'?'selected':''}>Metin2 TR</option><option value="pvp" ${s.sec==='pvp'?'selected':''}>Metin2 PVP</option></select></div></div>
-      <div class="fld"><label for="sv_url_${i}">Web sitesi</label><input class="inp" id="sv_url_${i}" value="${esc(s.url||'')}"></div>
+      <div class="fld"><label for="sv_url_${i}">Web sitesi</label><input class="inp" id="sv_url_${i}" value="${esc(srvWeb(s.url)?s.url:'')}" placeholder="https://"></div>
       <div class="fld"><label for="sv_desc_${i}">Açıklama</label><input class="inp" id="sv_desc_${i}" value="${esc(s.desc||'')}"></div></div>
     <div class="sdsec"><h3>Görünüm <small>Logo renklerden oluşur</small></h3><div class="row2"><div class="fld"><label for="sv_c1_${i}">Renk 1</label><input class="inp" type="color" id="sv_c1_${i}" value="${s.c[0]}" data-lg="1"></div><div class="fld"><label for="sv_c2_${i}">Renk 2</label><input class="inp" type="color" id="sv_c2_${i}" value="${s.c[1]}" data-lg="2"></div></div><div class="lgprev">${logo(s,48)}${logo(s,28)}<span>Server listesinde ve ilan kartlarında böyle görünür</span></div></div>
     <div class="sdsec"><h3>SEO <small>Server sayfasının altındaki "hakkında" metni</small></h3><div class="fld"><label for="sv_seo_${i}">SEO açıklaması</label><textarea class="inp" id="sv_seo_${i}" maxlength="600" data-cnt="sv_seo_n" placeholder="${esc(srvAuto(s))}">${esc(s.seo||'')}</textarea><span class="cnt-r" id="sv_seo_n">${String(s.seo||'').length} / 600</span></div></div>
@@ -3854,7 +3885,7 @@ function svDrawer(id){ const isNew=id==='new'; const s=isNew?null:srv(id); if(!i
 function svPageHtml(sec){ const L=S.servers.filter(s=>s.sec===sec);
   const act=new Set(S.listings.filter(l=>l.status==='aktif').map(l=>l.server)); const nAct=id=>S.listings.filter(l=>l.server===id&&l.status==='aktif').length;
   const adOn=new Set(S.ads.filter(a=>adLive(a)).map(a=>a.server));
-  const D_=s=>({ilan:nAct(s.id),ep:sec==='pvp'&&s.ep?1:0,ad:adOn.has(s.id)?1:0,web:s.url&&s.url!=='https://example.com'?1:0,seo:(s.seo||'').trim()?1:0});
+  const D_=s=>({ilan:nAct(s.id),ep:sec==='pvp'&&s.ep?1:0,ad:adOn.has(s.id)?1:0,web:srvWeb(s.url)?1:0,seo:(s.seo||'').trim()?1:0});
   const cnt={ilan:L.filter(s=>act.has(s.id)).length,ep:L.filter(s=>s.ep).length,ad:L.filter(s=>adOn.has(s.id)).length,noweb:L.filter(s=>!D_(s).web).length,noseo:L.filter(s=>!D_(s).seo).length};
   const F=ui.svF||[]; const chip=(k,l)=>`<button type="button" class="afchip ${F.includes(k)?'on':''}" data-act="svf" data-k="${k}" aria-pressed="${F.includes(k)}">${l} <b>${cnt[k]}</b></button>`;
   const rows=L.map(s=>{ const d=D_(s); const ep=sec==='pvp'?(s.ep?(()=>{ const n=epFor(s.id).reduce((a,p)=>a+p.codes.length,0); return `<span class="chip ${n<3?'warn':'ok'}">Açık · ${n} kod</span>`; })():'<span class="muted">Kapalı</span>'):'';
@@ -3880,10 +3911,13 @@ function vAdmin(P){
   if(!sub&&SB.length){ const last=(ui.asub||{})[it.k]; sub=SB.some(s=>s.s===last)?last:(it.k==='server'&&SB.some(s=>s.s===ui.svSec)?ui.svSec:SB[0].s); }
   if(sub) (ui.asub=ui.asub||{})[it.k]=sub;
   ui.atab=it.k; const t=it.k; let b=''; const B={}; let actions=''; ui.aq=P.q||''; const q=(ui.aq||'').toLocaleLowerCase('tr-TR').trim();
-  if(t==='borsa'){ ui.exOpen=P.id||null; if(P.f) ui.exf=P.f; }
-  if(t==='destek'&&P.f) ui.tkf=P.f;
-  if(t==='reklam'&&P.f) ui.adf=P.f;
-  if(t==='server'){ if(ui.svSec!==sub){ ui.svF=[]; ui.svPage=1; } ui.svSec=sub; ui.svEdit=P.id&&(P.id==='new'||srv(P.id))?P.id:null; }
+  // R7: liste filtreleri adresten okunur (#yonetim/<bölüm>/<alt>?f=&q=&sort=&page=); yenileme ve geri/ileri aynı görünümü açar.
+  if(t==='borsa'){ ui.exOpen=P.id||null; ui.exf=P.f||'hepsi'; }
+  if(t==='destek') ui.tkf=P.f||'aktif';
+  if(t==='reklam') ui.adf=P.f||'hepsi';
+  if(t==='ep') ui.epLog=P.f==='_tr'?'':(P.f||'all');
+  if(t==='cekim') ui.egpQ=P.q||'';
+  if(t==='server'){ ui.svSec=sub; ui.svEdit=P.id&&(P.id==='new'||srv(P.id))?P.id:null; ui.svQ=P.q||''; ui.svF=(P.f||'').split(',').filter(k=>SVFX[k]); ui.svSort=['ad','ilan','yeni'].includes(P.sort)?P.sort:'ad'; ui.svPage=Math.max(1,parseInt(P.page,10)||1); }
   const uMatch=u=>!q||[u.name,u.ad,u.soyad,fullName(u),u.tel,u.email].some(v=>(v||'').toLocaleLowerCase('tr-TR').includes(q));
   const search=(ph)=>`<form class="hstack asearch afq" data-form="asearch" role="search">${ADM_ICO.q}<input class="inp" id="aq" type="search" value="${esc(ui.aq||'')}" placeholder="${ph}" autocomplete="off" aria-label="${ph}"><button class="btn btn-primary btn-sm">Ara</button>${ui.aq?'<button type="button" class="btn btn-sm" data-act="aq-clear">Temizle</button>':''}</form>`;
   const uCell=U=>`<b>${esc(U.name)}</b>${U.staff?' <span class="chip">Çalışan</span>':''}<div class="muted" style="font-size:12px">${esc(fullName(U))}${U.tel?' · '+esc(U.tel):''}</div>`;
@@ -3993,7 +4027,7 @@ function vAdmin(P){
       <div class="tbl-w"><table class="tbl wdtbl mcards"><thead><tr><th>Tarih</th><th>Üye</th><th>Banka & Hesap Sahibi</th><th>IBAN</th><th>Durum & e-Gider Pusulası</th><th class="num">Gönderilecek Net</th><th>Mal / Hizmet Açıklaması</th><th>İşlem</th></tr></thead><tbody>${WL.map(w=>{
         const U=user(w.u)||{}; const mism=fullName(U)&&w.name.toLocaleLowerCase('tr-TR')!==fullName(U).toLocaleLowerCase('tr-TR');
         const g=w.egp||{}; const desc=egpDescFor(w); const net=netOf(w);
-        const hay=sqNorm([g.no,g.ettn,w.id,w.name,U.name,fullName(U),w.iban,w.bank,g.tckn].filter(Boolean).join(' '));
+        const hay=sqNorm([g.no,g.ettn,w.id,w.name,U.name,fullName(U),w.iban,w.bank,U.tc&&U.tc.mask].filter(Boolean).join(' '));
         const hide=!ui.egpQ||hay.includes(sqNorm(ui.egpQ))?'':'hidden';
         const cd=k=>ui.cpd&&ui.cpd[w.id+':'+k]?' done':''; const cpy=(k,v,l,big)=>`<button type="button" class="cpy${big?' big':''}${cd(k)}" data-act="copy" data-ck="${w.id}:${k}" data-v="${esc(v)}">📋 ${l}</button>`;
         const ib=fmtIban(w.iban).split(' '), ibRaw=String(w.iban).replace(/\s/g,'');
@@ -4217,8 +4251,8 @@ function repBook(X,a,b){ const test=t=>{const k=dkey(t); return k>=a&&k<=b;}; co
   W=new XSheet(X,MOVW); W.title(`Para hareketleri · ${per}`,'Tüm bakiye yükleme, çekim, satış, iade, EP, borsa, bonus ve düzeltme kayıtları · süzmek için başlıklardaki okları kullanın'); W.table(MOVCOLS,G.map(movRow),{total:[7,8],filter:true}); out.push(['Para hareketleri',W.done()]);
   const dep=G.filter(g=>g.k==='yukleme'); W=new XSheet(X,[17,16,20,15,26,18,16,14]); W.title(`Bakiye yüklemeleri · ${per}`,gen);
   W.table([{h:'Tarih',t:'dt'},{h:'Kullanıcı adı'},{h:'Ad soyad'},{h:'Telefon'},{h:'Yöntem'},{h:'Kategori'},{h:'Bakiye türü'},{h:'Tutar',t:'money'}],dep.map(g=>{const U=user(g.u); return [g.t,U.name,fullName(U),U.tel||'',g.m||'',(DEPK.find(x=>x[0]===g.cat)||['',g.cat||''])[1],g.w?'Çekilebilir':'Sadece alışveriş',g.a];}),{total:[7],filter:true}); out.push(['Yüklemeler',W.done()]);
-  const wds=S.wd.filter(w=>test(w.t)||(w.pt&&test(w.pt))); W=new XSheet(X,[17,17,16,20,18,32,20,13,20,36,14,14,14]); W.title(`Para çekme talepleri & e-Gider Pusulaları · ${per}`,gen);
-  W.table([{h:'Talep tarihi',t:'dt'},{h:'Ödeme tarihi',t:'dt'},{h:'Kullanıcı adı'},{h:'Ad soyad'},{h:'Banka'},{h:'IBAN'},{h:'Hesap sahibi'},{h:'Durum'},{h:'e-Gider Pusulası No'},{h:'ETTN'},{h:'Brüt Tutar',t:'money'},{h:'GV Stopaj',t:'money'},{h:'Net Ödenen',t:'money'}],wds.map(w=>{const U=user(w.u)||{}; return [w.t,w.pt||'',U.name||'',fullName(U),w.bank||'',w.iban,w.name,w.status,w.egp?w.egp.no:'',w.egp?w.egp.ettn:'',w.brut!=null?w.brut:w.amount,w.stopaj||0,w.net!=null?w.net:w.amount];}),{total:[10,11,12],filter:true}); out.push(['Çekimler & Gider Pusulası',W.done()]);
+  const wds=S.wd.filter(w=>test(w.t)||(w.pt&&test(w.pt))); W=new XSheet(X,[17,17,16,20,14,18,32,20,13,20,36,14,14,14]); W.title(`Para çekme talepleri & e-Gider Pusulaları · ${per}`,gen);
+  W.table([{h:'Talep tarihi',t:'dt'},{h:'Ödeme tarihi',t:'dt'},{h:'Kullanıcı adı'},{h:'Ad soyad'},{h:'T.C. Kimlik No'},{h:'Banka'},{h:'IBAN'},{h:'Hesap sahibi'},{h:'Durum'},{h:'e-Gider Pusulası No'},{h:'ETTN'},{h:'Brüt Tutar',t:'money'},{h:'GV Stopaj',t:'money'},{h:'Net Ödenen',t:'money'}],wds.map(w=>{const U=user(w.u)||{}; const tk=w.egp&&/^\d{11}$/.test(w.egp.tckn||'')?w.egp.tckn:tcFull(U)?U.tc.no:''; return [w.t,w.pt||'',U.name||'',fullName(U),tk,w.bank||'',w.iban,w.name,w.status,w.egp?w.egp.no:'',w.egp?w.egp.ettn:'',w.brut!=null?w.brut:w.amount,w.stopaj||0,w.net!=null?w.net:w.amount];}),{total:[11,12,13],filter:true}); out.push(['Çekimler & Gider Pusulası',W.done()]);
   const os=S.orders.filter(o=>o.status==='tamam'&&test(o.ct||o.t)); W=new XSheet(X,[17,12,11,32,16,16,8,14,11,14,14]); W.title(`Tamamlanan pazar satışları · ${per}`,gen);
   W.table([{h:'Tamamlanma',t:'dt'},{h:'Sipariş no'},{h:'İlan no'},{h:'Ürün'},{h:'Alıcı'},{h:'Satıcı'},{h:'Adet',t:'int'},{h:'Tutar',t:'money'},{h:'Komisyon %',t:'num'},{h:'Komisyon',t:'money'},{h:'Satıcıya net',t:'money'}],os.map(o=>[o.ct||o.t,o.id,String((lst(o.lid)||{}).no||''),o.title,user(o.buyer).name,user(o.seller).name,o.qty,o.total,o.rate,o.fee??r2(o.total*o.rate/100),o.net??r2(o.total*(1-o.rate/100))]),{total:[6,7,9,10],filter:true}); out.push(['Satışlar',W.done()]);
   const eps=S.epOrders.filter(o=>test(o.t)); const bxs=G.filter(g=>g.k==='borsa'); W=new XSheet(X,[17,12,16,20,14,12,14,14]); W.title(`EP ve Yang Borsası · ${per}`,gen);
@@ -4536,6 +4570,23 @@ const tcValid = t => { if(!/^[1-9]\d{10}$/.test(t)) return false; const d=[...t]
 const tcOk = u => !!(u&&u.tc&&u.tc.ok);
 const tcNeed = u => !!(S.set.tc&&S.set.tc.req&&u&&!u.admin&&!u.staff&&!tcOk(u));
 async function sha256(s){ try{ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }catch(e){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))|0; return 'x'+(h>>>0).toString(16); } }
+/* Tam T.C. no (u.tc.no) yalnızca e-Gider Pusulası için saklanır; sitede her yerde maske (u.tc.mask) gösterilir. */
+const tcMaskOf = t => t.slice(0,3)+'******'+t.slice(-2);
+const tcFull = u => !!(u&&u.tc&&/^[1-9]\d{10}$/.test(String(u.tc.no||'')));
+const tcNeedFull = u => !!(u&&!u.admin&&!u.staff&&tcOk(u)&&!tcFull(u));
+// Tam numara onayı (admin girişi veya üyenin yeniden onayı): tcValid + maskenin ilk 3 / son 2 hanesi + varsa kayıtlı hash.
+async function tcCheckFull(u,tc){ if(!tcValid(tc)) return 'T.C. kimlik numarası geçersiz. 11 haneyi kontrol edin.';
+  const m=String((u.tc&&(u.tc.mask||u.tc.masked))||''); const hd=(m.match(/^\d+/)||[''])[0].slice(0,3), tl=(m.match(/\d+$/)||[''])[0].slice(-2);
+  if(m&&(!tc.startsWith(hd)||!tc.endsWith(tl))) return 'Numara üyenin doğrulanmış kimliğiyle eşleşmiyor.';
+  const h=await sha256(tc+'|yangpazar'); if(u.tc&&u.tc.h&&u.tc.h!==h) return 'Numara üyenin doğrulanmış kimliğiyle eşleşmiyor.';
+  if(S.users.some(x=>x.id!==u.id&&x.tc&&(x.tc.h===h||x.tc.no===tc))) return 'Bu T.C. kimlik numarası başka bir hesapta kayıtlı.';
+  return {h}; }
+function tcSaveFull(u,tc,h,by){ if(!u.tc) u.tc={ok:false,t:now(),by:by||'admin'}; u.tc.no=tc; u.tc.mask=tcMaskOf(tc); if(!u.tc.h) u.tc.h=h; u.tc.nt=now(); delete u.tcAsk; }
+// Migrasyonla üretilen demo numaraların hash'i (sha256 eşzamansız olduğu için yüklemeden sonra doldurulur).
+async function tcHashFill(){ let ch=false; for(const u of S.users||[]){ if(u.tc&&tcFull(u)&&!u.tc.h){ u.tc.h=await sha256(u.tc.no+'|yangpazar'); ch=true; } } if(ch) save(); }
+function tcConfirm(u){ const m=(u.tc&&u.tc.mask)||''; return `<div class="panel panel-b tcgate tcconf"><div class="tcgate-i">${ICO.shield}</div><form class="stack" data-form="tcconf" style="gap:8px;min-width:0;flex:1" novalidate><b style="font-size:16px">T.C. kimlik numaranızı onaylayın</b><span class="muted" style="font-size:13px">Kimliğiniz doğrulanmış (<span class="mono">${esc(m)}</span>). Adınıza e-Gider Pusulası düzenleyebilmemiz için T.C. kimlik numaranızın tamamını bir kez onaylamanız gerekiyor. Numaranız sitede başkalarına maskeli gösterilir (KVKK).</span>
+  <div class="hstack" style="align-items:flex-end;flex-wrap:wrap;gap:8px"><div class="fld" style="flex:1 1 200px;min-width:0;max-width:280px"><label for="tcc_no">T.C. kimlik numarası</label><input class="inp mono" id="tcc_no" required inputmode="numeric" maxlength="11" autocomplete="off" placeholder="${esc(m||'11 haneli')}" aria-describedby="tcc_err"></div><button class="btn btn-primary" id="tccBtn">Onayla</button></div>
+  <div class="neg" id="tcc_err" style="font-size:12.5px" aria-live="polite"></div></form></div>`; }
 function tcGate(u){ return `<div class="panel panel-b tcgate"><div class="tcgate-i">${ICO.shield}</div><div class="stack" style="gap:6px"><b style="font-size:16px">Para çekmek için kimliğinizi doğrulayın</b><span class="muted" style="font-size:13px">Sadece TC kimlik numaranızı ve doğum tarihinizi girmeniz yeterli. Bilgiler Nüfus ve Vatandaşlık İşleri (NVİ) kayıtlarıyla eşleştirilir, bir kez yapılır.</span><div><button class="btn btn-primary" data-act="tc-open">Kimliğimi doğrula</button></div></div></div>`; }
 function mTc(afterReg){ const u=me(); if(!u) return mLogin(); if(tcOk(u)) return toast('Kimliğiniz zaten doğrulandı.');
   const lock=u.tcLock&&u.tcLock>now(); const maxD=new Date(); maxD.setFullYear(maxD.getFullYear()-18);
@@ -4544,7 +4595,7 @@ function mTc(afterReg){ const u=me(); if(!u) return mLogin(); if(tcOk(u)) return
     <div class="fld"><label for="tc_no">TC kimlik numarası</label><input class="inp mono" id="tc_no" required inputmode="numeric" maxlength="11" autocomplete="off" placeholder="11 haneli"></div>
     <div class="fld"><label for="tc_dt">Doğum tarihi</label><input class="inp mono" id="tc_dt" type="date" required max="${maxD.toISOString().slice(0,10)}" min="1920-01-01"></div>
     <div class="cprow" style="font-size:12.5px"><span><span class="muted">Eşleştirilecek ad soyad (üyelik bilgileriniz)</span><br><b>${esc(fullName(u)||'—')}</b></span><a class="btn btn-sm" href="#hesabim" data-act="tc-fixname">Düzelt</a></div>
-    <div class="guard">${ICO.shield}<span>TC numaranızın tamamı saklanmaz; yalnızca doğrulama sonucu ve maskeli hali kaydedilir. Para çekmek için 18 yaşını doldurmuş olmanız gerekir.</span></div>
+    <div class="guard">${ICO.shield}<span>TC numaranız yalnızca adınıza e-Gider Pusulası düzenlemek için saklanır; sitede başkalarına maskeli gösterilir (KVKK). Para çekmek için 18 yaşını doldurmuş olmanız gerekir.</span></div>
     ${lock?`<div class="note note-bad">Çok fazla hatalı deneme yapıldı. ${dtstr(u.tcLock)} sonrasında tekrar deneyin.</div>`:''}
     <div class="hstack"><button class="btn btn-primary" id="tcBtn" ${lock?'disabled':''}>Doğrula</button>${afterReg?'<button type="button" class="btn" data-act="close">Sonra yapacağım</button>':''}</div></form>`)); }
 const TC_PHP = String.raw`<?php
@@ -4557,7 +4608,7 @@ if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 /* >>> KENDİ SİTENİZE BAĞLAYIN ----------------------------------------------- */
 function uye(){ return $_SESSION['uye'] ?? null; }                 // ['id'=>..., 'ad'=>..., 'soyad'=>...]
 function tc_baska_hesapta($hash, $uye_id){ return false; }        // aynı TC başka üyede doğrulanmış mı?
-function tc_kaydet($uye_id, $hash, $maske, $yil){ }               // üyeye "TC doğrulandı" işareti koyun
+function tc_kaydet($uye_id, $hash, $maske, $yil, $tc){ }          // üyeye "TC doğrulandı" işareti koyun; tam no yalnızca e-Gider Pusulası için (şifreli) saklanır
 /* --------------------------------------------------------------------------- */
 
 function cevap($ok, $hata = ''){ echo json_encode($ok ? ['ok' => true] : ['ok' => false, 'error' => $hata]); exit; }
@@ -4599,7 +4650,7 @@ $yanit = curl_exec($ch); $kod = curl_getinfo($ch, CURLINFO_HTTP_CODE); curl_clos
 if($yanit === false || $kod !== 200) cevap(false, 'Nüfus servisine şu an ulaşılamıyor, biraz sonra tekrar deneyin.');
 if(!preg_match('/<TCKimlikNoDogrulaResult>\s*true\s*<\/TCKimlikNoDogrulaResult>/i', $yanit))
   cevap(false, 'Bilgiler nüfus kayıtlarıyla eşleşmedi. Doğum tarihinizi ve profilinizdeki ad soyadı kimliğinizdeki gibi kontrol edin.');
-tc_kaydet($u['id'], $hash, substr($tc, 0, 3).'******'.substr($tc, -2), $yil);
+tc_kaydet($u['id'], $hash, substr($tc, 0, 3).'******'.substr($tc, -2), $yil, $tc);
 cevap(true);
 `;
 const TC_README = `YANGPAZAR.COM · TC KİMLİK DOĞRULAMA KURULUMU
@@ -4610,7 +4661,8 @@ const TC_README = `YANGPAZAR.COM · TC KİMLİK DOĞRULAMA KURULUMU
 2) dogrula.php'nin başındaki üç fonksiyonu kendi sisteminize bağlayın:
    - uye(): giriş yapmış üyenin id, ad ve soyadı (kayıtta girilen)
    - tc_baska_hesapta(): aynı TC'nin başka hesapta doğrulanıp doğrulanmadığı
-   - tc_kaydet(): üyeyi "doğrulandı" olarak işaretler (TC'nin tamamını değil hash'ini saklayın)
+   - tc_kaydet(): üyeyi "doğrulandı" olarak işaretler; hash ve maskeyi saklayın. Tam TC yalnızca
+     e-Gider Pusulası için gereklidir: şifreli sütunda tutun, sitede herkese maskeli gösterin (KVKK).
 3) Para çekme isteğini sunucuda da kontrol edin: doğrulanmamış üyenin çekim talebini reddedin.
 
 Üye yalnızca TC kimlik numarası ve doğum tarihini girer. Ad ve soyad üyelik bilgilerinden
@@ -4889,7 +4941,7 @@ function mUser(id){ const U=user(id); const ords=S.orders.filter(o=>o.buyer===id
   modal(`<div class="md" style="width:min(880px,100%)" role="dialog" aria-label="Üye"><div class="md-h"><h3>${esc(U.name)}</h3><button class="md-x" data-act="close" aria-label="Kapat">×</button></div><div class="md-b">
     <div class="sum"><div><span class="muted">Ad soyad</span><b>${esc(fullName(U))}</b></div><div><span class="muted">Telefon</span><b class="mono">${esc(U.tel||'-')}</b></div><div><span class="muted">E-posta</span><b>${esc(U.email||'-')}</b></div><div><span class="muted">Durum</span>${seenTxt(U)}</div><div><span class="muted">Son hareket</span><b>${la?dtstr(la)+' · '+ago(la):'—'}</b></div><div><span class="muted">2 adımlı doğrulama</span><b>${U.tfa?(U.tfa==='sms'?'Açık · SMS':'Açık · e-posta'):'Kapalı'}</b></div><div><span class="muted">Üyelik</span><b>${esc(U.joined)}</b></div><div><span class="muted">Satış / hacim</span><b>${NUM(U.sales)} · ${TL(U.vol)}</b></div></div>
     <div class="hstack">${can('uye')?`<button class="btn btn-sm btn-primary" data-act="admin-sms" data-id="${U.id}">SMS gönder</button>`:''}<a class="btn btn-sm" href="#mesajlar-${U.id}" data-act="close">Mesaj yaz</a>${can('uye')?`<button class="btn btn-sm" data-act="u-ver" data-id="${U.id}">${U.verified?'Doğrulamayı kaldır':'Doğrula'}</button><button class="btn btn-sm ${U.banned?'':'btn-bad'}" data-act="u-ban" data-id="${U.id}">${U.banned?'Yasağı kaldır':'Yasakla'}</button>`:''}<button class="btn btn-sm" data-act="xls-user" data-id="${U.id}">Hesap ekstresi (Excel)</button></div>
-    ${!U.admin&&!U.staff?`<div class="cprow" style="font-size:12.5px"><span><span class="muted">TC kimlik</span><br>${tcOk(U)?`<b>Doğrulandı</b> · <span class="mono">${esc(U.tc.mask||'')}</span> · doğum yılı ${esc(String(U.tc.yil||'—'))} · ${dtstr(U.tc.t)}${U.tc.by==='demo'?' · önizleme':''}`:`<b class="neg">Doğrulanmadı</b> · para çekemez${U.tcLock&&U.tcLock>now()?' · hatalı deneme kilidi':''}`}</span>${can('uye')&&(tcOk(U)||U.tcLock)?`<button type="button" class="btn btn-sm btn-bad" data-act="tc-reset" data-id="${U.id}">Sıfırla</button>`:''}</div>`:''}
+    ${!U.admin&&!U.staff?`<div class="cprow" style="font-size:12.5px"><span><span class="muted">TC kimlik</span><br>${tcOk(U)?`<b>Doğrulandı</b> · <span class="mono">${esc(U.tc.mask||'')}</span>${tcFull(U)?'':' · <b class="neg">e-Gider için tam no eksik</b>'} · doğum yılı ${esc(String(U.tc.yil||'—'))} · ${dtstr(U.tc.t)}${U.tc.by==='demo'?' · önizleme':''}`:`<b class="neg">Doğrulanmadı</b> · para çekemez${U.tcLock&&U.tcLock>now()?' · hatalı deneme kilidi':''}`}</span>${can('uye')&&(tcOk(U)||U.tcLock)?`<button type="button" class="btn btn-sm btn-bad" data-act="tc-reset" data-id="${U.id}">Sıfırla</button>`:''}</div>`:''}
     <div class="eyebrow">Finansal özet</div>
     <div class="kpis fin"><div class="kpi hl"><small>Güncel bakiye</small><b>${TL(avail(U))}</b><span class="muted" style="font-size:11.5px">${TL(U.bal||0)} çekilebilir · ${TL(U.bonus||0)} alışveriş</span></div><div class="kpi"><small>Toplam yatırdığı</small><b>${TL(f.depT)}</b><span class="muted" style="font-size:11.5px">${TL(f.depW)} havale/EFT · ${f.dep.length} işlem</span></div><div class="kpi"><small>Toplam çektiği</small><b>${TL(f.wdP)}</b><span class="muted" style="font-size:11.5px">${f.wdQ?TL(f.wdQ)+' bekliyor':'Bekleyen yok'}</span></div><div class="kpi"><small>Alışverişi</small><b>${TL(f.buy)}</b></div><div class="kpi"><small>Satış geliri (net)</small><b>${TL(f.sell)}</b></div><div class="kpi"><small>Hediye / bonus</small><b>${TL(f.bonus)}</b><span class="muted" style="font-size:11.5px">Son yatırım: ${f.lastDep?dstr(f.lastDep):'—'}</span></div></div>
     <div class="eyebrow">Para yatırma ve çekme geçmişi</div>
@@ -5052,7 +5104,9 @@ const ACT={
   tpvar:(d)=>{ const el=$('#'+(ui.tplf||'tp_mb'))||$('#tp_sb'); if(!el) return; const a=el.selectionStart??el.value.length, z=el.selectionEnd??a; el.value=el.value.slice(0,a)+d.v+el.value.slice(z); el.focus(); el.selectionStart=el.selectionEnd=a+d.v.length; CHG.tplprev(el); },
   tpldef:(d)=>{ const k=d.k; delete S.mail.tpl[k]; S.sms.tpl[k]=SMSDEF[k]||smsDef(k); save(); toast('Şablon varsayılana döndü.'); render(); },
   adf:(d)=>{ui.adf=d.t; render();},
-  theme:()=>{ const t=curTheme()==='dark'?'light':'dark'; document.documentElement.dataset.theme=t; try{ localStorage.setItem('yangpazar_theme',t); }catch(e){} renderHeader(); },
+  theme:()=>{ const t=curTheme()==='dark'?'light':'dark'; document.documentElement.dataset.theme=t; try{ localStorage.setItem('yangpazar_theme',t); }catch(e){} renderHeader();
+    // yönetim üst çubuğu ve mobil çekmecedeki tema düğmeleri de yeni temayı gösterir
+    const dk=t==='dark'; document.querySelectorAll('.atop [data-act="theme"]').forEach(b=>{ b.innerHTML=dk?THEME_ICO.sun:THEME_ICO.moon; b.setAttribute('aria-label',dk?'Gündüz moduna geç':'Gece moduna geç'); }); document.querySelectorAll('.adrawer-f [data-act="theme"]').forEach(b=>{ b.textContent=dk?'Açık tema':'Koyu tema'; }); },
   'cnet-toggle':(d)=>{const n=S.cryptoNets.find(x=>x.id===d.id); n.on=!n.on; save(); toast(`${n.coin} · ${n.net} ${n.on?'aktif':'pasif'} edildi.`); render();},
   'cnet-del':(d,e)=>{const b=e.target.closest('button'); if(!b.dataset.sure){ b.dataset.sure='1'; b.textContent='Emin misiniz?'; return; } S.cryptoNets=S.cryptoNets.filter(x=>x.id!==d.id); save(); render();},
   'ad-detail':(d)=>mAdDetail(d.id),
@@ -5138,7 +5192,8 @@ const ACT={
   },
   'tc-kit':async()=>{ if(!can('odeme')&&!can('uye')) return; await saveFile('yangpazar-tc-dogrulama.zip',new Blob([tcKit()],{type:'application/zip'})); },
   'paytr-ok':(d)=>{const g=S.gws.find(x=>x.id===d.g); creditDeposit(g,+d.a,+d.b,d.c);},
-  'wd-ok':(d)=>{const w=S.wd.find(x=>x.id===d.id); if(!w||w.status!=='bekliyor') return; w.status='onaylandı'; w.pt=now(); if(egpCfg().autoOnApprove!==false && !w.taxpayer && !w.egp) issueEgp(w); const net=wdPaidBook(w); notify(w.u,`${TL(net)} çekim talebiniz IBAN'ınıza gönderildi.${w.egp?' Adınıza '+w.egp.no+' nolu e-Gider Pusulası düzenlendi.':''}`,'#hesabim','withdraw',{tutar:TL(net)}); save(); toast(w.egp?`Ödeme onaylandı ve ${w.egp.no} nolu e-Gider Pusulası kesildi.`:`Ödeme gönderildi olarak işaretlendi.`); render();},
+  'wd-ok':(d)=>{const w=S.wd.find(x=>x.id===d.id); if(!w||w.status!=='bekliyor') return; w.status='onaylandı'; w.pt=now(); const auto=egpCfg().autoOnApprove!==false && !w.taxpayer && !w.egp, noTc=auto&&!tcFull(user(w.u)); if(auto&&!noTc) issueEgp(w); const net=wdPaidBook(w); notify(w.u,`${TL(net)} çekim talebiniz IBAN'ınıza gönderildi.${w.egp?' Adınıza '+w.egp.no+' nolu e-Gider Pusulası düzenlendi.':''}`,'#hesabim','withdraw',{tutar:TL(net)}); save(); if(noTc) toast(`Ödeme onaylandı ancak e-Gider Pusulası kesilmedi: ${EGP_NOTC}. Talepte "Pusula Kes" ile tamamlayın.`,true); else toast(w.egp?`Ödeme onaylandı ve ${w.egp.no} nolu e-Gider Pusulası kesildi.`:`Ödeme gönderildi olarak işaretlendi.`); render();},
+  'tc-ask':(d)=>{ const U=user(d.id); if(!U) return; U.tcAsk=now(); notify(U.id,tcOk(U)?'e-Gider Pusulanızın düzenlenebilmesi için T.C. kimlik numaranızı onaylamanız gerekiyor. Hesabım › Para Çek sayfasından numaranızı onaylayın.':'e-Gider Pusulanızın düzenlenebilmesi için kimliğinizi doğrulamanız gerekiyor. Hesabım › Para Çek sayfasından kimliğinizi doğrulayın.','#hesabim'); save(); toast(`${U.name} üyesine yeniden doğrulama bildirimi gönderildi.`); if(d.w&&$('.mb')) mEgpModal(d.w); },
   'egp-view':(d)=>mEgpView(d.id),
   'egp-modal':(d)=>mEgpModal(d.id),
   'egp-q-clear':()=>{ ui.egpQ=''; const i=$('#egp_q'); if(i){ i.value=''; } egpApply(''); },
@@ -5205,8 +5260,19 @@ const FORM={
     const btn=$('#tcBtn'); if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span> Nüfus kayıtlarıyla eşleştiriliyor…'; }
     let j=null, demo=false; try{ const r=await fetch(S.set.tc.url,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({tc,yil})}); j=await r.json(); }catch(e){ demo=true; }
     if(!demo&&!(j&&j.ok)){ u.tcTry=(u.tcTry||0)+1; if(u.tcTry>=5){ u.tcLock=now()+24*H; u.tcTry=0; } save(); if(btn){ btn.disabled=false; btn.textContent='Tekrar dene'; } return toast((j&&j.error)||'Doğrulama yapılamadı.',true); }
-    u.tc={ok:true,t:now(),mask:tc.slice(0,3)+'******'+tc.slice(-2),yil,h,by:demo?'demo':'nvi'}; u.tcTry=0; delete u.tcLock;
+    u.tc={ok:true,t:now(),no:tc,mask:tcMaskOf(tc),yil,h,by:demo?'demo':'nvi'}; u.tcTry=0; delete u.tcLock; delete u.tcAsk;
     notify(u.id,'Kimliğiniz doğrulandı. Artık para çekebilirsiniz.','#hesabim','tc_ok'); save(); closeModal(); toast(demo?'Kimlik doğrulandı (önizleme: NVİ sorgusu canlı sitede sunucudan yapılır).':'Kimliğiniz doğrulandı. Artık para çekebilirsiniz.'); render(); },
+  // Doğrulanmış ama tam numarası kayıtlı olmayan üye: Para çek formundan önce tam TC onayı.
+  tcconf:async()=>{ const u=me(); if(!u||!tcNeedFull(u)) return render(); const err=$('#tcc_err'), say=x=>{ if(err) err.textContent=x; toast(x,true); };
+    if(u.tcLock&&u.tcLock>now()) return say('Çok fazla hatalı deneme. '+dtstr(u.tcLock)+' sonrasında tekrar deneyin.');
+    const tc=v_('tcc_no').replace(/\D/g,''); const r=await tcCheckFull(u,tc);
+    if(typeof r==='string'){ if(tc.length===11){ u.tcTry=(u.tcTry||0)+1; if(u.tcTry>=5){ u.tcLock=now()+24*H; u.tcTry=0; } save(); } return say(r); }
+    tcSaveFull(u,tc,r.h,'uye'); u.tcTry=0; save(); toast('T.C. kimlik numaranız onaylandı. Para çekme formuna devam edebilirsiniz.'); render(); },
+  // Admin: e-Gider modalında üyenin tam TC'sini girer; maske + hash ile doğrulanırsa kaydedilir.
+  egptc:async(f)=>{ const w=S.wd.find(x=>x.id===f.dataset.id); if(!w) return; const U=user(w.u); if(!U) return; const err=$('#egi_tcerr');
+    const tc=v_('egi_tcfull').replace(/\D/g,''); const r=await tcCheckFull(U,tc);
+    if(typeof r==='string'){ if(err) err.textContent=r; const i=$('#egi_tcfull'); if(i){ i.setAttribute('aria-invalid','true'); i.focus(); } return toast(r,true); }
+    tcSaveFull(U,tc,r.h,'admin'); save(); toast(`${fullName(U)||U.name} için tam T.C. kimlik no kaydedildi.`); mEgpModal(w.id); },
   tcset:()=>{ S.set.tc.req=$('#tcs_req').checked; S.set.tc.url=v_('tcs_url').trim()||'/kimlik/dogrula.php'; save(); toast('Kimlik doğrulama ayarları kaydedildi.'); render(); },
   buyf:(f)=>doBuy(f.dataset.id,+f.dataset.q,$('#b_info').value.trim(),{ch:($('#b_ch')||{}).value||'',place:($('#b_place')||{}).value||''}),
   disp:async(f)=>{const o=ord(f.dataset.id); const file=($('#dp_img')||{}).files?.[0]; if(file){try{o.proof=await fileToDataURL(file,900);}catch(e){}} o.status='itiraz'; o.reason=$('#dp_r').value+': '+censor($('#dp_d').value.trim()).text; o.log.push({t:now(),x:(S.cur===o.seller?'Satıcı':'Alıcı')+' itiraz açtı: '+o.reason}); notify(S.cur===o.seller?o.buyer:o.seller,`Sipariş #${o.id} için itiraz açıldı.`,'#siparis-'+o.id,'dispute',{no:o.id}); save(); closeModal(); toast('İtiraz açıldı, destek ekibi inceleyecek.'); render();},
@@ -5224,7 +5290,7 @@ const FORM={
   supportset:()=>{const sp=S.support; sp.mode=(document.querySelector('input[name=sp_mode]:checked')||{}).value||'auto'; [0,1,2,3,4,5,6].forEach(d=>{const c=v_('sh_c_'+d); sp.hours[d]=[v_('sh_o_'+d)||'09:00',c==='23:59'?'24:00':(c||'24:00'),$('#sh_on_'+d).checked];}); sp.ai=$('#sp_ai').checked; sp.aiName=v_('sp_an').trim()||'Asistan'; sp.wait=v_('sp_wait').trim(); sp.offline=v_('sp_off').trim(); sp.canned=v_('sp_can').split('\n').map(l=>l.split('|')).filter(p=>p.length>1&&p[0].trim()).map(p=>[p[0].trim(),p.slice(1).join('|').trim()]); save(); toast('Destek ayarları kaydedildi.'); render();},
   smstest:()=>{const k=v_('st_tp'); const to=v_('st_to').trim(); S.smsLog.unshift({id:uid('m'),u:S.cur,to,x:smsFill(S.sms.tpl[k]),t:now(),ev:'test',status:'Gönderildi (deneme)'}); save(); toast('Deneme SMS kayda yazıldı.'); render();},
   ls:()=>{const x=v_('lsmsg').trim(); if(!x) return; lsSend(x); setTimeout(()=>{const n=$('#lsmsg'); if(n) n.focus()},0);},
-  withdraw:()=>{const u=me(); if(tcNeed(u)){ toast('Para çekmek için önce kimliğinizi doğrulayın.',true); return mTc(); } const a=r2(+v_('w_amt')); if(a<S.set.minWithdraw) return toast('En az '+TL(S.set.minWithdraw)+' çekebilirsiniz.',true); if(a>u.bal) return toast(`Çekilebilir bakiyeniz ${TL(u.bal)}. Kart, mobil ödeme ve cüzdanla yüklenen bakiye ile bonuslar çekilemez, sadece alışverişte kullanılır.`,true);
+  withdraw:()=>{const u=me(); if(tcNeed(u)){ toast('Para çekmek için önce kimliğinizi doğrulayın.',true); return mTc(); } if(tcNeedFull(u)){ toast('Para çekmek için önce T.C. kimlik numaranızı onaylayın.',true); return render(); } const a=r2(+v_('w_amt')); if(a<S.set.minWithdraw) return toast('En az '+TL(S.set.minWithdraw)+' çekebilirsiniz.',true); if(a>u.bal) return toast(`Çekilebilir bakiyeniz ${TL(u.bal)}. Kart, mobil ödeme ve cüzdanla yüklenen bakiye ile bonuslar çekilemez, sadece alışverişte kullanılır.`,true);
     u.ibans=u.ibans||[]; const sel=(document.querySelector('input[name=wiban]:checked')||{}).value; let bk;
     if(sel&&sel!=='_new'){ bk=u.ibans.find(x=>x.id===sel); if(!bk) return toast('IBAN seçin.',true); }
     else { const ib=v_('w_iban').replace(/\s/g,'').toUpperCase(); if(!/^TR\d{24}$/.test(ib)) return toast('IBAN TR ile başlamalı ve 26 karakter olmalı.',true); const nm=v_('w_name').trim(); if(!nm) return toast('Hesap sahibinin adını yazın.',true); bk={id:uid('ib'),bank:v_('w_bank'),name:nm,iban:ib}; if($('#w_save')&&$('#w_save').checked&&!u.ibans.some(x=>x.iban===ib)) u.ibans.push(bk); }
@@ -5243,7 +5309,7 @@ const FORM={
     const w=S.wd.find(x=>{ const g=x.egp||{}; return sqNorm(g.no)===q||sqNorm(g.no).includes(q)||sqNorm(g.ettn)===q||sqNorm(x.id)===q; });
     if(w) mEgpView(w.id); else toast('Belge numarası eşleşen e-Gider Pusulası bulunamadı.',true);
   },
-  egpissue:(f)=>{ const w=S.wd.find(x=>x.id===f.dataset.id); if(!w) return; const wasPending=w.status==='bekliyor', wasIssued=!!w.egp; const opts={desc:v_('egi_desc').trim(), lockAmounts:!wasPending}; if(wasPending){ opts.stopajPct=Math.max(0,Math.min(40,+v_('egi_st')||0)); w.status='onaylandı'; w.pt=now(); } issueEgp(w,opts); if(wasPending){ wdPaidBook(w); notify(w.u,`${TL(w.net)} çekim talebiniz IBAN'ınıza gönderildi ve ${w.egp.no} nolu e-Gider Pusulanız oluşturuldu.`,'#hesabim','withdraw',{tutar:TL(w.net)}); } save(); closeModal(); toast(`${w.egp.no} nolu e-Gider Pusulası ${wasIssued?'güncellendi':'oluşturuldu'}.`); render(); mEgpView(w.id); },
+  egpissue:(f)=>{ const w=S.wd.find(x=>x.id===f.dataset.id); if(!w) return; if(!tcFull(user(w.u))) return toast(EGP_NOTC+'. Önce tam numarayı girin veya üyeden yeniden doğrulama isteyin.',true); const wasPending=w.status==='bekliyor', wasIssued=!!w.egp; const opts={desc:v_('egi_desc').trim(), lockAmounts:!wasPending}; if(wasPending){ opts.stopajPct=Math.max(0,Math.min(40,+v_('egi_st')||0)); w.status='onaylandı'; w.pt=now(); } issueEgp(w,opts); if(wasPending){ wdPaidBook(w); notify(w.u,`${TL(w.net)} çekim talebiniz IBAN'ınıza gönderildi ve ${w.egp.no} nolu e-Gider Pusulanız oluşturuldu.`,'#hesabim','withdraw',{tutar:TL(w.net)}); } save(); closeModal(); toast(`${w.egp.no} nolu e-Gider Pusulası ${wasIssued?'güncellendi':'oluşturuldu'}.`); render(); mEgpView(w.id); },
   ibanadd:()=>{const u=me(); const ib=v_('ia_i').replace(/\s/g,'').toUpperCase(); if(!/^TR\d{24}$/.test(ib)) return toast('IBAN TR ile başlamalı ve 26 karakter olmalı.',true); u.ibans=u.ibans||[]; if(u.ibans.some(x=>x.iban===ib)) return toast('Bu IBAN zaten kayıtlı.',true); u.ibans.push({id:uid('ib'),bank:v_('ia_b'),name:v_('ia_n').trim(),iban:ib}); save(); toast('IBAN kaydedildi.'); render();},
   epbuy:(f)=>{const u=me(); const p=S.epProducts.find(x=>x.id===f.dataset.id); if(!p||!p.on||!p.codes.length) return toast('Bu ürün tükendi.',true); if(avail(u)<p.price) return toast('Bakiye yetersiz.',true);
     const paid=spend(u,p.price); const hh=hhOn()&&!!p.hh; const o={id:'EP'+(++S.epSeq),u:u.id,pid:p.id,ep:p.ep,epShown:epAmt(p),hh,code:p.codes.shift(),price:p.price,paid,t:now()}; p.soldN=(p.soldN||0)+1; S.epOrders.unshift(o); track('ep',{value:p.price,transaction_id:o.id});
@@ -5325,7 +5391,7 @@ const FORM={
     if(avail(u)<price) return toast(`Bakiye yetersiz. ${TL(price-avail(u))} daha yükleyin.`,true);
     if(t!=='premium'&&!(($('#ad_text')||{}).value||'').trim()) return toast('Reklam metnini yazın.',true);
     let sid=$('#ad_server').value;
-    if(sid==='_new'){const nm=$('#ns_name').value.trim(); if(!nm) return toast('Server adını yazın.',true); const op=$('#ns_open').value; sid=uid('s'); S.servers.push({id:sid,sec:'pvp',name:nm,type:$('#ns_type').value,lv:$('#ns_lv').value.trim()||'1-99',c:[$('#ns_c1').value,$('#ns_c2').value],online:0,open:op?new Date(op).getTime():now(),desc:'',url:$('#ns_url').value.trim()||'https://example.com'});}
+    if(sid==='_new'){const nm=$('#ns_name').value.trim(); if(!nm) return toast('Server adını yazın.',true); const op=$('#ns_open').value; sid=uid('s'); S.servers.push({id:sid,sec:'pvp',name:nm,type:$('#ns_type').value,lv:$('#ns_lv').value.trim()||'1-99',c:[$('#ns_c1').value,$('#ns_c2').value],online:0,open:op?new Date(op).getTime():now(),desc:'',url:$('#ns_url').value.trim()});}
     const files=[...((($('#ad_media')||{}).files)||[])]; const media=[];
     for(const f of files){ if(f.size>15*1024*1024){toast(f.name+' 15 MB sınırını aşıyor.',true); continue;} try{ media.push(await mediaPut(f)); }catch(e){ toast('Medya kaydedilemedi: '+f.name,true); } }
     const s=srv(sid); const start=Math.max(ui.adStart,now()); const paid=price?spend(u,price):null;
@@ -5343,7 +5409,7 @@ const FORM={
   bank:()=>{S.banks.push({b:$('#bk_b').value.trim(),n:$('#bk_n').value.trim(),i:$('#bk_i').value.trim()}); save(); render();},
   raffle:()=>{const k=$('#rf_k').value; const pal=[['#4f2479','#c2185b'],['#0d6b52','#2f9a3e'],['#1d375a','#3b9fdc'],['#8a3b12','#e0892f']]; S.raffles.unshift({id:uid('r'),title:$('#rf_t').value.trim(),kind:k,value:+$('#rf_v').value||0,end:now()+Math.max(1,+$('#rf_d').value||7)*D,tk:{},acc:{},per:Math.max(1,+v_('rf_per')||100),minVip:v_('rf_vip'),maxTk:Math.max(0,parseInt(v_('rf_max'))||0),cats:[...document.querySelectorAll('[data-rc]:checked')].map(c=>c.dataset.rc),free:$('#rf_free').checked,c:pal[S.raffles.length%pal.length],w:'rifle'}); save(); toast('Çekiliş başladı.'); render();},
   coupon:()=>{const c=$('#cp_c').value.trim().toUpperCase(); if(S.coupons.some(x=>x.code===c)) return toast('Bu kod zaten var.',true); S.coupons.push({code:c,pct:+$('#cp_p').value||5,max:+$('#cp_m').value||50,on:true,used:[]}); save(); render();},
-  srvadd:()=>{const sec=ui.svSec||'tr'; const epOn=sec==='pvp'&&v_('sv_ep')==='1'; S.servers.push({id:uid('s'),added:now(),sec,name:v_('sv_n').trim(),lv:v_('sv_l').trim()||'1-120',type:v_('sv_t').trim()||(sec==='tr'?'Resmi':'Emek'),c:[v_('sv_c1'),v_('sv_c2')],online:0,open:now(),desc:'',url:v_('sv_u').trim()||'https://example.com'}); if(sec==='tr'||true) S.exchange.push({id:uid('x'),server:S.servers[S.servers.length-1].id,unit:sec==='tr'?'1 Won':'100M',max:10,buy:null,margin:null,on:false}); const ns=S.servers[S.servers.length-1]; let epMsg=''; if(epOn){ ns.ep=true; const a=parseInt(v_('sv_epa'))||0, pr=r2(+v_('sv_epp')||0); if(a>0&&pr>0){ const used=new Set(S.epProducts.flatMap(x=>x.codes).concat(S.epOrders.map(o=>o.code))); const codes=[...new Set(v_('sv_epc').split(/\n/).map(x=>x.trim()).filter(Boolean))].filter(c=>!used.has(c)); S.epProducts.push({id:uid('ep'),srv:ns.id,grp:ns.name+' EP',ep:a,price:pr,v:2,hh:false,on:true,soldN:0,codes}); epMsg=` EP paketi eklendi (${codes.length} kod).`; } else epMsg=' EP satışı açık; paketleri EP sekmesinden ekleyin.'; }
+  srvadd:()=>{const sec=ui.svSec||'tr'; const epOn=sec==='pvp'&&v_('sv_ep')==='1'; S.servers.push({id:uid('s'),added:now(),sec,name:v_('sv_n').trim(),lv:v_('sv_l').trim()||'1-120',type:v_('sv_t').trim()||(sec==='tr'?'Resmi':'Emek'),c:[v_('sv_c1'),v_('sv_c2')],online:0,open:now(),desc:'',url:v_('sv_u').trim()}); if(sec==='tr'||true) S.exchange.push({id:uid('x'),server:S.servers[S.servers.length-1].id,unit:sec==='tr'?'1 Won':'100M',max:10,buy:null,margin:null,on:false}); const ns=S.servers[S.servers.length-1]; let epMsg=''; if(epOn){ ns.ep=true; const a=parseInt(v_('sv_epa'))||0, pr=r2(+v_('sv_epp')||0); if(a>0&&pr>0){ const used=new Set(S.epProducts.flatMap(x=>x.codes).concat(S.epOrders.map(o=>o.code))); const codes=[...new Set(v_('sv_epc').split(/\n/).map(x=>x.trim()).filter(Boolean))].filter(c=>!used.has(c)); S.epProducts.push({id:uid('ep'),srv:ns.id,grp:ns.name+' EP',ep:a,price:pr,v:2,hh:false,on:true,soldN:0,codes}); epMsg=` EP paketi eklendi (${codes.length} kod).`; } else epMsg=' EP satışı açık; paketleri EP sekmesinden ekleyin.'; }
     save(); toast('Server eklendi.'+epMsg+' Borsada açmak için Borsa ayarlarından siteden satın al fiyatını girin.'); render();},
   srvsave:(f)=>{const id=f.dataset.id, s=srv(id); s.name=v_('sv_name_'+id).trim()||s.name; s.lv=v_('sv_lv_'+id).trim(); s.type=v_('sv_type_'+id).trim(); s.url=v_('sv_url_'+id).trim(); s.c=[v_('sv_c1_'+id),v_('sv_c2_'+id)]; s.sec=v_('sv_sec_'+id); s.desc=v_('sv_desc_'+id).trim(); if($('#sv_seo_'+id)) s.seo=v_('sv_seo_'+id).trim(); if($('#sv_ep_'+id)) s.ep=s.sec==='pvp'&&v_('sv_ep_'+id)==='1'; save(); toast('Server kaydedildi.'+(s.ep&&!epFor(s.id).length?' EP paketlerini eklemeyi unutmayın.':'')); render();},
   smsset:()=>{const s=S.sms; s.on=$('#sm_on').checked; s.provider=v_('sm_p'); s.header=v_('sm_h'); s.user=v_('sm_u'); s.pass=v_('sm_pw'); s.userPrice=Math.max(0,+v_('sm_up')||0); save(); toast('SMS ayarları kaydedildi.'); render();},
@@ -5524,7 +5590,7 @@ function seoApply(r){ if(!S.set.seo) return; const x=seoData(r), SE=S.set.seo; d
   if(ensureTags()&&window.gtag){ const pth=routeToPath(r); if(pth!==seoLastPath&&!PRIV_R(r)&&!r.startsWith('widget-')){ seoLastPath=pth; gtag('event','page_view',{page_title:x.title,page_location:siteBase()+pth}); } }
   if(seoClean()) ['#app','#hdr','#cats','#ftr'].forEach(sel=>{ const el=$(sel); if(el) el.querySelectorAll('a[href^="#"]').forEach(a=>{ const h=a.getAttribute('href').slice(1); if(!h) return; a.dataset.h=h; a.setAttribute('href',routeToPath(h)); }); }); }
 document.addEventListener('click',e=>{ if(!seoClean()||e.defaultPrevented||e.button||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey) return; const a=e.target.closest('a[data-h]'); if(!a||a.target==='_blank') return; e.preventDefault(); const h=a.dataset.h; if(route()===h){ render(); window.scrollTo(0,0); } else location.hash=h; });
-window.addEventListener('popstate',()=>{ if(seoClean()&&location.hash.length<=1){ PV.seen.clear(); render(); window.scrollTo(0,0); } });
+window.addEventListener('popstate',()=>{ if(typeof admDirtyNow==='function'&&admDirtyNow()) return; if(seoClean()&&location.hash.length<=1){ PV.seen.clear(); render(); window.scrollTo(0,0); } });
 /* --- sitemap / robots / htaccess --- */
 function sitemapUrls(){ const day=new Date().toISOString().slice(0,10), iso=t=>new Date(t).toISOString().slice(0,10); const U=[];
   const add=(r,lm,pr,cf)=>U.push({loc:siteBase()+routeToPath(r),lm:lm||day,pr,cf});
@@ -6026,12 +6092,13 @@ const safeUrl = u => { u=String(u||'').trim(); return /^(https?:\/\/|#|\/(?!\/))
     'sv-sec':(d)=>{ ui.svSec=d.s; ui.svF=[]; ui.svPage=1; ui.svEdit=null; admGo('server',d.s); },
     'ex-open':(d)=>{ ui.reveal=false; if(d.id){ const o=S.exOrders.find(x=>x.id===d.id); if(o){ ui.exSrv=o.server; ui.bkSrv=o.ex; } admGo('borsa','siparisler',{id:d.id}); } else { ui.exSrv='hepsi'; if(inAdm()) admSet({id:null}); else admGo('borsa','siparisler'); } },
     'admin-tk':()=>admGo('destek','talepler'),
-    'adm-tk':(d)=>{ ui.tk=d.id; ui.tkf='hepsi'; admGo('destek','talepler'); },
-    'adm-wdq':(d)=>{ const w=S.wd.find(x=>x.id===d.id); ui.egpQ=w?(w.name||''):''; admGo('cekim','talepler',{f:'tumu'}); },
+    'adm-tk':(d)=>{ ui.tk=d.id; ui.tkf='hepsi'; admGo('destek','talepler',{f:'hepsi'}); },
+    'adm-wdq':(d)=>{ const w=S.wd.find(x=>x.id===d.id); ui.egpQ=w?(w.name||''):''; admGo('cekim','talepler',{f:'tumu',q:ui.egpQ||null}); },
     ntab:(d)=>admGo('sms',{tpl:'sablonlar',mail:'eposta',sms:'sms',log:'kayitlar'}[d.t]||d.t),
     tkf:(d)=>{ ui.tkf=d.f; ui.tk=null; if(inAdm()) admSet({f:d.f}); else render(); },
     exf:(d)=>{ ui.exf=d.f; if(inAdm()) admSet({f:d.f}); else render(); },
     adf:(d)=>{ ui.adf=d.t; if(inAdm()) admSet({f:d.t}); else render(); },
+    eplog:(d)=>{ ui.epLog=d.g; if(inAdm()) admSet({f:d.g===''?'_tr':d.g==='all'?null:d.g}); else render(); },
     sof:fset('sof'), dpf:fset('dpf'), wdf:fset('wdf'), lf:fset('lf'), uf:fset('uf'), flf:fset('flf'),
     'fl-seen':(d)=>{ const f=S.flagged[+d.i]; if(f){ f.seen=true; save(); } render(); },
     'fl-seen-all':()=>{ const P=admParse(route()); const q=(P.q||'').toLocaleLowerCase('tr-TR'); let n=0; S.flagged.forEach(f=>{ if(f.seen) return; const U=user(f.u)||{}; if(q&&![U.name,fullName(U),U.tel,f.orig].some(v=>String(v||'').toLocaleLowerCase('tr-TR').includes(q))) return; f.seen=true; n++; }); save(); toast(n+' mesaj incelendi olarak işaretlendi.'); render(); },
@@ -6050,10 +6117,11 @@ const safeUrl = u => { u=String(u||'').trim(); return /^(https?:\/\/|#|\/(?!\/))
     'sv-clear':()=>{ ui.svF=[]; ui.svQ=''; ui.svPage=1; const i=$('#sv_q'); if(i) i.value=''; svApply(); }
   });
   { const f=ACT['srv-del']; ACT['srv-del']=(d,e)=>{ f(d,e); if(inAdm()){ ui.svEdit=null; admSet({id:null}); } }; }
-  { const f=FORM.srvadd; FORM.srvadd=(x)=>{ const n=S.servers.length; f(x); if(S.servers.length>n&&inAdm()){ ui.svHi=S.servers[S.servers.length-1].id; ui.svQ=''; ui.svF=[]; ui.svSort='yeni'; ui.svPage=1; admSet({id:null}); } }; }
+  { const f=FORM.srvadd; FORM.srvadd=(x)=>{ const n=S.servers.length; f(x); if(S.servers.length>n&&inAdm()){ ui.svHi=S.servers[S.servers.length-1].id; ui.svQ=''; ui.svF=[]; ui.svSort='yeni'; ui.svPage=1; admSet({id:null,q:null,f:null,sort:'yeni',page:null}); } }; }
   FORM.asearch=()=>{ const v=(($('#aq')||{}).value||'').trim(); if(inAdm()) admSet({q:v||null}); else { ui.aq=v; render(); } setTimeout(()=>{ const i=$('#aq'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); } },0); };
   CHG.atabsel=(el)=>admGo(el.value);
   CHG.svsort=(el)=>{ ui.svSort=el.value; ui.svPage=1; svApply(); };
+  CHG.eplog=(el)=>ACT.eplog({g:el.value});
   { const f=CHG.exst; CHG.exst=(el)=>{ if(el.value==='kismen'){ const o=S.exOrders.find(x=>x.id===el.dataset.id); ui.reveal=false; admGo('borsa','siparisler',{id:o.id}); setTimeout(()=>{const s_=$('#exds'); if(s_) s_.value='kismen'; const i=$('#exdq'); if(i){ i.focus(); i.select(); }},120); toast('Teslim edilen adedi yazıp “Durumu kaydet” deyin.'); return; } return f(el); }; }
   { const f=CHG.switch; CHG.switch=(el)=>{ const wasAdm=inAdm(); f(el); if(wasAdm&&!isPanel()&&inAdm()) go('home'); }; }
   // eski kayıtlar: of-cancel ve egp-view üye tarafında da kullanılıyor; sahibi ya da yetkili
@@ -6090,13 +6158,13 @@ document.addEventListener('keydown',e=>{
   if((e.key==='k'||e.key==='K')&&(e.ctrlKey||e.metaKey)||(e.key==='/'&&!typing&&!e.ctrlKey&&!e.metaKey)){ e.preventDefault(); const mob=window.matchMedia('(max-width:900px)').matches; if(mob){ ACT['adm-menu']({q:1}); } else { const i=$('#acmdA'); if(i){ i.focus(); i.select(); } } return; }
   if(e.key==='Escape'){ if($('.mb')) return; if(document.body.classList.contains('adm-menu')){ ACT['adm-menu-close'](); const b=$('.mtop [data-act="adm-menu"]'); if(b) b.focus(); return; } if($('.sdrawer')){ const x=$('.sdrawer [data-act="sv-close"]'); if(x) x.click(); } }
   if((e.key==='Enter'||e.key===' ')&&t&&t.matches&&t.matches('.svtbl tr[data-act]')){ e.preventDefault(); t.click(); } });
-const ADM_ACT={'dep-ok':'odeme','dep-no':'odeme','wd-ok':'cekim','wd-no':'cekim','l-ok':'ilan',resolve:'siparis','ad-ok':'reklam','tc-reset':'uye','u-ban':'uye','u-ver':'uye','pa-ok':'seo','pa-no':'seo','bl-del':'seo','post-del':'seo','static-kit':'seo','seo-kit':'seo','tc-kit':['cekim','uye'],'muhasebe-kit':['muhasebe','ayar'],'muhasebe-zip-dl':'muhasebe','ep-del':'ep','ep-toggle':'ep','ep-cdel':'ep','sv-ep':'server','srv-del':'server','ex-pair':'borsa','ex-unpair':'borsa','ex-unpair-all':'borsa','ex-cancel':'borsa',
+const ADM_ACT={'dep-ok':'odeme','dep-no':'odeme','wd-ok':'cekim','wd-no':'cekim','l-ok':'ilan',resolve:'siparis','ad-ok':'reklam','tc-reset':'uye','tc-ask':['cekim','muhasebe'],'u-ban':'uye','u-ver':'uye','pa-ok':'seo','pa-no':'seo','bl-del':'seo','post-del':'seo','static-kit':'seo','seo-kit':'seo','tc-kit':['cekim','uye'],'muhasebe-kit':['muhasebe','ayar'],'muhasebe-zip-dl':'muhasebe','ep-del':'ep','ep-toggle':'ep','ep-cdel':'ep','sv-ep':'server','srv-del':'server','ex-pair':'borsa','ex-unpair':'borsa','ex-unpair-all':'borsa','ex-cancel':'borsa',
   'ad-del':'reklam','ad-toggle':'reklam','ad-ext':'reklam','ad-media-clear':'reklam','slide-toggle':'reklam','slide-clear':'reklam','slide-del':'reklam','preview-pop':'reklam',draw:'kampanya','r-del':'kampanya','cp-toggle':'kampanya','cp-del':'kampanya','spin-reset':'kampanya',
   'bank-del':'odeme','gw-toggle':'odeme','cnet-toggle':'odeme','cnet-del':'odeme','xr-add':'borsa_ayar','xr-del':'borsa_ayar','ef-add':'borsa_ayar','ef-del':'borsa_ayar','ef-up':'borsa_ayar','ex-power':'borsa','ex-claim':'borsa','exdq-fill':'borsa',
   'staff-del':'calisan','vip-add':'vip','vip-del':'vip','l-del':'ilan','cover-reset':'ilan',reset:'ayar','bk-now':'bakim','bk-del':'bakim','bk-dl':'bakim','bk-restore':'bakim','safe-update':'bakim','xls-day':'muhasebe',mday:'muhasebe','xls-user':'uye',
   'tk-claim':'destek','tk-close':'destek','tk-ai':'destek','egp-modal':['cekim','muhasebe'],'admin-sms':'uye','adm-tk':'destek','adm-wdq':['cekim','muhasebe'],'fl-seen':'mesaj','fl-seen-all':'mesaj',
   'sv-edit':'server','sv-close':'server','sv-add':'server','sv-more':'server',svf:'server','sv-clear':'server'};
-const ADM_FORM={srvadd:'server',srvsave:'server',epadd:'ep',epprod:'ep',hhset:'ep',tcset:'cekim',seoset:'seo',adsset:'seo',postadd:'seo',postsave:'seo',bladd:'seo',wdfee:'cekim',egpset:'cekim',egpissue:'cekim',egplookup:'muhasebe',dopset:'ilan',mailset:'sms',tplsave:'sms',golive:'ayar',
+const ADM_FORM={srvadd:'server',srvsave:'server',epadd:'ep',epprod:'ep',hhset:'ep',tcset:'cekim',seoset:'seo',adsset:'seo',postadd:'seo',postsave:'seo',bladd:'seo',wdfee:'cekim',egpset:'cekim',egpissue:'cekim',egptc:['cekim','muhasebe'],egplookup:'muhasebe',dopset:'ilan',mailset:'sms',tplsave:'sms',golive:'ayar',
   packs:'reklam',adrej:'reklam',slideadd:'reklam',raffle:'kampanya',coupon:'kampanya',bank:'odeme',gws:'odeme',cnetadd:'odeme',cnetsave:'odeme',exrates:'borsa_ayar',xradd:'borsa_ayar',exfields:'borsa_ayar',excall:'borsa',exinfo:'borsa',exst:'borsa',exdq:'borsa',exoffmsg:'borsa',
   staffadd:'calisan',staffperm:'calisan',vipset:'vip',refset:'vip',settings:'ayar',maintset:'bakim',smsset:'sms',smstest:'sms',mailtest:'sms',supportset:'destek',tkreply:'destek',baladd:'bakiye',winback:'uye',xlsrange:'muhasebe'};
 { const f=FORM.editl; FORM.editl=(x)=>{ const l=lst(x.dataset.id); if(!(l&&l.seller===S.cur)&&!can('ilan')) return toast('Bu işlem için yetkiniz yok.',true); return f(x); }; }
@@ -6135,6 +6203,13 @@ function goLivePanel(){ const C=goLiveChecks(), ok=C.filter(c=>c[0]).length;
 const st_demo = () => S.set.demoMode!==false;
 FORM.golive=(()=>{ const f=()=>{ if(!can('ayar')) return toast('Bu işlem için yetkiniz yok.',true); S.set.demoMode=$('#gl_demo').checked; save(); toast(S.set.demoMode?'Demo modu açık.':'Demo modu kapatıldı. Demo hesap seçici gizlendi.'); render(); }; return f; })();
 
+/* R7: kaydedilmemiş değişiklik koruması tarayıcı Geri/İleri, elle adres değişikliği ve sayfa kapatma/yenileme için de çalışır. */
+const admDirtyNow = () => !!(ui.admDirty&&document.querySelector('.admwrap form[data-dirty], .sdrawer form[data-dirty]'));
+function admDirtyClear(){ ui.admDirty=false; document.querySelectorAll('form[data-dirty]').forEach(f=>delete f.dataset.dirty); }
+window.addEventListener('beforeunload',e=>{ if(admDirtyNow()){ e.preventDefault(); e.returnValue=''; return ''; } });
+window.addEventListener('hashchange',e=>{ if(admDirtyNow()){ let oldH=''; try{ oldH=new URL(e.oldURL).hash; }catch(x){}
+    if(isAdmRoute(oldH.slice(1))){ e.stopImmediatePropagation(); const to=e.newURL; try{ history.pushState(null,'',e.oldURL); }catch(x){ return; }
+      openConfirm({t:'Kaydedilmemiş değişiklikler var',d:'Kaydedilmemiş değişiklikler kaybolacak.',ok:'Kaydetmeden çık',danger:1,onOk:()=>{ admDirtyClear(); const from=location.href; try{ history.pushState(null,'',to); }catch(x){ location.href=to; return; } window.dispatchEvent(new HashChangeEvent('hashchange',{oldURL:from,newURL:to})); }}); } } });
 window.addEventListener('hashchange',()=>{ document.body.classList.remove('adm-menu'); cmdClose(); if(seoClean()&&location.hash.length>1&&!isAdmRoute(location.hash.slice(1))){ history.replaceState(null,'',routeToPath(location.hash.slice(1))+location.search); } PV.seen.clear(); render(); window.scrollTo(0,0); });
 render();
 
