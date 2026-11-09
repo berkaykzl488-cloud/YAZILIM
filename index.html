@@ -1297,8 +1297,11 @@ svg.cover,img.cover{display:block;width:100%;height:100%;object-fit:cover}
 .wdtbl{table-layout:fixed;width:100%}
 .wdtbl td{vertical-align:top;overflow-wrap:anywhere}
 .wdtbl td .mono{white-space:normal!important}
-.wdtbl th:nth-child(1){width:9%}.wdtbl th:nth-child(2){width:13%}.wdtbl th:nth-child(3){width:10%}.wdtbl th:nth-child(4){width:14%}.wdtbl th:nth-child(5){width:18%}.wdtbl th:nth-child(6){width:9%}.wdtbl th:nth-child(7){width:16%}.wdtbl th:nth-child(8){width:11%}
+.wdtbl th:nth-child(1){width:8%}.wdtbl th:nth-child(2){width:12%}.wdtbl th:nth-child(3){width:11%}.wdtbl th:nth-child(4){width:13%}.wdtbl th:nth-child(5){width:14%}.wdtbl th:nth-child(6){width:9%}.wdtbl th:nth-child(7){width:16%}.wdtbl th:nth-child(8){width:17%}
+.wdtbl th{white-space:normal}.wdact .btn{white-space:normal;text-align:center}
 .wdtbl td.num .hstack{flex-wrap:wrap!important;gap:4px}
+.wddesc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.4;color:var(--muted)}
+@media (max-width:640px){.wdtbl td.wddesc-td{grid-column:1/-1}}
 .wdact{display:grid;gap:4px}.wdact .btn{justify-content:center}
 
 @media (max-width:1200px){.wdtbl td,.wdtbl th{padding:8px 6px}.wdtbl .btn-sm{padding-inline:6px;font-size:11.5px}.wdtbl th{white-space:normal}}
@@ -1373,7 +1376,7 @@ svg.cover,img.cover{display:block;width:100%;height:100%;object-fit:cover}
 .egp-doc{background:#ffffff;color:#0f172a;border-radius:12px;padding:24px;border:1px solid #cbd5e1;font-family:var(--f-body);box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .egp-hdr{display:grid;grid-template-columns:1.2fr auto 1.1fr;gap:16px;align-items:start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:16px}
 @media (max-width:720px){.egp-hdr{grid-template-columns:1fr;text-align:center}}
-.egp-comp b{font-size:15px;color:#0f172a;display:block;margin-bottom:4px}
+.egp-comp>b{font-size:15px;color:#0f172a;display:block;margin-bottom:4px}
 .egp-comp div{font-size:12px;color:#334155;line-height:1.45}
 .egp-seal{text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
 .egp-seal-ring{width:64px;height:64px;border-radius:50%;border:2.5px solid #b91c1c;color:#b91c1c;display:grid;place-items:center;font-weight:900;font-size:11px;letter-spacing:.04em;line-height:1.1;background:#fef2f2}
@@ -1396,6 +1399,10 @@ svg.cover,img.cover{display:block;width:100%;height:100%;object-fit:cover}
 .egp-sum tr.tot td{background:#ecfdf5;color:#065f46;font-weight:800;font-size:13.5px;border-color:#6ee7b7}
 .egp-note{font-size:11.5px;color:#475569;line-height:1.5;border-top:1px dashed #cbd5e1;padding-top:10px}
 .egp-sign{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11.5px;color:#334155;text-align:center}
+.egp-doc{min-width:0;overflow-wrap:anywhere}
+.egp-tbl-w{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;margin-bottom:16px}
+.egp-tbl-w .egp-tbl{min-width:560px;margin-bottom:0}
+@media (max-width:640px){.egp-doc{padding:12px}.egp-meta{flex-wrap:wrap;justify-content:center}.egp-meta-tbl{max-width:100%}.egp-sign{grid-template-columns:1fr}}
 .egp-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:700;background:var(--ok-soft);color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 32%,transparent);font-family:var(--f-mono)}
 </style>
 </head><body>
@@ -1663,7 +1670,7 @@ const dkey = t => { const d=new Date(t); return d.getFullYear()+'-'+String(d.get
 const dTR = k => k.split('-').reverse().join('.');
 const hhmm = t => new Date(t).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
 function ledger(k,u,a,x){ (S.ledger=S.ledger||[]).unshift(Object.assign({id:uid('g'),t:now(),k,u,a:r2(a)},x||{})); }
-const LKN={yukleme:'Bakiye yükleme',cekim_talep:'Para çekme talebi',cekim_odendi:'Para çekme ödendi',cekim_red:'Çekim reddedildi (iade)',satis:'Pazar satışı (tamamlandı)',iade:'Sipariş iadesi',ep:'EP satışı',borsa:'Borsa teslimatı',bonus:'Hediye / bonus bakiye',duzeltme:'Yönetici düzeltmesi'};
+const LKN={yukleme:'Bakiye yükleme',cekim_talep:'Para çekme talebi',cekim_odendi:'Para çekme ödendi',cekim_red:'Çekim reddedildi (iade)',satis:'Pazar satışı (tamamlandı)',iade:'Sipariş iadesi',ep:'EP satışı',borsa:'Borsa teslimatı',bonus:'Hediye / bonus bakiye',duzeltme:'Yönetici düzeltmesi',stopaj_tahakkuk:'GV stopajı tahakkuku (ödenecek)'};
 function lastAct(u){ let m=u.lastSeen||0; S.tx.forEach(t=>{ if(t.u===u.id&&t.t>m) m=t.t; }); (S.ledger||[]).forEach(g=>{ if(g.u===u.id&&g.t>m) m=g.t; }); return m; }
 function refundPart(u,o,amt){ if(amt<=0) return; const p=o.paid||{nw:0,w:o.total}; const nw=Math.min(amt,p.nw||0); u.bonus=r2((u.bonus||0)+nw); u.bal=r2((u.bal||0)+amt-nw); p.nw=r2((p.nw||0)-nw); p.w=r2((p.w||0)-(amt-nw)); o.paid=p; }
 const maintOn = () => !!(S.set.maint&&S.set.maint.on&&(!S.set.maint.until||S.set.maint.until>now()));
@@ -1879,27 +1886,43 @@ function egpQrSvg(str){
   }
   return `<svg viewBox="0 0 21 21" width="68" height="68" fill="#0f172a" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px;flex:none" aria-label="e-Belge Karekod">${cells}</svg>`;
 }
+// Mal / Hizmet açıklaması: kesilmiş belgede belgedeki metin, yoksa ayarlardaki şablon ({banka}/{iban}/{uye}).
+function egpDescFor(w, tpl){
+  if(!tpl && w.egp && w.egp.desc) return w.egp.desc;
+  const E=egpCfg(), U=user(w.u)||{};
+  return String(tpl||E.descTpl||'Vergi mükellefi olmayan gerçek kişiden dijital oyun içi varlık tedariki ve bakiye ödemesi')
+    .replace(/\{banka\}/g,w.bank||'Banka').replace(/\{iban\}/g,fmtIban(w.iban||'')).replace(/\{uye\}/g,U.name||'');
+}
+// Pusula her zaman üyenin sistemde kayıtlı kimliğiyle kesilir (IBAN hesap sahibi adıyla değil).
+function egpIdent(w){ const U=user(w.u)||{}, tc=U.tc||{};
+  return {name:fullName(U)||U.name||'Üye', tckn:tc.no||tc.mask||tc.masked||w.tckn||'-', tel:U.tel||'-'}; }
 function issueEgp(w, opts){
   const E=egpCfg(), U=user(w.u)||{}; opts=opts||{};
+  const prev=w.egp||null, preview=!!opts.preview;
+  // Ödenmiş çekimde tutarlar kilitli: defterdeki ödenen net/stopaj ile belge aynı kalır.
+  const lock=opts.lockAmounts!=null?!!opts.lockAmounts:!!prev;
   const yr=new Date(w.pt||now()).getFullYear();
   const seri=(E.seri||'YGP').toUpperCase().slice(0,3).padEnd(3,'X');
-  const seq=++E.seq;
-  const no=opts.no||`${seri}${yr}${String(seq).padStart(9,'0')}`;
+  // Mevcut belge düzenlenirse no / ETTN / tarih korunur; önizleme sıra numarası tüketmez.
+  const no=prev?prev.no:(opts.no||(preview?'TASLAK (onayda numaralanır)':`${seri}${yr}${String(++E.seq).padStart(9,'0')}`));
   const fee=w.fee||0, brut=r2(w.amount-fee);
-  const stopajPct=opts.stopajPct!=null?+opts.stopajPct:(w.stopajPct!=null?+w.stopajPct:(+E.stopaj||0));
-  const stopaj=r2(brut*stopajPct/100), net=r2(brut-stopaj);
-  w.stopajPct=stopajPct; w.stopaj=stopaj; w.net=net;
-  const tckn=opts.tckn||(U.tc&&U.tc.no)||w.tckn||(U.tc&&U.tc.masked)||'10*******82 (NVİ Doğrulamalı)';
-  const desc=(opts.desc||E.descTpl||'Vergi mükellefi olmayan gerçek kişiden dijital oyun içi varlık tedariki ve bakiye ödemesi')
-    .replace(/\{banka\}/g,w.bank||'Banka').replace(/\{iban\}/g,fmtIban(w.iban||'')).replace(/\{uye\}/g,U.name||'');
-  w.egp={
+  let stopajPct, stopaj, net;
+  if(lock){ stopajPct=+w.stopajPct||0; stopaj=r2(+w.stopaj||0); net=w.net!=null?r2(w.net):r2(brut-stopaj); }
+  else {
+    stopajPct=opts.stopajPct!=null?+opts.stopajPct:(w.stopajPct!=null?+w.stopajPct:0); // eski talepte oran yoksa 0
+    stopaj=r2(brut*stopajPct/100); net=r2(brut-stopaj);
+    if(!preview){ w.stopajPct=stopajPct; w.stopaj=stopaj; w.net=net; }
+  }
+  const I=egpIdent(w);
+  const desc=egpDescFor(w, opts.desc);
+  const g={
     no,
-    ettn:opts.ettn||makeEttn(no+'-'+w.id),
-    t:w.pt||now(),
-    sellerName:w.name||fullName(U)||U.name||'Üye',
+    ettn:prev?prev.ettn:(opts.ettn||(preview?'—':makeEttn(no+'-'+w.id))),
+    t:prev?prev.t:(w.pt||now()),
+    sellerName:I.name,
     userName:U.name||'',
-    tckn,
-    tel:U.tel||'0532 *** ** **',
+    tckn:I.tckn,
+    tel:I.tel,
     email:U.email||'',
     addr:opts.addr||U.addr||'Türkiye (Bireysel / Vergi Mükellefi Değil)',
     bank:w.bank||'-',
@@ -1918,10 +1941,11 @@ function issueEgp(w, opts){
     compAddr:E.addr||'Muğla, Türkiye',
     provider:E.provider||'GİB e-Belge'
   };
-  return w.egp;
+  if(!preview) w.egp=g;
+  return g;
 }
-function egpDocHtml(w){
-  const g=w.egp||issueEgp(w);
+function egpDocHtml(w, gIn){
+  const g=gIn||w.egp||issueEgp(w,{preview:true});
   const bankNote = `YangPazar e-Gider Pusulasi No: ${g.no} - ${g.sellerName}`;
   return `<div class="egp-doc" id="egpDocArea">
     <div class="egp-hdr">
@@ -1957,7 +1981,7 @@ function egpDocHtml(w){
       <div><b>Ödeme Yapılan Banka:</b> ${esc(g.bank)}</div>
       <div><b>Ödeme Yapılan IBAN:</b> <span class="mono">${esc(g.iban)}</span></div>
     </div>
-    <table class="egp-tbl">
+    <div class="egp-tbl-w"><table class="egp-tbl">
       <thead>
         <tr>
           <th style="width:42px">#</th>
@@ -1983,7 +2007,7 @@ function egpDocHtml(w){
           <td class="num"><b>${TL(g.net)}</b></td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
     <table class="egp-sum">
       <tr><td>Çekim Talebi Toplamı</td><td class="num mono">${TL(g.amount)}</td></tr>
       ${g.fee?`<tr><td>Platform İşlem Ücreti (−)</td><td class="num mono">${TL(g.fee)}</td></tr>`:''}
@@ -2004,21 +2028,26 @@ function egpDocHtml(w){
     </div>
   </div>`;
 }
+// İndirilen .html pusula için: sayfadaki .egp-* kurallarını (medya sorguları dahil) toplar; kopyala butonları dosyada gizlenir.
+function egpCss(){ let out=':root{--f-body:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace}.egp-doc button{display:none!important}';
+  for(const sh of document.styleSheets){ let rules; try{ rules=sh.cssRules; }catch(e){ continue; } for(const r of rules||[]){ if(r.cssText.includes('.egp-')) out+=r.cssText+'\n'; } }
+  return out; }
 function mEgpView(id){
   const w=S.wd.find(x=>x.id===id); if(!w) return;
-  if(!w.egp) issueEgp(w); save();
-  const g=w.egp;
+  // Henüz kesilmemişse yalnızca taslak önizleme gösterilir: sıra numarası tüketilmez, kayıt değişmez.
+  const pv=!w.egp; const g=w.egp||issueEgp(w,{preview:true});
   const bankNote = `YangPazar e-Gider Pusulasi No: ${g.no} - ${g.sellerName}`;
   modal(`<div class="md" style="width:min(880px,100%)" role="dialog" aria-label="e-Gider Pusulası">
-    <div class="md-h"><h3>e-Gider Pusulası · ${esc(g.no)}</h3><button class="md-x" data-act="close" aria-label="Kapat">×</button></div>
+    <div class="md-h"><h3>e-Gider Pusulası · ${pv?'Taslak önizleme':esc(g.no)}</h3><button class="md-x" data-act="close" aria-label="Kapat">×</button></div>
     <div class="md-b stack">
-      ${egpDocHtml(w)}
+      ${pv?'<div class="note note-info">Bu çekim için henüz e-Gider Pusulası kesilmedi. Aşağıdaki görünüm taslaktır; belge numarası ve ETTN pusula kesildiğinde verilir.</div>':''}
+      ${egpDocHtml(w,g)}
       <div class="hstack" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div class="hstack" style="flex-wrap:wrap;gap:6px">
-          <button type="button" class="btn btn-primary" data-act="egp-dl" data-id="${w.id}">📥 e-Gider Pusulası İndir (.html / Yazdır)</button>
+          ${pv?'':`<button type="button" class="btn btn-primary" data-act="egp-dl" data-id="${w.id}">📥 e-Gider Pusulası İndir (.html / Yazdır)</button>`}
           <button type="button" class="btn btn-ok" data-act="copy" data-v="${esc(g.desc)}">📋 Mal / Hizmet Açıklamasını Kopyala</button>
-          <button type="button" class="btn" data-act="copy" data-v="${esc(bankNote)}">📋 Banka EFT Açıklamasını Kopyala</button>
-          <button type="button" class="btn" data-act="copy" data-v="${esc(JSON.stringify(g,null,2))}">📋 GİB JSON</button>
+          ${pv?'':`<button type="button" class="btn" data-act="copy" data-v="${esc(bankNote)}">📋 Banka EFT Açıklamasını Kopyala</button>
+          <button type="button" class="btn" data-act="copy" data-v="${esc(JSON.stringify(g,null,2))}">📋 GİB JSON</button>`}
         </div>
         <button type="button" class="btn btn-ghost" data-act="close">Kapat</button>
       </div>
@@ -2027,22 +2056,25 @@ function mEgpView(id){
 }
 function mEgpModal(id){
   const w=S.wd.find(x=>x.id===id); if(!w) return;
-  const U=user(w.u)||{}, E=egpCfg();
+  const I=egpIdent(w), paid=w.status!=='bekliyor';
   const fee=w.fee||0, brut=r2(w.amount-fee);
-  const stPct=w.stopajPct!=null?w.stopajPct:(+E.stopaj||0);
-  const stAmt=r2(brut*stPct/100), net=r2(brut-stAmt);
-  const desc=(w.egp&&w.egp.desc)||(E.descTpl||'').replace(/\{banka\}/g,w.bank||'').replace(/\{iban\}/g,fmtIban(w.iban||'')).replace(/\{uye\}/g,U.name||'');
+  const stPct=w.stopajPct!=null?+w.stopajPct:0; // eski talepte oran yoksa 0 (talep anındaki oran)
+  const stAmt=paid?r2(+w.stopaj||0):r2(brut*stPct/100), net=paid&&w.net!=null?r2(w.net):r2(brut-stAmt);
+  const desc=egpDescFor(w);
+  const mism=I.name&&w.name&&w.name.toLocaleLowerCase('tr-TR')!==I.name.toLocaleLowerCase('tr-TR');
   modal(mWrap(`e-Gider Pusulası Kes & Ödemeyi Onayla · #${w.id}`,`<form class="stack" data-form="egpissue" data-id="${w.id}">
-    <div class="note note-info">Üye vergi mükellefi olmadığından şirket hesabınızdan <b>${esc(w.name)}</b> adına (<b>${esc(fmtIban(w.iban))}</b>) yapılan EFT/Havale çıkışı için resmi <b>e-Gider Pusulası</b> oluşturulur.</div>
-    <div class="row2">
-      <div class="fld"><label for="egi_name">Ad Soyad (Ödeme Yapılan)</label><input class="inp" id="egi_name" value="${esc(w.name||fullName(U)||U.name)}" required></div>
-      <div class="fld"><label for="egi_tckn">T.C. Kimlik No</label><input class="inp mono" id="egi_tckn" value="${esc((w.egp&&w.egp.tckn)||(U.tc&&U.tc.no)||w.tckn||'10*******82')}" required></div>
+    <div class="note note-info">Şirket hesabınızdan <b>${esc(fmtIban(w.iban))}</b> IBAN'ına yapılan EFT/Havale çıkışı için üyenin sistemde kayıtlı bilgileriyle (<b>${esc(I.name)}</b>) resmi <b>e-Gider Pusulası</b> oluşturulur.${mism?`<br><span class="pill p-itiraz">İsim uyuşmuyor</span> IBAN hesap sahibi: <b>${esc(w.name)}</b>`:''}</div>
+    <div class="row3">
+      <div class="fld"><label for="egi_name">Ad Soyad (sistem kaydı)</label><input class="inp" id="egi_name" value="${esc(I.name)}" readonly></div>
+      <div class="fld"><label for="egi_tckn">T.C. Kimlik No (sistem kaydı)</label><input class="inp mono" id="egi_tckn" value="${esc(I.tckn)}" readonly></div>
+      <div class="fld"><label for="egi_tel">Telefon (sistem kaydı)</label><input class="inp mono" id="egi_tel" value="${esc(I.tel)}" readonly></div>
     </div>
     <div class="row3">
       <div class="fld"><label>Brüt Tutar</label><input class="inp mono" value="${TL(brut)}" disabled></div>
-      <div class="fld"><label for="egi_st">GV Stopaj Oranı (%)</label><input class="inp mono" id="egi_st" type="number" min="0" max="40" step="0.5" value="${stPct}" data-change="egicalc" data-brut="${brut}"></div>
+      <div class="fld"><label for="egi_st">GV Stopaj Oranı (%)</label><input class="inp mono" id="egi_st" type="number" min="0" max="40" step="0.5" value="${paid?(+w.stopajPct||0):stPct}" ${paid?'readonly':'data-change="egicalc"'} data-brut="${brut}"></div>
       <div class="fld"><label>IBAN'a Gönderilecek Net</label><input class="inp mono" id="egi_net" value="${TL(net)}" disabled></div>
     </div>
+    ${paid?'<div class="note note-warn" style="font-size:12px">Ödeme yapıldığı için net tutar ve stopaj değiştirilemez; yalnızca Mal / Hizmet açıklaması güncellenebilir. Belge numarası ve ETTN korunur.</div>':''}
     <div class="fld">
       <div class="hstack" style="justify-content:space-between">
         <label for="egi_desc">Mal / Hizmet Açıklaması</label>
@@ -2050,11 +2082,17 @@ function mEgpModal(id){
       </div>
       <textarea class="inp" id="egi_desc" rows="2" required>${esc(desc)}</textarea>
     </div>
-    <div class="hstack"><button class="btn btn-ok">${w.status==='bekliyor'?'Ödemeyi Onayla & e-Gider Pusulası Kes':'e-Gider Pusulasını Güncelle'}</button><button type="button" class="btn btn-ghost" data-act="close">İptal</button></div>
+    <div class="hstack"><button class="btn btn-ok">${w.status==='bekliyor'?'Ödemeyi Onayla & e-Gider Pusulası Kes':w.egp?'e-Gider Pusulasını Güncelle':'e-Gider Pusulası Kes'}</button><button type="button" class="btn btn-ghost" data-act="close">İptal</button></div>
   </form>`));
 }
 
 function addRev(k,a){S.rev[k]=r2((S.rev[k]||0)+a); S.revLog.push({t:now(),k,a:r2(a)})}
+// Onaylanan çekimin defter kayıtları: talep tutarı = ödenen net + işlem ücreti (gelir) + GV stopajı (vergi dairesine ödenecek borç).
+function wdPaidBook(w){ const net=w.net!=null?w.net:w.amount;
+  ledger('cekim_odendi',w.u,net,{m:(w.bank||'')+' · '+w.iban+(w.egp?' · e-Gider Pusulası: '+w.egp.no:'')+(w.fee?' · ücret '+TL(w.fee):''),ref:w.id});
+  if(w.stopaj>0) ledger('stopaj_tahakkuk',w.u,w.stopaj,{m:'GV stopajı %'+(w.stopajPct||0)+' · vergi dairesine ödenecek'+(w.egp?' · '+w.egp.no:''),ref:w.id});
+  if(w.fee) addRev('cekim',w.fee);
+  return net; }
 const RCATS={yang:'Yang / Won ilanları',item:'Item ilanları',karakter:'Karakter ilanları',ep:'EP ilanları (PVP)',epstore:'Metin2 EP mağazası',borsa:'Yang Borsası alımları'};
 const vipIdx = id => Math.max(0,VIP.findIndex(v=>v.id===id));
 const rOk = (r,u) => !!u && (!r.minVip || vipIdx(vip(u).id) >= vipIdx(r.minVip));
@@ -2971,14 +3009,8 @@ function vAccount(){
       <div class="stack" id="wNew" ${IB.length?'hidden':''}><div class="row2"><div class="fld"><label for="w_bank">Banka</label><select class="inp" id="w_bank">${TRBANKS.map(b=>`<option>${b}</option>`).join('')}</select></div><div class="fld"><label for="w_name">Hesap sahibi adı soyadı</label><input class="inp" id="w_name" value="${esc(fullName(u))}"></div></div>
         <div class="fld"><label for="w_iban">IBAN</label><input class="inp mono" id="w_iban" placeholder="TR00 0000 0000 0000 0000 0000 00"></div><label class="chk" for="w_save"><input type="checkbox" id="w_save" checked> Bu IBAN'ı sonraki çekimler için kaydet</label></div>
       <div class="fld"><label for="w_amt">Tutar (TL) · çekilebilir ${TL(u.bal)}</label><input class="inp" id="w_amt" type="number" min="${S.set.minWithdraw}" max="${u.bal}" step="0.01" required data-change="wdcalc"></div>
-      <div class="fld"><span class="lbl">Vergi mükellefiyeti & resmi belge türü</span>
-        <div class="tfach">
-          <label for="wt_0"><input type="radio" name="wtax" id="wt_0" value="0" checked data-change="wdcalc"><b>Vergi mükellefi değilim (Bireysel)</b><span>Şirket hesabından IBAN'ıma yapılan ödeme için adıma otomatik <b>e-Gider Pusulası</b> düzenlensin.</span></label>
-          <label for="wt_1"><input type="radio" name="wtax" id="wt_1" value="1" data-change="wdcalc"><b>Vergi mükellefiyim (Şirket)</b><span>Ödeme karşılığında şirketiniz adına e-Fatura / e-Arşiv Fatura keseceğim.</span></label>
-        </div>
-      </div>
       <div class="sum wdsum" id="wdsum"><div><span class="muted">Çekilecek brüt tutar</span><b class="mono" id="wd_a">${TL(0)}</b></div><div><span class="muted">İşlem ücreti</span><b class="mono" id="wd_f">${S.set.wdFee&&S.set.wdFee.on?TL(0):'Ücretsiz'}</b></div><div><span class="muted">e-Gider Pusulası GV Stopajı (%${(egpCfg().stopaj||0)})</span><b class="mono" id="wd_st">${TL(0)}</b></div><div class="tot"><span>IBAN'ınıza gönderilecek net tutar</span><b class="mono" id="wd_n">${TL(0)}</b></div></div>
-      <div class="note note-ok" style="font-size:12px"><b>e-Gider Pusulası Güvencesi:</b> 213 sayılı VUK Md. 234 uyarınca vergi mükellefi olmayan üyelerimizin banka hesabına yapılan EFT/Havale çıkışlarında resmi <b>e-Gider Pusulası</b> elektronik ortamda otomatik kesilir ve aşağıda <b>Taleplerim & e-Gider Pusulalarım</b> tablosundan görüntülenebilir.</div>
+      <div class="note note-ok" style="font-size:12px"><b>e-Gider Pusulası Güvencesi:</b> 213 sayılı VUK Md. 234 uyarınca tüm para çekme işlemlerinde banka hesabınıza yapılan EFT/Havale çıkışı için sistemde kayıtlı ad soyad, T.C. kimlik ve telefon bilgilerinizle resmi <b>e-Gider Pusulası</b> elektronik ortamda otomatik kesilir ve aşağıda <b>Taleplerim & e-Gider Pusulalarım</b> tablosundan görüntülenebilir.</div>
       <button class="btn btn-primary">Çekim talebi oluştur ve e-Gider Pusulası onayla</button></form></div>`}
     <div class="panel"><div class="panel-h"><h3>Kayıtlı IBAN'larım</h3></div><div class="panel-b stack">${IB.map(b=>`<div class="cprow"><span><b>${esc(b.bank)}</b> · ${esc(b.name)}<br><span class="mono">${esc(fmtIban(b.iban))}</span></span><button class="btn btn-sm btn-bad" data-act="iban-del" data-id="${b.id}">Sil</button></div>`).join('')||'<span class="muted">Kayıtlı IBAN yok.</span>'}
       <form class="row3" data-form="ibanadd" style="align-items:end"><div class="fld"><label for="ia_b">Banka</label><select class="inp" id="ia_b">${TRBANKS.map(b=>`<option>${b}</option>`).join('')}</select></div><div class="fld"><label for="ia_n">Ad soyad</label><input class="inp" id="ia_n" value="${esc(fullName(u))}" required></div><div class="fld"><label for="ia_i">IBAN</label><input class="inp mono" id="ia_i" required placeholder="TR.."></div><button class="btn btn-sm">IBAN kaydet</button></form></div></div>
@@ -3382,7 +3414,7 @@ function vAdmin(){
   if(t==='cekim') b=`<form class="panel" data-form="tcset"><div class="panel-h" style="flex-wrap:wrap"><h3>TC kimlik doğrulama</h3><span class="hstack"><span class="chip">${S.users.filter(x=>!x.admin&&!x.staff&&tcOk(x)).length} doğrulanmış · ${S.users.filter(x=>!x.admin&&!x.staff&&!tcOk(x)).length} doğrulanmamış üye</span><button class="btn btn-sm btn-primary">Kaydet</button></span></div><div class="panel-b stack">
     <label class="chk" for="tcs_req"><input type="checkbox" id="tcs_req" ${S.set.tc.req?'checked':''}> Para çekmek için TC kimlik doğrulaması zorunlu</label>
     <span class="muted" style="font-size:12.5px">Üye yalnızca TC kimlik numarası ve doğum tarihini girer; ad soyad üyelik bilgisinden alınır ve NVİ kayıtlarıyla eşleştirilir. Doğrulanan üyenin adı soyadı kilitlenir, aynı TC ikinci bir hesapta kullanılamaz, 5 hatalı denemede 24 saat beklenir.</span>
-    <div class="row2"><div class="fld"><label for="tcs_url">Doğrulama adresi (sunucu)</label><input class="inp mono" id="tcs_url" value="${esc(S.set.tc.url)}"></div><div class="fld" style="justify-content:flex-end"><button type="button" class="btn btn-sm" data-act="tc-kit">Sunucu dosyasını indir (.zip)</button><button type="button" class="btn btn-sm btn-primary" data-act="muhasebe-kit">Muhasebe & Banka API Paketini İndir (.zip)</button></div></div></div></form>
+    <div class="row2"><div class="fld"><label for="tcs_url">Doğrulama adresi (sunucu)</label><input class="inp mono" id="tcs_url" value="${esc(S.set.tc.url)}"></div><div class="fld" style="justify-content:flex-end"><button type="button" class="btn btn-sm" data-act="tc-kit">Sunucu dosyasını indir (.zip)</button>${can('muhasebe')?'<button type="button" class="btn btn-sm btn-primary" data-act="muhasebe-kit">Muhasebe & Banka API Paketini İndir (.zip)</button>':''}</div></div></div></form>
   <form class="panel panel-b stack" data-form="wdfee"><div class="eyebrow">Para çekme işlem ücreti</div>
       <div class="tfach">${[['0','Ücretsiz','Üyeden ücret alınmaz'],['1','Ücretli','Her çekim talebinden ücret düşülür']].map(([k,v,d])=>`<label for="wf_on${k}"><input type="radio" name="wfon" id="wf_on${k}" value="${k}" ${(S.set.wdFee&&S.set.wdFee.on?'1':'0')===k?'checked':''}><span><b>${v}</b>${d}</span></label>`).join('')}</div>
       <div class="row3"><div class="fld"><label for="wf_t">Ücret türü</label><select class="inp" id="wf_t"><option value="sabit" ${(S.set.wdFee||{}).type!=='yuzde'?'selected':''}>Sabit tutar (TL)</option><option value="yuzde" ${(S.set.wdFee||{}).type==='yuzde'?'selected':''}>Yüzde (%)</option></select></div><div class="fld"><label for="wf_v">Ücret</label><input class="inp mono" id="wf_v" type="number" step="0.01" min="0" value="${(S.set.wdFee||{}).val??5}"></div><div class="row2"><div class="fld"><label for="wf_min">En az (TL)</label><input class="inp mono" id="wf_min" type="number" step="0.01" min="0" value="${(S.set.wdFee||{}).min||0}"></div><div class="fld"><label for="wf_max">En fazla (TL)</label><input class="inp mono" id="wf_max" type="number" step="0.01" min="0" value="${(S.set.wdFee||{}).max||0}"></div></div></div>
@@ -3405,7 +3437,7 @@ function vAdmin(){
       </div>
       <div class="fld"><label for="egp_desc">Varsayılan Mal / Hizmet Açıklama Şablonu ({banka}, {iban}, {uye} değişkenleri kullanılabilir)</label><input class="inp" id="egp_desc" value="${esc(egpCfg().descTpl||'')}"></div>
       <div class="hstack" style="justify-content:space-between;flex-wrap:wrap">
-        <label class="chk" for="egp_auto"><input type="checkbox" id="egp_auto" ${egpCfg().autoOnApprove!==false?'checked':''}> Çekim talebi "Gönderildi" onaylandığında vergi mükellefi olmayan üye adına otomatik <b>e-Gider Pusulası</b> oluştur</label>
+        <label class="chk" for="egp_auto"><input type="checkbox" id="egp_auto" ${egpCfg().autoOnApprove!==false?'checked':''}> Çekim talebi "Gönderildi" onaylandığında üyenin sistemde kayıtlı bilgileriyle otomatik <b>e-Gider Pusulası</b> oluştur</label>
         <button class="btn btn-primary btn-sm">e-Gider Pusulası Ayarlarını Kaydet</button>
       </div>
     </form>
@@ -3419,12 +3451,12 @@ function vAdmin(){
           <button type="button" class="btn btn-sm btn-primary" data-act="egp-find">Belgeyi Aç</button>
         </div>
       </div>
-      <div class="tbl-w"><table class="tbl wdtbl mcards"><thead><tr><th>Tarih</th><th>Üye</th><th>Banka & Hesap Sahibi</th><th>IBAN</th><th>Durum & e-Gider Pusulası</th><th class="num">Gönderilecek Net</th><th>İşlem</th></tr></thead><tbody>${S.wd.map(w=>{
+      <div class="tbl-w"><table class="tbl wdtbl mcards"><thead><tr><th>Tarih</th><th>Üye</th><th>Banka & Hesap Sahibi</th><th>IBAN</th><th>Durum & e-Gider Pusulası</th><th class="num">Gönderilecek Net</th><th>Mal / Hizmet Açıklaması</th><th>İşlem</th></tr></thead><tbody>${S.wd.map(w=>{
         const U=user(w.u)||{}; const mism=fullName(U)&&w.name.toLocaleLowerCase('tr-TR')!==fullName(U).toLocaleLowerCase('tr-TR');
-        const g=w.egp||{};
+        const g=w.egp||{}; const desc=egpDescFor(w);
         const hay=sqNorm([g.no,g.ettn,w.id,w.name,U.name,fullName(U),w.iban,w.bank,g.tckn].filter(Boolean).join(' '));
         const hide=!ui.egpQ||hay.includes(sqNorm(ui.egpQ))?'':'hidden';
-        return `<tr data-hay="${esc(hay)}" ${hide}><td style="white-space:nowrap">${dtstr(w.t)}</td><td>${uCell(U)}<div class="muted" style="font-size:11px">${w.taxpayer?'Vergi mükellefi (Fatura)':'Bireysel (e-Gider Pusulası)'}</div></td><td><b>${esc(w.bank||'-')}</b><div style="font-weight:600">${esc(w.name)}</div>${mism?'<span class="pill p-itiraz">İsim uyuşmuyor</span> ':''}<button class="btn btn-sm" style="margin-top:4px" data-act="copy" data-v="${esc(w.name)}">Adı kopyala</button></td><td><div class="mono" style="font-size:12px;white-space:nowrap">${esc(fmtIban(w.iban))}</div><button class="btn btn-sm btn-primary" style="margin-top:4px" data-act="copy" data-v="${esc(String(w.iban).replace(/\s/g,''))}">IBAN kopyala</button></td><td><span class="pill p-${w.status==='bekliyor'?'bekliyor':w.status==='onaylandı'?'onay':'iade'}">${w.status}</span>${w.egp?`<div style="margin-top:6px"><span class="egp-badge">📄 ${esc(w.egp.no)}</span></div><div style="margin-top:4px"><button class="btn btn-sm" data-act="egp-view" data-id="${w.id}">Pusulayı Aç / PDF</button></div>`:w.status==='onaylandı'&&!w.taxpayer?`<div style="margin-top:6px"><button class="btn btn-sm btn-primary" data-act="egp-modal" data-id="${w.id}">+ e-Gider Pusulası Kes</button></div>`:''}</td><td class="num"><div class="hstack" style="flex-wrap:nowrap;justify-content:flex-end"><span><b>${TL(w.net!=null?w.net:w.amount)}</b>${(w.fee||w.stopaj)?`<div class="muted" style="font-size:11px">Brüt ${TL(w.amount)}${w.fee?' · Ücret '+TL(w.fee):''}${w.stopaj?' · Stopaj '+TL(w.stopaj):''}</div>`:''}</span><button class="btn btn-sm" data-act="copy" data-v="${(w.net!=null?w.net:w.amount).toFixed(2).replace('.',',')}">Kopyala</button></div></td><td>${w.status==='bekliyor'?`<div class="wdact"><button class="btn btn-sm btn-ok" data-act="wd-ok" data-id="${w.id}">Gönderildi & Pusula Kes</button><button class="btn btn-sm" data-act="egp-modal" data-id="${w.id}">Önizle / Düzenle</button><button class="btn btn-sm btn-bad" data-act="wd-no" data-id="${w.id}">Reddet</button></div>`:w.status==='onaylandı'?`<div class="wdact"><button class="btn btn-sm" data-act="egp-view" data-id="${w.id}">📄 Belgeyi Gör</button><button class="btn btn-sm" data-act="egp-modal" data-id="${w.id}">Düzenle</button></div>`:''}</td></tr>`;
+        return `<tr data-hay="${esc(hay)}" ${hide}><td style="white-space:nowrap">${dtstr(w.t)}</td><td>${uCell(U)}${w.taxpayer===true?'<div class="muted" style="font-size:11px">Vergi mükellefi (Fatura)</div>':''}</td><td><b>${esc(w.bank||'-')}</b><div style="font-weight:600">${esc(w.name)}</div>${mism?'<span class="pill p-itiraz">İsim uyuşmuyor</span> ':''}<button class="btn btn-sm" style="margin-top:4px" data-act="copy" data-v="${esc(w.name)}">Adı kopyala</button></td><td><div class="mono" style="font-size:12px;white-space:nowrap">${esc(fmtIban(w.iban))}</div><button class="btn btn-sm btn-primary" style="margin-top:4px" data-act="copy" data-v="${esc(String(w.iban).replace(/\s/g,''))}">IBAN kopyala</button></td><td><span class="pill p-${w.status==='bekliyor'?'bekliyor':w.status==='onaylandı'?'onay':'iade'}">${w.status}</span>${w.egp?`<div style="margin-top:6px"><span class="egp-badge">📄 ${esc(w.egp.no)}</span></div><div style="margin-top:4px"><button class="btn btn-sm" data-act="egp-view" data-id="${w.id}">Pusulayı Aç / PDF</button></div>`:w.status==='onaylandı'&&!w.taxpayer?`<div style="margin-top:6px"><button class="btn btn-sm btn-primary" data-act="egp-modal" data-id="${w.id}">+ e-Gider Pusulası Kes</button></div>`:''}</td><td class="num"><div class="hstack" style="flex-wrap:nowrap;justify-content:flex-end"><span><b>${TL(w.net!=null?w.net:w.amount)}</b>${(w.fee||w.stopaj)?`<div class="muted" style="font-size:11px">Brüt ${TL(w.amount)}${w.fee?' · Ücret '+TL(w.fee):''}${w.stopaj?' · Stopaj '+TL(w.stopaj):''}</div>`:''}</span><button class="btn btn-sm" data-act="copy" data-v="${(w.net!=null?w.net:w.amount).toFixed(2).replace('.',',')}">Kopyala</button></div></td><td class="wddesc-td"><div class="wddesc" title="${esc(desc)}">${esc(desc)}</div><button type="button" class="btn btn-sm btn-ok" style="margin-top:4px" data-act="copy" data-v="${esc(desc)}">📋 Açıklamayı Kopyala</button></td><td>${w.status==='bekliyor'?`<div class="wdact"><button class="btn btn-sm btn-ok" data-act="wd-ok" data-id="${w.id}">Gönderildi & Pusula Kes</button><button class="btn btn-sm" data-act="egp-modal" data-id="${w.id}">Önizle / Düzenle</button><button class="btn btn-sm btn-bad" data-act="wd-no" data-id="${w.id}">Reddet</button></div>`:w.status==='onaylandı'?`<div class="wdact"><button class="btn btn-sm" data-act="egp-view" data-id="${w.id}">📄 Belgeyi Gör</button><button class="btn btn-sm" data-act="egp-modal" data-id="${w.id}">Düzenle</button></div>`:''}</td></tr>`;
       }).join('')}</tbody></table><div id="egp_empty" class="empty" hidden>Aramanıza uygun e-Gider Pusulası veya çekim talebi bulunamadı.</div></div>
     </div>`;
   if(t==='reklam') b=`<div class="panel"><div class="panel-h"><h3>Paket fiyatları</h3><span class="muted" style="font-size:12px">1 gün / 7 gün / 30 gün</span></div><form class="panel-b stack" data-form="packs">${Object.entries(S.packs).map(([k,p])=>`<div class="row3" style="grid-template-columns:1.4fr repeat(4,1fr);align-items:end"><b>${p.name}</b><div class="fld"><label for="pk_${k}_cap">Aynı anda en fazla</label><input class="inp" type="number" id="pk_${k}_cap" value="${p.cap||1}" min="1"></div>${p.p.map((v,i)=>`<div class="fld"><label for="pk_${k}_${i}">${[1,7,30][i]} gün</label><input class="inp" type="number" id="pk_${k}_${i}" value="${v}" min="0"></div>`).join('')}</div>`).join('')}<div><button class="btn btn-primary btn-sm">Fiyatları kaydet</button></div></form></div>
@@ -3633,6 +3665,7 @@ function repFor(test){ const R={}; REVK.forEach(([x])=>R[x]=r2(S.revLog.filter(e
   R.wdReq=sum(g=>g.k==='cekim_talep'); R.wdPaid=sum(g=>g.k==='cekim_odendi'); R.wdPaidN=cnt(g=>g.k==='cekim_odendi'); R.wdRej=sum(g=>g.k==='cekim_red');
   R.sales=sum(g=>g.k==='satis'); R.salesN=cnt(g=>g.k==='satis'); R.fee=r2(G.filter(g=>g.k==='satis').reduce((s,g)=>s+(g.fee||0),0)); R.net=r2(R.sales-R.fee);
   R.refund=sum(g=>g.k==='iade'); R.epL=sum(g=>g.k==='ep'); R.epN=cnt(g=>g.k==='ep'); R.bx=sum(g=>g.k==='borsa'); R.bxCost=r2(G.filter(g=>g.k==='borsa').reduce((s,g)=>s+(g.cost||0),0));
+  R.stopaj=sum(g=>g.k==='stopaj_tahakkuk'); R.wdEgp=sum(g=>g.k==='cekim_odendi'&&!!(S.wd.find(w=>w.id===g.ref)||{}).egp);
   R.bonus=sum(g=>g.k==='bonus'); R.adj=sum(g=>g.k==='duzeltme'); R.kasa=r2(R.dep-R.wdPaid); R.G=G.slice().sort((a,b)=>a.t-b.t); return R; }
 const dayRep = k => repFor(t=>dkey(t)===k);
 const MOVCOLS=[{h:'Tarih',t:'dt'},{h:'İşlem'},{h:'Kullanıcı adı'},{h:'Ad soyad'},{h:'Telefon'},{h:'Yöntem / detay'},{h:'Bakiye türü'},{h:'Tutar',t:'money'},{h:'Komisyon / maliyet',t:'money'},{h:'Referans'}];
@@ -3645,7 +3678,7 @@ function repBook(X,a,b){ const test=t=>{const k=dkey(t); return k>=a&&k<=b;}; co
   W.section('Gelirler'); let r0=W.r+1; const tot=r0+REVK.length+1; W.table([{h:'Kalem'},{h:'Tutar',t:'money'},{h:'Pay',t:'pct'}],REVK.map(([x,nm],i)=>[nm,T[x],{f:`IF($B$${tot}=0,0,B${r0+i+1}/$B$${tot})`}]),{total:[1,2],totalLabel:'Toplam gelir'});
   W.section('Bakiye yüklemeleri'); W.table([{h:'Yöntem'},{h:'Adet',t:'int'},{h:'Tutar',t:'money'},{h:'Çekilebilir mi'}],DEPK.map(([k,nm])=>[nm,T['n_'+k],T['d_'+k],k==='eft'?'Evet':'Hayır']),{total:[1,2]});
   W.kv([['Çekilebilir bakiyeye giden (Havale/EFT)',T.depW],['Sadece alışveriş bakiyesine giden',T.depNW]]);
-  W.section('Para çekme'); W.table([{h:'Kalem'},{h:'Adet',t:'int'},{h:'Tutar',t:'money'}],[['Talep edilen',c('cekim_talep'),T.wdReq],["Ödenen (IBAN'a gönderilen)",c('cekim_odendi'),T.wdPaid],['Reddedilen (bakiyeye iade)',c('cekim_red'),T.wdRej]]);
+  W.section('Para çekme'); W.table([{h:'Kalem'},{h:'Adet',t:'int'},{h:'Tutar',t:'money'}],[['Talep edilen',c('cekim_talep'),T.wdReq],["Ödenen (IBAN'a gönderilen)",c('cekim_odendi'),T.wdPaid],['Reddedilen (bakiyeye iade)',c('cekim_red'),T.wdRej],['GV stopajı tahakkuku (ödenecek)',c('stopaj_tahakkuk'),T.stopaj]]);
   W.section('Pazar (üye ilanları)'); W.table([{h:'Kalem'},{h:'Adet',t:'int'},{h:'Tutar',t:'money'}],[['Tamamlanan satış hacmi',T.salesN,T.sales],['Kesilen komisyon','',T.fee],['Satıcılara aktarılan','',T.net],['Alıcılara iade',c('iade'),T.refund]]);
   W.section('EP ve Yang Borsası'); W.table([{h:'Kalem'},{h:'Adet',t:'int'},{h:'Tutar',t:'money'}],[['EP satışı',T.epN,T.epL],['Borsa teslimat cirosu',c('borsa'),T.bx],['Borsa satıcılara ödenen','',T.bxCost],['Borsa kârı','',r2(T.bx-T.bxCost)]]);
   W.section('Diğer'); W.table([{h:'Kalem'},{h:'Adet',t:'int'},{h:'Tutar',t:'money'}],[['Hediye / bonus bakiye (gider)',c('bonus'),T.bonus],['Yönetici bakiye düzeltmeleri',c('duzeltme'),T.adj]]);
@@ -3676,57 +3709,52 @@ function xlsUser(id){ const U=user(id); const f=finSum(id);
     return [['Ekstre',a1],['Bakiye hareketleri',W.done()]]; }); }
 function vMuhasebe(){ const k=ui.mDay||dkey(now()); const R=dayRep(k); const days=[...Array(14)].map((_,i)=>dkey(now()-i*D)); const neg=v=>v<0?'neg':'';
   const tbl=(rows,h)=>`<div class="tbl-w"><table class="tbl"><thead><tr>${h.map((x,i)=>`<th class="${i?'num':''}">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr class="${r[3]?'tot':''}">${r.slice(0,h.length).map((c,i)=>`<td class="${i?'num':''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-  const brutGiris = r2((R.dep||0) + (R.sales||0));
-  const giderPusulasiCikis = r2(R.wdPaid||0);
-  const vergiyeTabiKazan = r2(Math.max(0, R.gelir||0));
-  const vergiOrani = 0.25; // %25 Kurumlar Vergisi
-  const ciroVergisi = r2(brutGiris * vergiOrani);
-  const gercekVergi = r2(vergiyeTabiKazan * vergiOrani);
-  const netTasarruf = r2(Math.max(0, ciroVergisi - gercekVergi));
+  /* Vergi matrahı (tahmini) — yalnızca platformun KENDİ gelir ve giderleri:
+     Gelir  = S.rev / revLog kalemleri (komisyon, reklam, borsa kârı, EP satışı, doping, SMS, takas, çekim ücreti) = R.gelir
+     Gider  = platformun cebinden çıkan gerçek gider: hediye / bonus bakiye (R.bonus)
+     Matrah = Gelir − Gider
+     Bakiye yüklemeleri ve pazar satış hacmi üye emanetidir (gelir değildir; satışlar zaten yüklenen bakiyeden ödenir,
+     ikisini toplamak çift sayımdır). Ödenen çekimler bu emanetin üyeye iadesidir ve e-Gider Pusulası ile belgelenir;
+     gelir − gider hesabına ayrıca girmez. Kesilen GV stopajı üyeden alınıp vergi dairesine ödenecek borçtur (R.stopaj). */
+  const gelir = r2(R.gelir||0);
+  const gider = r2(R.bonus||0);
+  const matrah = r2(gelir - gider);
+  const vergiOrani = 0.25; // %25 Kurumlar Vergisi (tahmini)
+  const tahminiVergi = r2(Math.max(0, matrah) * vergiOrani);
+  const egpBelgeli = r2(R.wdEgp||0);
   return `<div class="panel panel-b stack" style="border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));background:linear-gradient(175deg,var(--gold-soft) 0%,var(--surface) 65%)">
     <div class="hstack" style="justify-content:space-between;flex-wrap:wrap;gap:12px">
       <div>
-        <div class="eyebrow" style="color:var(--neon-gold)">⚖️ MALİYE VERGİ MATRAHI VE RESMİ GİDER KALKANI (VUK MD. 234)</div>
-        <h2 style="margin:4px 0 6px;font-family:var(--f-display);letter-spacing:.02em">Vergi Matrahı: Gelir (Tahsilat) − Gider (e-Gider Pusulası) = Net Kâr</h2>
-        <p style="margin:0;font-size:13px;color:var(--muted);max-width:88ch;line-height:1.5">Şirket hesabına giren paranın tamamı ciro görünse de şirketinizin yasal kazancı yalnızca komisyondur. Kullanıcılara IBAN'a EFT/Havale yaparken kestiğiniz <b>e-Gider Pusulaları</b> en büyük resmi maliyetinizdir. e-Gider Pusulası düzenlemezseniz Maliye tüm ciro üzerinden vergi talep edebilir!</p>
+        <div class="eyebrow" style="color:var(--neon-gold)">⚖️ VERGİ MATRAHI ÖZETİ (TAHMİNİ) · ${dTR(k)}</div>
+        <h2 style="margin:4px 0 6px;font-family:var(--f-display);letter-spacing:.02em">Vergi Matrahı = Platform Geliri − Gider</h2>
+        <p style="margin:0;font-size:13px;color:var(--muted);max-width:88ch;line-height:1.5">Gelir yalnızca platformun kendi gelir kalemleridir (komisyon, reklam, borsa kârı, EP satışı, doping, SMS, takas, çekim ücreti). Bakiye yüklemeleri ve satış hacmi üye emanetidir, gelire eklenmez. Üyelere yapılan çekim ödemeleri <b>e-Gider Pusulası</b> ile belgelenir. Kesin hesap için mali müşavirinize danışın.</p>
       </div>
       <div class="hstack" style="gap:8px">
-        <button type="button" class="btn btn-primary" data-act="muhasebe-kit">📦 API Konsolu & Kodları Aç</button>
+        ${can('muhasebe')?'<button type="button" class="btn btn-primary" data-act="muhasebe-kit">📦 API Konsolu & Kodları Aç</button>':''}
         <button type="button" class="btn btn-ok" data-act="muhasebe-zip-dl">📥 .ZIP İndir</button>
       </div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px">
       <div class="kpi" style="border-left:4px solid var(--accent)">
-        <small style="color:var(--accent);font-weight:700">1. GELİR (CİRO & TAHSİLAT)</small>
-        <b class="mono" style="font-size:20px">${TL(brutGiris)}</b>
-        <span class="muted" style="font-size:11.5px">PayTR Sanal POS & Havale yüklemeleri</span>
+        <small style="color:var(--accent);font-weight:700">1. GELİR (PLATFORM GELİRİ)</small>
+        <b class="mono" style="font-size:20px">${TL(gelir)}</b>
+        <span class="muted" style="font-size:11.5px">Komisyon, reklam, borsa, EP, doping, SMS, takas, çekim ücreti</span>
       </div>
       <div class="kpi" style="border-left:4px solid var(--ok);background:var(--ok-soft)">
-        <small style="color:var(--ok);font-weight:700">2. GİDER (E-GİDER PUSULALARI)</small>
-        <b class="mono" style="font-size:20px;color:var(--ok)">− ${TL(giderPusulasiCikis)}</b>
-        <span class="muted" style="font-size:11.5px">Kullanıcı IBAN'larına resmi çıkışlar</span>
+        <small style="color:var(--ok);font-weight:700">2. GİDER</small>
+        <b class="mono" style="font-size:20px;color:var(--ok)">− ${TL(gider)}</b>
+        <span class="muted" style="font-size:11.5px">Hediye / bonus bakiye</span>
       </div>
       <div class="kpi hl" style="border-left:4px solid var(--neon-gold)">
-        <small style="color:var(--neon-gold);font-weight:700">3. VERGİYE TABİ MATRAH</small>
-        <b class="mono" style="font-size:20px;color:var(--neon-gold)">${TL(vergiyeTabiKazan)}</b>
-        <span class="muted" style="font-size:11.5px">Net komisyon kazancı (Gelir − Gider)</span>
+        <small style="color:var(--neon-gold);font-weight:700">3. VERGİ MATRAHI</small>
+        <b class="mono ${neg(matrah)}" style="font-size:20px;color:var(--neon-gold)">${TL(matrah)}</b>
+        <span class="muted" style="font-size:11.5px">Gelir − Gider · tahmini %25 KV: ${TL(tahminiVergi)}</span>
       </div>
       <div class="kpi" style="border-left:4px solid var(--neon-purple);background:color-mix(in srgb,var(--neon-purple) 9%,var(--surface))">
-        <small style="color:var(--neon-purple);font-weight:700">4. KURTARILAN HAKSIZ VERGİ</small>
-        <b class="mono" style="font-size:20px;color:var(--neon-purple)">+ ${TL(netTasarruf)}</b>
-        <span class="muted" style="font-size:11.5px">Gider pusulası ile kasada kalan kâr</span>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
-      <div style="background:var(--bad-soft);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent);border-radius:10px;padding:12px 14px">
-        <b style="color:var(--bad);font-size:13px;display:flex;align-items:center;gap:6px">⚠️ e-Gider Pusulası Kesilmezse (Büyük Risk)</b>
-        <div style="font-size:12px;color:var(--fg);margin-top:6px;line-height:1.45">Maliye banka hesabına giren paranın tamamını (<b>${TL(brutGiris)}</b>) şirket hasılatı sayar. Kullanıcılara gönderdiğiniz para gider kabul edilmez. %25 Kurumlar Vergisi istendiğinde <b>${TL(ciroVergisi)}</b> haksız vergi çıkar!</div>
-      </div>
-      <div style="background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 35%,transparent);border-radius:10px;padding:12px 14px">
-        <b style="color:var(--ok);font-size:13px;display:flex;align-items:center;gap:6px">🛡️ e-Gider Pusulası Kesildiğinde (Yasal Zırh)</b>
-        <div style="font-size:12px;color:var(--fg);margin-top:6px;line-height:1.45">Bankadan çıkan <b>${TL(giderPusulasiCikis)}</b> resmi maliyet yazılır. Şirketiniz yalnızca komisyon kazancı olan <b>${TL(vergiyeTabiKazan)}</b> üzerinden vergi öder (<b>${TL(gercekVergi)}</b>). Şirketiniz <b>${TL(netTasarruf)}</b> tasarruf eder.</div>
+        <small style="color:var(--neon-purple);font-weight:700">4. E-GİDER PUSULASI İLE BELGELENEN ÖDEME</small>
+        <b class="mono" style="font-size:20px;color:var(--neon-purple)">${TL(egpBelgeli)}</b>
+        <span class="muted" style="font-size:11.5px">Üyelere ödenen çekim (emanet iadesi) · GV stopajı tahakkuku ${TL(R.stopaj||0)}</span>
       </div>
     </div>
 
@@ -3750,7 +3778,7 @@ function vMuhasebe(){ const k=ui.mDay||dkey(now()); const R=dayRep(k); const day
   <div class="kpis"><div class="kpi hl"><small>${dTR(k)} toplam gelir</small><b>${TL(R.gelir)}</b></div><div class="kpi hl"><small>Komisyon geliri</small><b>${TL(R.commission)}</b></div><div class="kpi"><small>Bakiye yükleme</small><b>${TL(R.dep)}</b><span class="muted" style="font-size:11.5px">${R.depN} işlem · havale/EFT ${TL(R.d_eft)}</span></div><div class="kpi"><small>Ödenen çekim</small><b>${TL(R.wdPaid)}</b></div><div class="kpi"><small>Satış hacmi</small><b>${TL(R.sales)}</b><span class="muted" style="font-size:11.5px">${R.salesN} sipariş</span></div><div class="kpi"><small>Net kasa</small><b class="${neg(R.kasa)}">${TL(R.kasa)}</b><span class="muted" style="font-size:11.5px">yükleme − ödenen çekim</span></div></div>
   <div class="mgrid"><div class="panel"><div class="panel-h"><h3>Gelirler</h3></div>${tbl([...REVK.map(([x,n])=>[n,TL(R[x])]),['<b>Toplam gelir</b>',`<b>${TL(R.gelir)}</b>`,'',1]],['Kalem','Tutar'])}</div>
     <div class="panel"><div class="panel-h"><h3>Bakiye yüklemeleri</h3></div>${tbl([...DEPK.map(([c,n])=>[n,R['n_'+c],TL(R['d_'+c])]),['<b>Toplam</b>',R.depN,`<b>${TL(R.dep)}</b>`,1],['Çekilebilir (havale/EFT)','',TL(R.depW)],['Çekilemez','',TL(R.depNW)]],['Yöntem','Adet','Tutar'])}</div>
-    <div class="panel"><div class="panel-h"><h3>Çekim, pazar ve diğer</h3></div>${tbl([['Çekim talebi',TL(R.wdReq)],['Ödenen çekim',TL(R.wdPaid)],['Reddedilen çekim',TL(R.wdRej)],['Satış hacmi',TL(R.sales)],['Kesilen komisyon',TL(R.fee)],['Satıcılara aktarılan',TL(R.net)],['İadeler',TL(R.refund)],['EP satışı ('+R.epN+')',TL(R.epL)],['Borsa cirosu',TL(R.bx)],['Bonus gideri',TL(R.bonus)],['Yönetici düzeltmesi',TL(R.adj)]],['Kalem','Tutar'])}</div></div>
+    <div class="panel"><div class="panel-h"><h3>Çekim, pazar ve diğer</h3></div>${tbl([['Çekim talebi',TL(R.wdReq)],['Ödenen çekim',TL(R.wdPaid)],['Reddedilen çekim',TL(R.wdRej)],['GV stopajı tahakkuku (ödenecek)',TL(R.stopaj)],['Satış hacmi',TL(R.sales)],['Kesilen komisyon',TL(R.fee)],['Satıcılara aktarılan',TL(R.net)],['İadeler',TL(R.refund)],['EP satışı ('+R.epN+')',TL(R.epL)],['Borsa cirosu',TL(R.bx)],['Bonus gideri',TL(R.bonus)],['Yönetici düzeltmesi',TL(R.adj)]],['Kalem','Tutar'])}</div></div>
   <div class="panel"><div class="panel-h"><h3>${dTR(k)} para hareketleri</h3><span class="muted" style="font-size:12px">${R.G.length} kayıt</span></div>${R.G.length?`<div class="tbl-w"><table class="tbl"><thead><tr><th>Saat</th><th>İşlem</th><th>Üye</th><th>Yöntem / detay</th><th class="num">Tutar</th></tr></thead><tbody>${R.G.map(g=>`<tr><td class="mono">${hhmm(g.t)}</td><td>${LKN[g.k]||g.k}${g.k==='yukleme'?` <span class="chip ${g.w?'ok':''}">${g.w?'çekilebilir':'alışveriş'}</span>`:''}</td><td>${uCellS(user(g.u))}</td><td>${esc(g.m||g.note||'')}${g.fee!=null?` · komisyon ${TL(g.fee)}`:''}</td><td class="num ${['cekim_talep','cekim_odendi'].includes(g.k)?'neg':''}">${['cekim_talep','cekim_odendi'].includes(g.k)?'−':''}${TL(Math.abs(g.a))}</td></tr>`).join('')}</tbody></table></div>`:emptyBox('Bu günde para hareketi yok','')}</div>
   <div class="panel"><div class="panel-h"><h3>Günlük raporlar</h3><span class="muted" style="font-size:12px">Son 14 gün · her gün otomatik hazırlanır</span></div><div class="tbl-w"><table class="tbl"><thead><tr><th>Tarih</th><th class="num">Toplam gelir</th><th class="num">Komisyon</th><th class="num">Havale/EFT</th><th class="num">Kart</th><th class="num">Ödenen çekim</th><th class="num">Satış hacmi</th><th></th></tr></thead><tbody>${days.map(d=>{const r=dayRep(d); return `<tr class="${d===k?'mine':''}"><td><b>${dTR(d)}</b>${d===dkey(now())?' <span class="chip">bugün</span>':''}</td><td class="num">${TL(r.gelir)}</td><td class="num">${TL(r.commission)}</td><td class="num">${TL(r.d_eft)}</td><td class="num">${TL(r.d_kart)}</td><td class="num">${TL(r.wdPaid)}</td><td class="num">${TL(r.sales)}</td><td><div class="hstack" style="flex-wrap:nowrap"><button class="btn btn-sm" data-act="mday" data-k="${d}">Görüntüle</button><button class="btn btn-sm btn-primary" data-act="xls-day" data-k="${d}">Excel</button></div></td></tr>`}).join('')}</tbody></table></div></div>`; }
 function bkDB(){ return new Promise((res,rej)=>{ try{ const r=indexedDB.open('yangpazar_yedek',1); r.onupgradeneeded=()=>{ r.result.createObjectStore('m'); r.result.createObjectStore('d'); }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);}catch(e){rej(e)} }); }
@@ -4170,7 +4198,7 @@ $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 $tutar = (float)($input['tutar'] ?? 0);
 $iban = strtoupper(str_replace(' ', '', trim($input['iban'] ?? '')));
 $banka = trim($input['banka'] ?? 'Banka');
-$hesapSahibi = trim($input['hesap_sahibi'] ?? 'Deniz Kaya');
+$hesapSahibi = trim($input['hesap_sahibi'] ?? '');
 $isTaxPayer = !empty($input['vergi_mukellefi']);
 $stopajOrani = $isTaxPayer ? 0 : EGP_STOPAJ_ORANI;
 $stopajTutari = round($tutar * $stopajOrani / 100, 2);
@@ -4188,13 +4216,15 @@ echo json_encode([
 `;
 
 const CEKIM_ONAYLA_PHP = String.raw`<?php
+// TASLAK — üretimde kullanmadan önce kimlik doğrulama, CSRF ve PayTR hash doğrulaması eklenmelidir.
 // Adım 3: Yönetici Onayı -> e-Gider Pusulasını Resmileştirme & Şirket Bankasından IBAN'a Otomatik Transfer
 require_once __DIR__ . '/config.php';
 header('Content-Type: application/json; charset=utf-8');
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 $cekimId = $input['cekim_id'] ?? 'w0';
 $resmiBelgeNo = $input['belge_no'] ?? (EGP_SERI . date('Y') . rand(100000000, 999999999));
-$bankaAciklama = "YangPazar e-Gider Pusulasi No: {$resmiBelgeNo} - Deniz Kaya";
+$adSoyad = trim($input['ad_soyad'] ?? ''); // üyenin sistemde kayıtlı ad soyadı
+$bankaAciklama = "YangPazar e-Gider Pusulasi No: {$resmiBelgeNo} - {$adSoyad}";
 echo json_encode([
     'ok' => true,
     'cekim_id' => $cekimId,
@@ -4206,6 +4236,7 @@ echo json_encode([
 `;
 
 const PAYTR_HAKEDIS_PHP = String.raw`<?php
+// TASLAK — üretimde kullanmadan önce kimlik doğrulama, CSRF ve PayTR hash doğrulaması eklenmelidir.
 // Giriş Tarafı (Tahsilat): PayTR Hakediş Bildirimi & Ön Muhasebeye Satış Hasılatı / Komisyon Kaydı
 require_once __DIR__ . '/config.php';
 header('Content-Type: application/json; charset=utf-8');
@@ -4580,7 +4611,7 @@ const ACT={
     toast('yangpazar-muhasebe-api.zip indirildi.');
   },
   'muhasebe-kit':async()=>{
-    if(!can('muhasebe')&&!can('ayar')) return;
+    if(!can('muhasebe')) return;
     try {
       const z = (window.zipDeflate ? await zipDeflate(muhasebeFiles()) : zipFiles(muhasebeFiles()));
       await saveFile('yangpazar-muhasebe-api.zip', new Blob([z], {type:'application/zip'}));
@@ -4591,7 +4622,7 @@ const ACT={
   },
   'tc-kit':async()=>{ if(!can('odeme')&&!can('uye')) return; await saveFile('yangpazar-tc-dogrulama.zip',new Blob([tcKit()],{type:'application/zip'})); },
   'paytr-ok':(d)=>{const g=S.gws.find(x=>x.id===d.g); creditDeposit(g,+d.a,+d.b,d.c);},
-  'wd-ok':(d)=>{const w=S.wd.find(x=>x.id===d.id); if(!w) return; w.status='onaylandı'; w.pt=now(); if(egpCfg().autoOnApprove!==false && !w.taxpayer && !w.egp) issueEgp(w); const net=w.net!=null?w.net:w.amount; ledger('cekim_odendi',w.u,net,{m:(w.bank||'')+' · '+w.iban+(w.egp?' · e-Gider Pusulası: '+w.egp.no:'')+(w.fee?' · ücret '+TL(w.fee):''),ref:w.id}); if(w.fee) addRev('cekim',w.fee); notify(w.u,`${TL(net)} çekim talebiniz IBAN'ınıza gönderildi.${w.egp?' Adınıza '+w.egp.no+' nolu e-Gider Pusulası düzenlendi.':''}`,'#hesabim','withdraw',{tutar:TL(net)}); save(); toast(w.egp?`Ödeme onaylandı ve ${w.egp.no} nolu e-Gider Pusulası kesildi.`:`Ödeme gönderildi olarak işaretlendi.`); render();},
+  'wd-ok':(d)=>{const w=S.wd.find(x=>x.id===d.id); if(!w||w.status!=='bekliyor') return; w.status='onaylandı'; w.pt=now(); if(egpCfg().autoOnApprove!==false && !w.taxpayer && !w.egp) issueEgp(w); const net=wdPaidBook(w); notify(w.u,`${TL(net)} çekim talebiniz IBAN'ınıza gönderildi.${w.egp?' Adınıza '+w.egp.no+' nolu e-Gider Pusulası düzenlendi.':''}`,'#hesabim','withdraw',{tutar:TL(net)}); save(); toast(w.egp?`Ödeme onaylandı ve ${w.egp.no} nolu e-Gider Pusulası kesildi.`:`Ödeme gönderildi olarak işaretlendi.`); render();},
   'egp-view':(d)=>mEgpView(d.id),
   'egp-modal':(d)=>mEgpModal(d.id),
   'egp-q-clear':()=>{ ui.egpQ=''; const i=$('#egp_q'); if(i){ i.value=''; } egpApply(''); },
@@ -4602,7 +4633,7 @@ const ACT={
     const w=S.wd.find(x=>{ const g=x.egp||{}; return sqNorm(g.no)===q||sqNorm(g.no).includes(q)||sqNorm(g.ettn)===q||sqNorm(x.id)===q; });
     if(w) mEgpView(w.id); else toast('Bu numaraya ait e-Gider Pusulası bulunamadı.',true);
   },
-  'egp-dl':async(d)=>{ const w=S.wd.find(x=>x.id===d.id); if(!w) return; if(!w.egp) issueEgp(w); const docHtml=`<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>e-Gider Pusulası - ${esc(w.egp.no)}</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f1f5f9;margin:0;padding:24px;color:#0f172a}.wrap{max-width:820px;margin:0 auto}${extra_css}.mono{font-family:ui-monospace,Menlo,Consolas,monospace}@media print{body{background:#fff;padding:0}.no-print{display:none!important}.egp-doc{box-shadow:none;border:0}}</style></head><body><div class="wrap"><div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><button onclick="window.print()" style="padding:10px 18px;border-radius:8px;border:0;background:#0284c7;color:#fff;font-weight:700;cursor:pointer">🖨️ Yazdır / PDF Olarak Kaydet</button><span style="font-size:12.5px;color:#475569">GİB e-Belge · ${esc(w.egp.no)}</span></div>${egpDocHtml(w)}</div></body></html>`; await saveFile(`e-gider-pusulasi-${w.egp.no}.html`, new Blob([docHtml],{type:'text/html;charset=utf-8'})); toast(`${w.egp.no} nolu e-Gider Pusulası indirildi.`); },
+  'egp-dl':async(d)=>{ const w=S.wd.find(x=>x.id===d.id); if(!w) return; if(!w.egp) return toast('Bu çekim için henüz e-Gider Pusulası kesilmedi.',true); const extra_css=egpCss(); const docHtml=`<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>e-Gider Pusulası - ${esc(w.egp.no)}</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f1f5f9;margin:0;padding:24px;color:#0f172a}.wrap{max-width:820px;margin:0 auto}${extra_css}.mono{font-family:ui-monospace,Menlo,Consolas,monospace}@media print{body{background:#fff;padding:0}.no-print{display:none!important}.egp-doc{box-shadow:none;border:0}}</style></head><body><div class="wrap"><div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><button onclick="window.print()" style="padding:10px 18px;border-radius:8px;border:0;background:#0284c7;color:#fff;font-weight:700;cursor:pointer">🖨️ Yazdır / PDF Olarak Kaydet</button><span style="font-size:12.5px;color:#475569">GİB e-Belge · ${esc(w.egp.no)}</span></div>${egpDocHtml(w)}</div></body></html>`; await saveFile(`e-gider-pusulasi-${w.egp.no}.html`, new Blob([docHtml],{type:'text/html;charset=utf-8'})); toast(`${w.egp.no} nolu e-Gider Pusulası indirildi.`); },
   'wd-no':(d)=>{const w=S.wd.find(x=>x.id===d.id); w.status='reddedildi'; const u=user(w.u); u.bal=r2(u.bal+w.amount); notify(u.id,`Çekim talebiniz reddedildi, ${TL(w.amount)} bakiyenize iade edildi.`,'#hesabim','withdraw_no',{tutar:TL(w.amount),durum:w.why||w.note||'Hesap bilgileri uyuşmuyor veya eksik'}); addTx(u.id,'Çekim talebi reddedildi, iade',w.amount); ledger('cekim_red',u.id,w.amount,{m:w.bank||'',ref:w.id}); notify(u.id,'Çekim talebiniz reddedildi, tutar bakiyenize iade edildi.','#hesabim'); save(); render();},
   'ad-toggle':(d)=>{const a=S.ads.find(x=>x.id===d.id); a.active=!a.active; save(); render();},
   'ad-ext':(d)=>{const a=S.ads.find(x=>x.id===d.id); a.until=Math.max(a.until,now())+7*D; a.active=true; save(); toast('Reklam 7 gün uzatıldı.'); render();},
@@ -4681,14 +4712,14 @@ const FORM={
     u.ibans=u.ibans||[]; const sel=(document.querySelector('input[name=wiban]:checked')||{}).value; let bk;
     if(sel&&sel!=='_new'){ bk=u.ibans.find(x=>x.id===sel); if(!bk) return toast('IBAN seçin.',true); }
     else { const ib=v_('w_iban').replace(/\s/g,'').toUpperCase(); if(!/^TR\d{24}$/.test(ib)) return toast('IBAN TR ile başlamalı ve 26 karakter olmalı.',true); const nm=v_('w_name').trim(); if(!nm) return toast('Hesap sahibinin adını yazın.',true); bk={id:uid('ib'),bank:v_('w_bank'),name:nm,iban:ib}; if($('#w_save')&&$('#w_save').checked&&!u.ibans.some(x=>x.iban===ib)) u.ibans.push(bk); }
-    const taxpayer=(document.querySelector('input[name=wtax]:checked')||{}).value==='1';
-    const brk=wdBreakdown(a, !taxpayer); if(brk.net<=0) return toast('Tutar işlem ücreti ve kesintilerden büyük olmalı.',true);
+    const taxpayer=false; // vergi mükellefi seçeneği kaldırıldı: her çekimde e-Gider Pusulası kesilir
+    const brk=wdBreakdown(a, true); if(brk.net<=0) return toast('Tutar işlem ücreti ve kesintilerden büyük olmalı.',true);
     u.bal=r2(u.bal-a);
     S.wd.unshift({id:uid('w'),u:u.id,amount:a,fee:brk.fee,brut:brk.brut,stopajPct:brk.stopajPct,stopaj:brk.stopaj,net:brk.net,taxpayer,iban:fmtIban(bk.iban),bank:bk.bank,name:bk.name,status:'bekliyor',t:now()});
-    addTx(u.id,'Para çekme talebi · '+bk.bank+(taxpayer?'':' (e-Gider Pusulalı)'),-a);
-    ledger('cekim_talep',u.id,a,{m:bk.bank+(taxpayer?'':' · e-Gider Pusulalı'),ref:S.wd[0].id});
-    notify(u.id,`${TL(brk.net)} net çekim talebiniz alındı.${taxpayer?'':' Ödeme aşamasında adınıza e-Gider Pusulası düzenlenecektir.'}`,'#hesabim','withdraw_req',{tutar:TL(brk.net)});
-    save(); toast(`Çekim talebiniz alındı. IBAN'ınıza net ${TL(brk.net)} gönderilecek ve ${taxpayer?'fatura':'e-Gider Pusulası'} işlenecektir.`); render();},
+    addTx(u.id,'Para çekme talebi · '+bk.bank+' (e-Gider Pusulalı)',-a);
+    ledger('cekim_talep',u.id,a,{m:bk.bank+' · e-Gider Pusulalı',ref:S.wd[0].id});
+    notify(u.id,`${TL(brk.net)} net çekim talebiniz alındı. Ödeme aşamasında adınıza e-Gider Pusulası düzenlenecektir.`,'#hesabim','withdraw_req',{tutar:TL(brk.net)});
+    save(); toast(`Çekim talebiniz alındı. IBAN'ınıza net ${TL(brk.net)} gönderilecek ve e-Gider Pusulası işlenecektir.`); render();},
   egpset:()=>{ const E=egpCfg(); E.company=v_('egp_comp').trim()||E.company; E.vd=v_('egp_vd').trim()||E.vd; E.vkn=v_('egp_vkn').trim()||E.vkn; E.seri=(v_('egp_seri').trim()||'YGP').toUpperCase(); E.stopaj=Math.max(0,Math.min(40,+v_('egp_stopaj')||0)); E.provider=v_('egp_prov')||E.provider; E.descTpl=v_('egp_desc').trim()||E.descTpl; E.autoOnApprove=$('#egp_auto').checked; save(); toast('e-Gider Pusulası ayarları kaydedildi.'); render(); },
   egplookup:(f)=>{
     const q=sqNorm(v_('m_egp_find'));
@@ -4696,7 +4727,7 @@ const FORM={
     const w=S.wd.find(x=>{ const g=x.egp||{}; return sqNorm(g.no)===q||sqNorm(g.no).includes(q)||sqNorm(g.ettn)===q||sqNorm(x.id)===q; });
     if(w) mEgpView(w.id); else toast('Belge numarası eşleşen e-Gider Pusulası bulunamadı.',true);
   },
-  egpissue:(f)=>{ const w=S.wd.find(x=>x.id===f.dataset.id); if(!w) return; w.name=v_('egi_name').trim()||w.name; const stPct=Math.max(0,Math.min(40,+v_('egi_st')||0)); const wasPending=w.status==='bekliyor'; if(wasPending){ w.status='onaylandı'; w.pt=now(); } issueEgp(w,{tckn:v_('egi_tckn').trim(),stopajPct:stPct,desc:v_('egi_desc').trim()}); if(wasPending){ ledger('cekim_odendi',w.u,w.net,{m:(w.bank||'')+' · '+w.iban+' · e-Gider Pusulası: '+w.egp.no,ref:w.id}); if(w.fee) addRev('cekim',w.fee); notify(w.u,`${TL(w.net)} çekim talebiniz IBAN'ınıza gönderildi ve ${w.egp.no} nolu e-Gider Pusulanız oluşturuldu.`,'#hesabim','withdraw',{tutar:TL(w.net)}); } save(); closeModal(); toast(`${w.egp.no} nolu e-Gider Pusulası oluşturuldu.`); render(); mEgpView(w.id); },
+  egpissue:(f)=>{ const w=S.wd.find(x=>x.id===f.dataset.id); if(!w) return; const wasPending=w.status==='bekliyor', wasIssued=!!w.egp; const opts={desc:v_('egi_desc').trim(), lockAmounts:!wasPending}; if(wasPending){ opts.stopajPct=Math.max(0,Math.min(40,+v_('egi_st')||0)); w.status='onaylandı'; w.pt=now(); } issueEgp(w,opts); if(wasPending){ wdPaidBook(w); notify(w.u,`${TL(w.net)} çekim talebiniz IBAN'ınıza gönderildi ve ${w.egp.no} nolu e-Gider Pusulanız oluşturuldu.`,'#hesabim','withdraw',{tutar:TL(w.net)}); } save(); closeModal(); toast(`${w.egp.no} nolu e-Gider Pusulası ${wasIssued?'güncellendi':'oluşturuldu'}.`); render(); mEgpView(w.id); },
   ibanadd:()=>{const u=me(); const ib=v_('ia_i').replace(/\s/g,'').toUpperCase(); if(!/^TR\d{24}$/.test(ib)) return toast('IBAN TR ile başlamalı ve 26 karakter olmalı.',true); u.ibans=u.ibans||[]; if(u.ibans.some(x=>x.iban===ib)) return toast('Bu IBAN zaten kayıtlı.',true); u.ibans.push({id:uid('ib'),bank:v_('ia_b'),name:v_('ia_n').trim(),iban:ib}); save(); toast('IBAN kaydedildi.'); render();},
   epbuy:(f)=>{const u=me(); const p=S.epProducts.find(x=>x.id===f.dataset.id); if(!p||!p.on||!p.codes.length) return toast('Bu ürün tükendi.',true); if(avail(u)<p.price) return toast('Bakiye yetersiz.',true);
     const paid=spend(u,p.price); const hh=hhOn()&&!!p.hh; const o={id:'EP'+(++S.epSeq),u:u.id,pid:p.id,ep:p.ep,epShown:epAmt(p),hh,code:p.codes.shift(),price:p.price,paid,t:now()}; p.soldN=(p.soldN||0)+1; S.epOrders.unshift(o); track('ep',{value:p.price,transaction_id:o.id});
@@ -4855,7 +4886,7 @@ const CHG={
   cnet:(el)=>{ ui.cnet=el.value; const n=S.cryptoNets.find(x=>x.id===el.value); const b=$('#cAddr'); if(b) b.innerHTML=cAddrHtml(n); },
   bksrv:(el)=>{ ui.bkSrv=el.value; render(); },
   tplprev:(el)=>{ const m=$('#tpv_m'); if(m&&$('#tp_ms')) m.innerHTML=mailPreview(v_('tp_ms'),$('#tp_mb').value); const sv=$('#tpv_s'); if(sv&&$('#tp_sb')) sv.innerHTML=smsPreview($('#tp_sb').value); },
-  wdcalc:()=>{ const inp=$('#w_amt'); const a=Math.max(0,+(inp&&inp.value)||0); const taxpayer=(document.querySelector('input[name=wtax]:checked')||{}).value==='1'; const brk=wdBreakdown(a,!taxpayer); const set=(id,v)=>{ const e=$('#'+id); if(e) e.textContent=v; }; set('wd_a',TL(a)); set('wd_f',S.set.wdFee&&S.set.wdFee.on?TL(brk.fee):'Ücretsiz'); set('wd_st',taxpayer?'Muaf (Faturalı)':(brk.stopajPct?`%${brk.stopajPct} (${TL(brk.stopaj)})`:`${TL(0)} (%0)`)); set('wd_n',TL(brk.net)); },
+  wdcalc:()=>{ const inp=$('#w_amt'); const a=Math.max(0,+(inp&&inp.value)||0); const taxpayer=false; const brk=wdBreakdown(a,true); const set=(id,v)=>{ const e=$('#'+id); if(e) e.textContent=v; }; set('wd_a',TL(a)); set('wd_f',S.set.wdFee&&S.set.wdFee.on?TL(brk.fee):'Ücretsiz'); set('wd_st',taxpayer?'Muaf (Faturalı)':(brk.stopajPct?`%${brk.stopajPct} (${TL(brk.stopaj)})`:`${TL(0)} (%0)`)); set('wd_n',TL(brk.net)); },
   egicalc:(el)=>{ const brut=+el.dataset.brut||0, pct=Math.max(0,Math.min(40,+el.value||0)), net=r2(brut-r2(brut*pct/100)); const n=$('#egi_net'); if(n) n.value=TL(net); },
   mailprev:(el)=>{ const ks=el.dataset.k?[el.dataset.k]:Object.keys(MAILEV); if(!el.dataset.k){ S.mail.fromName=v_('ml_fn'); S.mail.from=v_('ml_fr'); } ks.forEach(k=>{ const b=$('#mpv_'+k); if(b) b.innerHTML=mailPreview(v_('ml_s_'+k),$('#ml_b_'+k).value); }); },
   srvsec:(el)=>{ const p=el.dataset.p; const t=$('#'+p+'_srv'); if(t){ t.innerHTML=srvOpts(el.value,null,SRVOPT[p]||{}); t.dispatchEvent(new Event('change',{bubbles:true})); } },
