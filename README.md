@@ -1,10 +1,11 @@
-# İtemHan Pazaryeri
+# yangpazar.com
 
-Metin2 ve diğer oyunlar için item / yang / hesap pazaryeri arayüzü (tek dosyalık HTML uygulaması).
+Metin2 Yang, Won, EP ve İtem pazaryeri arayüzü (tek dosyalık HTML uygulaması). Proje geliştirme aşamasındadır.
 
-- Kaynak: Claude artifact — https://claude.ai/artifact/XzP2U5EtEEjbzwzxfc4oXn
 - Çalıştırmak için `index.html` dosyasını tarayıcıda açman yeterli.
+- İlk sürüm kaynağı (İtemHan Pazaryeri): https://claude.ai/artifact/XzP2U5EtEEjbzwzxfc4oXn
 
 > Not: Sayfa bazı yerlerde Claude artifact çalışma zamanına (`window.claude`) dayanıyor;
-> artifact dışında açıldığında bu özellikler (indirme vb.) devre dışı kalabilir.
-> Ödeme anahtarları ve cüzdan adresleri demo/boş değerlerdir.
+> artifact dışında açıldığında bu özellikler devre dışı kalabilir.
+> Ödeme anahtarları, IBAN, VKN, telefon ve cüzdan bilgileri demo değerlerdir.
+> e-Gider Pusulası belgeleri tarayıcıda üretilen örneklerdir; gerçek GİB/entegratör bağlantısı yoktur.
