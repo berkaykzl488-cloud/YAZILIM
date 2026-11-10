@@ -1,2 +1,9 @@
 dist/
 tests/snapshot/out/
+# çalışma zamanı verisi (sırlar, loglar, yedekler, yüklemeler) asla repoya girmez
+storage/*
+!storage/.htaccess
+!storage/index.php
+uploads/*
+!uploads/.htaccess
+!uploads/index.php
