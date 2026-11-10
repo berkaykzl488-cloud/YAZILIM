@@ -1,0 +1,76 @@
+YANGPAZAR ÖDEME VE MUHASEBE BAĞLANTISI · KURULUM (3 ADIM)
+==========================================================
+
+Hiçbir dosyayı açıp düzenlemenize gerek yok. Bütün bilgiler sitenizin
+yönetim panelinden girilir ve sunucuda şifreli olarak saklanır.
+
+
+1. ADIM · Dosyaları hostinge yükleyin (5 dakika)
+-------------------------------------------------
+  1) Hosting panelinize (cPanel) girin ve "Dosya Yöneticisi"ni açın.
+  2) Sitenizin ana klasörüne gidin (genellikle "public_html").
+  3) Üstteki "Yükle" düğmesiyle yangpazar-api.zip dosyasını yükleyin.
+  4) Yüklenen zip dosyasına sağ tıklayın → "Ayıkla" (Extract) deyin.
+     Sonunda public_html içinde "api" adında bir klasör görmelisiniz.
+  5) Zip dosyasını silebilirsiniz.
+
+  Kontrol: Tarayıcıda https://siteniz.com/api/durum.php adresini açın.
+  İçinde "ok":true yazan bir satır görüyorsanız bu adım tamamdır.
+
+
+2. ADIM · Panelden kurulumu tamamlayın ve PayTR bilgilerini girin
+------------------------------------------------------------------
+  1) Sitenizi açın → Yönetim › Entegrasyonlar sayfasına gidin.
+  2) "Kurulumu tamamla" kartında:
+       - Kendinize bir API şifresi belirleyin (en az 10 karakter).
+         Bu şifreyi bir yere not edin; panele her girişte sorulur.
+       - Site adresinizi yazın (ör. https://yangpazar.com).
+     "Kurulumu tamamla" düğmesine basın.
+     (Kurulum yalnızca bir kez yapılır; sonra kimse tekrar kurulum yapamaz.)
+  3) PayTR kartına şu üç bilgiyi girin. Bunlar PayTR Mağaza Paneli'nde
+     "Bilgi" sayfasında yazar:
+       - Mağaza No
+       - Mağaza Parola
+       - Mağaza Gizli Anahtar
+  4) ÖNCE "Test modu" açık kalsın. "Kaydet"e, ardından
+     "Bağlantıyı test et"e basın. "Bağlı ✓" görmelisiniz.
+     Hata çıkarsa ekrandaki PayTR mesajını okuyun (genellikle bilgilerden
+     biri yanlış yazılmıştır).
+  5) Test kartıyla küçük bir deneme ödemesi yapın. Her şey yolundaysa
+     "Test modu"nu kapatıp "Kaydet"e basın; artık CANLI ödemeler alınır.
+
+  Paraşüt veya Bizim Hesap kullanıyorsanız aynı sayfadaki kartlarına
+  bilgilerinizi girip yine "Kaydet" ve "Bağlantıyı test et" yapın.
+  Gizli alanlar kaydedildikten sonra yıldızlı görünür; değiştirmek
+  istemiyorsanız boş bırakmanız yeterlidir, eski değer korunur.
+
+
+3. ADIM · PayTR Mağaza Paneli'ne Bildirim adresini yapıştırın
+-------------------------------------------------------------
+  1) Entegrasyonlar sayfasındaki "PayTR panelinde yapman gereken tek şey"
+     kutusunda Bildirim URL'si yazar
+     (ör. https://siteniz.com/api/paytr_bildirim.php). "Kopyala"ya basın.
+  2) PayTR Mağaza Paneli › Destek & Kurulum › Ayarlar › "Bildirim URL"
+     alanına yapıştırıp kaydedin.
+     Bu adım yapılmazsa ödemeler sitenize "tamamlandı" olarak düşmez.
+
+
+İSTEĞE BAĞLI · Otomatik hakediş (her saat çalışan görev)
+--------------------------------------------------------
+  Entegrasyonlar sayfasındaki "Otomatik hakediş (cron)" kutusundaki
+  adresi kopyalayın. Bu adres gizli bir anahtar içerir; kimseyle
+  paylaşmayın.
+  - Ücretsiz yol: https://cron-job.org adresinde hesap açın →
+    "Create cronjob" → adresi yapıştırın → "Every hour" (her saat başı)
+    seçin → kaydedin.
+  - Ya da cPanel › "Cron Jobs" bölümüne saatlik bir görev olarak ekleyin.
+
+
+SORUN ÇÖZME
+-----------
+  - "data klasörü yazılabilir değil" hatası: Dosya Yöneticisi'nde
+    api/data klasörüne sağ tıklayın → "İzinleri Değiştir" → 755 yapın.
+  - API şifrenizi unuttuysanız: Dosya Yöneticisi'nde api/data klasöründeki
+    admin.php dosyasını silin, ardından Entegrasyonlar'dan kurulumu yeniden
+    yapın (PayTR bilgilerini de yeniden girmeniz gerekir).
+  - 5 kez yanlış şifre girerseniz 15 dakika beklemeniz gerekir.

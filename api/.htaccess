@@ -1,0 +1,24 @@
+# yangpazar API · bu dosyada düzenlenecek bir şey yoktur.
+Options -Indexes
+DirectoryIndex durum.php
+
+# data/ klasörü ve yardımcı dosyalar doğrudan açılamaz
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^data(/|$) - [F,L]
+</IfModule>
+
+<FilesMatch "^(_lib|parasut_client|bizimhesap_client)\.php$|\.(md|log|json|lock)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "no-referrer"
+</IfModule>
