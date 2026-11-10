@@ -1,3 +1,4 @@
-/* placeholder */
-function seed(){ return {v:3}; }
+/* prod saplaması (P0a): demo/ dosyaları (seed, seed3, migrate, POSTS_DEMO, kitler) prod derlemesinde yok.
+   Sunucu verisi (YP_BOOT, P0b) bağlanana kadar boş durum + bakım sayfası gösterilir; yükleme sırasında hata atılmaz. */
+function seed(){ return {v:3,seq:1,cur:null,set:{maint:{on:true,msg:'Site kurulum aşamasında: sunucu veri bağlantısı henüz yok.',until:null}},packs:{},dopings:{},gws:[],banks:[],deps:[],coupons:[],raffles:[],rfree:{},spins:{},rev:{},revLog:[],servers:[],users:[],listings:[],orders:[],ads:[],wd:[],tx:[],tickets:[],lno:1,exchange:[],exFields:[],exRules:'',exOrders:[],bounties:[],dms:[],flagged:[],notifs:[],sms:{},smsLog:[],exFieldsBuy:[],backlinks:[],partnerApps:[],posts:[],paytr:{},support:{mode:'closed',hours:{}},tkSeq:1,exOffers:[],ofSeq:0,covers:{},vip:[],epProducts:[],epOrders:[],epSeq:0,slides:[],winback:[],ledger:[],mailLog:[],cryptoNets:[],mail:{}}; }
 function migrate(o){ return o; }
