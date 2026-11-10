@@ -1,0 +1,31 @@
+# Yükleme sırası (tools/build.php okur). Her satır src/js/ altındaki bir dosya; sıra = çalışma sırası.
+# Klasik <script> dosyaları tek global kapsamı paylaşır; sırayı değiştirmeyin.
+#   demo/...  yalnız --single ve --prod --demo çıktısında (prod'da yok)
+#   prod/...  yalnız demo verisi olmayan --prod çıktısında (demo/ yerine geçen saplama)
+00-core.js
+demo/seed.js
+prod/demo-stub.js
+01-state.js
+02-domain.js
+30-wallet-egp.js
+40-views-public.js
+demo/migrate.js
+41-covers.js
+42-views-member.js
+50-exchange.js
+60-admin-shell.js
+61-admin-tabs.js
+62-admin-panels.js
+70-support.js
+71-modals.js
+demo/kits.js
+72-admin-ent.js
+75-actions-core.js
+80-act.js
+81-form.js
+82-chg.js
+90-seo.js
+demo/posts.js
+91-seo2-mkt.js
+95-router.js
+99-wiring.js
