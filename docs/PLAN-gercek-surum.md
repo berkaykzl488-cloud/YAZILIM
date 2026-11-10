@@ -622,3 +622,9 @@ Sahibin kararları ayrı bölümde, sade Türkçe. En önemlileri: çekiliş mev
 - /home/user/YAZILIM/api/paytr_bildirim.php
 - /home/user/YAZILIM/api/cekim_onayla.php
 - /home/user/YAZILIM/api/kurulum.php
+## 9. Sahibin verdiği kararlar (2026-11-10)
+1. **2 adımlı doğrulama:** Yönetici ve para yetkili çalışanlar için ZORUNLU DEĞİL, isteğe bağlı (her kullanıcı kendisi açar). Panelde açık olmayan yetkili hesaplar için uyarı gösterilebilir ama giriş engellenmez.
+2. **E-posta gönderimi:** Baştan Brevo/Mailjet gibi harici bir SMTP/API servisi. P0b'de mailer, sağlayıcı seçimli (Brevo API, Mailjet API, genel SMTP) ve ayarları Entegrasyonlar sayfasından girilebilir olmalı; hosting `mail()` yalnız yedek.
+3. **Çekiliş ve şans çarkı:** Gerçek sürümde AÇIK başlayacak (hukuki risk sahibe ait; panelden kapatılabilir kalmalı).
+4. **Borsa oyun hesabı şifresi:** Devam — şifreli saklama, yalnız `borsa` yetkilisine gösterim, her gösterim audit, işlem bitince (ve 7 gün güvenlik ağıyla) silinir.
+Henüz bekleyenler: hosting limitleri (e-posta/saat, cron sıklığı, yükleme sınırı, MariaDB sürümü), SMS sağlayıcısı, teslim kanıtı saklama süresi, mali müşavir onayı, canlı destek yapay zekâsı, demo adresi ve açılış haftası çekim sınırı.
