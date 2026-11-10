@@ -16,10 +16,10 @@ final class Text
         return strtr($s, ['ç' => 'c', 'ğ' => 'g', 'ı' => 'i', 'i̇' => 'i', 'ö' => 'o', 'ş' => 's', 'ü' => 'u', 'â' => 'a', 'î' => 'i', 'û' => 'u']);
     }
 
-    /** LIKE için kaçış (\ ile) */
+    /** LIKE için kaçış; sorguda ESCAPE '!' kullanılır (MySQL ve SQLite'ta aynı davranır) */
     public static function likeEscape($s)
     {
-        return strtr((string)$s, ['\\' => '\\\\', '%' => '\\%', '_' => '\\_']);
+        return strtr((string)$s, ['!' => '!!', '%' => '!%', '_' => '!_']);
     }
 
     public static function maskTel($t)
