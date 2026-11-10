@@ -436,6 +436,13 @@ footer a{display:block;padding:3px 0} footer a:hover{color:var(--hdr-accent)}
 .pays{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .pays span{border:1px solid rgba(255,255,255,.15);border-radius:5px;padding:3px 7px;font-size:11px;color:var(--hdr-fg)}
 .fbot{border-top:1px solid rgba(255,255,255,.08);margin-top:22px;padding-top:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px}
+.etbis-b{display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:8px 12px 8px 8px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.04);color:var(--hdr-fg);text-decoration:none;max-width:100%}
+.etbis-b:hover{border-color:var(--hdr-accent,var(--accent))}
+.etbis-b img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;flex:none}
+.etbis-b .etbis-qr0{width:64px;height:64px;border-radius:6px;background:#fff;color:#1c2230;display:grid;place-items:center;font-weight:800;font-size:11px;letter-spacing:.04em;flex:none}
+.etbis-b span{display:grid;gap:1px;font-size:12px;line-height:1.35;min-width:0}.etbis-b b{font-size:13px}.etbis-b small{color:var(--hdr-muted);overflow-wrap:anywhere}
+.etbis-prev{display:flex;justify-content:flex-start;padding:14px;border-radius:10px;background:var(--hdr)}
+.etbis-steps{margin:0;padding-left:20px;display:grid;gap:4px;font-size:13px}
 
 /* modal */
 .mb{position:fixed;inset:0;z-index:100;background:rgba(6,9,15,.62);display:grid;place-items:center;padding:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));backdrop-filter:blur(3px);animation:fi .18s ease}
@@ -2555,7 +2562,7 @@ function renderFooter(){
   $('#ftr').innerHTML=`<div class="wrap"><div class="fgrid">
     <div><a href="#home" class="brand" style="color:var(--hdr-fg)">${ICO.han}<span>${esc(S.set.siteName)}</span></a>
       <p style="max-width:34ch">Alıcı ile satıcı arasında aracı olan güvenli ilan pazarı. Ödemeniz, ürünü teslim aldığınızı onaylayana kadar havuzda bekler.</p>
-      <div class="pays">${S.gws.filter(g=>g.on).map(g=>`<span>${esc(g.n)}</span>`).join('')}</div></div>
+      <div class="pays">${S.gws.filter(g=>g.on).map(g=>`<span>${esc(g.n)}</span>`).join('')}</div>${etbisBadge()}</div>
     <div><h4>Pazar</h4><a href="#metin2-tr">Metin2 TR Won & EP</a><a href="#metin2-pvp">Metin2 PVP Serverlar</a><a href="#metin2-ep">Metin2 EP</a><a href="#borsa">Yang Borsası</a><a href="#ortaklik">Ortaklık & Partner</a></div>
     <div><h4>Popüler serverlar</h4>${S.servers.map(x=>[x,active().filter(l=>l.server===x.id).length]).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([x])=>`<a href="#server-${x.id}">${esc(x.name)}</a>`).join('')}</div>
     <div><h4>Rehber</h4>${posts().slice(0,4).map(p=>`<a href="#rehber-${p.slug}">${esc(cut(p.title,38))}</a>`).join('')}<a href="#rehber">Tüm rehberler →</a></div>
@@ -3773,7 +3780,7 @@ const ADM_NAV=[
     {k:'bakim',l:'Yedek & bakım',p:'bakim',desc:'Bakım modu ve yedekler.',kw:'yedek bakım geri yükle',subs:[
       {s:'bakim',l:'Bakım modu'},{s:'yedekler',l:'Yedekler'}]},
     {k:'ayar',l:'Site ayarları',p:'ayar',desc:'Site adı, komisyon, para çekme alt sınırı, popup ve yayına alma kontrolü.',kw:'ayar komisyon site adı popup demo yayın',subs:[
-      {s:'genel',l:'Genel'},{s:'yayin',l:'Yayına alma',kw:'demo modu yayına alma'}]}]}
+      {s:'genel',l:'Genel'},{s:'yayin',l:'Yayına alma',kw:'demo modu yayına alma'},{s:'etbis',l:'ETBİS',kw:'etbis ticaret bakanlığı elektronik ticaret bilgi sistemi kayıt qr karekod doğrulama'}]}]}
 ];
 const ADM_HIDDEN=[{k:'ara',l:'Arama sonuçları',p:'ara',desc:'Sipariş, borsa, ilan ve üye araması. Siparişte kimin aldığı ve sattığı ad soyad ve telefonla görünür.'}];
 const admCan = p => !p || (Array.isArray(p) ? p.some(x=>can(x)) : can(p));
@@ -4214,7 +4221,7 @@ function vAdmin(P){
       <div class="fld" style="max-width:320px"><label for="st_wa">WhatsApp destek hattı</label><input class="inp" id="st_wa" value="${esc(s.whatsapp)}"></div></div>
     ${aSave('Ayarları kaydet')}</form>
     <div class="panel panel-b stack danger-z"><h3 class="ph3">Tehlikeli işlemler</h3><div class="hstack" style="justify-content:space-between"><span class="muted" style="font-size:12.5px">Tüm demo verileri başlangıç durumuna döner. Bu işlem geri alınamaz.</span><button type="button" class="btn btn-bad" data-act="reset">Demo verilerini sıfırla</button></div></div>`;
-    B.yayin=goLivePanel(); }
+    B.yayin=goLivePanel(); B.etbis=etbisPanel(); }
   if(sub&&B[sub]!=null) b=B[sub]; else if(sub&&!b) b=emptyBox('Bu bölüm boş','');
   const page=aPage({title:it.l,desc:t==='panel'?today.desc:it.desc,actions,subs:aSubs(it,sub),body:`<div class="stack">${b}</div>`});
   return admShell({P:Object.assign({},P,{k:t}),it,sub,page,over});
@@ -8989,6 +8996,41 @@ window.addEventListener('hashchange',e=>{ if(admDirtyNow()){ let oldH=''; try{ o
     if(isAdmRoute(oldH.slice(1))){ e.stopImmediatePropagation(); const to=e.newURL; try{ history.pushState(null,'',e.oldURL); }catch(x){ return; }
       openConfirm({t:'Kaydedilmemiş değişiklikler var',d:'Kaydedilmemiş değişiklikler kaybolacak.',ok:'Kaydetmeden çık',danger:1,onOk:()=>{ admDirtyClear(); const from=location.href; try{ history.pushState(null,'',to); }catch(x){ location.href=to; return; } window.dispatchEvent(new HashChangeEvent('hashchange',{oldURL:from,newURL:to})); }}); } } });
 window.addEventListener('hashchange',()=>{ document.body.classList.remove('adm-menu'); cmdClose(); if(seoClean()&&location.hash.length>1&&!isAdmRoute(location.hash.slice(1))){ history.replaceState(null,'',routeToPath(location.hash.slice(1))+location.search); } PV.seen.clear(); render(); window.scrollTo(0,0); });
+
+/* ================== ETBİS (Elektronik Ticaret Bilgi Sistemi) ================== */
+const ETBIS_HOSTS=['etbis.ticaret.gov.tr','etbis.eticaret.gov.tr'];
+function etbisCfg(){ if(!S.set.etbis) S.set.etbis={on:false,url:'',code:'',date:'',img:''}; return S.set.etbis; }
+function etbisUrlOk(u){ try{ const x=new URL(u); return x.protocol==='https:'&&ETBIS_HOSTS.some(h=>x.hostname===h||x.hostname.endsWith('.'+h)); }catch(e){ return false; } }
+function etbisImgOk(src){ return /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=\s]+$/.test(src||'')||etbisUrlOk(src||''); }
+// ETBİS'in verdiği HTML kodunu güvenli biçimde çözer: yalnız bağlantı ve karekod görseli alınır, kod sayfaya eklenmez.
+function etbisParse(html){ const out={url:'',img:''}; try{ const d=new DOMParser().parseFromString(String(html||''),'text/html'); const a=[...d.querySelectorAll('a[href]')].find(x=>etbisUrlOk(x.getAttribute('href'))); if(a) out.url=a.getAttribute('href'); const im=[...d.querySelectorAll('img[src]')].map(x=>x.getAttribute('src')).find(etbisImgOk); if(im) out.img=im.replace(/\s+/g,''); }catch(e){} if(!out.url){ const m=String(html||'').match(/https:\/\/[^\s"'<>]*etbis\.e?ticaret\.gov\.tr[^\s"'<>]*/i); if(m&&etbisUrlOk(m[0])) out.url=m[0]; } return out; }
+function etbisBadge(prev){ const E=etbisCfg(); if(!prev&&!(E.on&&etbisUrlOk(E.url))) return ''; const qr=E.img&&etbisImgOk(E.img)?`<img src="${esc(E.img)}" alt="ETBİS karekodu">`:'<i class="etbis-qr0">ETBİS</i>';
+  return `<a class="etbis-b" href="${esc(etbisUrlOk(E.url)?E.url:'#')}" target="_blank" rel="noopener" title="T.C. Ticaret Bakanlığı ETBİS kaydını doğrula">${qr}<span><b>ETBİS'e kayıtlıdır</b>T.C. Ticaret Bakanlığı Elektronik Ticaret Bilgi Sistemi${E.code?`<small>Kayıt no: ${esc(E.code)}</small>`:''}<small>Doğrulamak için tıklayın</small></span></a>`; }
+function etbisPanel(){ const E=etbisCfg(); const ready=etbisUrlOk(E.url);
+  return `<form class="stack" data-form="etbisset">
+    <div class="panel panel-b stack"><h3 class="ph3">ETBİS kaydı</h3>
+      <p class="muted" style="margin:0;font-size:13px">E-ticaret yapan siteler T.C. Ticaret Bakanlığı'nın Elektronik Ticaret Bilgi Sistemi'ne (ETBİS) kayıt olmak ve kayıt bilgisini sitede göstermek zorundadır. Kaydınız onaylanınca ETBİS size bir doğrulama bağlantısı ve karekod verir; onları buraya girin, sitenin alt kısmında "ETBİS'e kayıtlıdır" rozeti çıksın.</p>
+      <ol class="etbis-steps muted"><li>etbis.ticaret.gov.tr adresine e-Devlet ile girip sitenizi kaydedin.</li><li>Onaydan sonra ETBİS'in verdiği <b>kodu</b> kopyalayıp aşağıdaki kutuya yapıştırın — bağlantı ve karekod kendiliğinden doldurulur. (İsterseniz alanları tek tek de girebilirsiniz.)</li><li>"Sitede göster"i işaretleyip kaydedin.</li></ol>
+      <div class="fld"><label for="eb_paste">ETBİS'in verdiği kodu yapıştırın (isteğe bağlı)</label><textarea class="inp mono" id="eb_paste" rows="3" placeholder='&lt;div id="ETBIS"&gt;&lt;a href="https://etbis.ticaret.gov.tr/…"&gt;&lt;img src="data:image/…"&gt;&lt;/a&gt;&lt;/div&gt;' data-change="etbispaste"></textarea><small class="muted">Kod güvenlik için sayfaya olduğu gibi eklenmez; yalnızca doğrulama bağlantısı ve karekod görseli alınır.</small></div>
+      <div class="fld"><label for="eb_url">Doğrulama bağlantısı</label><input class="inp mono" id="eb_url" value="${esc(E.url)}" placeholder="https://etbis.ticaret.gov.tr/…" inputmode="url"><small class="muted">Yalnızca etbis.ticaret.gov.tr (veya etbis.eticaret.gov.tr) adresleri kabul edilir.</small></div>
+      <div class="row2"><div class="fld"><label for="eb_code">ETBİS kayıt numarası / site kodu (isteğe bağlı)</label><input class="inp mono" id="eb_code" value="${esc(E.code)}" maxlength="80"></div><div class="fld"><label for="eb_date">Kayıt tarihi (isteğe bağlı)</label><input class="inp mono" id="eb_date" type="date" value="${esc(E.date)}"></div></div>
+      <div class="fld"><span class="lbl">Karekod (QR) görseli</span><div class="hstack"><label class="btn btn-sm" for="eb_img">Görsel yükle</label><input type="file" id="eb_img" accept="image/png,image/jpeg,image/gif,image/webp" hidden data-change="etbisimg">${E.img?'<button type="button" class="btn btn-sm btn-bad" data-act="etbis-img-del">Karekodu kaldır</button>':'<span class="muted" style="font-size:12.5px">Yüklenmedi — rozet karekodsuz görünür.</span>'}</div></div>
+      <label class="chk" for="eb_on"><input type="checkbox" id="eb_on" ${E.on?'checked':''}> ETBİS rozetini sitenin alt kısmında göster</label>
+      ${!ready&&E.on?'<div class="note note-warn" style="font-size:12.5px">Rozetin görünmesi için geçerli bir ETBİS doğrulama bağlantısı girin.</div>':''}
+      <div class="stack" style="gap:6px"><span class="lbl">Önizleme</span><div class="etbis-prev" id="eb_prev">${etbisBadge(true)}</div></div>
+    </div>${aSave('ETBİS bilgilerini kaydet')}</form>`; }
+FORM.etbisset=()=>{ if(!can('ayar')) return toast('Bu işlem için yetkiniz yok.',true); const E=etbisCfg(); const url=v_('eb_url').trim();
+  if(url&&!etbisUrlOk(url)) return toast('Doğrulama bağlantısı etbis.ticaret.gov.tr adresiyle başlamalı (https).',true);
+  const on=$('#eb_on').checked; if(on&&!url) return toast('Rozeti göstermek için doğrulama bağlantısını girin.',true);
+  E.url=url; E.code=v_('eb_code').trim().slice(0,80); E.date=v_('eb_date'); E.on=on; save(); toast(on?'ETBİS bilgileri kaydedildi; rozet sitenin alt kısmında görünüyor.':'ETBİS bilgileri kaydedildi.'); render(); };
+CHG.etbispaste=(el)=>{ const r=etbisParse(el.value); if(!r.url&&!r.img) return toast('Yapıştırılan kodda ETBİS bağlantısı veya karekodu bulunamadı.',true);
+  const E=etbisCfg(); if(r.url){ const u=$('#eb_url'); if(u) u.value=r.url; } if(r.img) E.img=r.img; if(r.url) E.url=r.url; save(); el.value=''; toast('ETBİS kodu okundu: '+[r.url&&'bağlantı',r.img&&'karekod'].filter(Boolean).join(' ve ')+' alındı. Kaydetmeyi unutmayın.'); render(); };
+CHG.etbisimg=async(el)=>{ const f=el.files&&el.files[0]; if(!f) return; if(f.size>600*1024) return toast('Görsel en fazla 600 KB olabilir.',true);
+  const src=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); }).catch(()=>'');
+  if(!etbisImgOk(src)) return toast('Görsel okunamadı. PNG, JPG, GIF veya WEBP yükleyin.',true); etbisCfg().img=src; save(); toast('Karekod yüklendi.'); render(); };
+ACT['etbis-img-del']=()=>{ if(!can('ayar')) return; etbisCfg().img=''; save(); toast('Karekod kaldırıldı.'); render(); };
+ADM_FORM.etbisset='ayar'; ADM_CHG.etbispaste='ayar'; ADM_CHG.etbisimg='ayar'; ADM_ACT['etbis-img-del']='ayar';
+
 render();
 
 </script>
