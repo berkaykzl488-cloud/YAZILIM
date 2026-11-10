@@ -128,7 +128,7 @@ $out = [
     'ok'             => true,
     'id'             => $id,
     'belge_no'       => $belge,
-    'banka_aciklama' => 'YangPazar e-Gider Pusulasi No: ' . $belge . ' - ' . $ad,
+    'banka_aciklama' => 'YangPazar Cekim Odemesi Ref: ' . $id . ' - ' . $ad, // müşterinin dekontunda görünür: pusula ifadesi içermez
     'parasut'        => $sonuclar['parasut'],
     'bizimhesap'     => $sonuclar['bizimhesap'],
 ];
