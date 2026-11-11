@@ -1,7 +1,8 @@
 <?php
 /**
  * Zamanlanmış görevler (cPanel › Cron Jobs, 5 dakikada bir):
- *   /usr/local/bin/php /home/KULLANICI/public_html/app/cron.php
+ *   /usr/local/bin/php /home/KULLANICI/<sitenin-kök-klasörü>/app/cron.php
+ *   (ör. public_html ya da test.yangpazar.com — tam yol kurulumun son sayfasında gösterilir)
  * Yalnız komut satırından çalışır; tarayıcıdan açılamaz (app/ klasörü zaten kapalıdır).
  * Dış zamanlayıcı (cron-job.org) için: https://SITE/api/v1/cron?key=… (kurulum sonunda gösterilir)
  */

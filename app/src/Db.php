@@ -394,6 +394,33 @@ final class Db
         return array_column($this->pdo->query('PRAGMA index_list(`' . $t . '`)')->fetchAll(PDO::FETCH_ASSOC), 'name');
     }
 
+    /**
+     * Veritabanının varsayılan karakter setini utf8mb4 yapar (sunucu varsayılanı latin1 olabilir).
+     * Yetki yoksa sessizce geçer; tablolar zaten CREATE TABLE … DEFAULT CHARSET=utf8mb4 ile açılır.
+     * Dönüş: true (değişti/zaten utf8mb4) | false (yetki yok ya da başarısız)
+     */
+    public function ensureUtf8mb4Database()
+    {
+        if ($this->dialect !== 'mysql') {
+            return true;
+        }
+        try {
+            $name = (string)$this->pdo->query('SELECT DATABASE()')->fetchColumn();
+            if ($name === '' || !preg_match('/^[A-Za-z0-9_$]{1,64}$/', $name)) {
+                return false;
+            }
+            $cs = strtolower((string)$this->pdo->query('SELECT @@character_set_database')->fetchColumn());
+            $co = strtolower((string)$this->pdo->query('SELECT @@collation_database')->fetchColumn());
+            if ($cs === 'utf8mb4' && $co === 'utf8mb4_unicode_ci') {
+                return true;
+            }
+            $this->pdo->exec('ALTER DATABASE `' . $name . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     public function serverInfo()
     {
         $info = ['dialect' => $this->dialect, 'version' => $this->version, 'charset' => '', 'skip_locked' => $this->supportsSkipLocked()];
@@ -401,6 +428,8 @@ final class Db
             try {
                 $info['charset'] = (string)$this->pdo->query('SELECT @@character_set_database')->fetchColumn()
                     . ' / ' . (string)$this->pdo->query('SELECT @@collation_database')->fetchColumn();
+                $info['server_charset'] = (string)$this->pdo->query('SELECT @@character_set_server')->fetchColumn();
+                $info['connection_charset'] = (string)$this->pdo->query('SELECT @@character_set_connection')->fetchColumn();
             } catch (\Throwable $e) {
             }
         } else {

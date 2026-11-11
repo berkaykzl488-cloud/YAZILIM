@@ -192,7 +192,7 @@ function env_checks($test)
     if (is_dir($up) && !is_file($up . '/.htaccess')) {
         @file_put_contents($up . '/.htaccess', "# Yüklenen dosyalar asla program olarak çalıştırılmaz.\nOptions -Indexes -ExecCGI\n<FilesMatch \"(?i)\\.(php[0-9]?|phtml|phar|pht|phps|cgi|pl|py|sh|shtml|htaccess)$\">\n  Require all denied\n</FilesMatch>\n<IfModule mod_mime.c>\n  RemoveHandler .php .phtml .phar .php5 .php7 .php8\n  RemoveType .php .phtml .phar\n</IfModule>\n");
     }
-    $c[] = ['uploads/ klasörü yazılabilir', is_dir($up) && is_writable($up), false, 'public_html içinde uploads klasörü oluşturup izni 755 yapın.'];
+    $c[] = ['uploads/ klasörü yazılabilir', is_dir($up) && is_writable($up), false, 'Sitenin kök klasöründe (ör. public_html ya da test.yangpazar.com) uploads klasörü oluşturup izni 755 yapın.'];
     $c[] = ['Güvenli bağlantı (https)', yp_is_https(), false, 'cPanel › SSL/TLS Status\'tan ücretsiz AutoSSL sertifikasını açın.'];
     return $c;
 }
@@ -267,11 +267,18 @@ if (!$dbCfg) {
             try {
                 $t = Db::connect($cfg);
                 $si = $t->serverInfo();
-                $info = '<div class="note good"><b>Bağlantı başarılı.</b> Sunucu: ' . h($si['version']) . ($si['charset'] ? ' · Karakter seti: ' . h($si['charset']) : '')
+                $csNote = '';
+                if ($si['dialect'] === 'mysql') {
+                    $csNote = '<div class="hint">Sunucu varsayılan karakter seti: ' . h(isset($si['server_charset']) ? $si['server_charset'] : '?')
+                        . ' · Bağlantı: ' . h(isset($si['connection_charset']) ? $si['connection_charset'] : '?')
+                        . (stripos($si['charset'], 'utf8mb4') === 0 ? '' : ' — veritabanı kaydedilirken utf8mb4\'e çevrilecek; tüm tablolar utf8mb4 (Türkçe karakter ve emoji için) oluşturulur.') . '</div>';
+                }
+                $info = '<div class="note good"><b>Bağlantı başarılı.</b> Sunucu: ' . h($si['version']) . ($si['charset'] ? ' · Veritabanı karakter seti: ' . h($si['charset']) : '') . $csNote
                     . ($si['dialect'] === 'mysql' && !$si['skip_locked'] ? '<div class="hint">Not: Bu sürüm SKIP LOCKED desteklemiyor; site yine çalışır (EP satışında kısa kilit kullanılır).</div>' : '') . '</div>';
                 if ($t->tableExists('users')) {
                     $err = 'Bu veritabanında "' . $cfg['prefix'] . 'users" tablosu zaten var. Boş bir veritabanı kullanın ya da farklı bir tablo öneki yazın.';
                 } elseif ($action === 'dbsave') {
+                    $t->ensureUtf8mb4Database();
                     Store::createKey();
                     Store::write('db', $cfg);
                     if (!Store::exists('app')) {
@@ -325,6 +332,7 @@ if (!$hasTables) {
     $err = '';
     if ($action === 'schema') {
         try {
+            $db->ensureUtf8mb4Database(); // yetki yoksa sessizce geçer; tablolar yine utf8mb4 açılır
             $done = Schema::install($db);
             $S['schema_log'] = $done;
             header('Location: ./', true, 303);
@@ -338,7 +346,10 @@ if (!$hasTables) {
     foreach (array_keys(Schema::load()) as $t) {
         $list .= '<code>' . h($db->prefix . $t) . '</code> ';
     }
-    kur_page('Tabloları oluştur', ($err ? kur_err($err) : '') . '<div class="note good">Veritabanı bağlantısı kaydedildi.</div><form method="post" class="card">' . hidden_csrf()
+    $si = $db->serverInfo();
+    kur_page('Tabloları oluştur', ($err ? kur_err($err) : '') . '<div class="note good">Veritabanı bağlantısı kaydedildi. Sunucu: ' . h($si['version'])
+        . ($si['charset'] ? ' · Veritabanı karakter seti: ' . h($si['charset']) : '') . '</div><form method="post" class="card">' . hidden_csrf()
+        . '<p class="hint">Tüm tablolar InnoDB ve utf8mb4 (utf8mb4_unicode_ci) olarak oluşturulur.</p>'
         . '<p>Şu tablolar oluşturulacak:</p><p>' . $list . '</p><button name="action" value="schema">Tabloları oluştur</button></form>', 3);
 }
 
@@ -362,6 +373,14 @@ if (!$siteDone) {
             $s['siteName'] = $name;
             $s['siteUrl'] = $origin;
             Settings::set('site', $s, null, $db);
+            // Gönderen adresi boşsa noreply@<alan adı> (Brevo'da bu adres doğrulanmalı; panelden değiştirilebilir)
+            $mail = Settings::get('mail', $db);
+            $host = (string)parse_url($origin, PHP_URL_HOST);
+            if ($mail['from'] === '' && preg_match('/^[a-z0-9.\-]+\.[a-z]{2,}$/', $host)) {
+                $mail['from'] = 'noreply@' . preg_replace('/^www\./', '', $host);
+                $mail['fromName'] = $mail['fromName'] !== '' ? $mail['fromName'] : $name;
+                Settings::set('mail', $mail, null, $db);
+            }
             header('Location: ./', true, 303);
             exit;
         }

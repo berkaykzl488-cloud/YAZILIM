@@ -80,14 +80,17 @@ chk "bağlantı testi (YP_TEST SQLite) → başarılı + sürüm" 'echo "$BODY" 
 kur "$J_K" action=dbsave driver=sqlite "sqlite_path=$RUN/storage/test.sqlite"
 chk "kaydet → tablolar adımı" 'echo "$BODY" | grep -q "Tabloları oluştur" && echo "$BODY" | grep -q "yp_users"'
 chk "storage/db.php şifreli (düz yol yok)" '[ -f "$RUN/storage/db.php" ] && ! grep -q "test.sqlite" "$RUN/storage/db.php" && grep -Eq "^return '\''[A-Za-z0-9+/=]+'\'';$" "$RUN/storage/db.php"'
-OUT=$(curl -s -c "$J_K2" -b "$J_K2" "$B/kurulum/")
-chk "başka tarayıcı kurulumu sürdüremez" 'echo "$OUT" | grep -q "başka bir tarayıcıda"'
+kur "$J_K2" action=code install_code=KOD123abc
+chk "başka tarayıcı (kodu bilse bile) kurulumu sürdüremez" 'echo "$BODY" | grep -q "başka bir tarayıcıda"'
 kur "$J_K" action=schema
 chk "tablolar oluşturuldu → site adımı" 'echo "$BODY" | grep -q "Site adı ve adresi" && [ "$(sq "SELECT COUNT(*) FROM sqlite_master WHERE type='\''table'\'' AND name LIKE '\''yp_%'\''")" -ge 12 ]'
 kur "$J_K" action=site site_name="Yang Test" site_url="javascript:alert(1)"
 chk "geçersiz site adresi reddedilir" 'echo "$BODY" | grep -q "Site adresi geçersiz"'
 kur "$J_K" action=site site_name="Yang Test" site_url="http://127.0.0.1:$PORT"
 chk "site kaydedildi → yönetici adımı" 'echo "$BODY" | grep -q "Yönetici hesabı"'
+# (gerçek alan adında gönderen noreply@alanadi olur; test adresi IP olduğu için burada elle veriyoruz)
+php -r 'define("YP_STORAGE",$argv[1]); require $argv[2]; YP\Store::requireKey(); $db=YP\Db::connect(YP\Store::dbConfig()); YP\Db::setMain($db); $m=YP\Settings::get("mail",$db); $m["from"]="noreply@yangpazar.test"; YP\Settings::set("mail",$m,null,$db);' "$RUN/storage" "$RUN/app/bootstrap.php"
+
 kur "$J_K" action=admin name=Yonetici email=admin@yangpazar.com password=kisa password2=kisa
 chk "yönetici şifresi < 10 → reddedilir" 'echo "$BODY" | grep -q "en az 10 karakter"'
 APW='Yonetici-Sifre-2026'
@@ -278,11 +281,13 @@ chk "yönetici boot: yetki etiketleri" '[ "$(j .data.permLabels.calisan)" = "Ça
 api "$J_ADM" POST admin/staff '{"name":"Calisan1","email":"c1@yangpazar.com","ad":"Cem","soyad":"Ak","password":"kisa","perms":["uye"]}' -H "X-CSRF-Token: $CS_ADM"
 chk "çalışan şifresi < 10 → 422" '[ "$CODE" = 422 ] && [ "$(j .fields.password)" != null ]'
 api "$J_ADM" POST admin/staff '{"name":"Calisan1","email":"c1@yangpazar.com","ad":"Cem","soyad":"Ak","password":"Calisan-1-Sifre","perms":["uye","calisan"]}' -H "X-CSRF-Token: $CS_ADM"
-chk "çalışan S1 (uye, calisan) eklendi" '[ "$CODE" = 200 ] && [ "$(j ".data.user.perms | join(",")")" = "uye,calisan" ] && [ "$(j .data.user.staff)" = true ]'
+PJ=$(j '.data.user.perms|join(",")')
+chk "çalışan S1 (uye, calisan) eklendi" '[ "$CODE" = 200 ] && [ "$PJ" = "uye,calisan" ] && [ "$(j .data.user.staff)" = true ]'
 S1="$(j .data.user.id)"
 api "$J_ADM" POST admin/staff '{"name":"Calisan2","email":"c2@yangpazar.com","ad":"Ece","soyad":"Su","password":"Calisan-2-Sifre","perms":["ara"]}' -H "X-CSRF-Token: $CS_ADM"
 S2="$(j .data.user.id)"
-chk "çalışan S2 (ara) eklendi" '[ "$CODE" = 200 ] && [ "$(j ".data.user.perms | join(",")")" = "ara" ]'
+PJ=$(j '.data.user.perms|join(",")')
+chk "çalışan S2 (ara) eklendi" '[ "$CODE" = 200 ] && [ "$PJ" = "ara" ]'
 CS_S1=$(csrf_of "$J_S1"); api "$J_S1" POST auth/login '{"login":"Calisan1","password":"Calisan-1-Sifre"}' -H "X-CSRF-Token: $CS_S1"; CS_S1="$(j .data.csrf)"
 CS_S2=$(csrf_of "$J_S2"); api "$J_S2" POST auth/login '{"login":"calisan2","password":"Calisan-2-Sifre"}' -H "X-CSRF-Token: $CS_S2"; CS_S2="$(j .data.csrf)"
 chk "çalışanlar giriş yaptı" '[ "$CODE" = 200 ] && [ -n "$CS_S1" ] && [ -n "$CS_S2" ]'
@@ -333,12 +338,14 @@ chk "S2 (ara) üye araması" '[ "$CODE" = 200 ] && [ "$(j ".data.users[0].name")
 api "$J_S1" POST admin/staff '{"name":"Calisan3","email":"c3@yangpazar.com","ad":"Can","soyad":"Er","password":"Calisan-3-Sifre","perms":["uye","cekim"]}' -H "X-CSRF-Token: $CS_S1"
 chk "S1 sahip olmadığı yetkiyi (cekim) veremez → 403 perm_grant" '[ "$CODE" = 403 ] && [ "$(j .code)" = perm_grant ] && echo "$(j .error)" | grep -q "Para çekme onayı"'
 api "$J_S1" POST admin/staff '{"name":"Calisan3","email":"c3@yangpazar.com","ad":"Can","soyad":"Er","password":"Calisan-3-Sifre","perms":["uye"]}' -H "X-CSRF-Token: $CS_S1"
-chk "S1 kendi yetkisini (uye) verebilir" '[ "$CODE" = 200 ] && [ "$(j ".data.user.perms | join(",")")" = uye ]'
+PJ=$(j '.data.user.perms|join(",")')
+chk "S1 kendi yetkisini (uye) verebilir" '[ "$CODE" = 200 ] && [ "$PJ" = uye ]'
 S3="$(j .data.user.id)"
 api "$J_S1" PUT "admin/staff/$S2" '{"perms":["ara","bakim"]}' -H "X-CSRF-Token: $CS_S1"
 chk "S1, S2'ye bakim ekleyemez → 403" '[ "$CODE" = 403 ] && [ "$(j .code)" = perm_grant ]'
 api "$J_S1" PUT "admin/staff/$S2" '{"perms":["uye"]}' -H "X-CSRF-Token: $CS_S1"
-chk "S1, S2'ye uye ekler; S2'nin ara yetkisi (S1'de yok) korunur" '[ "$CODE" = 200 ] && [ "$(j ".data.user.perms | join(",")")" = "ara,uye" ]'
+PJ=$(j '.data.user.perms|join(",")')
+chk "S1, S2'ye uye ekler; S2'nin ara yetkisi (S1'de yok) korunur" '[ "$CODE" = 200 ] && [ "$PJ" = "ara,uye" ]'
 api "$J_S2" GET "admin/users/$UA" ""
 chk "S2 yeni yetkisi hemen geçerli (uye)" '[ "$CODE" = 200 ] && [ "$(j .data.user.email)" = deniz@ornek.com ]'
 api "$J_S1" DELETE "admin/staff/$S2" "" -H "X-CSRF-Token: $CS_S1"
@@ -371,7 +378,9 @@ chk "askı kaldırıldı (geçiş)" '[ "$CODE" = 200 ] && [ "$(j .data.user.bann
 api "$J_B" POST auth/login '{"login":"Kurt","password":"Kurt-Sifre-12"}' -H "X-CSRF-Token: $CS_B"
 chk "B tekrar giriş yapabilir" '[ "$CODE" = 200 ]'
 api "$J_S1" POST "admin/users/$UA/verify" "" -H "X-CSRF-Token: $CS_S1"
-chk "üye doğrulama (geçiş)" '[ "$CODE" = 200 ] && [ "$(j .data.user.verified)" = true ]'
+chk "üye doğrulama geçişi (matristeki doğrulamadan sonra → kaldırıldı)" '[ "$CODE" = 200 ] && [ "$(j .data.user.verified)" = false ]'
+api "$J_S1" POST "admin/users/$UA/verify" '{"verified":true}' -H "X-CSRF-Token: $CS_S1"
+chk "üye doğrulama (açık değer)" '[ "$CODE" = 200 ] && [ "$(j .data.user.verified)" = true ]'
 api "$J_ADM" POST "admin/staff" "{\"existing\":\"$UB\",\"perms\":[\"destek\"]}" -H "X-CSRF-Token: $CS_ADM"
 chk "mevcut üyeyi çalışan yap" '[ "$CODE" = 200 ] && [ "$(j .data.user.staff)" = true ]'
 api "$J_B" GET poll ""

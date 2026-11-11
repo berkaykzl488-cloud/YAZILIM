@@ -253,6 +253,22 @@ section('schema', function () {
         return strpos($s, 'CREATE TABLE') === 0;
     })) === count(Schema::load()));
     ok('MySQL DDL: InnoDB utf8mb4', substr_count($all, 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci') === count(Schema::load()));
+    $noUtf = [];
+    foreach (Schema::load() as $t => $def) {
+        $c = Schema::tableDdl('mysql', 'yp_', $t, $def)[0];
+        if (substr($c, -strlen(') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci')) !== ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci' || stripos($c, 'latin1') !== false) {
+            $noUtf[] = $t;
+        }
+    }
+    ok('MySQL DDL: HER tablo utf8mb4_unicode_ci (sunucu varsayılanı latin1 olsa bile)', !$noUtf, $noUtf);
+    ok('MySQL bağlantısı: DSN charset=utf8mb4 + SET NAMES utf8mb4', strpos(file_get_contents(YP_APP . '/src/Db.php'), ';charset=utf8mb4') !== false
+        && strpos(file_get_contents(YP_APP . '/src/Db.php'), "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci") !== false);
+    ok('MariaDB 10.11.19 → SKIP LOCKED', (function () {
+        $my = (new ReflectionClass(Db::class))->newInstanceWithoutConstructor();
+        $my->dialect = 'mysql';
+        $my->version = '10.11.19-MariaDB';
+        return $my->supportsSkipLocked();
+    })());
     ok('MySQL DDL: AUTO_INCREMENT pk', strpos($all, '`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY') !== false);
     ok('MySQL DDL: ENUM + varsayılan', strpos($all, "`role` ENUM('member','staff','admin') NOT NULL DEFAULT 'member'") !== false
         && strpos($all, "`tfa` ENUM('','sms','mail') NOT NULL DEFAULT ''") !== false);
