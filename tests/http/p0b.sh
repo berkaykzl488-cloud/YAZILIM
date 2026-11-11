@@ -210,7 +210,7 @@ api "$J_A" POST me/tfa '{"tfa":"mail"}' -H "X-CSRF-Token: $CS_A"
 chk "2FA aç: kod gönderildi (maskeli adres)" '[ "$CODE" = 200 ] && [ "$(j .tfa.ch)" = mail ] && [ "$(j .tfa.dest)" = "de•••@ornek.com" ]'
 TID="$(j .tfa.id)"
 CODE6=$(otp_for deniz@ornek.com)
-chk "kod outbox'ta (test ucu), mail() yedeğiyle gönderildi" '[ ${#CODE6} = 6 ] && grep -q "deniz@ornek.com" "$RUN/sendmail.log"'
+chk "kod outbox'ta (test ucu); mail() yedeği varsayılan kapalı → sendmail kullanılmadı" '[ ${#CODE6} = 6 ] && ! grep -qs "deniz@ornek.com" "$RUN/sendmail.log"'
 WRONG=$([ "$CODE6" = 000000 ] && echo 111111 || echo 000000)
 api "$J_A" POST auth/tfa/verify "{\"id\":$TID,\"code\":\"$WRONG\"}" -H "X-CSRF-Token: $CS_A"
 chk "yanlış kod → 400, kalan 4" '[ "$CODE" = 400 ] && [ "$(j .code)" = tfa_bad ] && [ "$(j .remaining)" = 4 ]'
@@ -397,9 +397,18 @@ api "$J_ADM" PUT admin/settings/mail '{"on":true,"from":"gecersiz"}' -H "X-CSRF-
 chk "geçersiz gönderen → 422" '[ "$CODE" = 422 ]'
 api "$J_ADM" PUT admin/settings/sms '{"on":true,"user":"8503000000"}' -H "X-CSRF-Token: $CS_ADM"
 chk "SMS açmak için şifre/başlık gerekli → 422" '[ "$CODE" = 422 ]'
-api "$J_ADM" PUT admin/settings/mail '{"provider":""}' -H "X-CSRF-Token: $CS_ADM"
+api "$J_ADM" PUT admin/settings/mail '{"on":false,"provider":"","fallback":false}' -H "X-CSRF-Token: $CS_ADM"
+api "$J_ADM" POST admin/mail/test '{"to":"yok@ornek.com"}' -H "X-CSRF-Token: $CS_ADM"
+chk "sağlayıcı yok + yedek kapalı → gönderilemedi, sendmail kullanılmadı" '[ "$CODE" = 200 ] && [ "$(j .data.sent)" = false ] && ! grep -qs "yok@ornek.com" "$RUN/sendmail.log"'
+api "$J_ADM" PUT admin/settings/mail '{"provider":"","fallback":true}' -H "X-CSRF-Token: $CS_ADM"
 api "$J_ADM" POST admin/mail/test '{"to":"test@ornek.com"}' -H "X-CSRF-Token: $CS_ADM"
 chk "deneme e-postası (sağlayıcı yok → mail() yedeği)" '[ "$CODE" = 200 ] && [ "$(j .data.sent)" = true ] && [ "$(j .data.provider)" = phpmail ] && grep -q "test@ornek.com" "$RUN/sendmail.log"'
+# Hoş geldin e-postası cron'u beklemeden (yanıt sonrası) gönderilir
+api "$J_ADM" PUT admin/settings/mail '{"on":true,"provider":"","fallback":true,"from":"noreply@yangpazar.com"}' -H "X-CSRF-Token: $CS_ADM"
+J_W="$RUN/w.jar"; CS_W=$(csrf_of "$J_W")
+api "$J_W" POST auth/register '{"name":"Hosgeldin_1","email":"hosgeldin@ornek.com","tel":"0555 999 88 77","ad":"Hoş","soyad":"Geldin","password":"Hosgeldin-Sifre-1"}' -H "X-CSRF-Token: $CS_W"
+sleep 1
+chk "hoş geldin e-postası cron beklenmeden gönderildi" '[ "$CODE" = 200 ] && grep -q "hosgeldin@ornek.com" "$RUN/sendmail.log" && [ "$(sq "SELECT status FROM yp_outbox WHERE to_addr='\''hosgeldin@ornek.com'\'' ORDER BY id DESC LIMIT 1")" = sent ]'
 api "$J_ADM" GET "admin/outbox?ch=mail" ""
 chk "gönderim kayıtları: doğrulama kodları maskeli" '[ "$CODE" = 200 ] && [ "$(j ".data.log | length")" -ge 4 ] && ! echo "$BODY" | jq -r ".data.log[] | select(.ev==\"tfa\") | .x" | grep -qE "[0-9]{6}"'
 api "$J_X" GET "cron?key=yanlis" ""

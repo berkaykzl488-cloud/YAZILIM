@@ -17,14 +17,52 @@ final class Outbox
     const PRIO_NORMAL = 5;
     const MAX_TRIES = 5;
 
+    /** Bu istekte kuyruğa giren olağan iletiler; yanıt gönderildikten sonra hemen denenir (Kernel::afterResponse). */
+    public static $fresh = [];
+
     public static function queue(Db $db, $channel, $userId, $to, $ev, $subject, $body, $priority = self::PRIO_NORMAL)
     {
         $now = yp_now_ms();
-        return $db->insert('outbox', [
+        $id = $db->insert('outbox', [
             'channel' => $channel, 'user_id' => $userId, 'to_addr' => yp_str($to, 190), 'ev' => yp_str($ev, 40),
             'subject' => yp_str($subject, 255), 'body' => (string)$body, 'priority' => (int)$priority,
             'status' => 'queued', 'tries' => 0, 'next_at' => $now, 'created_at' => $now,
         ]);
+        if ((int)$priority !== self::PRIO_OTP && count(self::$fresh) < 20) {
+            self::$fresh[] = (int)$id;
+        }
+        return $id;
+    }
+
+    /**
+     * Bu istekte kuyruğa giren olağan iletileri saatlik bütçe izin verdiği ölçüde hemen gönderir
+     * (hoş geldin, bildirim…). Gönderilemeyenler kuyrukta kalır, cron sonra dener.
+     */
+    public static function flushFresh(Db $db)
+    {
+        $ids = self::$fresh;
+        self::$fresh = [];
+        if (!$ids) {
+            return 0;
+        }
+        $hourly = [
+            'mail' => (int)(Settings::get('mail', $db)['hourly'] ?: 80),
+            'sms'  => (int)(Settings::get('sms', $db)['hourly'] ?: 60),
+        ];
+        $sent = 0;
+        foreach ($ids as $id) {
+            $row = $db->one("SELECT * FROM {outbox} WHERE id=? AND status='queued'", [$id]);
+            if (!$row || !isset($hourly[$row['channel']])) {
+                continue;
+            }
+            if (self::sentLastHour($db, $row['channel']) >= max(1, $hourly[$row['channel']])) {
+                continue;
+            }
+            if (self::sendRow($db, $row)) {
+                $sent++;
+            }
+        }
+        return $sent;
     }
 
     /** Tek satırı gönderir (önce 'sending' olarak sahiplenir). Dönüş: true = gönderildi */

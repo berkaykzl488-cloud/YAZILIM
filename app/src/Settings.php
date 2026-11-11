@@ -22,7 +22,7 @@ final class Settings
                 'tfaOn' => true,
             ],
             'mail' => [
-                'on' => false, 'provider' => '', 'from' => '', 'fromName' => '', 'hourly' => 80, 'fallback' => true,
+                'on' => false, 'provider' => '', 'from' => '', 'fromName' => '', 'hourly' => 80, 'fallback' => false,
                 'brevo_key' => '', 'mailjet_key' => '', 'mailjet_secret' => '',
                 'smtp_host' => '', 'smtp_port' => 587, 'smtp_sec' => 'tls', 'smtp_user' => '', 'smtp_pass' => '',
                 'ev' => ['welcome' => true, 'pass' => true],

@@ -148,15 +148,23 @@ final class Kernel
     private static function lazyCron(Db $db)
     {
         $finish = function_exists('litespeed_finish_request') ? 'litespeed_finish_request' : (function_exists('fastcgi_finish_request') ? 'fastcgi_finish_request' : null);
-        if (!$finish) {
-            return;
-        }
+        $fresh = !empty(\YP\Outbox::$fresh);
         try {
-            if (!Cron::late($db)) {
+            $late = Cron::late($db);
+            if (!$late && !$fresh) {
                 return;
             }
-            $finish();
-            Cron::run($db, 20, 'lazy');
+            if ($finish) {
+                $finish(); // yanıt kullanıcıya gitti; aşağısı arka planda çalışır
+            } elseif (!$fresh) {
+                return; // yanıtı kesemiyorsak gecikmeli cron'u çalıştırma (kullanıcı beklemesin)
+            }
+            if ($fresh) {
+                \YP\Outbox::flushFresh($db); // hoş geldin vb. iletiler cron'u beklemeden gitsin
+            }
+            if ($late && $finish) {
+                Cron::run($db, 20, 'lazy');
+            }
         } catch (\Throwable $e) {
             Log::write('hata', 'Gecikmeli cron: ' . $e->getMessage());
         }
