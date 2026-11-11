@@ -64,7 +64,7 @@ return [
             'status' => 'enum:bekliyor,onaylandı,reddedildi,basarisiz,suresi_doldu=bekliyor',
             'merchant_oid' => 'str:64?', 'expected' => 'bigint=0', 'paytr_total' => 'bigint?', 'paytr_payment' => 'bigint?', 'test_mode' => 'tinyint=0',
             'bank' => 'str:60=', 'crypto_net_id' => 'ref?', 'net_label' => 'str:90=', 'addr' => 'str:200=', 'txid' => 'str:160=', 'tx_at' => 'bigint?',
-            'note' => 'str:255=', 'receipt_media_id' => 'ref?', 'callbacks' => 'int=0', 'reason' => 'str:255=', 'journal_id' => 'ref?',
+            'note' => 'str:255=', 'receipt_media_id' => 'ref?', 'callbacks' => 'int=0', 'paytr_token' => 'str:255?', 'reason' => 'str:255=', 'journal_id' => 'ref?',
             'created_at' => 'bigint', 'decided_at' => 'bigint?', 'decided_by' => 'ref?',
         ],
         'unique' => [['merchant_oid']],
