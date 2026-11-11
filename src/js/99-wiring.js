@@ -183,6 +183,3 @@ CHG.etbisimg=async(el)=>{ const f=el.files&&el.files[0]; if(!f) return; if(f.siz
   if(!etbisImgOk(src)) return toast('Görsel okunamadı. PNG, JPG, GIF veya WEBP yükleyin.',true); etbisCfg().img=src; save(); toast('Karekod yüklendi.'); render(); };
 ACT['etbis-img-del']=()=>{ if(!can('ayar')) return; etbisCfg().img=''; save(); toast('Karekod kaldırıldı.'); render(); };
 ADM_FORM.etbisset='ayar'; ADM_CHG.etbispaste='ayar'; ADM_CHG.etbisimg='ayar'; ADM_ACT['etbis-img-del']='ayar';
-
-render();
-

@@ -340,8 +340,6 @@ function vSafe(){
 const PAGES={hakkimizda:['Hakkımızda','yangpazar.com, Metin2 oyuncularının item, won, yang, EP ve karakterlerini güvenle alıp sattığı bir ilan pazarıdır. Ürünleri biz satmayız; alıcı ile satıcıyı buluşturur, ödemeyi teslim onaylanana kadar güvence altında tutarız.'],kvkk:['KVKK Aydınlatma Metni','Bu alana şirketinizin 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamındaki aydınlatma metnini ekleyin. Metni bir hukukçuya hazırlatmanız önerilir.'],mesafeli:['Mesafeli Satış Sözleşmesi','Bu alana mesafeli satış sözleşmenizi ekleyin. Dijital ürünlerde cayma hakkının istisnaları ve aracı hizmet koşulları açıkça yazılmalıdır.'],iletisim:['İletişim','Destek: 7/24 canlı destek (sağ alttaki buton). WhatsApp: +90 5xx xxx xx xx. Adres ve vergi bilgilerinizi bu alana ekleyin.']};
 function vPage(k){const p=PAGES[k]; if(!p) return vNotFound(); return `<div class="wrap" style="max-width:760px"><div class="page-h"><h1>${p[0]}</h1></div><div class="panel panel-b" style="line-height:1.7">${esc(p[1]).replace('yangpazar.com',esc(S.set.siteName))}</div></div>`}
 function vNotFound(){return `<div class="wrap">${emptyBox('Sayfa bulunamadı','Aradığınız ilan kaldırılmış veya bağlantı hatalı olabilir.','<a class="btn btn-primary" href="#home">Ana sayfaya dön</a>')}</div>`}
-S = migrate(load()); VIP = S.vip; setTimeout(()=>tcHashFill().catch(()=>{}),0);
-if(window.__r9Save){ delete window.__r9Save; save(); } // R9: temizlenmiş üye metinleri hemen kalıcı olsun
 /* ================== reklam ver (görsel / video) ================== */
 function vAds(){
   const u=me(); const t=ui.adType; const P=S.packs[t]; const SZ=AD_SIZE[t]; const free=can('reklam');
