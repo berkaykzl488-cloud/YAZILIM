@@ -6,9 +6,8 @@
 let P_TFA=null, P_TFAT=null;
 const P_REF = () => { try{ return (localStorage.getItem('yangpazar_ref')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,40); }catch(e){ return ''; } };
 if(YP_PROD){
-const P_SOON_R = r => /^(ilan-ver$|siparis-|borsa$|metin2-ep$|cekilis$|reklam-ver$|mesajlar|ortaklik$|yang-fiyatlari$|widget-)/.test(r);
+const P_SOON_R = r => /^(siparis-|borsa$|metin2-ep$|cekilis$|reklam-ver$|mesajlar|ortaklik$|yang-fiyatlari$|widget-)/.test(r);
 const P_SOON_T = {
-  'ilan-ver':['İlan verme çok yakında','İlan verme ve satış bir sonraki güncellemeyle açılıyor.'],
   'siparis-':['Siparişler çok yakında','Güvenli havuzlu alışveriş bir sonraki güncellemeyle açılıyor.'],
   'borsa':['Yang Borsası çok yakında','Borsa alım ve satış emirleri sonraki güncellemelerde açılıyor.'],
   'metin2-ep':['EP mağazası çok yakında','Anında EP kodu satışı sonraki güncellemelerde açılıyor.'],
@@ -52,13 +51,13 @@ function pTfa(t,err){ if(t){ P_TFA=Object.assign({},t,{until:Date.now()+(+t.wait
   clearInterval(P_TFAT); P_TFAT=setInterval(()=>{ const b=$('#tfaRe'); if(!b||!P_TFA){ clearInterval(P_TFAT); return; } const x=wait(); if(x>0){ b.disabled=true; b.textContent=`Tekrar gönder (${x} sn)`; } else { b.disabled=false; b.textContent='Kodu tekrar gönder'; clearInterval(P_TFAT); } },1000); }
 
 /* ---- Hesabım ---- */
-const P_TABS=[['ozet','Özet'],['profil','Profil ve güvenlik'],['banka','Banka hesaplarım']];
+const P_TABS=[['ozet','Özet'],['ilan','İlanlarım'],['profil','Profil ve güvenlik'],['banka','Banka hesaplarım']];
 vAccount=function(){ const u=me(); if(!u) return `<div class="wrap">${emptyBox('Hesabınızı görmek için giriş yapın','','<button class="btn btn-primary" data-act="login">Giriş Yap</button>')}</div>`;
   if(!P_TABS.some(([k])=>k===ui.tab)) ui.tab=ui.tab==='cek'?'banka':'ozet';
   const IB=u.ibans||[]; const nn=S.notifs.filter(n=>n.u===u.id&&!n.read).length; let body='';
   if(ui.tab==='ozet') body=`<div class="kpis"><div class="kpi hl"><small>Toplam bakiye</small><b>${TL(avail(u))}</b><span class="muted" style="font-size:12px">Çekilebilir ${TL(u.bal)} · Sadece alışveriş ${TL(u.bonus||0)}</span></div><div class="kpi"><small>Puanınız</small><b>${NUM(u.pts)}</b></div><div class="kpi"><small>Okunmamış bildirim</small><b>${nn}</b></div></div>
-    <div class="note note-info">Hesabınız hazır. Alım satım, bakiye yükleme ve para çekme çok yakında açılıyor; açıldığında bildirim alacaksınız.</div>
-    <div class="hstack"><a class="btn" href="#bildirimler">Bildirimler</a><button class="btn" data-act="tab" data-t="profil">Profil ve güvenlik</button><button class="btn" data-act="tab" data-t="banka">Banka hesaplarım</button></div>
+    <div class="note note-info">Hesabınız hazır. İlan verebilir ve ilanlarınızı yönetebilirsiniz. Güvenli satın alma, bakiye yükleme ve para çekme çok yakında açılıyor; açıldığında bildirim alacaksınız.</div>
+    <div class="hstack"><a class="btn btn-primary" href="#ilan-ver">İlan ver</a><button class="btn" data-act="tab" data-t="ilan">İlanlarım</button><a class="btn" href="#bildirimler">Bildirimler</a><button class="btn" data-act="tab" data-t="profil">Profil ve güvenlik</button><button class="btn" data-act="tab" data-t="banka">Banka hesaplarım</button></div>
     <div class="panel panel-b stack"><div class="eyebrow">Davet kodunuz</div><div class="cprow"><span><b class="mono" style="font-size:16px">${esc(u.refCode||refCode(u))}</b><br><span class="muted" style="font-size:12px">Arkadaşlarınız üye olurken bu kodu yazabilir.</span></span><button class="btn btn-sm" data-act="copy" data-v="${esc(u.refCode||refCode(u))}">Kodu kopyala</button></div></div>`;
   if(ui.tab==='profil'){ const tp=tfaPanel(u).replace(/id="tf_sms"/,API.smsOn?'id="tf_sms"':'id="tf_sms" disabled').replace(/(<b>SMS ile kod<\/b><span>)[^<]*/,API.smsOn?'$1'+esc(u.tel?maskTel(u.tel):'Önce telefon ekleyin'):'$1SMS gönderimi henüz açık değil');
     body=`<div class="panel panel-b"><form class="stack" data-form="profile" style="max-width:520px"><div class="note note-info">Ad, soyad ve telefonunuz diğer üyelere gösterilmez.</div>
@@ -67,6 +66,7 @@ vAccount=function(){ const u=me(); if(!u) return `<div class="wrap">${emptyBox('
     <div class="row2"><div class="fld"><label for="pf_pass">Yeni şifre (değiştirmek için)</label><input class="inp" id="pf_pass" type="password" autocomplete="new-password" minlength="${u.admin||u.staff?10:8}"></div><div class="fld"><label for="pf_cur">Mevcut şifre</label><input class="inp" id="pf_cur" type="password" autocomplete="current-password"><span class="muted" style="font-size:12px">Şifre veya e-posta değiştirirken gerekir.</span></div></div>
     <button class="btn btn-primary">Bilgilerimi kaydet</button></form></div>${tp}
     <div class="panel panel-b hstack" style="justify-content:space-between;max-width:560px"><span class="muted" style="font-size:13px">Bu cihazdaki oturumu kapatın.</span><button class="btn" data-act="logout">Çıkış yap</button></div>`; }
+  if(ui.tab==='ilan') body=pMyListings(u);
   if(ui.tab==='banka') body=`<div class="panel"><div class="panel-h"><h3>Kayıtlı IBAN'larım</h3><span class="muted" style="font-size:12px">En fazla 5 hesap</span></div><div class="panel-b stack">
     <div class="note note-info">IBAN'lar şifreli saklanır ve size maskeli gösterilir. Hesap sizin adınıza olmalıdır. Para çekme çok yakında açılıyor.</div>
     ${IB.map(b=>`<div class="cprow"><span><b>${esc(b.bank)}</b> · ${esc(b.name)}<br><span class="mono">${esc(b.iban)}</span></span><button class="btn btn-sm btn-bad" data-act="iban-del" data-id="${esc(b.id)}">Sil</button></div>`).join('')||'<span class="muted">Kayıtlı IBAN yok.</span>'}
@@ -75,7 +75,7 @@ vAccount=function(){ const u=me(); if(!u) return `<div class="wrap">${emptyBox('
   <div class="acc"><div class="stack" style="gap:12px"><nav class="panel tabs">${P_TABS.map(([k,t])=>`<button data-act="tab" data-t="${k}" class="${ui.tab===k?'on':''}">${t}</button>`).join('')}</nav></div><div class="stack">${body}</div></div></div>`; };
 
 /* ---- Yönetim ---- */
-const P_ADM = {panel:1, ara:1, uye:['uyeler'], calisan:1, sms:1};
+const P_ADM = {panel:1, ara:1, uye:['uyeler'], calisan:1, sms:1, ilan:1, server:1, bakim:1};
 function pAdmPage(P,it,fn){ const SB=admSubs(it); const sub=P.sub&&SB.some(s=>s.s===P.sub)?P.sub:(SB[0]||{}).s||null; if(sub) (ui.asub=ui.asub||{})[it.k]=sub; ui.atab=it.k; ui.admDirty=false;
   const r=fn(sub)||{}; return admShell({P:Object.assign({},P,{k:it.k}),it,sub,page:aPage({title:it.l,desc:r.desc!=null?r.desc:it.desc,actions:r.actions||'',subs:aSubs(it,sub),body:`<div class="stack">${r.body||''}</div>`}),over:''}); }
 const pAdmLoad = (k,path,fn,ttl) => need(k, ()=>call('GET',path,null,{quiet:true}).then(j=>fn?fn(j.data):j.data), ttl);

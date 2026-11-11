@@ -60,6 +60,11 @@ function apiApplyBoot(b){ if(!b) return; API.csrf=b.csrf||API.csrf; if(b.now) AP
   if(b.permLabels) API.permLabels=b.permLabels;
   S.notifs=[]; API.lastN=0; apiMergeNotifs(b.notifs||[]); API.unread=b.unread||{n:0};
   const keep=S.users.filter(u=>u.id!==S.cur); S.users=keep; S.cur=null; if(b.me) apiSetMe(b.me);
+  // P1 katalog: serverlar (n: kategori bazında aktif ilan sayısı), hazır ilan görselleri, ilk ilan sayfası + satıcıları
+  if(Array.isArray(b.servers)) S.servers=b.servers;
+  if(b.covers&&typeof b.covers==='object'&&!Array.isArray(b.covers)) S.covers=b.covers; else S.covers={};
+  if(Array.isArray(b.users)) b.users.forEach(apiUpsertUser);
+  if(Array.isArray(b.listings)){ S.listings=b.listings; API.homeNext=b.listingsNext||null; }
   apiPollStart(); }
 async function apiReboot(quiet){ const j=await call('GET','boot',null,{quiet:!!quiet}); API.cache={}; apiApplyBoot(j.data); return j.data; }
 /** Sunucu oturumu kapattı (401): yerel oturumu kapat, ziyaretçi olarak devam et. */
