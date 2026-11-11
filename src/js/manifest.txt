@@ -6,6 +6,8 @@
 demo/seed.js
 prod/demo-stub.js
 01-state.js
+prod/05-api.js
+prod/06-adapter.js
 02-domain.js
 30-wallet-egp.js
 40-views-public.js
@@ -29,3 +31,6 @@ demo/posts.js
 91-seo2-mkt.js
 95-router.js
 99-wiring.js
+prod/97-p0b-views.js
+prod/98-p0b-actions.js
+99z-start.js

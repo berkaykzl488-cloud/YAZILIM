@@ -19,7 +19,8 @@ use YP\V;
 @ini_set('display_errors', '0');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
-header('Referrer-Policy: no-referrer');
+// same-origin: no-referrer iken tarayıcılar form POST'larında "Origin: null" gönderir ve aşağıdaki köken denetimi her adımı reddeder.
+header('Referrer-Policy: same-origin');
 header('Cache-Control: no-store, max-age=0');
 header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
 header_remove('X-Powered-By');

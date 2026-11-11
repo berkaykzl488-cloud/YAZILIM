@@ -29,18 +29,25 @@ Sunucunuzun varsayılan karakter seti latin1. Bunu değiştirmenize gerek yok: k
 
 ## 3. Dosyaları yükleyin
 
-1. cPanel › **File Manager** › `test.yangpazar.com` klasörünü açın.
-2. Paketi (zip) **Upload** ile yükleyin, sonra sağ tıklayıp **Extract** deyin. Klasörde şunlar olmalı:
-   `app/`, `api/`, `kurulum/`, `storage/`, `uploads/`, `.htaccess`, `index.html`.
+Size iki dosya verilir: **`yangpazar-site-<sürüm>.zip`** (site paketi) ve **`yangpazar-site-<sürüm>-KURULUM-KODU.txt`**
+(tek kullanımlık kurulum kodu). Kod dosyasını sunucuya **yüklemeyin**; içindeki kodu bir yere not edin, 4. adımda gerekecek.
+
+1. cPanel › **File Manager** › `test.yangpazar.com` klasörünü açın (tam yolu `/home/KULLANICI/test.yangpazar.com`).
+   Klasörde cPanel'in koyduğu boş bir `index.html` ya da `cgi-bin` varsa `index.html`'i silebilirsiniz.
+2. Zip dosyasını **Upload** ile yükleyin, sonra zip'e sağ tıklayıp **Extract** deyin (klasör olarak yine `test.yangpazar.com` seçili kalsın).
+   Klasörde şunlar olmalı: `app/`, `api/`, `assets/`, `kurulum/`, `storage/`, `uploads/`, `.htaccess`, `index.php`.
    - Gizli dosyaları görmek için File Manager › sağ üst **Settings** › **Show Hidden Files**.
      `.htaccess` dosyası mutlaka yüklenmiş olmalı.
+   - Açtıktan sonra zip dosyasını silebilirsiniz.
 3. `storage` ve `uploads` klasörlerine sağ tıklayıp **Change Permissions** ile izni **755** yapın.
 
 `app/` ve `storage/` klasörleri dışarıdan açılmaz. Şifreler ve veritabanı bilgileri `storage/` içinde şifreli durur.
 
+Kurulum bitmeden `https://test.yangpazar.com` adresini açarsanız site sizi kendiliğinden kurulum sihirbazına götürür.
+
 ## 4. Kurulum sihirbazı: `https://test.yangpazar.com/kurulum/`
 
-1. **Kurulum kodu:** Paket bir kurulum koduyla geldiyse önce onu yazın. Böylece paketi yükledikten sonra kurulumu sizden önce başkası yapamaz.
+1. **Kurulum kodu:** `KURULUM-KODU.txt` dosyasındaki kodu yazın (büyük harf ve rakamlardan oluşur). Böylece paketi yükledikten sonra kurulumu sizden önce başkası yapamaz.
 2. **Ortam denetimi:** Kırmızı ✗ varsa yanındaki açıklamayı uygulayın (genellikle cPanel › **Select PHP Version** › Extensions).
    Turuncu ! işaretleri zorunlu değildir. Yükleme sınırı küçükse cPanel › **MultiPHP INI Editor**'den
    `upload_max_filesize` ve `post_max_size` değerlerini 64M yapın.
@@ -92,18 +99,20 @@ Doğrulama kodları ve bildirim e-postaları Brevo üzerinden gönderilir. Hosti
    sonra Brevo'da **Authenticate**'e basın.
 4. **API anahtarı:** Sağ üstte hesap adınız › **SMTP & API** › **API Keys** sekmesi › **Generate a new API key**.
    Ad olarak `yangpazar-site` yazın. Anahtar `xkeysib-…` ile başlar ve **yalnız bir kez** gösterilir; kopyalayın.
-5. **Siteye girin:** Siteye yönetici olarak giriş yapın › Yönetim › **E-posta & SMS**:
-   - Sağlayıcı: **Brevo (API)**, API anahtarını yapıştırın
-   - Gönderen adresi: `noreply@yangpazar.com` (Brevo'da onayladığınız adres)
-   - **E-posta gönderimi açık** kutusunu işaretleyip kaydedin
-   - **Deneme e-postası gönder** ile kendi adresinize bir deneme gönderin.
+5. **Siteye girin:** Siteye yönetici olarak giriş yapın › Yönetim › **E-posta & SMS** › **E-posta ayarları**:
+   - Sağlayıcı: **Brevo API (önerilir)**, **Brevo API anahtarı** kutusuna anahtarı yapıştırın
+   - Gönderen adı: `yangpazar`, gönderen adresi: `noreply@yangpazar.com` (Brevo'da onayladığınız adres)
+   - **E-posta gönderimi açık** kutusunu işaretleyip **E-posta ayarlarını kaydet**
+   - Kaydettikten sonra anahtar kutusu boş görünür, altında "Kayıtlı: ••••…" yazar. Bu normaldir: anahtar sunucuda şifreli saklanır
+     ve güvenlik için ekrana bir daha getirilmez. Değiştirmek isterseniz yeni anahtarı yazıp kaydedin; boş bırakırsanız eskisi kalır.
+   - Aynı sayfadaki **Deneme e-postası gönder** ile kendi adresinize bir deneme gönderin. Sonucu **Gönderim kayıtları** sekmesinde de görürsünüz.
+   - Mailjet kullanacaksanız sağlayıcıyı **Mailjet API** seçin; API Key ve Secret Key kutuları çıkar.
 6. Deneme "IP adresi tanınmadı" (unrecognised IP) hatası verirse: Brevo › hesap adınız › **Security** › **Authorised IPs**.
    Sunucunuzun IP'sini ekleyin ya da bu korumayı kapatın. Sunucu IP'si cPanel ana sayfasında sağda "Shared IP Address" olarak yazar.
 
 Ücretsiz plan günde 300 e-posta gönderir. Panelde "saatlik sınır" ayarı olağan e-postaları yavaşlatır (varsayılan saatte 80).
 Doğrulama kodları bu sınırı beklemeden hemen gider.
 
-Yönetim panelindeki bu ekranın görünümü bir sonraki ön yüz güncellemesiyle gelecek. Sunucu tarafı hazır.
 
 ## 8. 2 adımlı doğrulama (isteğe bağlı)
 
@@ -112,9 +121,19 @@ yönetici hesabınızda **e-posta ile 2 adımlı doğrulamayı** açmanızı ön
 
 SMS ile doğrulama NetGSM'e hazırlandı ama henüz gerçek NetGSM hesabıyla denenmedi. NetGSM bilgileri girilene kadar SMS seçeneği kapalı kalır.
 
+## 9. Bu sürümde neler çalışıyor
+
+- Üye olma, giriş/çıkış, 2 adımlı doğrulama, **Hesabım** (profil, şifre, IBAN'lar), bildirimler (sayfa açıkken birkaç saniyede bir kendiliğinden yenilenir).
+- Yönetim: **Bugün** (üye sayıları), **Üyeler** (arama, detay, doğrulama, askıya alma), **Çalışanlar & yetkiler**, **E-posta & SMS**.
+- İlanlar, siparişler, bakiye yükleme, para çekme, borsa, EP, reklam ve kampanyalar sonraki güncellemelerde açılacak; bu sayfalarda
+  şimdilik "Yakında" yazar. Demo hesap seçici ve "Demo verilerini sıfırla" düğmesi gerçek sitede yoktur.
+- Askıya aldığınız bir üye o an sitedeyse oturumu birkaç saniye içinde kapanır ve tekrar giriş yapamaz.
+
 ## Sorun olursa
 
-- **"Site henüz kurulmadı"**: Kurulum sihirbazı bitmemiş. `/kurulum/` adresinden devam edin.
+- **"Site henüz kurulmadı"** ya da site açılınca kurulum sayfası geliyor: Kurulum sihirbazı bitmemiş. `/kurulum/` adresinden devam edin.
+- **"Kurulum kodu eşleşmedi"**: Kodu `KURULUM-KODU.txt` dosyasından aynen (büyük harflerle) yazın. Her paketin kodu farklıdır;
+  yüklediğiniz zip ile aynı adı taşıyan kod dosyasını kullanın.
 - **Veritabanı "Access denied"**: 2. adımın 4. maddesinde kullanıcıyı veritabanına eklemeyi unutmuş olabilirsiniz (ALL PRIVILEGES).
 - **Kurulumu baştan yapmak**: File Manager'da `storage` klasöründeki `db.php` ve `kurulum_durum.php` dosyalarını silin.
   Kurulum tamamlandıysa `kurulum_tamam.php` dosyasını da silin, cPanel › **phpMyAdmin**'de `yp_` ile başlayan tabloları kaldırın.
