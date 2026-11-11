@@ -10,6 +10,10 @@ const API = { csrf: '', base: (window.YP_BASE || '/') + 'api/v1/', skew: 0, live
 function apiKey(){ try{ if(window.crypto&&crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
   const b=new Uint8Array(16); try{ crypto.getRandomValues(b); }catch(e){ for(let i=0;i<16;i++) b[i]=Math.floor(Math.random()*256); }
   b[6]=(b[6]&15)|64; b[8]=(b[8]&63)|128; const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join(''); return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20); }
+/** Sunucu yönlendirme (.htaccess) kurallarına bağımlı olmamak için her istek ön denetleyiciye doğrudan gider:
+ *  /api/v1/index.php?r=<yol>&<sorgu>. Bazı paylaşımlı hostinglerde alt klasör rewrite kuralları çalışmıyor. */
+function apiUrl(path){ const i=String(path).indexOf('?'); const p=i<0?path:path.slice(0,i), q=i<0?'':path.slice(i+1);
+  return API.base+'index.php?r='+encodeURIComponent(p)+(q?'&'+q:''); }
 const API_MSG = { net:'Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edin.', bad:'Sunucudan beklenmeyen bir yanıt geldi. Lütfen tekrar deneyin.' };
 /** İlk hata alanını (fields) kullanıcıya gösterilecek metne çevirir. */
 const apiErr = j => (j && j.fields && Object.values(j.fields).filter(Boolean)[0]) || (j && j.error) || API_MSG.bad;
@@ -18,7 +22,7 @@ async function call(method, path, body, opt){ opt=opt||{};
   if(method!=='GET'){ h['X-CSRF-Token']=API.csrf||''; h['Idempotency-Key']=opt.key||apiKey(); }
   if(body&&!(body instanceof FormData)) h['Content-Type']='application/json';
   let r=null, j=null;
-  try{ r=await fetch(API.base+path,{method,headers:h,credentials:'same-origin',cache:'no-store',body:body instanceof FormData?body:(body?JSON.stringify(body):undefined)}); }
+  try{ r=await fetch(apiUrl(path),{method,headers:h,credentials:'same-origin',cache:'no-store',body:body instanceof FormData?body:(body?JSON.stringify(body):undefined)}); }
   catch(e){ j={ok:false,error:API_MSG.net,code:'network',http:0}; }
   if(r){ try{ j=await r.json(); }catch(e){ j={ok:false,error:API_MSG.bad,code:'bad_json'}; } j.http=r.status; }
   if(j.patch) applyPatch(j.patch);

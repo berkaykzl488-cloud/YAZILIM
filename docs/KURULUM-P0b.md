@@ -76,7 +76,7 @@ Cron, e-posta kuyruğunu gönderir ve temizlik yapar. Sonraki sürümlerde otoma
    Sondaki `>/dev/null 2>&1`, cron'un size her 5 dakikada bir e-posta atmasını engeller.
 4. **Add New Cron Job**.
 
-Hostinginiz cron vermiyorsa, son sayfadaki `https://test.yangpazar.com/api/v1/cron?key=…` adresini
+Hostinginiz cron vermiyorsa, son sayfadaki `https://test.yangpazar.com/api/v1/index.php?r=cron&key=…` adresini
 cron-job.org'a 5 dakikalık aralıkla ekleyin. Bu adresteki anahtar gizlidir; kimseyle paylaşmayın.
 
 ## 6. PayTR Bildirim URL

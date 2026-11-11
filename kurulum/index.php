@@ -461,7 +461,7 @@ $S = ['csrf' => bin2hex(random_bytes(32))];
 
 $cronPath = realpath(YP_APP . '/cron.php') ?: (YP_APP . '/cron.php');
 $cronCmd = '/usr/local/bin/php ' . $cronPath . ' >/dev/null 2>&1';
-$cronUrl = $siteUrl . '/api/v1/cron?key=' . $app['cron_key'];
+$cronUrl = $siteUrl . '/api/v1/index.php?r=cron&key=' . $app['cron_key'];
 $paytr = $siteUrl . '/api/paytr_bildirim.php';
 kur_page('Kurulum tamamlandı', '<div class="note good"><b>Tebrikler!</b> Site kuruldu ve bu sihirbaz kilitlendi. Bu sayfadaki bilgileri bir yere not edin; sayfa bir daha açılmayacak.</div>'
     . '<div class="card"><h2>1. Cron (zamanlanmış görev)</h2><p>cPanel › <b>Cron Jobs</b> › Common Settings: <b>Once Per Five Minutes (*/5 * * * *)</b> seçin ve Command alanına şunu yapıştırın:</p>'
