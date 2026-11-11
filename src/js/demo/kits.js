@@ -2672,6 +2672,10 @@ DirectoryIndex durum.php
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^data(/|$) - [F,L]
+    # API v1 (api/v1/.htaccess yoksa yedek)
+    RewriteRule ^v1/?$ v1/index.php [QSA,L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^v1/(.+)$ v1/index.php [QSA,L]
 </IfModule>
 
 <FilesMatch "^(_lib|parasut_client|bizimhesap_client)\.php$|\.(md|log|json|lock)$">

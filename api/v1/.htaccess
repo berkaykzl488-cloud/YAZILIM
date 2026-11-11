@@ -1,0 +1,11 @@
+# yangpazar API v1 · bu dosyada düzenlenecek bir şey yoktur.
+# /api/v1/* isteklerini index.php'ye yönlendirir. (Üst klasördeki api/.htaccess kendi
+# RewriteEngine'ini açtığı için kökteki kurallar burada geçerli olmaz; bu dosya şarttır.)
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
