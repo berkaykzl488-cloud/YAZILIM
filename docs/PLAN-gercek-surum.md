@@ -628,3 +628,9 @@ Sahibin kararları ayrı bölümde, sade Türkçe. En önemlileri: çekiliş mev
 3. **Çekiliş ve şans çarkı:** Gerçek sürümde AÇIK başlayacak (hukuki risk sahibe ait; panelden kapatılabilir kalmalı).
 4. **Borsa oyun hesabı şifresi:** Devam — şifreli saklama, yalnız `borsa` yetkilisine gösterim, her gösterim audit, işlem bitince (ve 7 gün güvenlik ağıyla) silinir.
 Henüz bekleyenler: hosting limitleri (e-posta/saat, cron sıklığı, yükleme sınırı, MariaDB sürümü), SMS sağlayıcısı, teslim kanıtı saklama süresi, mali müşavir onayı, canlı destek yapay zekâsı, demo adresi ve açılış haftası çekim sınırı.
+
+## 10. PayTR en sona (sahip kararı, 2026-11-11)
+PayTR mağaza başvurusu "satışa hazır" site istediği için PayTR en son bağlanacak.
+- P2'de PayTR akışı yazılır ve sahte bildirimlerle test edilir; PayTR ayarı yoksa kart/PayTR seçenekleri üyelere gösterilmez.
+- Test sitesinde bakiye, manuel havale/EFT yüklemesi (yönetici onaylı) veya yönetici bakiye düzeltmesiyle yüklenir; havuzlu satış akışı uçtan uca böyle denenir.
+- PayTR başvurusundan önce hazır olması gerekenler (P7/P8'de tamamlanacak): SSL, KVKK aydınlatma metni, mesafeli satış sözleşmesi, iade/iptal koşulları, gizlilik politikası, hakkımızda/iletişim (şirket unvanı, adres, VKN/MERSİS, telefon, e-posta), ETBİS kaydı ve rozeti, çalışan ürün/ilan sayfaları ve sepet/ödeme akışı.
