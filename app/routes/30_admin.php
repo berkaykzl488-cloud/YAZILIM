@@ -219,7 +219,9 @@ return function (Router $r) {
         $u = Auth::$user;
         $day = (new \DateTime('today', new \DateTimeZone('Europe/Istanbul')))->getTimestamp() * 1000;
         $out = [
-            'queues' => ['deps' => 0, 'wd' => 0, 'orders' => 0, 'disputes' => 0, 'tickets' => 0, 'listings' => 0, 'ex' => 0, 'flagged' => 0],
+            'queues' => ['deps' => 0, 'wd' => 0, 'orders' => 0, 'disputes' => 0, 'tickets' => 0, 'ex' => 0,
+                'listings' => (int)$db->val("SELECT COUNT(*) FROM {listings} WHERE status='beklemede'"),
+                'flagged' => (int)$db->val('SELECT COUNT(*) FROM {flagged} WHERE seen=0')],
             'outbox' => ['queued' => (int)$db->val("SELECT COUNT(*) FROM {outbox} WHERE status='queued'"),
                          'failed' => (int)$db->val("SELECT COUNT(*) FROM {outbox} WHERE status='failed'")],
         ];
@@ -245,11 +247,16 @@ return function (Router $r) {
                 [$like, '%' . Text::likeEscape(strtolower($s)) . '%']);
         }
         $canSee = Perm::has(Auth::$user, 'uye');
+        $listings = [];
+        if (yp_strlen($s) >= 2) {
+            list($rows) = \YP\Catalog::query($db, ['q' => $s, 'status' => ['aktif', 'beklemede', 'satildi', 'kaldirildi']], 8);
+            list($listings) = \YP\Catalog::presentMany($db, $rows);
+        }
         return ['data' => [
             'users' => array_map(function ($u) use ($db, $canSee) {
                 return $canSee ? Present::staffUser($db, $u) : Present::publicUser($u);
             }, $users),
-            'orders' => [], 'listings' => [], 'withdrawals' => [], // P1–P3
+            'orders' => [], 'listings' => $listings, 'withdrawals' => [], // P2–P3
         ]];
     }, $S('ara'));
 };

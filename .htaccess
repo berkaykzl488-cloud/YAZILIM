@@ -26,6 +26,18 @@ ServerSignature Off
   # API v1 ön denetleyicisi
   RewriteRule ^api/v1/?$ api/v1/index.php [QSA,L]
   RewriteRule ^api/v1/(.+)$ api/v1/index.php [QSA,L]
+
+  # SEO dosyaları: cron bunları site köküne GERÇEK DOSYA olarak yazar (rewrite gerekmez); dosya henüz yoksa API üretir
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^sitemap\.xml$ api/v1/index.php?r=seo/sitemap.xml [L,QSA]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^robots\.txt$ api/v1/index.php?r=seo/robots.txt [L,QSA]
+
+  # Temiz adresler (/server/…, /ilan/…, /metin2-tr …) → index.php (sunucu tarafı başlık/meta + uygulama).
+  # Çalışmayan sunucularda aynı sayfa /index.php?p=ilan/… ile açılır.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(?!api/|kurulum/|uploads/|assets/)[A-Za-z0-9][A-Za-z0-9_/\-]*/?$ index.php [L,QSA]
 </IfModule>
 
 # mod_rewrite yoksa bile klasörler kapalı kalsın (Apache 2.4 / LiteSpeed)

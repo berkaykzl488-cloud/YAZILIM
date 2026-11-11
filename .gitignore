@@ -7,3 +7,6 @@ storage/*
 uploads/*
 !uploads/.htaccess
 !uploads/index.php
+# cron'un site köküne yazdığı SEO dosyaları
+/sitemap.xml
+/robots.txt

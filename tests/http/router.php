@@ -13,6 +13,20 @@ if (preg_match('#^/(app|storage|tests|tools|docs)(/|$)#', $uri) || preg_match('#
     echo 'Forbidden';
     return true;
 }
+// uploads/: yalnız görsel/video (uploads/.htaccess karşılığı)
+if (preg_match('#^/uploads/#', $uri) && preg_match('#\.(php[0-9]?|phtml|phar|pht|phps|cgi|pl|py|sh|shtml|htaccess|html?|svgz?|js|xml)$#i', $uri)) {
+    http_response_code(403);
+    echo 'Forbidden';
+    return true;
+}
+// sitemap.xml / robots.txt: dosya yoksa API üretir (kök .htaccess karşılığı)
+if (in_array($uri, ['/sitemap.xml', '/robots.txt'], true) && !is_file($root . $uri)) {
+    $_GET['r'] = 'seo' . $uri;
+    $_SERVER['SCRIPT_NAME'] = '/api/v1/index.php';
+    $_SERVER['REQUEST_URI'] = '/api/v1/index.php?r=seo' . $uri;
+    require $root . '/api/v1/index.php';
+    return true;
+}
 if (preg_match('#^/api/v1(/|$)#', $uri)) {
     $_SERVER['SCRIPT_NAME'] = '/api/v1/index.php';
     require $root . '/api/v1/index.php';

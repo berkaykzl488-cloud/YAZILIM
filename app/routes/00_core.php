@@ -3,6 +3,7 @@
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 use YP\Auth;
+use YP\Catalog;
 use YP\Cron;
 use YP\Db;
 use YP\Http\HttpError;
@@ -28,6 +29,12 @@ return function (Router $r) {
             'notifs' => [],
             'unread' => ['n' => 0],
         ];
+        // P1 katalog: serverlar (kategori bazında aktif ilan sayılarıyla: n), hazır ilan görselleri, ilk ilan sayfası + satıcıları
+        $data['servers'] = Catalog::servers($db);
+        $data['covers'] = Catalog::covers($db);
+        list($rows, $next) = Catalog::query($db, ['sort' => 'yeni'], 24);
+        list($data['listings'], $data['users']) = Catalog::presentMany($db, $rows);
+        $data['listingsNext'] = $next;
         if ($u) {
             $rows = $db->all('SELECT * FROM {notifications} WHERE user_id=? ORDER BY id DESC LIMIT 50', [(int)$u['id']]);
             $data['notifs'] = array_map([Present::class, 'notif'], $rows);

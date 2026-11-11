@@ -1,6 +1,6 @@
 <?php
 /**
- * P0b birim testleri (PHPUnit gerekmez). SQLite bellek içi veritabanı + geçici storage klasörü.
+ * P0b + P1 birim testleri (PHPUnit gerekmez). SQLite bellek içi veritabanı + geçici storage klasörü.
  * Çalıştırma:  php tests/run.php            (hepsi)
  *              php tests/run.php smtp outbox  (yalnız adı eşleşen bölümler)
  */
@@ -12,7 +12,9 @@ ini_set('display_errors', '1');
 
 $TMP = sys_get_temp_dir() . '/yp-unit-' . getmypid() . '-' . bin2hex(random_bytes(3));
 mkdir($TMP . '/storage', 0700, true);
+mkdir($TMP . '/public', 0755, true);
 define('YP_STORAGE', $TMP . '/storage');
+define('YP_PUBLIC', $TMP . '/public'); // uploads/, sitemap.xml, robots.txt (deponun köküne yazılmasın)
 require dirname(__DIR__) . '/app/bootstrap.php';
 register_shutdown_function(function () use ($TMP) {
     exec('rm -rf ' . escapeshellarg($TMP));
@@ -850,6 +852,8 @@ section('store', function () {
     }
     ok('tüm app/ dosyalarında doğrudan çağrı koruması', !$guard, $guard);
 });
+
+require __DIR__ . '/unit_p1.php';
 
 echo "\nSONUÇ (birim): $PASS geçti, $FAIL kaldı\n";
 exit($FAIL ? 1 : 0);

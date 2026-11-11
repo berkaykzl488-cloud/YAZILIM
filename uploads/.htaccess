@@ -1,9 +1,14 @@
-# Yüklenen dosyalar asla program olarak çalıştırılmaz.
+# Yüklenen dosyalar asla program olarak çalıştırılmaz; yalnız görsel/video uzantıları sunulur.
 Options -Indexes -ExecCGI
-<FilesMatch "(?i)\.(php[0-9]?|phtml|phar|pht|phps|cgi|pl|py|sh|shtml|htaccess)$">
+<FilesMatch "(?i)\.(php[0-9]?|phtml|phar|pht|phps|cgi|pl|py|sh|shtml|htaccess|html?|svgz?|js|xml)$">
   Require all denied
 </FilesMatch>
 <IfModule mod_mime.c>
   RemoveHandler .php .phtml .phar .php5 .php7 .php8
   RemoveType .php .phtml .phar
+</IfModule>
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Content-Security-Policy "default-src 'none'; img-src 'self'; media-src 'self'; sandbox"
+  Header set Cache-Control "public, max-age=2592000, immutable"
 </IfModule>

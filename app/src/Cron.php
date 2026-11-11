@@ -26,7 +26,19 @@ final class Cron
                 $r['notifs'] = $db->exec('DELETE FROM {notifications} WHERE is_read=1 AND t<?', [$now - 180 * 86400000]);
                 $r['outbox'] = $db->exec("DELETE FROM {outbox} WHERE status IN ('sent','failed') AND created_at<?", [$now - 90 * 86400000]);
                 RateLimit::gc();
+                $r['media'] = Media::cleanupOrphans($db);
                 return $r;
+            }],
+            // sitemap.xml + robots.txt site köküne: katalog değiştiyse en çok 10 dakikada bir, değişmese de günde bir
+            'seo' => [0, function (Db $db, $deadline) {
+                $f = Media::publicRoot() . '/sitemap.xml';
+                clearstatcache(true, $f);
+                $gen = is_file($f) ? (int)filemtime($f) * 1000 : 0;
+                $now = (int)floor(microtime(true) * 1000);
+                if ($gen && ($now - $gen < 600000 || (Seo::changedAt($db) < $gen && $now - $gen < 86400000))) {
+                    return ['skip' => true];
+                }
+                return Seo::writeFiles($db);
             }],
             // P2+: autoconfirm, deposit_expiry, accounting_jobs, ad_stats; saatlik hakediş; günlük yedek ve defter denetimi
         ];
