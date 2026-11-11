@@ -17,6 +17,9 @@ const p1UpS = L => p1Up(S.servers, L);
 const p1UpU = L => (L || []).forEach(apiUpsertUser);
 const p1Act = l => l && l.status === 'aktif' && l.stock > 0;
 const p1Err = d => d && d.err ? `<div class="note note-bad">${esc(d.err)}</div>` : '';
+const p1It = x => typeof x === 'string' ? { url: x, st: 'ok' } : x;
+const p1AdmLoad = (k, path, fn, ttl) => need(k, () => call('GET', path, null, { quiet: true }).then(j => fn ? fn(j.data) : j.data), ttl);
+const p1AdmSrv = () => { const c = API.cache['adm:servers']; return c && c.v && Array.isArray(c.v.servers) ? c.v.servers : []; };
 const P1_SORT = [['yeni', 'En yeni'], ['ucuz', 'En ucuz'], ['pahali', 'En pahalı'], ['eski', 'En eski']];
 const P1_SOON = {
   buy: 'Güvenli satın alma (ödeme havuzu) çok yakında açılıyor. Şimdilik ilanları inceleyebilir, kendi ilanınızı verebilirsiniz.',
@@ -73,7 +76,7 @@ if (YP_PROD) {
 
 /* ================= görünüm sarmalayıcıları ================= */
 /* rota değişince liste/ilan/profil dilimleri yenilenir (her ziyaret sunucudan; görüntülenme sayılır) */
-{ const r0 = render; render = function () { const r = route(); if (r !== P1.last) { const prev = P1.last; P1.last = r; if (prev !== null) needDrop('L', 'lst', 'usr', 'me:lst'); } return r0.apply(this, arguments); }; }
+{ const r0 = render; render = function () { const r = route(); if (r !== P1.last) { const prev = P1.last; P1.last = r; if (prev !== null) { needDrop('L', 'lst', 'usr', 'me:lst'); Object.keys(API.cache).forEach(k => { if (k.indexOf('adm:lst') === 0) API.cache[k].t = 0; }); } } return r0.apply(this, arguments); }; }
 /* yeni rota: satıcı profili */
 { const v0 = view; view = function (r) { if (/^uye-u[0-9]+$/.test(r) && !API.booting && !(maintOn() && !isPanel())) { if (ui.lastView !== 'uye') { ui.f = {}; ui.lastView = 'uye'; } return pProfile(r.slice(4)); } return v0(r); }; }
 
@@ -214,7 +217,6 @@ function pMyListings(u) {
     return h; }; }
 
 /* fotoğraf yükleme alanı (önce yükle): her dosyanın ilerlemesi / hatası ayrı gösterilir */
-const p1It = x => typeof x === 'string' ? { url: x, st: 'ok' } : x;
 pupThumbs = function (p) { const L = UPL[p] || [];
   return L.map((x, i) => { const it = p1It(x); const st = it.st || 'ok';
     return `<div class="pup-t ${i === 0 ? 'cov' : ''} ${st !== 'ok' ? 'p1-' + st : ''}" data-pk="${esc(p + ':' + (it.k || 'i' + i))}" title="${esc(it.info || it.name || '')}"><img src="${esc(it.url)}" alt="Fotoğraf ${i + 1}">${st === 'up' ? `<span class="p1-prog"><i style="width:${+it.pct || 0}%"></i></span><span class="p1-st">${it.pct ? 'Yükleniyor %' + it.pct : 'Hazırlanıyor…'}</span>` : st === 'err' ? `<span class="p1-st bad" role="alert">${esc(it.err || 'Yüklenemedi')}</span>` : ''}${i === 0 ? '<span class="pup-b">Kapak</span>' : `<button type="button" class="pup-c" data-act="pupcov" data-p="${p}" data-i="${i}" title="Kapak yap">★</button>`}<button type="button" class="pup-x" data-act="pupdel" data-p="${p}" data-i="${i}" aria-label="Fotoğrafı kaldır">✕</button></div>`; }).join(''); };
@@ -222,11 +224,9 @@ pupHtml = function (p, label) { const n = (UPL[p] || []).length;
   return `<div class="pup" id="pup_${p}"><div class="pup-grid">${pupThumbs(p)}${n < PUP_MAX ? `<label class="pup-add" for="${p}_files"><b>＋</b><span>Fotoğraf ekle</span><small>${n}/${PUP_MAX}</small></label>` : ''}</div><input id="${p}_files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden data-change="pupadd" data-p="${p}"><span class="muted" style="font-size:12px">${label || 'En fazla 10 fotoğraf (JPG, PNG, WEBP). Büyük fotoğraflar yüklenmeden önce otomatik küçültülür. İlk fotoğraf kapak olur; ★ ile kapağı değiştirebilirsiniz.'}</span></div>`; };
 
 /* ================= Yönetim ================= */
-const p1AdmLoad = (k, path, fn, ttl) => need(k, () => call('GET', path, null, { quiet: true }).then(j => fn ? fn(j.data) : j.data), ttl);
 listTbl = function (L) { return `<div class="tbl-w"><table class="tbl mcards"><thead><tr><th>İlan no</th><th>İlan</th><th>Satıcı</th><th>Durum</th><th class="num">Fiyat</th><th></th></tr></thead><tbody>${L.map(l => `<tr data-lid="${esc(l.id)}"><td class="mono">#${l.no}</td><td><a href="#ilan-${l.id}" style="font-weight:600">${esc(l.title)}</a><div class="muted" style="font-size:12px">${esc(lsub(l))} · ${catName(l)} · ${ago(l.t)}</div></td><td><b>${esc(user(l.seller).name)}</b></td><td><span class="pill ${l.status === 'aktif' ? 'p-tamam' : l.status === 'beklemede' ? 'p-bekliyor' : 'p-iade'}">${{ aktif: 'Yayında', beklemede: 'Onay bekliyor', satildi: 'Stok bitti', kaldirildi: 'Kaldırıldı' }[l.status] || esc(l.status)}</span></td><td class="num">${TL(l.price)}</td><td><div class="hstack" style="flex-wrap:nowrap">${l.status === 'beklemede' || (l.status === 'kaldirildi' && can('ilan')) ? `<button class="btn btn-sm btn-ok" data-act="l-ok" data-id="${l.id}">${l.status === 'beklemede' ? 'Onayla' : 'Yayına al'}</button>` : ''}${l.seller === S.cur ? `<button class="btn btn-sm" data-act="edit-l" data-id="${l.id}">Düzenle</button>` : ''}${l.status !== 'kaldirildi' ? `<button class="btn btn-sm btn-bad" data-act="l-del" data-id="${l.id}">Kaldır</button>` : ''}</div></td></tr>`).join('')}</tbody></table></div>`; };
 CFM['srv-del'] = d => { const s = srv(d.id) || (p1AdmSrv().find(x => x.id === d.id)) || {}; const n = p1N(s); return ['Server silinsin mi?', `<b>${esc(s.name || '')}</b> silinecek.${n ? ` Bu serverda <b>${n} aktif ilan</b> var; önce ilanların kaldırılması gerekir.` : ' Server listelerden kalkar (kayıt silinmez, geçmiş korunur).'}`, 'Serverı sil', 1]; };
 /** Yönetim server listesi (gizliler dahil; GET admin/servers) */
-const p1AdmSrv = () => { const c = API.cache['adm:servers']; return c && c.v && Array.isArray(c.v.servers) ? c.v.servers : []; };
 function p1AdmSrvUp(s, del) { const L = p1AdmSrv(); if (del) { const i = L.findIndex(x => x.id === del); if (i >= 0) L.splice(i, 1); return; } p1Up(L, [s]); }
 
 svPageHtml = function (sec) { const L = S.servers.filter(s => s.sec === sec);

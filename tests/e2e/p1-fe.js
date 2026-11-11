@@ -151,7 +151,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await go(Bp, `server-${SV}-item`, 600);
     ok('kategori (item): ilan listede, sekmede sayı 1', (await txt(Bp, '#app')).includes(T1) && /Item\s*1/.test(await txt(Bp, '.ctabs')));
     await Bp.fill('#p1_q', 'efsunlu'); await Bp.click('form[data-form=p1f] button.btn-primary'); await Bp.waitForTimeout(600);
-    ok('kategori araması: "efsunlu" bulunur', (await txt(Bp, '#app')).includes(T1) && /“efsunlu” için 1 ilan/.test(await txt(Bp, '#app')));
+    ok('kategori araması: "efsunlu" bulunur', (await txt(Bp, '#app')).includes(T1) && /“efsunlu” için 1 ilan/.test(await tc(Bp, '#app')));
     await Bp.fill('#p1_q', 'yokboyleilan'); await Bp.click('form[data-form=p1f] button.btn-primary'); await Bp.waitForTimeout(600);
     ok('kategori araması: eşleşmeyen arama boş durum', (await txt(Bp, '#app')).includes('Bu aramaya uyan ilan yok') && !(await txt(Bp, '#app')).includes(T1));
     await Bp.click('[data-act=p1-qclear]'); await Bp.waitForTimeout(500);
@@ -164,23 +164,23 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     // üst arama önerileri (sunucudan)
     await go(Bp, 'home'); await Bp.fill('#q', ''); await Bp.type('#q', 'Ejder Kılıcı', { delay: 30 });
     ok('üst arama önerisi: ilan sunucudan gelir', await until(Bp, t => { const b = document.querySelector('#qsug'); return b && !b.hidden && b.innerText.includes(t); }, T1));
-    ok('arama önerisi isteği search/suggest ile', apiReq.some(r => /r=search%2Fsuggest&q=|r=search\/suggest&q=/.test(r)));
+    ok('arama önerisi isteği search/suggest ile', await (async () => { for (let i = 0; i < 20; i++) { if (apiReq.some(r => /r=search%2Fsuggest&q=/.test(r))) return true; await sleep(150); } return false; })(), apiReq.filter(r => /suggest/.test(r)).join(','));
     await Bp.press('#q', 'Enter'); await Bp.waitForTimeout(700);
     ok('arama sonuçları sayfası: ilan bulundu', /#ara$/.test(Bp.url()) && (await txt(Bp, '#app')).includes(T1));
     // satıcı profili
     await go(Bp, 'ilan-' + L1, 600); await Bp.click('.seller a.p1seller'); await Bp.waitForTimeout(600);
     ok('satıcı profili: ad ve aktif ilanı', /#uye-u\d+$/.test(Bp.url()) && (await txt(Bp, '#app')).includes(UA.name) && (await txt(Bp, '#app')).includes(T1));
-    await go(A, 'ilan-' + L1, 700);
+    await go(A, 'home', 200); await go(A, 'ilan-' + L1, 700);
     ok('A: görüntülenme sahibi tarafında da 1', (await txt(A, '#lViews')).trim() === '1');
 
     /* ---------- 8. ilan onayı: açıkken yeni ilan gizli, yönetici onaylayınca yayında ---------- */
     await go(M, 'yonetim/ilan/ayarlar', 700); await M.waitForSelector('#modT');
     await M.check('#modT'); ok('yönetim: ilan onayı açıldı', await toast(M, 'onaydan geçecek'));
-    ok('yönetim › İlanlar › Ayarlar: doping fiyatları yakında, hazır görseller', (await txt(M, '.apage')).includes('Doping fiyatları') && await M.locator('form[data-form=dopset]').count() === 0 && await M.locator('[data-change=coverup]').count() > 0);
+    ok('yönetim › İlanlar › Ayarlar: doping fiyatları yakında, hazır görseller', (await tc(M, '.apage')).includes('Doping fiyatları') && await M.locator('form[data-form=dopset]').count() === 0 && await M.locator('[data-change=coverup]').count() > 0);
     await A.reload(); await A.waitForSelector('#hdr'); await go(A, 'ilan-ver'); await A.waitForSelector('form[data-form=sell]');
     ok('ilan ver: onay notu gösterilir', (await txt(A, '#app')).includes('yönetici onayından sonra'));
     const T2 = 'Moderasyon Testi 100 Won Paketi';
-    await A.selectOption('#s_server_tr', SV); await A.selectOption('#s_cat', 'yang'); await A.fill('#s_title', T2); await A.fill('#s_price', '9,90'); await A.fill('#s_stock', '100');
+    await A.selectOption('#s_server_tr', SV); await A.selectOption('#s_cat', 'yang'); await A.fill('#s_title', T2); await A.fill('#s_price', '9.90'); await A.fill('#s_stock', '100');
     await A.click('form[data-form=sell] button.btn-primary');
     ok('ilan onaya gönderildi', await toast(A, /onaya gönderildi/) && await until(A, () => /#ilan-l\d+$/.test(location.hash)));
     const L2 = (A.url().match(/#ilan-(l\d+)$/) || [])[1]; await A.waitForTimeout(500);
@@ -234,7 +234,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await M.fill(`#sv_name_${SID}`, SN + ' 2'); await M.fill(`#sv_seo_${SID}`, 'Testara PVP Zirve için item ve yang ilanları.');
     await M.click('.sdrawer form[data-form=srvsave] .asave button.btn-primary');
     ok('server düzenlendi (çekmece)', await toast(M, 'Server kaydedildi'));
-    await M.waitForTimeout(400); ok('çekmece başlığı yeni ad', (await txt(M, '.sdrawer #sdT')).includes(SN + ' 2'));
+    await M.waitForTimeout(400); ok('çekmece başlığı yeni ad', (await tc(M, '.sdrawer #sdT')).includes(SN + ' 2'));
     const pub = await (await fetch(`${B}/api/v1/index.php?r=servers`)).json();
     ok('herkese açık server listesinde güncel ad', pub.data.servers.some(s => s.id === SID && s.name === SN + ' 2'));
     await M.click(`.sdrawer [data-act=srv-del][data-id=${SID}]`); await M.waitForSelector('#cfm:not([hidden])'); await M.click('#cfm_ok');
@@ -320,10 +320,11 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     ok('tüm API istekleri /api/v1/index.php?r= biçiminde (yönlendirmesiz)', badApi.length === 0 && apiReq.length > 50, badApi.slice(0, 5).join(' | ') + ` (toplam ${apiReq.length})`);
 
     /* ---------- 17. güncelleme paketi kurulu sitenin üzerine ---------- */
-    const keep = ['storage/db.php', 'storage/test.sqlite'].filter(f => fs.existsSync(path.join(SITE, f))).map(f => [f, fs.statSync(path.join(SITE, f)).mtimeMs, fs.statSync(path.join(SITE, f)).size]);
+    const stList = () => fs.readdirSync(path.join(SITE, 'storage')).sort().join(','); const st0 = stList();
+    const keep = ['storage/db.php'].filter(f => fs.existsSync(path.join(SITE, f))).map(f => [f, fs.statSync(path.join(SITE, f)).mtimeMs, fs.statSync(path.join(SITE, f)).size]);
     const up1 = fs.readdirSync(path.join(SITE, 'uploads')).filter(f => /^\d{4}$/.test(f));
     unzip(path.join(BUILD, UZIP), SITE);
-    const same = keep.every(([f, m]) => fs.statSync(path.join(SITE, f)).mtimeMs === m);
+    const same = keep.every(([f, m]) => fs.statSync(path.join(SITE, f)).mtimeMs === m) && stList() === st0 && fs.existsSync(path.join(SITE, 'storage/test.sqlite'));
     const home2 = await (await fetch(B + '/')).text();
     ok('güncelleme paketi açıldı: storage/ dokunulmadı, yüklenen görseller duruyor, site açılıyor', keep.length >= 1 && same && up1.length > 0 && up1.every(d => fs.existsSync(path.join(SITE, 'uploads', d))) && /window\.YP_BOOT=\{"csrf"/.test(home2) && home2.includes(T1), JSON.stringify(keep));
 

@@ -164,13 +164,9 @@ final class Deposits
         return $g && (int)$g['is_on'] && Paytr::configured();
     }
 
-    /**
-     * Bekleyen PayTR yüklemesi açar (işlem içinde). Token ayrı adımda alınır (HTTP isteği işlem dışında).
-     * $in: gw, amount, coupon, bank
-     */
-    public static function paytrCreate(Db $db, array $u, array $in)
+    /** PayTR yöntemi kullanılabilir mi? Değilse Türkçe 400 (paytr_off) */
+    public static function assertPaytr(Db $db, $gwId)
     {
-        $gwId = isset($in['gw']) && is_string($in['gw']) ? $in['gw'] : 'paytr';
         if (!in_array($gwId, self::PAYTR_GWS, true)) {
             throw HttpError::validation(['gw' => 'Ödeme yöntemi bulunamadı.']);
         }
@@ -178,6 +174,16 @@ final class Deposits
             throw new HttpError(400, $gwId === 'paytr_eft' ? 'PayTR Havale/EFT ile yükleme yakında. Şimdilik havale ile yükleme yapabilirsiniz.'
                 : 'Kart ile ödeme yakında. Şimdilik havale/EFT ile yükleme yapabilirsiniz.', 'paytr_off');
         }
+    }
+
+    /**
+     * Bekleyen PayTR yüklemesi açar (işlem içinde). Token ayrı adımda alınır (HTTP isteği işlem dışında).
+     * $in: gw, amount, coupon, bank
+     */
+    public static function paytrCreate(Db $db, array $u, array $in)
+    {
+        $gwId = isset($in['gw']) && is_string($in['gw']) ? $in['gw'] : 'paytr';
+        self::assertPaytr($db, $gwId);
         if ($u['status'] !== 'active') {
             throw HttpError::forbidden('Hesabınız yasaklı, işlem yapamazsınız.');
         }
