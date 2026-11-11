@@ -33,4 +33,6 @@ demo/posts.js
 99-wiring.js
 prod/97-p0b-views.js
 prod/98-p0b-actions.js
+prod/97p1-catalog.js
+prod/98p1-actions.js
 99z-start.js

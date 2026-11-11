@@ -19,14 +19,6 @@ final class Ledger
     const KIND_TL = ['yukleme', 'cekim_talep', 'cekim_odendi', 'cekim_red', 'satis', 'iade', 'ep', 'borsa', 'bonus', 'duzeltme', 'stopaj_tahakkuk',
                      'satin_alma', 'doping', 'reklam', 'sms', 'cekilis', 'cark', 'puan', 'davet'];
 
-    /** @var array [code => id] istek içi önbellek (işlem geri alınırsa temizlenir) */
-    private static $acc = [];
-
-    public static function reset()
-    {
-        self::$acc = [];
-    }
-
     public static function cash($userId)
     {
         return 'U' . (int)$userId . ':cash';
@@ -53,9 +45,6 @@ final class Ledger
 
     public static function accountId(Db $db, $code)
     {
-        if (isset(self::$acc[$code])) {
-            return self::$acc[$code];
-        }
         $id = $db->val('SELECT id FROM {accounts} WHERE code=?', [$code]);
         if (!$id) {
             list($type, $uid) = self::parse($code);
@@ -65,7 +54,7 @@ final class Ledger
         if (!$id) {
             throw new RuntimeException('Hesap açılamadı: ' . $code);
         }
-        return self::$acc[$code] = (int)$id;
+        return (int)$id;
     }
 
     /** Cüzdan satırlarını artan kimlik sırasıyla kilitler (yoksa açar). Dönüş [user_id => ['cash'=>, 'credit'=>]] */
@@ -231,9 +220,4 @@ final class Ledger
         }
         return ['ok' => !$err, 'errors' => array_slice($err, 0, 50)];
     }
-}
-
-/** Bakiye yetersiz (defter güvenlik ağı; çağıranlar önceden Türkçe hata verir) */
-final class InsufficientFunds extends \RuntimeException
-{
 }
