@@ -280,6 +280,27 @@ final class Seo
         return $out;
     }
 
+    /**
+     * index.php için tek çağrı: bağlantı yoksa kurar, HİÇBİR ZAMAN hata fırlatmaz (sorun olursa null; sayfa statik başlıkla açılır).
+     *   $seo = YP\Seo::forRequest();  if ($seo) { echo $seo['html']; if ($seo['status'] === 404) http_response_code(404); }
+     */
+    public static function forRequest($uri = null)
+    {
+        try {
+            if (!Db::hasMain()) {
+                if (!Store::installed()) {
+                    return null;
+                }
+                Store::requireKey();
+                Db::setMain(Db::connect(Store::dbConfig()));
+            }
+            return self::head(Db::main(), $uri !== null ? $uri : (isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '/'));
+        } catch (\Throwable $e) {
+            Log::write('hata', 'SEO meta: ' . get_class($e) . ': ' . $e->getMessage());
+            return null;
+        }
+    }
+
     /** <head> etiketleri (HTML kaçışlı; JSON-LD içinde </script> kırılamaz) */
     public static function html(array $x)
     {

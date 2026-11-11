@@ -392,3 +392,17 @@ section('seo', function () {
     file_put_contents(YP_PUBLIC . '/robots.txt', "User-agent: *\nDisallow:\n");
     ok('sahibin elle yazdığı robots.txt korunur', Seo::writeFiles($db)['robots'] === 'elle' && file_get_contents(YP_PUBLIC . '/robots.txt') === "User-agent: *\nDisallow:\n");
 });
+
+section('catalog-limits', function () {
+    $db = freshDb();
+    $site = Settings::get('site', $db);
+    // 90 karakterlik "wp wp …" başlığı sansürle 120'yi aşar → sütun sınırında kesilir (MySQL katı kip)
+    list($row) = Catalog::listingInput($db, ['game' => 'metin2', 'server' => 'sv1', 'cat' => 'yang', 'title' => trim(str_repeat('wp ', 30)), 'price' => 5], true, $site);
+    ok('sansürlü başlık ≤ 120 karakter', mb_strlen($row['title']) <= 120 && strpos($row['title'], '[gizlendi]') === 0, mb_strlen($row['title']));
+    list($row) = Catalog::listingInput($db, ['game' => 'metin2', 'server' => 'sv1', 'cat' => 'yang', 'title' => 'Uzun açıklama', 'price' => 5, 'desc' => trim(str_repeat('tg ', 1000))], true, $site);
+    ok('sansürlü açıklama ≤ 6000 karakter', mb_strlen($row['descr']) <= 6000);
+    $u = mkUser($db, 'SsrUye');
+    $l = mkListing($db, $u['id'], $db->one('SELECT * FROM {servers} WHERE id=1'), ['title' => 'SSR deneme']);
+    $x = Seo::forRequest('/ilan/ssr-deneme-l' . $l['id']);
+    ok('Seo::forRequest: mevcut bağlantıyla meta', is_array($x) && strpos($x['html'], '<title>SSR deneme') === 0);
+});

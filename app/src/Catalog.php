@@ -366,7 +366,8 @@ final class Catalog
             $t = $v->str('title', 5, 90, null, 'Başlık 5-90 karakter olmalı.');
             if ($t !== null) {
                 $c = Censor::apply($t);
-                $row['title'] = $c['text'];
+                // '[gizlendi]' kısa parçaları uzatabilir: sütun sınırı (MySQL katı kip "Data too long" vermesin)
+                $row['title'] = yp_str($c['text'], 120);
                 if ($c['flagged']) {
                     $flags['title'] = $t;
                 }
@@ -403,7 +404,7 @@ final class Catalog
                     $v->err('desc', 'Açıklama en fazla 3000 karakter olabilir.');
                 } else {
                     $c = Censor::apply($d);
-                    $row['descr'] = $c['text'];
+                    $row['descr'] = mb_substr($c['text'], 0, 6000, 'UTF-8');
                     if ($c['flagged']) {
                         $flags['desc'] = $d;
                     }

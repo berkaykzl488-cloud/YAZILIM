@@ -98,7 +98,7 @@ kur "$J_K" action=admin name=Yonetici email=admin@yangpazar.com "password=$APW" 
 chk "yönetici oluşturuldu → son adım (demo seçeneği)" 'echo "$BODY" | grep -q "Demo verileriyle kur"'
 kur "$J_K" action=finish
 chk "bitiş: cron komutu + PayTR bildirim URL" 'echo "$BODY" | grep -q "app/cron.php &gt;/dev/null 2&gt;&amp;1" && echo "$BODY" | grep -q "http://127.0.0.1:$PORT/api/paytr_bildirim.php"'
-CRONKEY=$(echo "$BODY" | grep -oE 'cron\?key=[0-9a-f]{48}' | head -1 | cut -d= -f2)
+CRONKEY=$(echo "$BODY" | grep -oE 'cron(\?|&amp;|&)key=[0-9a-f]{48}' | head -1 | grep -oE '[0-9a-f]{48}')
 chk "bitiş: cron-job.org adresi (anahtarlı)" '[ ${#CRONKEY} = 48 ]'
 chk "kurulum kodu dosyası silindi, kilit yazıldı" '[ ! -f "$RUN/storage/kurulum_kodu.php" ] && [ -f "$RUN/storage/kurulum_tamam.php" ] && [ ! -f "$RUN/storage/kurulum_durum.php" ]'
 OUT=$(curl -s -w '\n%{http_code}' "$B/kurulum/")
