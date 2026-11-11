@@ -177,7 +177,7 @@ final class Catalog
             'server' => $l['server_id'] !== null ? Ids::sv($l['server_id']) : null, 'cat' => $l['cat'],
             'title' => $l['title'], 'price' => Text::tl($l['price']), 'stock' => (int)$l['stock'], 'del' => $l['del_txt'],
             'desc' => (string)$l['descr'], 'status' => $l['status'], 't' => (int)$l['created_at'], 'bump' => (int)$l['bump_at'],
-            'views' => (int)$l['views'], 'dop' => (object)[], 'freeBump' => (int)$l['free_bump_at'], 'cover' => $l['cover'],
+            'views' => (int)$l['views'], 'dop' => self::dopOf($l), 'freeBump' => (int)$l['free_bump_at'], 'cover' => $l['cover'],
             'img' => $imgs ? $imgs[0] : null, 'imgs' => $imgs,
             'media' => array_map(function ($m) {
                 return ['id' => Ids::m($m['id']), 'url' => Media::url($m), 'w' => (int)$m['w'], 'h' => (int)$m['h']];
@@ -194,6 +194,18 @@ final class Catalog
             $out['skin'] = json_decode($l['skin'], true);
         }
         return $out;
+    }
+
+    /** Doping bitiş zamanları (ön yüz: on(l,k) = l.dop[k] > now) */
+    public static function dopOf(array $l)
+    {
+        $d = [];
+        foreach (['vitrin', 'acil', 'renk'] as $k) {
+            if (isset($l['dop_' . $k]) && (int)$l['dop_' . $k] > 0) {
+                $d[$k] = (int)$l['dop_' . $k];
+            }
+        }
+        return (object)$d;
     }
 
     /** [listing_id => [media satırları (pos sırasıyla)]] */
@@ -350,13 +362,16 @@ final class Catalog
     }
 
     /**
-     * İlan formu doğrulama. $create: yeni ilan (oyun/server/kategori zorunlu). Dönüş: [satır, sansür bayrakları, medya kimlikleri|null]
+     * İlan formu doğrulama. $create: yeni ilan (oyun/server/kategori zorunlu).
+     * Dönüş: [satır, sansür bayrakları, medya kimlikleri|null, dopingler [k => gün] (P2: ücreti ilan açılırken bakiyeden alınır)]
+     * Dopingler: dop:{vitrin:3, acil:1} ya da dop:['vitrin'] + dopDays:{vitrin:3}
      */
     public static function listingInput(Db $db, array $in, $create, array $site)
     {
-        foreach (['dop', 'dops', 'dopings', 'doping', 'vitrin', 'acil', 'renk', 'ust'] as $k) {
+        $dops = [];
+        foreach (['dop', 'dops'] as $k) {
             if (!empty($in[$k])) {
-                throw new HttpError(400, 'İlan dopingleri (vitrin, acil, renkli, üste taşı) yakında açılacak. Şimdilik dopingsiz yayınlayabilirsiniz; ücretsiz üste taşıma 2 saatte bir kullanılabilir.', 'doping_soon');
+                $dops = Money\Wallet::dopSpec($db, $in[$k], isset($in['dopDays']) ? $in['dopDays'] : null);
             }
         }
         $v = new V($in);
@@ -496,7 +511,7 @@ final class Catalog
         if (isset($row['title'])) {
             $row['title_norm'] = yp_str(Text::fold($row['title']), 190);
         }
-        return [$row, $flags, $mediaIds];
+        return [$row, $flags, $mediaIds, $dops];
     }
 
     /** Çok satırlı metin: satır sonları korunur, diğer denetim karakterleri ve geçersiz UTF-8 atılır */

@@ -44,7 +44,7 @@ return function (Router $r) {
                 $data['permGroups'] = PermMap::GROUPS;
             }
         }
-        return ['data' => $data];
+        return ['data' => YP\Hooks::run('boot', $data, $db, $u)]; // alan dosyaları ek dilim katar (ör. 50_wallet.php)
     }, ['auth' => 'none', 'csrf' => false]);
 
     // Kısa yoklama: ?n=<son bildirim no> → yeni bildirimler + okunmamış sayısı
@@ -56,11 +56,11 @@ return function (Router $r) {
             $after = (int)$m[1];
         }
         $rows = $db->all('SELECT * FROM {notifications} WHERE user_id=? AND id>? ORDER BY id DESC LIMIT 50', [(int)$u['id'], $after]);
-        return ['data' => [
+        return ['data' => YP\Hooks::run('poll', [
             'now'    => yp_now_ms(),
             'notifs' => array_map([Present::class, 'notif'], $rows),
             'unread' => ['n' => (int)$db->val('SELECT COUNT(*) FROM {notifications} WHERE user_id=? AND is_read=0', [(int)$u['id']])],
-        ]];
+        ], $db, $u, $q)];
     }, ['auth' => 'user', 'csrf' => false]);
 
     // cron-job.org gibi dış zamanlayıcılar için: /api/v1/cron?key=…

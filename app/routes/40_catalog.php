@@ -141,15 +141,17 @@ return function (Router $r) {
     /* ---------------- ilan ver / düzenle ---------------- */
 
     // Yükle-önce: görseller önce POST media (kind=listing) ile yüklenir, burada yalnız kimlikleri gönderilir: media:["m4","m5"]
-    $r->post('listings', function (Req $q, Db $db) use ($one, $idem) {
+    // P2: dopingler (dop:{vitrin:3}) ilanla aynı işlemde bakiyeden alınır; Idempotency-Key işlem içinde (çift ücret yok)
+    $r->post('listings', function (Req $q, Db $db) use ($one) {
         $u = Auth::$user;
-        return $idem($q, $db, function () use ($q, $db, $u, $one) {
+        return YP\Money\IdemTx::run($db, $u['id'], YP\Money\IdemTx::key($q, false), 'POST listings', function (Db $db) use ($q, $u, $one) {
             RateLimit::enforce('listing_create:' . (int)$u['id'], 20, 3600, true, 'Bir saatte en fazla 20 ilan verebilirsiniz. Lütfen biraz sonra tekrar deneyin.');
             $site = Settings::get('site', $db);
-            list($row, $flags, $mediaIds) = Catalog::listingInput($db, $q->body(), true, $site);
+            list($row, $flags, $mediaIds, $dops) = Catalog::listingInput($db, $q->body(), true, $site);
             $now = yp_now_ms();
             $mod = !empty($site['moderation']);
-            $id = $db->tx(function (Db $db) use ($row, $u, $now, $mod, $mediaIds) {
+            $dopCost = 0;
+            $id = $db->tx(function (Db $db) use ($row, $u, $now, $mod, $mediaIds, $dops, &$dopCost) {
                 $id = $db->insert('listings', $row + [
                     'seller_id' => (int)$u['id'], 'status' => $mod ? 'beklemede' : 'aktif', 'views' => 0,
                     'bump_at' => $now, 'free_bump_at' => 0, 'created_at' => $now, 'updated_at' => $now,
@@ -157,6 +159,10 @@ return function (Router $r) {
                 $db->update('listings', ['no' => 100000 + $id], 'id=?', [$id]);
                 if ($mediaIds) {
                     Catalog::attachMedia($db, $id, $mediaIds, $u['id']);
+                }
+                if ($dops) {
+                    $me = $db->one('SELECT * FROM {users} WHERE id=?', [(int)$u['id']]);
+                    list($dopCost) = YP\Money\Wallet::applyDopings($db, $me, Catalog::listingRow($db, $id, true), $dops, 'sell');
                 }
                 return $id;
             });
@@ -168,7 +174,12 @@ return function (Router $r) {
             if ($flags) {
                 $msg .= ' İletişim bilgisi gizlendi.';
             }
-            return ['msg' => $msg, 'data' => ['listing' => $l, 'flagged' => (bool)$flags], 'patch' => ['upsert' => ['listings' => [$l]]]];
+            $patch = ['upsert' => ['listings' => [$l]]];
+            if ($dops) {
+                $patch['me'] = YP\Money\Api::me($db);
+                $msg .= ' Doping ücreti: ' . YP\Money\Rules::tl($dopCost) . '.';
+            }
+            return ['msg' => $msg, 'data' => ['listing' => $l, 'flagged' => (bool)$flags], 'patch' => $patch];
         });
     }, ['auth' => 'user']);
 
@@ -181,7 +192,10 @@ return function (Router $r) {
         if ($l['status'] === 'kaldirildi' && $l['removed_by'] !== null && (int)$l['removed_by'] !== (int)$u['id']) {
             throw HttpError::conflict('Bu ilan yönetim tarafından kaldırıldı; düzenlenemez.');
         }
-        list($row, $flags, $mediaIds) = Catalog::listingInput($db, $q->body(), false, Settings::get('site', $db));
+        list($row, $flags, $mediaIds, $dops) = Catalog::listingInput($db, $q->body(), false, Settings::get('site', $db));
+        if ($dops) {
+            throw new HttpError(400, 'Doping için ilan sayfasındaki “Doping al” bölümünü kullanın.', 'use_dope');
+        }
         $row['updated_at'] = yp_now_ms();
         if (isset($row['stock']) && (int)$row['stock'] > 0 && $l['status'] === 'satildi') {
             $row['status'] = 'aktif';

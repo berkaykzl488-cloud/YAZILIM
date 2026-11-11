@@ -19,7 +19,7 @@ final class Present
     {
         return [
             'id' => Ids::u($u['id']), 'name' => $u['name'], 'rating' => (float)$u['rating'], 'sales' => (int)$u['sales'],
-            'joined' => Text::monthYear($u['joined_at']), 'verified' => (bool)$u['verified'], 'vol' => (int)$u['vol'],
+            'joined' => Text::monthYear($u['joined_at']), 'verified' => (bool)$u['verified'], 'vol' => Text::tl($u['vol']), // vol: kuruş → TL (VIP eşikleri TL)
             'lastSeen' => (int)$u['last_seen'], 'admin' => $u['role'] === 'admin', 'staff' => $u['role'] === 'staff',
         ];
     }

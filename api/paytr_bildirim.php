@@ -5,6 +5,7 @@
  *
  * - hash: base64(hmac_sha256(merchant_oid + merchant_salt + status + total_amount, merchant_key)), hash_equals ile karşılaştırılır
  * - İdempotent: aynı merchant_oid ikinci kez gelirse yeniden işlenmez, yine "OK" döner
+ * - Site uygulaması kuruluysa (P2) ödeme veritabanındaki yüklemeye işlenir ve üyenin bakiyesine geçer
  * - Geçerli bildirimlerde düz metin "OK" döner (PayTR "OK" görene kadar tekrar dener)
  */
 require_once __DIR__ . '/_lib.php';
@@ -44,6 +45,36 @@ if (!preg_match('/^[A-Za-z0-9]{1,64}$/', $oid) || !in_array($status, ['success',
 }
 
 $paymentAmount = preg_match('/^[0-9]{1,12}$/', $f('payment_amount')) ? (int)$f('payment_amount') : null;
+
+/*
+ * P2: site uygulaması (app/) kuruluysa bildirim veritabanındaki yüklemeyi (deposits.merchant_oid) bakiyeye geçirir:
+ * satır kilidiyle tek geçiş bekliyor → onaylandı, tutar beklenenle aynı olmalı, tekrar bildirimler hiçbir şeyi değiştirmez.
+ * Tanınmayan sipariş numarası (ör. eski paytr_token.php ile açılmış) aşağıdaki eski dosya kaydına düşer.
+ */
+$appBoot = dirname(__DIR__) . '/app/bootstrap.php';
+if (is_file($appBoot)) {
+    require_once $appBoot;
+    if (YP\Store::installed()) {
+        try {
+            YP\Store::requireKey(); // bundan sonra şifreleme anahtarı uygulamanınki (storage/)
+            $db = YP\Db::connect(YP\Store::dbConfig());
+            YP\Db::setMain($db);
+            YP\Settings::clearCache();
+            YP\Updater::ensure($db);
+            $res = YP\Money\Deposits::paytrCallback($db, [
+                'merchant_oid' => $oid, 'status' => $status, 'total_amount' => $total, 'payment_amount' => $paymentAmount,
+                'test_mode' => $f('test_mode'), 'payment_type' => $f('payment_type'), 'failed_reason_msg' => $f('failed_reason_msg'),
+            ]);
+        } catch (Throwable $e) {
+            yp_log('hata', 'PayTR bildirimi işlenemedi: ' . get_class($e) . ': ' . $e->getMessage(), ['merchant_oid' => $oid]);
+            yp_text('PAYTR notification failed: server error', 500); // PayTR yeniden dener
+        }
+        if ($res !== null) {
+            yp_text('OK');
+        }
+    }
+}
+
 $sonuc = 'yeni';
 
 yp_json_update(YP_DATA . '/odemeler.json', function ($d) use ($oid, $status, $total, $paymentAmount, $f, &$sonuc) {

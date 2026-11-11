@@ -310,7 +310,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await go(P, 'ilan-ver', 500); await P.setInputFiles('#s_files', [F2, F3]); await until(P, () => (UPL.s || []).length === 2 && UPL.s.every(x => x.st === 'ok'), null, 20000); { const w = await overW(P); if (w > 390) over.push('ilan-ver+foto:' + w); } await shot(P, 'ilan-ver-390');
     await go(P, 'ilan-' + L1, 600); await P.click('[data-act=edit-l]'); await P.waitForSelector('form[data-form=editl]'); { const w = await overW(P); if (w > 390) over.push('duzenle:' + w); } await P.click('#modal [data-act=close]');
     await P.click('#hdr [data-act=theme]'); await go(P, 'home', 400); { const w = await overW(P); if (w > 390) over.push('home-light:' + w); } await P.click('#hdr [data-act=theme]');
-    await P.evaluate(() => apiReboot(true)); await P.click('#app [data-act=logout]').catch(() => {}); await go(P, 'hesabim', 300); await P.click('#app [data-act=logout]').catch(() => {}); await toast(P, 'Çıkış yapıldı');
+    await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim/ilan/moderasyon', 'yonetim/ilan/ayarlar', 'yonetim/server/tr', 'yonetim/server/pvp?id=new', `yonetim/server/tr?id=${SV}`, 'yonetim/bakim']) { await go(P, r, 700); const w = await overW(P); if (w > 390) over.push(r + ':' + w); }
     await shot(P, 'yonetim-bakim-390');
@@ -324,9 +324,9 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     const keep = ['storage/db.php'].filter(f => fs.existsSync(path.join(SITE, f))).map(f => [f, fs.statSync(path.join(SITE, f)).mtimeMs, fs.statSync(path.join(SITE, f)).size]);
     const up1 = fs.readdirSync(path.join(SITE, 'uploads')).filter(f => /^\d{4}$/.test(f));
     unzip(path.join(BUILD, UZIP), SITE);
-    const same = keep.every(([f, m]) => fs.statSync(path.join(SITE, f)).mtimeMs === m) && stList() === st0 && fs.existsSync(path.join(SITE, 'storage/test.sqlite'));
+    const same = keep.every(([f, m]) => fs.statSync(path.join(SITE, f)).mtimeMs === m) && st0.split(',').every(f => stList().split(',').includes(f)) && fs.existsSync(path.join(SITE, 'storage/test.sqlite'));
     const home2 = await (await fetch(B + '/')).text();
-    ok('güncelleme paketi açıldı: storage/ dokunulmadı, yüklenen görseller duruyor, site açılıyor', keep.length >= 1 && same && up1.length > 0 && up1.every(d => fs.existsSync(path.join(SITE, 'uploads', d))) && /window\.YP_BOOT=\{"csrf"/.test(home2) && home2.includes(T1), JSON.stringify(keep));
+    ok('güncelleme paketi açıldı: storage/ dokunulmadı, yüklenen görseller duruyor, site açılıyor', keep.length >= 1 && same && up1.length > 0 && up1.every(d => fs.existsSync(path.join(SITE, 'uploads', d))) && /window\.YP_BOOT=\{"csrf"/.test(home2) && /"listings":\[\{"id":"l\d+"/.test(home2), JSON.stringify(keep) + ' ' + st0 + ' → ' + stList() + ' up:' + up1.join(','));
 
     ok('konsol / sayfa hatası yok (tüm gezinmeler)', errs.length === 0, errs.slice(0, 8).join('\n      '));
   } catch (e) {

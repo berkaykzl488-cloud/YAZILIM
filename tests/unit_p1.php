@@ -270,10 +270,13 @@ section('catalog', function () {
     ok('başlık ve açıklama sansürlenir + bayrak', strpos($row['title'], '[gizlendi]') !== false && strpos($row['descr'], 'kotu') === false && isset($flags['title'], $flags['desc']));
     ok('açıklama satır sonları korunur, fazlası sadeleşir', $row['descr'] === "Satır 1\n[gizlendi]\n\nSon", $row['descr']);
     ok('server bölümü ilana yazılır, kapak varsayılanı', $row['sec'] === 'tr' && $row['server_id'] === 1 && $row['cover'] === 'yang-1');
+    // P2: dopingler artık gerçek (ücret ilan açılırken bakiyeden alınır); girdi doğrulanıp [k => gün] döner
+    $res = Catalog::listingInput($db, $in + ['dop' => ['vitrin' => 3]], true, $site);
+    ok('doping alanı → [vitrin => 3] (P2)', isset($res[3]) && $res[3] === ['vitrin' => 3], $res[3] ?? null);
     $e = throws(function () use ($db, $in, $site) {
-        Catalog::listingInput($db, $in + ['dop' => ['vitrin' => 3]], true, $site);
+        Catalog::listingInput($db, $in + ['dop' => ['vitrin' => 4]], true, $site);
     });
-    ok('doping alanı → 400 Türkçe "yakında"', $e instanceof HttpError && $e->http === 400 && $e->errCode === 'doping_soon' && strpos($e->getMessage(), 'yakında') !== false);
+    ok('doping: listede olmayan gün sayısı → 422', $e instanceof HttpError && $e->http === 422);
     $e = throws(function () use ($db, $in, $site) {
         Catalog::listingInput($db, array_merge($in, ['cat' => 'ep']), true, $site);
     });

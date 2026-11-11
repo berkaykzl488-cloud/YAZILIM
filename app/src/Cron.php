@@ -14,7 +14,7 @@ final class Cron
     /** görev => [aralık ms, işlev(Db, bitiş zamanı)] */
     public static function tasks()
     {
-        return [
+        $t = [
             'outbox'  => [0, function (Db $db, $deadline) {
                 return Outbox::tick($db, null, null, $deadline);
             }],
@@ -40,8 +40,10 @@ final class Cron
                 }
                 return Seo::writeFiles($db);
             }],
-            // P2+: autoconfirm, deposit_expiry, accounting_jobs, ad_stats; saatlik hakediş; günlük yedek ve defter denetimi
+            // P3+: accounting_jobs, ad_stats; saatlik hakediş; günlük yedek
         ];
+        // P2 para görevleri: autoconfirm, deposit_expiry, ledger_check, proof_retention (YP\Money\Jobs)
+        return array_merge($t, Money\Jobs::tasks());
     }
 
     public static function lock(Db $db, $task, $ttlMs)

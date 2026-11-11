@@ -145,7 +145,7 @@ chk "başka ilana bağlı görsel tekrar kullanılamaz → 422" '[ "$CODE" = 422
 api "$J_B" POST listings "{\"game\":\"metin2\",\"server\":\"sv2\",\"cat\":\"item\",\"title\":\"Başkasının görseli\",\"price\":5,\"media\":[\"${M[0]}\"]}" -H "X-CSRF-Token: $CS_B"
 chk "başkasının görseli → 422" '[ "$CODE" = 422 ]'
 api "$J_A" POST listings '{"game":"metin2","server":"sv1","cat":"item","title":"Dopingli ilan","price":10,"dop":{"vitrin":7}}' -H "X-CSRF-Token: $CS_A"
-chk "doping → 400 doping_soon (yakında)" '[ "$CODE" = 400 ] && [ "$(j .code)" = doping_soon ] && j .error | grep -q yakında'
+chk "doping, bakiye yok → 409 (P2: dopingler gerçek), ilan açılmadı" '[ "$CODE" = 409 ] && [ "$(j .code)" = insufficient ] && [ "$(sq "SELECT COUNT(*) FROM yp_listings WHERE title='\''Dopingli ilan'\''")" = 0 ]'
 api "$J_A" POST listings '{"game":"metin2","server":"sv1","cat":"ep","title":"EP satıyorum","price":10}' -H "X-CSRF-Token: $CS_A"
 chk "TR serverda EP ilanı → 422" '[ "$CODE" = 422 ] && j .fields.cat | grep -q "EP"'
 api "$J_A" POST listings '{"game":"metin2","cat":"yang","title":"x","price":"abc"}' -H "X-CSRF-Token: $CS_A"

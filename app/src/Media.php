@@ -312,6 +312,13 @@ final class Media
         if ($m['owner_id'] !== null && (int)$m['owner_id'] === (int)$user['id']) {
             return true;
         }
+        // P2: itiraz kanıtını siparişin iki tarafı da görür (teslim kanıtlarını alıcı GÖRMEZ: yalnız satıcı ve [siparis])
+        if ($m['kind'] === 'dispute' && $m['ref_type'] === 'order' && $m['ref_id'] !== null) {
+            $o = Db::main()->one('SELECT buyer_id, seller_id FROM {orders} WHERE id=?', [(int)$m['ref_id']]);
+            if ($o && in_array((int)$user['id'], [(int)$o['buyer_id'], (int)$o['seller_id']], true)) {
+                return true;
+            }
+        }
         $need = ['proof' => ['siparis'], 'dispute' => ['siparis'], 'support' => ['destek'], 'receipt' => ['odeme']];
         return Perm::has($user, isset($need[$m['kind']]) ? $need[$m['kind']] : ['siparis', 'destek', 'odeme']);
     }
