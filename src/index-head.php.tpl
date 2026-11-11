@@ -6,6 +6,7 @@
  * - Açılış verisini (GET /api/v1/boot ile aynı: CSRF, herkese açık ayarlar, oturumdaki üye, bildirimler)
  *   sayfaya window.YP_BOOT olarak yazar; böylece ilk açılışta ayrı bir istek gerekmez.
  * - window.YP_MODE='prod': ön yüz localStorage demo yerine sunucu API'sini kullanır.
+ * - <head>: YP\Seo::forRequest() başlık/meta/canonical/JSON-LD (statik <title> yerine).
  */
 require __DIR__ . '/app/bootstrap.php';
 
@@ -49,4 +50,13 @@ $ypJ = function ($v) {
     return json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_PARTIAL_OUTPUT_ON_ERROR);
 };
 $ypBootTag = '<script>window.YP_MODE="prod";window.YP_BASE=' . $ypJ($ypBase) . ';window.YP_BOOT=' . $ypJ($ypBoot) . ';</script>';
+// Sunucu tarafı SEO (P1): <title>, description, robots, canonical, Open Graph, JSON-LD. Hiçbir zaman hata fırlatmaz.
+// Temiz adresler (/ilan/<başlık>-l7, /server/<slug>) ve yönlendirmesiz sunucular için /index.php?p=ilan/<başlık>-l7.
+// <base>: temiz adreste açılan sayfada göreli assets/ yolları site kökünden çözülsün.
+$ypSeo = YP\Seo::forRequest();
+if ($ypSeo && (int)$ypSeo['status'] === 404 && !headers_sent()) {
+    http_response_code(404);
+}
+$ypHead = '<base href="' . htmlspecialchars($ypBase, ENT_QUOTES, 'UTF-8') . '">' . "\n"
+    . ($ypSeo ? $ypSeo['html'] : '<title>yangpazar.com · Metin2 Yang, Won, EP ve İtem Pazaryeri</title>' . "\n");
 ?>

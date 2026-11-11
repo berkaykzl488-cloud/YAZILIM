@@ -9,6 +9,9 @@
  *                                       storage/ ve uploads/ (yalnız koruma dosyaları), .htaccess. demo/ hariç, prod/ dahil.
  *   php tools/build.php --prod --zip    aynı + dist/yangpazar-site-<sürüm>.zip (içine tek kullanımlık kurulum kodu: storage/kurulum_kodu.php)
  *                                       ve dist/yangpazar-site-<sürüm>-KURULUM-KODU.txt (zip'in DIŞINDA; kod ekrana da yazılır)
+ *   php tools/build.php --prod --update-zip   aynı + dist/yangpazar-guncelleme-<sürüm>.zip: KURULU siteyi güncellemek için
+ *                                       (index.php, assets/, app/, api/, kurulum/, .htaccess dosyaları, uploads/ korumaları;
+ *                                       storage/ YOK: kurulum kodu, veritabanı bağlantısı ve veriler olduğu gibi kalır). --zip ile birlikte de verilebilir.
  *   php tools/build.php --prod --demo   çok dosyalı demo: index.html + assets/ (demo/ dahil, prod/ hariç, YP_MODE='demo'; sunucu gerekmez)
  *   --out=<klasör>                      dist/ yerine başka bir klasöre yaz (boş olmalı ya da önceki bir derleme olmalı; testler için)
  *   php tools/build.php --embed-api     api/ klasörünü src/js/demo/kits.js içindeki API_KIT_FILES'a yeniden gömer
@@ -90,7 +93,7 @@ function appVersion(): string {
   return $m[1];
 }
 
-function prod(bool $demo, string $out, bool $zip): void {
+function prod(bool $demo, string $out, bool $zip, bool $upd = false): void {
   cleanOut($out);
   $h = fn(string $c) => substr(sha1($c), 0, 10);
   $css = rd(SRC . '/app.css'); wr("$out/assets/app.css", $css);
@@ -109,8 +112,11 @@ function prod(bool $demo, string $out, bool $zip): void {
     echo rel($out) . '/ yazıldı (' . count($tags) . " js, demo dahil; index.html)\n";
     return;
   }
+  if (str_contains(shell(), '<?')) fail('shell.html içinde "<?" olamaz (PHP olarak yorumlanır)');
   $html = $page('<?php echo $ypBootTag; ?>');
-  if (str_contains($html, '<?') && substr_count($html, '<?') !== 1) fail('shell.html içinde "<?" olamaz (PHP olarak yorumlanır)');
+  // sunucu tarafı SEO: statik <title> yerine index.php'nin ürettiği başlık/meta/canonical (+ <base>)
+  $html = preg_replace('~<title>[^<]*</title>~', '<?php echo $ypHead; ?>', $html, 1, $nt);
+  if ($nt !== 1) fail('shell.html: <title> bulunamadı');
   wr("$out/index.php", rd(SRC . '/index-head.php.tpl') . $html);
   // sunucu tarafı: app/ api/ kurulum/ ve koruma dosyaları
   $n = copyTree(ROOT . '/app', "$out/app");
@@ -121,6 +127,33 @@ function prod(bool $demo, string $out, bool $zip): void {
   $v = appVersion();
   echo rel($out) . '/ yazıldı (' . count($tags) . " js, demo hariç; index.php + $n sunucu dosyası; sürüm $v)\n";
   if ($zip) makeZip($out, $v);
+  if ($upd) makeUpdateZip($out, $v);
+}
+
+/**
+ * Kurulu siteyi güncelleme paketi: index.php, assets/, app/, api/, kurulum/, .htaccess dosyaları ve uploads/ korumaları.
+ * storage/ HİÇ yok (kurulum kodu, veritabanı bağlantısı, anahtarlar, günlükler, özel medya olduğu gibi kalır);
+ * uploads/ içinden yalnız .htaccess ve index.php (yüklenen görseller ezilmez); api/data/ içinden yalnız korumalar.
+ * Yükleyip üzerine yazdıktan sonra ilk istek eksik tabloları otomatik ekler (Yönetim › Yedek & bakım › Güncellemeleri uygula).
+ */
+function makeUpdateZip(string $out, string $v): void {
+  if (!class_exists('ZipArchive')) fail('PHP zip eklentisi yok (ZipArchive)');
+  $name = "yangpazar-guncelleme-$v.zip"; $zf = "$out/$name";
+  $z = new ZipArchive();
+  if ($z->open($zf, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) fail("zip açılamadı: $zf");
+  $base = strlen(rtrim($out, '/')) + 1; $n = 0;
+  $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($out, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+  foreach ($it as $f) {
+    $rel = str_replace('\\', '/', substr($f->getPathname(), $base));
+    if (!preg_match('~^(index\.php|\.htaccess|assets(/.*)?|app(/.*)?|api(/.*)?|kurulum(/.*)?|uploads(/(\.htaccess|index\.php))?)$~', $rel)) continue;
+    if ($rel === 'app/routes/90_test.php') continue;
+    if (preg_match('~^api/data/(?!\.htaccess$|index\.php$)~', $rel)) continue;
+    if ($f->isDir()) { $z->addEmptyDir($rel); continue; }
+    $z->addFile($f->getPathname(), $rel); $n++;
+  }
+  $z->setArchiveComment("yangpazar.com güncelleme paketi $v · storage/ içermez; site köküne çıkarıp üzerine yazın.");
+  if (!$z->close()) fail("zip yazılamadı: $zf");
+  echo rel($zf) . " yazıldı ($n dosya, " . round(filesize($zf) / 1024) . " KB; storage/ yok — kurulum ve veriler korunur)\n";
 }
 
 /** Yüklemeye hazır zip: dist/ ağacı + tek kullanımlık kurulum kodu (storage/kurulum_kodu.php, kurulum/index.php bunu sorar). */
@@ -135,7 +168,7 @@ function makeZip(string $out, string $v): void {
   $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($out, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
   foreach ($it as $f) {
     $rel = str_replace('\\', '/', substr($f->getPathname(), $base));
-    if (preg_match('~^yangpazar-site-.*\.(zip|txt)$~', $rel)) continue;
+    if (preg_match('~^yangpazar-(site|guncelleme)-.*\.(zip|txt)$~', $rel)) continue;
     if ($rel === 'app/routes/90_test.php') continue; // yalnız test kancası (YP_TEST=1 + SQLite); yüklenecek pakete girmez
     if ($f->isDir()) { $z->addEmptyDir($rel); continue; }
     $z->addFile($f->getPathname(), $rel); $n++;
@@ -179,12 +212,12 @@ elseif (in_array('--check', $a, true)) {
   if (single() !== rd(ROOT . '/index.html')) { fwrite(STDERR, "index.html güncel değil: php tools/build.php --single\n"); exit(1); }
   echo "index.html güncel.\n";
 }
-elseif (in_array('--prod', $a, true) || in_array('--zip', $a, true)) {
+elseif (in_array('--prod', $a, true) || in_array('--zip', $a, true) || in_array('--update-zip', $a, true)) {
   $out = ROOT . '/dist';
   foreach ($a as $x) if (str_starts_with($x, '--out=')) { $out = substr($x, 6); if ($out === '') fail('--out= boş'); if ($out[0] !== '/') $out = getcwd() . '/' . $out; }
   $demo = in_array('--demo', $a, true);
-  if ($demo && in_array('--zip', $a, true)) fail('--zip yalnız canlı paket (--prod) içindir');
-  prod($demo, rtrim($out, '/'), in_array('--zip', $a, true));
+  if ($demo && (in_array('--zip', $a, true) || in_array('--update-zip', $a, true))) fail('--zip / --update-zip yalnız canlı paket (--prod) içindir');
+  prod($demo, rtrim($out, '/'), in_array('--zip', $a, true), in_array('--update-zip', $a, true));
 }
 elseif (in_array('--embed-api', $a, true)) embedApi();
-else { fwrite(STDERR, "Kullanım: php tools/build.php --single | --check | --prod [--demo|--zip] [--out=klasör] | --embed-api\n"); exit(2); }
+else { fwrite(STDERR, "Kullanım: php tools/build.php --single | --check | --prod [--demo|--zip|--update-zip] [--out=klasör] | --embed-api\n"); exit(2); }
