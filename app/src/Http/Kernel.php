@@ -9,6 +9,7 @@ use YP\Db;
 use YP\Log;
 use YP\Settings;
 use YP\Store;
+use YP\Updater;
 
 /**
  * /api/v1/* ön denetleyicisi: güvenlik başlıkları → kurulum/veritabanı → rota → köken (origin) → oturum →
@@ -50,6 +51,13 @@ final class Kernel
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_write_close();
         }
+        if ($body instanceof Raw) {
+            $body->emit();
+            if ($db) {
+                self::lazyCron($db);
+            }
+            return;
+        }
         if (!headers_sent()) {
             http_response_code($http);
             header('Content-Type: application/json; charset=utf-8');
@@ -77,6 +85,8 @@ final class Kernel
         $db = Db::connect(Store::dbConfig());
         Db::setMain($db);
         Settings::clearCache();
+        // Yeni sürüm yüklendiyse (zip/FTP) eksik tablolar ve göçler kilitli, tek seferlik olarak burada uygulanır.
+        Updater::ensure($db);
 
         $router = $router ?: Router::loadDir();
         list($route, $params, $allowed) = $router->match($req->method, $req->path);
@@ -101,6 +111,9 @@ final class Kernel
             Auth::requireStaff($opt['perm']);
         }
         $out = call_user_func($route['fn'], $req, $db);
+        if ($out instanceof Raw) {
+            return [$out->http, $out, $db];
+        }
         if (!is_array($out)) {
             $out = [];
         }

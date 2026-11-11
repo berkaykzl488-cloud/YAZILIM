@@ -72,4 +72,42 @@ final class Text
         $s = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)$name));
         return ($s === '' ? 'UYE' : $s) . '26';
     }
+
+    /**
+     * Adres parçası: ön yüzdeki slugify() ile aynı (tr-TR küçük harf, ç ğ ı ö ş ü â → ASCII, diğerleri '-', en çok 70, boşsa 'sayfa').
+     */
+    public static function slug($s)
+    {
+        $s = str_replace(['I', 'İ'], ['ı', 'i'], (string)$s);
+        $s = mb_strtolower($s, 'UTF-8');
+        $s = strtr($s, ['ç' => 'c', 'ğ' => 'g', 'ı' => 'i', 'i̇' => 'i', 'ö' => 'o', 'ş' => 's', 'ü' => 'u', 'â' => 'a']);
+        $s = preg_replace('/[^a-z0-9]+/', '-', $s);
+        $s = substr(trim($s, '-'), 0, 70);
+        return $s === '' ? 'sayfa' : $s;
+    }
+
+    /** Kuruş → TL sayı (ön yüzün TL()/r2() biçimi) */
+    public static function tl($kurus)
+    {
+        return round(((int)$kurus) / 100, 2);
+    }
+
+    /** TL girdisi ("1.234,56" / 12.5) → kuruş; geçersizse null */
+    public static function kurus($v)
+    {
+        $f = yp_money($v);
+        return $f === null ? null : (int)round($f * 100);
+    }
+
+    /** Kısalt (ön yüzdeki cut()): boşlukları sadeleştirir, sözcük ortasında kesmez */
+    public static function cut($t, $n)
+    {
+        $t = trim(preg_replace('/\s+/u', ' ', (string)$t));
+        if (mb_strlen($t, 'UTF-8') <= $n) {
+            return $t;
+        }
+        $c = mb_substr($t, 0, $n - 1, 'UTF-8');
+        $c2 = preg_replace('/\s+\S*$/u', '', $c);
+        return ($c2 === '' || $c2 === null ? $c : $c2) . '…';
+    }
 }

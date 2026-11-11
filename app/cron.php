@@ -24,6 +24,7 @@ try {
     Store::requireKey();
     $db = Db::connect(Store::dbConfig());
     Db::setMain($db);
+    YP\Updater::ensure($db);
     $r = Cron::run($db, 45, 'cli');
     echo json_encode($r, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), "\n";
     exit(!empty($r['ok']) ? 0 : 2);
