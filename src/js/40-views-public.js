@@ -66,7 +66,6 @@ function renderFooter(){
 function vHome(){
   const sl=[...S.slides.filter(x=>x.on).map(x=>({...x,site:true})),...liveAds('slider')];
   const prem=liveAds('premium').map(a=>a.server);
-  const pvp=S.servers.filter(s=>s.sec==='pvp'&&!prem.includes(s.id)).sort((a,b)=>b.open-a.open).slice(0,6);
   const tr=S.servers.filter(s=>s.sec==='tr');
   const vit=sortL(active().filter(l=>on(l,'vitrin')&&l.game!=='cs2'));
   const latest=sortL(active().filter(l=>l.game!=='cs2'),'yeni').slice(0,8);
@@ -81,7 +80,6 @@ function vHome(){
     <div class="panel"><div class="panel-h"><h3>Premium PVP</h3><span class="sponsor">Sponsorlu</span></div>
       <div class="slist">${prem.map(id=>srv(id)).filter(Boolean).map(s=>sItem(s,true)).join('')||'<div class="empty">Boş alan</div>'}</div>
       <div class="panel-b" style="padding-top:0"><a href="#reklam-ver" class="btn btn-sm btn-block" data-act="pick-ad" data-type="premium">Server'ını buraya taşı</a></div></div>
-    <div class="panel"><div class="panel-h"><h3>PVP Serverlar</h3><a href="#metin2-pvp">Tümü</a></div><div class="slist">${pvp.map(s=>sItem(s)).join('')}</div></div>
   </aside>
   <section class="col mcol">
     ${sl.length?`<div class="slider" id="slider"><div class="slides" style="transform:translateX(-${(ui.slide%sl.length)*100}%)">${sl.map(a=>{if(a.site) return siteSlide(a); const s=srv(a.server)||{name:a.title,c:['#333','#666']};adImp(a);return `<div class="slide" data-adc="${a.id}" style="--c1:${s.c[0]};--c2:${s.c[1]}">${adMedia(a)}${logo(s,92)}<div><span class="sponsor">Sponsorlu${s.type&&s.type!=='PVP'?' · '+esc(s.type):''}${s.lv?' · '+esc(s.lv):''}</span><h2>${esc(s.name)}</h2><p><b>${esc(a.title)}</b> — ${esc(a.text)}</p><div class="hstack"><a class="btn btn-primary" href="#server-${s.id}">Server'ı İncele</a><a class="btn" href="#server-${s.id}">İlanları Gör</a></div></div></div>`}).join('')}</div>
