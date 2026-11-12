@@ -283,7 +283,8 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
 
     /* ---------- 13. Bakım › Güncellemeleri uygula ---------- */
     await go(M, 'yonetim/bakim', 900); await M.waitForSelector('[data-act=p1-update]');
-    ok('Bakım: sürüm 0.3.0-p1 ve durum', (await txt(M, '.apage')).includes('0.3.0-p1'));
+    const VER = (fs.readFileSync(path.join(REPO, 'app/bootstrap.php'), 'utf8').match(/YP_APP_VERSION', '([^']+)'/) || [])[1];
+    ok('Bakım: site sürümü (' + VER + ') ve durum', !!VER && (await txt(M, '.apage')).includes(VER));
     await M.click('[data-act=p1-update]'); ok('Güncellemeleri uygula → sonuç', await toast(M, /Veritabanı (zaten güncel|güncellendi)/));
     await M.waitForTimeout(400); ok('Bakım: sitemap sonucu gösterildi', /sitemap\.xml/.test(await txt(M, '.apage')));
 

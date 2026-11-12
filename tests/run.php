@@ -1,6 +1,6 @@
 <?php
 /**
- * P0b + P1 birim testleri (PHPUnit gerekmez). SQLite bellek içi veritabanı + geçici storage klasörü.
+ * P0b + P1 + P2 birim testleri (PHPUnit gerekmez). SQLite bellek içi veritabanı + geçici storage klasörü.
  * Çalıştırma:  php tests/run.php            (hepsi)
  *              php tests/run.php smtp outbox  (yalnız adı eşleşen bölümler)
  */
@@ -854,6 +854,7 @@ section('store', function () {
 });
 
 require __DIR__ . '/unit_p1.php';
+require __DIR__ . '/unit_p2.php';
 
 echo "\nSONUÇ (birim): $PASS geçti, $FAIL kaldı\n";
 exit($FAIL ? 1 : 0);

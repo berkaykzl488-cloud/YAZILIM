@@ -37,7 +37,7 @@ final class Ledger
         }
         $p = strtok($code, ':');
         $map = ['ESCROW' => 'escrow', 'REV' => 'revenue', 'GW' => 'gateway', 'PAYABLE' => 'payable', 'TAX' => 'tax', 'EXP' => 'expense', 'ADJ' => 'equity', 'BANK' => 'gateway'];
-        if (!isset($map[$p]) || !preg_match('/^[A-Z]+(:[a-z0-9_]{1,40})?$/', $code)) {
+        if (!isset($map[$p]) || !preg_match('/^[A-Z]+(:[A-Za-z0-9_]{1,40})?$/', $code)) {
             throw new RuntimeException('Geçersiz hesap kodu: ' . $code);
         }
         return [$map[$p], null];
