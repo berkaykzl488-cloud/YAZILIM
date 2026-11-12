@@ -237,6 +237,24 @@ chk "kod doğru → giriş tamam" '[ "$CODE" = 200 ] && [ "$(j .data.me.name)" =
 CS_A="$(j .data.csrf)"
 api "$J_A" GET poll ""
 chk "2FA sonrası poll → 200" '[ "$CODE" = 200 ]'
+# Güvenilir cihaz: kod bir kez girildi → aynı tarayıcıdan 180 dk içinde tekrar sorulmaz
+chk "kod sonrası tarayıcıya YPT çerezi yazıldı" 'grep -q "YPT" "$J_A"'
+api "$J_A" POST auth/logout "" -H "X-CSRF-Token: $CS_A"; CS_A="$(j .data.csrf)"
+rl_reset
+N_TFA0=$(sq "SELECT COUNT(*) FROM yp_auth_challenges")
+api "$J_A" POST auth/login '{"login":"Deniz_TR","password":"Yeni-Sifre-123"}' -H "X-CSRF-Token: $CS_A"
+chk "aynı tarayıcı 180 dk içinde → kodsuz giriş, yeni kod gönderilmedi" '[ "$CODE" = 200 ] && [ "$(j .data.me.name)" = Deniz_TR ] && [ "$(j .tfa)" = null ] && [ "$(sq "SELECT COUNT(*) FROM yp_auth_challenges")" = "$N_TFA0" ]'
+CS_A="$(j .data.csrf)"
+J_T="$RUN/t.jar"; CS_T=$(csrf_of "$J_T")
+api "$J_T" POST auth/login '{"login":"Deniz_TR","password":"Yeni-Sifre-123"}' -H "X-CSRF-Token: $CS_T"
+chk "başka tarayıcı → yine kod istenir" '[ "$CODE" = 200 ] && [ "$(j .tfa.purpose)" = login ] && [ "$(j .data.me)" = null ]'
+J_T="$RUN/t2.jar"; : > "$J_T"
+printf '127.0.0.1\tFALSE\t/\tFALSE\t0\tYPT\t%s\n' "$(awk '$6=="YPT"{print $7}' "$J_A" | sed 's/.$/0/')" >> "$J_T"
+CS_T=$(csrf_of "$J_T")
+rl_reset
+api "$J_T" POST auth/login '{"login":"Deniz_TR","password":"Yeni-Sifre-123"}' -H "X-CSRF-Token: $CS_T"
+chk "imzası bozulmuş çerez → kod istenir" '[ "$CODE" = 200 ] && [ "$(j .tfa.purpose)" = login ]'
+rl_reset
 rl_reset
 api "$J_A" POST me/tfa '{"tfa":""}' -H "X-CSRF-Token: $CS_A"
 TID="$(j .tfa.id)"; CODE6=$(otp_for deniz@ornek.com)
@@ -278,6 +296,13 @@ chk "yönetici girişi" '[ "$CODE" = 200 ] && [ "$(j .data.me.admin)" = true ] &
 CS_ADM="$(j .data.csrf)"
 api "$J_ADM" GET boot ""
 chk "yönetici boot: yetki etiketleri" '[ "$(j .data.permLabels.calisan)" = "Çalışanlar ve yetkiler" ]'
+api "$J_ADM" GET admin/settings/mail ""
+chk "giriş kodu tekrar sorma süresi varsayılan 180 dk" '[ "$CODE" = 200 ] && [ "$(j .data.tfaTrustMin)" = 180 ]'
+api "$J_ADM" PUT admin/settings/tfa '{"trustMin":-5}' -H "X-CSRF-Token: $CS_ADM"
+chk "tekrar sorma süresi: negatif → 422" '[ "$CODE" = 422 ]'
+api "$J_ADM" PUT admin/settings/tfa '{"trustMin":0}' -H "X-CSRF-Token: $CS_ADM"
+chk "tekrar sorma süresi 0 kaydedildi" '[ "$CODE" = 200 ] && [ "$(j .data.tfaTrustMin)" = 0 ] && [ "$(sq "SELECT COUNT(*) FROM yp_audit_log WHERE action='\''setting_tfa_trust'\''")" = 1 ]'
+api "$J_ADM" PUT admin/settings/tfa '{"trustMin":180}' -H "X-CSRF-Token: $CS_ADM"
 api "$J_ADM" POST admin/staff '{"name":"Calisan1","email":"c1@yangpazar.com","ad":"Cem","soyad":"Ak","password":"kisa","perms":["uye"]}' -H "X-CSRF-Token: $CS_ADM"
 chk "çalışan şifresi < 10 → 422" '[ "$CODE" = 422 ] && [ "$(j .fields.password)" != null ]'
 api "$J_ADM" POST admin/staff '{"name":"Calisan1","email":"c1@yangpazar.com","ad":"Cem","soyad":"Ak","password":"Calisan-1-Sifre","perms":["uye","calisan"]}' -H "X-CSRF-Token: $CS_ADM"

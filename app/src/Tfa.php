@@ -9,6 +9,8 @@ use YP\Http\HttpError;
  * 2 adımlı doğrulama (isteğe bağlı; her kullanıcı kendisi açar — sahibin kararı, PLAN §9).
  * 6 haneli kod, 3 dakika geçerli, en fazla 5 hatalı deneme. Kod veritabanında HMAC(pepper) olarak tutulur.
  * Gönderim sınırı: kanal başına 60 saniyede 1, kullanıcı başına saatte 5.
+ * Kod doğru girilince tarayıcıya imzalı YPT çerezi yazılır; süre (site.tfaTrustMin, varsayılan 180 dk) dolana
+ * kadar aynı tarayıcıdan girişte yeniden kod gönderilmez (SMS/e-posta tasarrufu).
  */
 final class Tfa
 {
@@ -151,5 +153,57 @@ final class Tfa
             throw new HttpError(400, 'Doğrulama isteği bulunamadı veya kullanıldı. Lütfen baştan deneyin.', 'tfa_gone');
         }
         return $row;
+    }
+
+    /* ---------- güvenilir cihaz: kod bir kez girilince bu tarayıcıda X dakika tekrar sorulmaz ---------- */
+
+    const TRUST_COOKIE = 'YPT';
+    const TRUST_DEFAULT = 180;
+    const TRUST_MAX = 43200; // 30 gün
+
+    /** Yönetimden ayarlanan süre (dakika). 0 = her girişte kod iste. */
+    public static function trustMinutes(?Db $db = null)
+    {
+        $s = Settings::get('site', $db);
+        $m = isset($s['tfaTrustMin']) && is_numeric($s['tfaTrustMin']) ? (int)$s['tfaTrustMin'] : self::TRUST_DEFAULT;
+        return max(0, min(self::TRUST_MAX, $m));
+    }
+
+    /** İmza; şifre, 2FA kanalı ya da "tüm oturumları kapat" (session_ver) değişirse eski çerez geçersiz olur. */
+    private static function trustSig(array $u, $exp)
+    {
+        return hash_hmac('sha256', 'trust|' . (int)$u['id'] . '|' . (int)$exp . '|' . (string)$u['tfa'] . '|'
+            . (int)$u['session_ver'] . '|' . (string)$u['pass_hash'], Store::pepper());
+    }
+
+    /** Başarılı kod girişinden sonra çağrılır. */
+    public static function trust(Db $db, array $u)
+    {
+        $min = self::trustMinutes($db);
+        if ($min <= 0 || headers_sent()) {
+            return;
+        }
+        $exp = time() + 60 * $min;
+        $_COOKIE[self::TRUST_COOKIE] = (int)$u['id'] . '.' . $exp . '.' . self::trustSig($u, $exp);
+        setcookie(self::TRUST_COOKIE, $_COOKIE[self::TRUST_COOKIE], [
+            'expires' => $exp, 'path' => '/', 'domain' => '', 'secure' => yp_is_https(), 'httponly' => true, 'samesite' => 'Lax',
+        ]);
+    }
+
+    /** Bu tarayıcı, bu kullanıcı için süresi dolmamış bir doğrulama taşıyor mu? */
+    public static function trusted(Db $db, array $u)
+    {
+        $c = isset($_COOKIE[self::TRUST_COOKIE]) && is_string($_COOKIE[self::TRUST_COOKIE]) ? $_COOKIE[self::TRUST_COOKIE] : '';
+        if (!preg_match('/^(\d{1,12})\.(\d{9,12})\.([a-f0-9]{64})$/', $c, $m)) {
+            return false;
+        }
+        if ((int)$m[1] !== (int)$u['id'] || (int)$m[2] < time() || self::trustMinutes($db) <= 0) {
+            return false;
+        }
+        // Yönetici süreyi kısaltırsa eski uzun çerezler de kısalır
+        if ((int)$m[2] > time() + 60 * self::trustMinutes($db) + 60) {
+            return false;
+        }
+        return hash_equals(self::trustSig($u, (int)$m[2]), $m[3]);
     }
 }

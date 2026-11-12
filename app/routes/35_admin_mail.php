@@ -58,6 +58,7 @@ return function (Router $r) {
             'mail' => $mask(Settings::get('mail', $db), $secretMail),
             'sms' => $mask(Settings::get('sms', $db), $secretSms),
             'providers' => ['mail' => Mailer::providers(), 'sms' => Sms::providers()],
+            'tfaTrustMin' => \YP\Tfa::trustMinutes($db),
             'stats' => [
                 'mailLastHour' => Outbox::sentLastHour($db, 'mail'), 'smsLastHour' => Outbox::sentLastHour($db, 'sms'),
                 'queued' => (int)$db->val("SELECT COUNT(*) FROM {outbox} WHERE status='queued'"), 'last' => $last,
@@ -133,6 +134,22 @@ return function (Router $r) {
         Audit::log($db, Auth::$user['id'], 'settings_sms', 'settings', 'sms', ['provider' => $new['provider'], 'on' => $new['on']]);
         return ['msg' => 'SMS ayarları kaydedildi.', 'data' => ['sms' => $mask($new, $secretSms)]];
     }, $S('ui:form:smsset'));
+
+    // Giriş doğrulaması: kod girildikten sonra aynı tarayıcıda kaç dakika tekrar sorulmasın (0 = her girişte)
+    $r->put('admin/settings/tfa', function (Req $q, Db $db) {
+        $actor = Auth::$user;
+        $in = $q->body();
+        if (!isset($in['trustMin']) || !is_numeric($in['trustMin']) || (int)$in['trustMin'] < 0 || (int)$in['trustMin'] > \YP\Tfa::TRUST_MAX) {
+            throw HttpError::validation(['trustMin' => '0 ile ' . \YP\Tfa::TRUST_MAX . ' dakika arasında bir sayı yazın.']);
+        }
+        $min = (int)$in['trustMin'];
+        $site = Settings::get('site', $db);
+        $site['tfaTrustMin'] = $min;
+        Settings::set('site', $site, $actor['id'], $db);
+        Audit::log($db, $actor['id'], 'setting_tfa_trust', 'settings', 'site', ['min' => $min]);
+        return ['msg' => $min ? 'Kod girildikten sonra ' . $min . ' dakika tekrar sorulmayacak.' : 'Her girişte doğrulama kodu istenecek.',
+            'data' => ['tfaTrustMin' => $min], 'patch' => ['set' => ['tfaTrustMin' => $min]]];
+    }, $S('sms'));
 
     $r->post('admin/mail/test', function (Req $q, Db $db) {
         RateLimit::enforce('mailtest:' . Auth::$user['id'], 10, 600);

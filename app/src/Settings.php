@@ -19,7 +19,7 @@ final class Settings
                 'siteName' => 'yangpazar.com', 'slogan' => 'Oyuncu pazaryeri', 'siteUrl' => '', 'commission' => 8, 'popupOn' => true,
                 'popupDelay' => 1.5, 'autoConfirm' => 24, 'minWithdraw' => 50, 'moderation' => false, 'whatsapp' => '',
                 'supportHours' => '7/24', 'wheelOn' => true, 'ptRate' => 100, 'refOn' => true, 'refBonus' => 25, 'refFriend' => 10,
-                'tfaOn' => true,
+                'tfaOn' => true, 'tfaTrustMin' => 180,
             ],
             'mail' => [
                 'on' => false, 'provider' => '', 'from' => '', 'fromName' => '', 'hourly' => 80, 'fallback' => false,

@@ -70,6 +70,8 @@ pF('mailset',async(f)=>{ const b={on:$('#ml_on').checked,provider:v_('ml_pv'),fr
   await call('PUT','admin/settings/mail',b,{key:formKey(f)}); needDrop('adm:mail'); admDirtyClear(); render(); });
 pF('smsset',async(f)=>{ const b={on:$('#sm_on').checked,provider:v_('sm_p')||'netgsm',header:v_('sm_h').trim(),user:v_('sm_u').trim(),hourly:+v_('sm_hr')||60}; pIfSet(b,'pass','sm_pw');
   await call('PUT','admin/settings/sms',b,{key:formKey(f)}); needDrop('adm:mail'); admDirtyClear(); render(); });
+pF('tfatrust',async(f)=>{ const n=Math.round(+v_('tt_min')); if(!(n>=0&&n<=43200)){ toast('0 ile 43200 dakika arasında bir sayı yazın.',true); return; }
+  await call('PUT','admin/settings/tfa',{trustMin:n},{key:formKey(f)}); needDrop('adm:mail'); render(); });
 pF('mailtest',async()=>{ const j=await call('POST','admin/mail/test',{to:v_('mt_to').trim()},{silent:true}); toast(j.msg,!(j.data&&j.data.sent)); needDrop('adm:outbox','adm:mail'); });
 pF('smstest',async()=>{ const j=await call('POST','admin/sms/test',{to:v_('st_to').trim()},{silent:true}); toast(j.msg,!(j.data&&j.data.sent)); needDrop('adm:outbox','adm:mail'); });
 ACT['p-outbox']=()=>{ needDrop('adm:outbox'); render(); };

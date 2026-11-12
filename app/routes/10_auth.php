@@ -106,7 +106,8 @@ return function (Router $r) {
         }
         RateLimit::reset($acc);
         $remember = !empty($in['remember']) && yp_bool($in['remember']);
-        if ($u['tfa'] !== '') {
+        $trusted = $u['tfa'] !== '' && Tfa::trusted($db, $u);
+        if ($u['tfa'] !== '' && !$trusted) {
             $t = Tfa::start($db, $u, 'login', $u['tfa']);
             Auth::write(function (&$s) use ($t, $u, $remember) {
                 $s['tfa'] = ['cid' => $t['id'], 'uid' => (int)$u['id'], 'rem' => $remember ? 1 : 0, 'exp' => time() + 900];
@@ -114,7 +115,7 @@ return function (Router $r) {
             return ['tfa' => $t, 'msg' => 'Doğrulama kodu gönderildi.'];
         }
         $csrf = Auth::login($db, $u, $remember);
-        Audit::log($db, $u['id'], 'login', 'user', $u['id'], ['staff' => $u['role'] !== 'member']);
+        Audit::log($db, $u['id'], 'login', 'user', $u['id'], $trusted ? ['tfa' => 'trusted', 'staff' => $u['role'] !== 'member'] : ['staff' => $u['role'] !== 'member']);
         return ['msg' => 'Hoş geldin ' . $u['name'] . '!', 'data' => ['me' => Present::me($db, $u), 'csrf' => $csrf]];
     }, ['auth' => 'none']);
 
@@ -144,6 +145,7 @@ return function (Router $r) {
         if ($row['purpose'] === 'login') {
             $u = $db->one('SELECT * FROM {users} WHERE id=?', [(int)$u['id']]);
             $csrf = Auth::login($db, $u, !empty($pending['rem']));
+            Tfa::trust($db, $u);
             Audit::log($db, $u['id'], 'login', 'user', $u['id'], ['tfa' => $row['channel'], 'staff' => $u['role'] !== 'member']);
             return ['msg' => 'Hoş geldin ' . $u['name'] . '!', 'data' => ['me' => Present::me($db, $u), 'csrf' => $csrf]];
         }

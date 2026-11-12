@@ -153,5 +153,10 @@ function pSmsPage(sub){
     return {actions:'<button type="button" class="btn btn-sm" data-act="p-outbox">Yenile</button>',body:`<div class="panel"><div class="panel-h"><h3>E-posta kayıtları</h3><span class="muted" style="font-size:12px">Son 100 · doğrulama kodları gizli</span></div>${m?(m.err?pErrBox(m):pLogTbl(m.log||[],'mail')):pLoading()}</div>
       <div class="panel"><div class="panel-h"><h3>SMS kayıtları</h3></div>${s?(s.err?pErrBox(s):pLogTbl(s.log||[],'sms')):pLoading()}</div>`}; }
   const d=pAdmLoad('adm:mail','admin/settings/mail',null,60000); if(!d) return {body:pLoading()}; if(d.err) return {body:pErrBox(d)};
-  return {body:sub==='sms'?pSmsForm(d.sms||{},d.stats):pMailForm(d.mail||{},d.stats)}; }
+  return {body:(sub==='sms'?pSmsForm(d.sms||{},d.stats):pMailForm(d.mail||{},d.stats))+pTfaTrustForm(d)}; }
+function pTfaTrustForm(d){ const m=d.tfaTrustMin!=null?+d.tfaTrustMin:180;
+  return `<form class="panel panel-b stack" data-form="tfatrust"><div class="eyebrow">Giriş doğrulama kodu</div>
+    <div class="note note-info">2 adımlı doğrulamayı açan üyeler kodu bir kez girdikten sonra aynı tarayıcıdan bu süre boyunca tekrar kod istenmeden girer. SMS ve e-posta paketinizi korur. 0 yazarsanız her girişte kod istenir.</div>
+    <div class="row3" style="align-items:end"><div class="fld"><label for="tt_min">Tekrar sorma süresi (dakika)</label><input class="inp mono" id="tt_min" type="number" min="0" max="43200" step="1" value="${m}"></div>
+    <div><button class="btn btn-primary" type="submit">Kaydet</button></div><span class="muted" style="font-size:12.5px">180 dakika = 3 saat · 1440 dakika = 1 gün</span></div></form>`; }
 }

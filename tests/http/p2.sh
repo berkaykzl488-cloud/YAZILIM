@@ -61,6 +61,8 @@ kur() {
 csrf_of() { api "$1" GET boot ""; j .data.csrf; }
 rl_reset() { rm -f "$RUN"/storage/rl/*.json; }
 sq() { php -r '$p=new PDO("sqlite:'"$RUN"'/storage/test.sqlite"); $p->exec("PRAGMA busy_timeout=8000"); $v=$p->query($argv[1])->fetchColumn(); echo $v===false?"":$v;' "$1"; }
+PIDS=()
+wjobs() { local p; for p in "${PIDS[@]}"; do wait "$p"; done; PIDS=(); }   # yalnız istek süreçlerini bekle (php -S'yi değil)
 ik() { echo "k$(date +%s%N)$RANDOM"; }
 nowms() { echo $(( $(date +%s%N) / 1000000 )); }
 cron_at() { YP_TEST=1 YP_TEST_NOW="$1" php "$RUN/app/cron.php" 2>&1; }
@@ -145,13 +147,13 @@ chk "kupon önizleme: 1000 TL → 50 TL bonus" '[ "$(j .data.ok)" = true ] && [ 
 
 echo "=== 5. Elle havale bildirimi → [odeme] onayı (çekilebilir) / ret; kupon tek kullanım ==="
 TXAT=$(nowms)
-api "$J_B" POST deposits/manual "{\"gw\":\"havale\",\"amount\":\"1.000\",\"txAt\":$TXAT,\"toBank\":\"Ziraat Bankası\",\"note\":\"Test Uye · Ziraat\",\"coupon\":\"HOSGELDIN\"}" -H "X-CSRF-Token: $CS_B"
+api "$J_B" POST deposits/manual "{\"gw\":\"havale\",\"amount\":1000,\"txAt\":$TXAT,\"toBank\":\"Ziraat Bankası\",\"note\":\"Test Uye · Ziraat\",\"coupon\":\"HOSGELDIN\"}" -H "X-CSRF-Token: $CS_B"
 chk "Idempotency-Key olmadan → 400" '[ "$CODE" = 400 ] && [ "$(j .code)" = idem_key ]'
 KEY=$(ik)
-api "$J_B" POST deposits/manual "{\"gw\":\"havale\",\"amount\":\"1.000\",\"txAt\":$TXAT,\"toBank\":\"Ziraat Bankası\",\"note\":\"Test Uye · Ziraat\",\"coupon\":\"HOSGELDIN\"}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $KEY"
+api "$J_B" POST deposits/manual "{\"gw\":\"havale\",\"amount\":1000,\"txAt\":$TXAT,\"toBank\":\"Ziraat Bankası\",\"note\":\"Test Uye · Ziraat\",\"coupon\":\"HOSGELDIN\"}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $KEY"
 D1="$(j .data.deposit.id)"
 chk "bildirim alındı: bekliyor, 1000 + 50 bonus, çekilebilir" '[ "$CODE" = 200 ] && [ "$(j .data.deposit.status)" = bekliyor ] && [ "$(j .data.deposit.amount)" = 1000 ] && [ "$(j .data.deposit.bonus)" = 50 ] && [ "$(j .data.deposit.w)" = true ] && [ "$(wal $UB)" = "0/0" ]'
-api "$J_B" POST deposits/manual "{\"gw\":\"havale\",\"amount\":\"1.000\",\"txAt\":$TXAT,\"toBank\":\"Ziraat Bankası\",\"coupon\":\"HOSGELDIN\"}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $KEY"
+api "$J_B" POST deposits/manual "{\"gw\":\"havale\",\"amount\":1000,\"txAt\":$TXAT,\"toBank\":\"Ziraat Bankası\",\"coupon\":\"HOSGELDIN\"}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $KEY"
 chk "aynı anahtar → aynı bildirim (ikinci kayıt yok)" '[ "$(j .data.deposit.id)" = "$D1" ] && [ "$(sq "SELECT COUNT(*) FROM yp_deposits")" = 1 ]'
 api "$J_B" POST deposits/manual "{\"gw\":\"havale\",\"amount\":100,\"txAt\":$TXAT,\"toBank\":\"Ziraat Bankası\",\"coupon\":\"HOSGELDIN\"}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $(ik)"
 chk "kupon bekleyen bildirimde kullanılıyor → 422" '[ "$CODE" = 422 ] && [ "$(j .fields.coupon)" != null ]'
@@ -234,9 +236,9 @@ api "$J_A" POST listings '{"game":"metin2","server":"sv1","cat":"yang","title":"
 L2="$(j .data.listing.id)"
 for i in $(seq 1 20); do
   curl -s -b "$J_B" -X POST -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: par$i-$(ik)" -H 'Content-Type: application/json' \
-    --data "{\"listing\":\"$L2\",\"info\":\"KarB\"}" -o "$RUN/par$i.json" "$(url orders)" &
+    --data "{\"listing\":\"$L2\",\"info\":\"KarB\"}" -o "$RUN/par$i.json" "$(url orders)" & PIDS+=($!)
 done
-wait
+wjobs
 NOK=$(cat "$RUN"/par*.json | jq -s '[.[] | select(.ok==true)] | length')
 NSOLD=$(cat "$RUN"/par*.json | jq -s '[.[] | select(.code=="sold_out")] | length')
 chk "20 paralel: 1 başarılı, 19 'satışta değil'" '[ "$NOK" = 1 ] && [ "$NSOLD" = 19 ]'
@@ -248,18 +250,18 @@ api "$J_A" POST listings '{"game":"metin2","server":"sv1","cat":"item","title":"
 L3="$(j .data.listing.id)"
 for i in $(seq 1 20); do
   curl -s -b "$J_C" -X POST -H "X-CSRF-Token: $CS_C" -H "Idempotency-Key: ovr$i-$(ik)" -H 'Content-Type: application/json' \
-    --data "{\"listing\":\"$L3\",\"info\":\"KarC\"}" -o "$RUN/ovr$i.json" "$(url orders)" &
+    --data "{\"listing\":\"$L3\",\"info\":\"KarC\"}" -o "$RUN/ovr$i.json" "$(url orders)" & PIDS+=($!)
 done
-wait
+wjobs
 NOK=$(cat "$RUN"/ovr*.json | jq -s '[.[] | select(.ok==true)] | length')
 NINS=$(cat "$RUN"/ovr*.json | jq -s '[.[] | select(.code=="insufficient")] | length')
-chk "C 210 TL kredi: 20 × 10 TL → 20 başarılı (tam yetiyor)… (ön koşul)" '[ "$NOK" = 20 ] || [ "$NOK" = 21 ] || true'
+chk "C 210 TL alışveriş bakiyesi: 20 paralel × 10 TL → 20 başarılı, kayıp/çift kesinti yok" '[ "$NOK" = 20 ] && [ "$NINS" = 0 ]'
 chk "C cüzdanı: 210 − 200 = 10 TL, eksi yok" '[ "$(wal $UC)" = "0/1000" ] && [ "$(sq "SELECT COUNT(*) FROM yp_orders WHERE buyer_id=${UC#u}")" = "$NOK" ]'
 for i in $(seq 1 6); do
   curl -s -b "$J_C" -X POST -H "X-CSRF-Token: $CS_C" -H "Idempotency-Key: ov2$i-$(ik)" -H 'Content-Type: application/json' \
-    --data "{\"listing\":\"$L3\",\"info\":\"KarC\",\"qty\":1}" -o "$RUN/ov2$i.json" "$(url orders)" &
+    --data "{\"listing\":\"$L3\",\"info\":\"KarC\",\"qty\":1}" -o "$RUN/ov2$i.json" "$(url orders)" & PIDS+=($!)
 done
-wait
+wjobs
 NOK2=$(cat "$RUN"/ov2*.json | jq -s '[.[] | select(.ok==true)] | length')
 NINS2=$(cat "$RUN"/ov2*.json | jq -s '[.[] | select(.code=="insufficient")] | length')
 chk "kalan 10 TL ile 6 paralel → tam 1 başarılı, 5 'bakiye yetersiz'" '[ "$NOK2" = 1 ] && [ "$NINS2" = 5 ] && [ "$(wal $UC)" = "0/0" ]'
@@ -356,9 +358,9 @@ CR0=$(sq "SELECT credit FROM yp_wallets WHERE user_id=${UB#u}")
 OUT=$(cb "$OID" success 20500 "badhash==")
 chk "yanlış hash → reddedildi, bakiye yok" '[ "$OUT" = "PAYTR notification failed: bad hash" ] && [ "$(sq "SELECT status FROM yp_deposits WHERE merchant_oid='\''$OID'\''")" = bekliyor ]'
 H=$(hsh "$OID" success 20500)
-for i in 1 2 3 4 5; do cb "$OID" success 20500 "$H" > "$RUN/cb$i.txt" & done
-wait
-chk "5 paralel bildirim: hepsi OK" '[ "$(cat "$RUN"/cb*.txt | grep -c "^OK$")" = 5 ]'
+for i in 1 2 3 4 5; do cb "$OID" success 20500 "$H" > "$RUN/cb$i.txt" & PIDS+=($!); done
+wjobs
+chk "5 paralel bildirim: hepsi OK" '[ "$(for f in "$RUN"/cb*.txt; do cat "$f"; echo; done | grep -c "^OK$")" = 5 ]'
 chk "bir kez yüklendi: kart → yalnız alışveriş +200, 5 bildirim sayıldı" '[ "$(sq "SELECT credit FROM yp_wallets WHERE user_id=${UB#u}")" = $((CR0 + 20000)) ] && [ "$(sq "SELECT callbacks FROM yp_deposits WHERE merchant_oid='\''$OID'\''")" = 5 ] && [ "$(sq "SELECT COUNT(*) FROM yp_journal WHERE ref_type='\''deposit'\'' AND kind='\''yukleme'\'' AND ref_id=(SELECT '\''d'\''||id FROM yp_deposits WHERE merchant_oid='\''$OID'\'')")" = 1 ]'
 api "$J_B" GET "deposits/$OID" ""
 chk "durum yoklama: onaylandı + güncel bakiye" '[ "$(j .data.deposit.status)" = onaylandı ] && [ "$(j .data.done)" = true ] && [ "$(j .patch.me.bonus)" != null ]'
