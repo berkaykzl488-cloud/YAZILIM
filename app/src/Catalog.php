@@ -314,6 +314,11 @@ final class Catalog
             $w[] = 'seller_id=?';
             $p[] = (int)$f['seller_id'];
         }
+        // P2: dopingi süren ilanlar (ana sayfa vitrini): dop=vitrin|acil|renk
+        if (!empty($f['dop']) && in_array($f['dop'], ['vitrin', 'acil', 'renk'], true)) {
+            $w[] = 'dop_' . $f['dop'] . '>?';
+            $p[] = yp_now_ms();
+        }
         if (isset($f['q']) && trim((string)$f['q']) !== '') {
             $q = yp_str($f['q'], 60);
             $or = ["title_norm LIKE ? ESCAPE '!'"];
@@ -357,6 +362,9 @@ final class Catalog
         }
         if ($g('seller') !== '') {
             $f['seller_id'] = Ids::user($g('seller'));
+        }
+        if (in_array($g('dop'), ['vitrin', 'acil', 'renk'], true)) {
+            $f['dop'] = $g('dop');
         }
         return $f;
     }

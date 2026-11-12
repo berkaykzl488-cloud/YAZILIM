@@ -66,9 +66,7 @@ ACT['p1-more'] = (d, e) => { const c = API.cache[d.k]; const v = c && c.v; if (!
 FORM.p1f = () => { ui.f.q = v_('p1_q').trim(); render(); };
 ACT['p1-qclear'] = () => { ui.f.q = ''; render(); };
 
-/* ---- henüz sunucuda olmayanlar ---- */
-ACT.buy = () => { if (!me()) return mLogin(); toast(P1_SOON.buy); };
-ACT.dope = () => toast(P1_SOON.dop);
+/* ---- henüz sunucuda olmayanlar (satın alma ve doping: 98p2-actions.js) ---- */
 ACT['sms-user'] = () => toast(P1_SOON.sms);
 
 /* ---- fotoğraflar (önce yükle) ---- */
@@ -91,6 +89,11 @@ p1F('sell', async (f) => { const u = me(); if (!u) return mLogin();
   const media = p1Media('s'); if (!media) return;
   const b = { game: 'metin2', server, cat, title: v_('s_title').trim(), price: p1Cnum(v_('s_price')), stock: parseInt(v_('s_stock'), 10) || 1, del: v_('s_del'), desc: v_('s_desc'),
     cover: (document.querySelector('input[name=cover]:checked') || {}).value || '', media };
+  // P2: seçilen dopingler {vitrin: gün}; ücret ilanla aynı işlemde bakiyeden düşülür (yetersizse ilan açılmaz)
+  const dop = {}; document.querySelectorAll('form[data-form=sell] [data-dop]:checked').forEach(c => { const k = c.dataset.dop; if (S.dopings[k]) dop[k] = Math.max(1, parseInt(v_('dd_' + k), 10) || 1); });
+  if (Object.keys(dop).length) { const cost = r2(Object.entries(dop).reduce((s, [k, n]) => s + dopCost(k, n), 0));
+    if (avail(u) < cost) { toast(`Doping için ${TL(cost)} gerekiyor, bakiyeniz ${TL(avail(u))}. Önce bakiye yükleyin ya da dopingi kaldırın.`, true); ui.depAmt = Math.max(10, Math.ceil(cost - avail(u))); return; }
+    b.dop = dop; }
   const j = await call('POST', 'listings', b, { key: formKey(f) }); const l = j.data.listing;
   UPL.s = []; ui.preset = null; needDrop('L'); try { track('ilan', { value: l.price }); } catch (e) { }
   go('ilan-' + l.id); });

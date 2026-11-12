@@ -3,7 +3,7 @@
    "Daha fazla" anahtar kümesi sayfalama), arama sonuçları ve üst arama önerileri, ilan ayrıntısı (görüntülenme),
    satıcı profili (#uye-<id>), ilan ver (önce yükle: fotoğraflar tarayıcıda ≤1600 px küçültülüp POST media ile yüklenir),
    ilan düzenle / kaldır / ücretsiz üste taşı, Hesabım › İlanlarım, Yönetim › İlanlar, Serverlar, Bakım › Güncellemeler.
-   Henüz sunucuda olmayanlar (satın alma, doping, mesaj, EP, borsa, reklam) "Yakında" uyarısı verir.
+   Henüz sunucuda olmayanlar (mesaj, EP, borsa, reklam) "Yakında" uyarısı verir; satın alma ve doping P2 dosyalarında (97p2/98p2).
    Tüm adresler hash rotasıdır (#ilan-l7); yönlendirmesiz (rewrite'sız) sunucularda da çalışır. Temiz adresler
    (/ilan/<başlık>-l7, /server/<slug>, /index.php?p=…) yalnız sunucu tarafı meta/canonical içindir; açılışta hash'e çevrilir. */
 const P1 = { last: null, uk: 0, sugT: 0, sugDone: {}, fresh: {} };
@@ -22,8 +22,6 @@ const p1AdmLoad = (k, path, fn, ttl) => need(k, () => call('GET', path, null, { 
 const p1AdmSrv = () => { const c = API.cache['adm:servers']; return c && c.v && Array.isArray(c.v.servers) ? c.v.servers : []; };
 const P1_SORT = [['yeni', 'En yeni'], ['ucuz', 'En ucuz'], ['pahali', 'En pahalı'], ['eski', 'En eski']];
 const P1_SOON = {
-  buy: 'Güvenli satın alma (ödeme havuzu) çok yakında açılıyor. Şimdilik ilanları inceleyebilir, kendi ilanınızı verebilirsiniz.',
-  dop: 'İlan dopingleri (vitrin, acil, renkli) çok yakında açılıyor. Ücretsiz üste taşıma 2 saatte bir kullanılabilir.',
   sms: 'Üyeye SMS ile ulaşma çok yakında açılıyor.'
 };
 
@@ -101,9 +99,8 @@ srvCard = function (s, prem) {
     <div class="m" style="margin-top:auto"><b style="color:var(--fg)">${p1N(s)}</b> aktif ilan</div></div></a>`;
 };
 
-/* ana sayfa: son ilanlar açılış verisinden (ilk 24, en yeni); vitrin dopingi yakında */
+/* ana sayfa: son ilanlar açılış verisinden (ilk 24, en yeni); vitrin ilanları P2'de (97p2-money.js) */
 { const f = vHome; vHome = function () { let h = f.apply(this, arguments);
-    h = h.replace('İlanınızı vitrine çıkarmak için ilan verirken Vitrin dopingini seçin.', 'Vitrin dopingi çok yakında açılıyor. Şimdilik son eklenen ilanlar aşağıda.');
     if (!active().length) h = h.replace(/(<h2>Son Eklenen İlanlar<\/h2>[\s\S]*?<div class="lrows">)(<\/div>)/, '$1' + emptyBox('Henüz ilan yok', 'İlk ilanı siz verin; ilan vermek ücretsiz.', '<a class="btn btn-primary" href="#ilan-ver">İlan Ver</a>') + '$2');
     return h; }; }
 
@@ -172,11 +169,10 @@ vServer = function (id, cat) {
     if (!d && !l) return `<div class="wrap">${pLoading('İlan yükleniyor…')}</div>`;
     if (d && d.err) return `<div class="wrap">${emptyBox('İlan bulunamadı', esc(d.err), '<a class="btn btn-primary" href="#home">Ana sayfaya dön</a>')}</div>`;
     if (!l) return vNotFound();
-    const views = l.views, dp = S.dopings; let h;
-    S.dopings = {}; try { h = v0(id); } finally { S.dopings = dp; l.views = views; }
+    const views = l.views; let h;
+    try { h = v0(id); } finally { l.views = views; }
     const u = user(l.seller), mine = S.cur === l.seller;
     h = h.replace('<div class="ltiles">', `<div class="ltiles"><div>${LI.eye}<span><small>Görüntülenme</small><b id="lViews">${NUM(views || 0)}</b></span></div>`);
-    h = h.replace('<div class="eyebrow">Doping al · süreyi siz seçin</div><div class="stack" style="gap:8px"></div>', `<div class="note note-info" style="font-size:12.5px"><b>Dopingler yakında.</b> ${esc(P1_SOON.dop)}</div>`);
     const stNote = { beklemede: '<b>Bu ilan onay bekliyor.</b> Yönetici onayladığında yayına girer; şu an yalnız siz ve yöneticiler görebilir.', kaldirildi: '<b>Bu ilan yayından kaldırıldı.</b> Ziyaretçiler bu ilanı göremez.', satildi: '<b>Bu ilanın stoğu bitti.</b> Stok eklemek için ilanı düzenleyin.' }[l.status];
     if (stNote && (mine || isPanel())) h = h.replace('<div class="lprice">', `<div class="note ${l.status === 'beklemede' ? 'note-warn' : 'note-bad'}">${stNote}</div><div class="lprice">`);
     if (!mine && l.status !== 'aktif' && l.status !== 'satildi') h = h.replace('<div class="note note-bad"><b>Bu ilan satıldı.</b> Benzer ilanlar için kategoriye göz atın.</div>', '');
@@ -209,9 +205,8 @@ function pMyListings(u) {
   ${my.length ? `<div class="tbl-w"><table class="tbl mcards"><thead><tr><th>İlan no</th><th>İlan</th><th>Durum</th><th class="num">Stok</th><th class="num">Fiyat</th><th></th></tr></thead><tbody>${my.map(l => { const st = ST_[l.status] || ['p-iade', l.status]; return `<tr data-lid="${esc(l.id)}"><td class="mono">#${l.no}</td><td><a href="#ilan-${l.id}" style="font-weight:600">${esc(l.title)}</a><div class="muted" style="font-size:12px">${esc(lsub(l))} · ${catName(l)} · ${NUM(l.views || 0)} görüntülenme${l.bump ? ' · son taşıma ' + ago(l.bump) : ''}</div></td><td><span class="pill ${st[0]}">${st[1]}</span></td><td class="num">${NUM(l.stock)}</td><td class="num">${TL(l.price)}</td><td><div class="hstack" style="flex-wrap:nowrap">${l.status === 'aktif' ? freeBumpBtn(l) : ''}${l.status !== 'kaldirildi' ? `<button class="btn btn-sm" data-act="edit-l" data-id="${l.id}">Düzenle</button><button class="btn btn-sm btn-bad" data-act="unlist" data-id="${l.id}">Kaldır</button>` : ''}</div></td></tr>`; }).join('')}</tbody></table></div>${p1MoreBtn(d, 'Daha fazla göster')}` : emptyBox('Henüz ilanınız yok', 'İlk ilanınızı verin, alıcılar sizi bulsun.', '<a class="btn btn-primary" href="#ilan-ver">İlan Ver</a>')}</div>`;
 }
 
-/* ilan ver: doping paneli yakında, ilan no sunucuda verilir */
-{ const f = vSell; vSell = function () { const dp = S.dopings; let h; S.dopings = {}; try { h = f.apply(this, arguments); } finally { S.dopings = dp; }
-    h = h.replace(/<div class="panel panel-b stack"><div class="eyebrow">4 · Doping \(isteğe bağlı\)<\/div>[\s\S]*?id="dopTot">[^<]*<\/span><\/div><\/div>\s*<\/div>/, `<div class="panel panel-b stack"><div class="eyebrow">4 · Doping</div><div class="note note-info"><b>Dopingler yakında.</b> ${esc(P1_SOON.dop)}</div></div>`);
+/* ilan ver: ilan no sunucuda verilir (dopingler P2: ücreti ilanla aynı işlemde bakiyeden) */
+{ const f = vSell; vSell = function () { let h = f.apply(this, arguments);
     h = h.replace(` · Sıradaki ilan no: <b class="mono">#${S.lno + 1}</b>`, '');
     if (S.set.moderation) h = h.replace('<div class="hstack"><button class="btn btn-primary" style="padding:13px 24px">İlanı Yayınla</button>', '<div class="note note-info">İlanınız yönetici onayından sonra yayına girer.</div><div class="hstack"><button class="btn btn-primary" style="padding:13px 24px">İlanı Yayınla</button>');
     return h; }; }
@@ -291,8 +286,7 @@ function p1Bakim(sub) {
       const b = p1AdmLoad('adm:lst:~pend', 'admin/listings?status=beklemede&limit=100', fn, 20000);
       if (!a || !b) return pAdmPage(P, it, () => ({ body: pLoading('İlanlar yükleniyor…') }));
       if (a.err || b.err) return pAdmPage(P, it, () => ({ body: p1Err(a.err ? a : b) }));
-      const dp = S.dopings; let out; S.dopings = {}; try { out = v1(P); } finally { S.dopings = dp; }
-      return out.replace(/<form class="panel" data-form="dopset">[\s\S]*?<\/form>/, `<div class="panel panel-b stack"><h3 class="ph3">Doping fiyatları</h3><div class="note note-info">${esc(P1_SOON.dop)}</div></div>`);
+      return v1(P);
     }
     if (it.k === 'server') {
       const d = p1AdmLoad('adm:servers', 'admin/servers', null);

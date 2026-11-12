@@ -114,7 +114,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
 
     /* ---------- 6. A: ilan ver (3 fotoğraf, biri büyük) ---------- */
     await go(A, 'ilan-ver'); await A.waitForSelector('form[data-form=sell]');
-    ok('ilan ver: formda doping yerine "Dopingler yakında"', (await txt(A, '#app')).includes('Dopingler yakında') && await A.locator('[data-dop]').count() === 0);
+    ok('ilan ver: doping seçenekleri sunucudan (P2; seçilmezse ücret yok)', !(await txt(A, '#app')).includes('Dopingler yakında') && await A.locator('[data-dop]').count() === 3);
     const srvOpt = await A.evaluate(() => { const o = document.querySelector('#s_server_tr option'); return o ? { id: o.value, name: o.textContent } : null; });
     ok('ilan ver: TR server listesi sunucudan (sv… kimlikleri)', srvOpt && /^sv\d+$/.test(srvOpt.id), JSON.stringify(srvOpt));
     const SV = srvOpt.id, SVN = srvOpt.name.trim();
@@ -136,7 +136,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     const L1 = (A.url().match(/#ilan-(l\d+)$/) || [])[1];
     await A.waitForSelector('.lhero'); await A.waitForTimeout(400);
     ok('ilan sayfası: başlık, fiyat, 3 fotoğraf galerisi', (await txt(A, '#app')).includes(T1) && /125,50/.test(await txt(A, '.lprice')) && await A.locator('.lgal button').count() === 3);
-    ok('ilan sayfası (sahibi): düzenle / üste taşı / kaldır, doping yakında', await A.locator('[data-act=edit-l]').count() === 1 && await A.locator('[data-act=unlist]').count() === 1 && (await txt(A, '#app')).includes('Dopingler yakında'));
+    ok('ilan sayfası (sahibi): düzenle / üste taşı / kaldır, doping al (P2)', await A.locator('[data-act=edit-l]').count() === 1 && await A.locator('[data-act=unlist]').count() === 1 && await A.locator('[data-act=dope]').count() === 3);
     ok('ilan sayfası: kendi görüntülemesi sayılmaz (0)', (await txt(A, '#lViews')).trim() === '0');
 
     /* ---------- 7. B: gezinme (ana sayfa → Metin2 TR → server → kategori/arama/sıralama → ilan) ---------- */
@@ -159,7 +159,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     ok('sıralama: "En ucuz" seçili kalır, ilan listede', (await Bp.inputValue('#p1_sort')) === 'ucuz' && (await txt(Bp, '#app')).includes(T1));
     await Bp.click(`.lrows a[href="#ilan-${L1}"]`); await Bp.waitForSelector('.lhero'); await Bp.waitForTimeout(500);
     ok('B ilanı açtı: görüntülenme 1', (await txt(Bp, '#lViews')).trim() === '1', await txt(Bp, '#lViews'));
-    ok('B: satın al yerine "yakında" (çökme yok)', await (async () => { await Bp.click('[data-act=buy]'); return toast(Bp, /çok yakında/); })());
+    ok('B: satın al → onay penceresi, bakiye yetersiz → "Bakiye yükle" (P2)', await (async () => { await Bp.click('[data-act=buy]'); try { await Bp.waitForSelector('#modal [data-act=p2-topup]', { timeout: 5000 }); } catch (e) { return false; } const ok_ = (await Bp.locator('#modal').innerText()).includes('Bakiyeniz yetersiz'); await Bp.click('#modal [data-act=close]'); return ok_; })());
     await shot(Bp, 'ilan-detay');
     // üst arama önerileri (sunucudan)
     await go(Bp, 'home'); await Bp.fill('#q', ''); await Bp.type('#q', 'Ejder Kılıcı', { delay: 30 });
@@ -176,7 +176,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     /* ---------- 8. ilan onayı: açıkken yeni ilan gizli, yönetici onaylayınca yayında ---------- */
     await go(M, 'yonetim/ilan/ayarlar', 700); await M.waitForSelector('#modT');
     await M.check('#modT'); ok('yönetim: ilan onayı açıldı', await toast(M, 'onaydan geçecek'));
-    ok('yönetim › İlanlar › Ayarlar: doping fiyatları yakında, hazır görseller', (await tc(M, '.apage')).includes('Doping fiyatları') && await M.locator('form[data-form=dopset]').count() === 0 && await M.locator('[data-change=coverup]').count() > 0);
+    ok('yönetim › İlanlar › Ayarlar: doping fiyatları formu (P2), hazır görseller', (await tc(M, '.apage')).includes('Doping fiyatları') && await M.locator('form[data-form=dopset]').count() === 1 && await M.locator('[data-change=coverup]').count() > 0);
     await A.reload(); await A.waitForSelector('#hdr'); await go(A, 'ilan-ver'); await A.waitForSelector('form[data-form=sell]');
     ok('ilan ver: onay notu gösterilir', (await txt(A, '#app')).includes('yönetici onayından sonra'));
     const T2 = 'Moderasyon Testi 100 Won Paketi';

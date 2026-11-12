@@ -53,7 +53,9 @@ function pTfa(t,err){ if(t){ P_TFA=Object.assign({},t,{until:Date.now()+(+t.wait
 /* ---- Hesabım ---- */
 const P_TABS=[['ozet','Özet'],['ilan','İlanlarım'],['profil','Profil ve güvenlik'],['banka','Banka hesaplarım']];
 vAccount=function(){ const u=me(); if(!u) return `<div class="wrap">${emptyBox('Hesabınızı görmek için giriş yapın','','<button class="btn btn-primary" data-act="login">Giriş Yap</button>')}</div>`;
-  if(!P_TABS.some(([k])=>k===ui.tab)) ui.tab=ui.tab==='cek'?'banka':'ozet';
+  // P2 (97p2-money.js): ek sekmeler (siparişler, satışlar, bakiye hareketleri) ve sekme gövdeleri
+  const TABS=typeof p2AccTabs==='function'?p2AccTabs(u,P_TABS):P_TABS;
+  if(!TABS.some(([k])=>k===ui.tab)) ui.tab=ui.tab==='cek'?'banka':'ozet';
   const IB=u.ibans||[]; const nn=S.notifs.filter(n=>n.u===u.id&&!n.read).length; let body='';
   if(ui.tab==='ozet') body=`<div class="kpis"><div class="kpi hl"><small>Toplam bakiye</small><b>${TL(avail(u))}</b><span class="muted" style="font-size:12px">Çekilebilir ${TL(u.bal)} · Sadece alışveriş ${TL(u.bonus||0)}</span></div><div class="kpi"><small>Puanınız</small><b>${NUM(u.pts)}</b></div><div class="kpi"><small>Okunmamış bildirim</small><b>${nn}</b></div></div>
     <div class="note note-info">Hesabınız hazır. İlan verebilir ve ilanlarınızı yönetebilirsiniz. Güvenli satın alma, bakiye yükleme ve para çekme çok yakında açılıyor; açıldığında bildirim alacaksınız.</div>
@@ -67,12 +69,13 @@ vAccount=function(){ const u=me(); if(!u) return `<div class="wrap">${emptyBox('
     <button class="btn btn-primary">Bilgilerimi kaydet</button></form></div>${tp}
     <div class="panel panel-b hstack" style="justify-content:space-between;max-width:560px"><span class="muted" style="font-size:13px">Bu cihazdaki oturumu kapatın.</span><button class="btn" data-act="logout">Çıkış yap</button></div>`; }
   if(ui.tab==='ilan') body=pMyListings(u);
+  { const xb=typeof p2AccBody==='function'?p2AccBody(u,ui.tab):null; if(xb!=null) body=xb; }
   if(ui.tab==='banka') body=`<div class="panel"><div class="panel-h"><h3>Kayıtlı IBAN'larım</h3><span class="muted" style="font-size:12px">En fazla 5 hesap</span></div><div class="panel-b stack">
     <div class="note note-info">IBAN'lar şifreli saklanır ve size maskeli gösterilir. Hesap sizin adınıza olmalıdır. Para çekme çok yakında açılıyor.</div>
     ${IB.map(b=>`<div class="cprow"><span><b>${esc(b.bank)}</b> · ${esc(b.name)}<br><span class="mono">${esc(b.iban)}</span></span><button class="btn btn-sm btn-bad" data-act="iban-del" data-id="${esc(b.id)}">Sil</button></div>`).join('')||'<span class="muted">Kayıtlı IBAN yok.</span>'}
     <form class="row3" data-form="ibanadd" style="align-items:end"><div class="fld"><label for="ia_b">Banka</label><select class="inp" id="ia_b">${TRBANKS.map(b=>`<option>${esc(b)}</option>`).join('')}</select></div><div class="fld"><label for="ia_n">Ad soyad</label><input class="inp" id="ia_n" value="${esc(fullName(u))}" required></div><div class="fld"><label for="ia_i">IBAN</label><input class="inp mono" id="ia_i" required placeholder="TR.."></div><button class="btn btn-sm">IBAN kaydet</button></form></div></div>`;
   return `<div class="wrap"><div class="page-h"><div><h1>Hesabım</h1><p>${esc(u.name)} · ${esc(fullName(u))} · Üyelik: ${esc(u.joined||'')}</p></div><div class="hstack">${isPanel()?'<a class="btn btn-primary" href="#yonetim">Yönetim paneline git</a>':''}<button class="btn" data-act="logout">Çıkış yap</button></div></div>
-  <div class="acc"><div class="stack" style="gap:12px"><nav class="panel tabs">${P_TABS.map(([k,t])=>`<button data-act="tab" data-t="${k}" class="${ui.tab===k?'on':''}">${t}</button>`).join('')}</nav></div><div class="stack">${body}</div></div></div>`; };
+  <div class="acc"><div class="stack" style="gap:12px"><nav class="panel tabs">${TABS.map(([k,t,c])=>`<button data-act="tab" data-t="${k}" class="${ui.tab===k?'on':''}">${t}${c?`<span class="cnt">${c}</span>`:''}</button>`).join('')}</nav></div><div class="stack">${body}</div></div></div>`; };
 
 /* ---- Yönetim ---- */
 const P_ADM = {panel:1, ara:1, uye:['uyeler'], calisan:1, sms:1, ilan:1, server:1, bakim:1};
@@ -94,7 +97,6 @@ const pErrBox = d => d&&d.err?`<div class="note note-bad">${esc(d.err)}</div>`:'
     if(it.k==='ara'&&P.q){ const d=pAdmLoad('adm:search:'+P.q,'admin/search?q='+encodeURIComponent(P.q),x=>{ (x.users||[]).forEach(apiUpsertUser); return x; },15000);
       if(!d) return pAdmPage(P,it,()=>({body:pLoading('Aranıyor…')})); }
     let out=v0(P);
-    if(it.k==='uye') out=out.replace(/<a class="btn btn-primary" href="#yonetim\/uye\/bakiye">Bakiye düzelt<\/a>/,'');
     if(it.k==='calisan'&&!(can('uye')||can('ara'))) out=out.replace(/<div class="fld" style="max-width:340px"><label for="sa_ex">[\s\S]*?<\/select>[\s\S]*?<\/span><\/div>/,'');
     return out; }; }
 /* Bugün: iş kuyruğu sayıları ve KPI'lar sunucudan (GET admin/today) */

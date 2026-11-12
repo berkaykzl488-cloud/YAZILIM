@@ -219,7 +219,10 @@ return function (Router $r) {
         $u = Auth::$user;
         $day = (new \DateTime('today', new \DateTimeZone('Europe/Istanbul')))->getTimestamp() * 1000;
         $out = [
-            'queues' => ['deps' => 0, 'wd' => 0, 'orders' => 0, 'disputes' => 0, 'tickets' => 0, 'ex' => 0,
+            // P2: bekleyen elle yükleme bildirimleri, teslim bekleyen ve itirazlı siparişler
+            'queues' => ['deps' => (int)$db->val("SELECT COUNT(*) FROM {deposits} WHERE status='bekliyor' AND gw IN (SELECT id FROM {gateways} WHERE manual=1)"),
+                'wd' => 0, 'orders' => (int)$db->val("SELECT COUNT(*) FROM {orders} WHERE status='odendi'"),
+                'disputes' => (int)$db->val("SELECT COUNT(*) FROM {orders} WHERE status='itiraz'"), 'tickets' => 0, 'ex' => 0,
                 'listings' => (int)$db->val("SELECT COUNT(*) FROM {listings} WHERE status='beklemede'"),
                 'flagged' => (int)$db->val('SELECT COUNT(*) FROM {flagged} WHERE seen=0')],
             'outbox' => ['queued' => (int)$db->val("SELECT COUNT(*) FROM {outbox} WHERE status='queued'"),

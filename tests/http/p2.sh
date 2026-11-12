@@ -335,6 +335,10 @@ api "$J_A" POST listings '{"game":"metin2","server":"sv1","cat":"item","title":"
 chk "ilan verirken doping (acil 2 gün 9 TL) bakiyeden" '[ "$CODE" = 200 ] && [ "$(j .data.listing.dop.acil)" -gt 0 ] && j .msg | grep -q "Doping ücreti" && [ "$(sq "SELECT COUNT(*) FROM yp_journal WHERE kind='\''doping'\''")" = 2 ]'
 api "$J_IL" PUT admin/dopings '{"dopings":{"vitrin":{"p":8,"max":14}}}' -H "X-CSRF-Token: $CS_IL"
 chk "[ilan] doping fiyatı (dopset) + audit" '[ "$CODE" = 200 ] && [ "$(j .data.dopings.vitrin.pd)" = 8 ] && [ "$(j .data.dopings.vitrin.p)" = 56 ] && [ "$(sq "SELECT COUNT(*) FROM yp_audit_log WHERE action='\''dopings_set'\''")" = 1 ]'
+api "$J_X" GET "listings?dop=vitrin" ""
+chk "ana sayfa vitrini: listings?dop=vitrin yalnız vitrini süren ilanlar" '[ "$CODE" = 200 ] && [ "$(j ".data.listings | length")" = 1 ] && [ "$(j .data.listings[0].id)" = "$L4" ]'
+api "$J_ADM" GET admin/today ""
+chk "Bugün: bekleyen yükleme / teslim bekleyen / itirazlı sayıları gerçek" '[ "$(j .data.queues.deps)" = "$(sq "SELECT COUNT(*) FROM yp_deposits WHERE status='\''bekliyor'\'' AND gw IN ('\''havale'\'','\''kripto'\'')")" ] && [ "$(j .data.queues.orders)" = "$(sq "SELECT COUNT(*) FROM yp_orders WHERE status='\''odendi'\''")" ] && [ "$(j .data.queues.orders)" -gt 0 ] && [ "$(j .data.queues.disputes)" = 0 ]'
 
 echo "=== 12. PayTR ayarlanır (api/ Entegrasyonlar) → token → bildirim (gerçek hash) ==="
 MID=123456; KEY=AbCdEf1234567890; SALT=SaLt0987654321zz; PW='Cok-Gizli-Sifre-2026'
