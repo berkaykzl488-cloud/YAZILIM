@@ -89,10 +89,11 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .x { flex: none; width: 32px; height: 32px; padding: 0; border-radius: 8px; background: transparent; color: var(--muted); border: 1px solid var(--line); font-size: 18px; line-height: 1; }
 .x:hover { color: var(--danger); border-color: var(--danger); }
 
-.bench { margin-top: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.bench strong { display: block; margin-bottom: 6px; }
-.bench ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
-.bench li { display: flex; align-items: center; gap: 8px; }
+.bench-head { margin-top: 22px; }
+.bench-head h2 { font-size: 22px; }
+.slot.res .shirt { background: var(--accent); color: var(--accent-ink); font-size: 16px; }
+.slot.res.empty .shirt { background: var(--line); color: var(--muted); }
+.slot.res:not(.empty) { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
 
 .admin { gap: 18px; }
 .grid2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
@@ -150,9 +151,12 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
       <p>Her forma bir oyuncu. Boş yerler dolunca liste kapanır.</p>
     </div>
     <ol class="squad" id="squad"></ol>
-    <div class="bench" id="bench" hidden>
-      <strong>Yedek (sınırın dışında kalanlar)</strong>
-      <ol id="benchList"></ol>
+    <div id="bench" hidden>
+      <div class="section-head bench-head">
+        <h2>Yedekler</h2>
+        <p>Kadrodan biri çıkarsa 1. yedek kendiliğinden kadroya geçer, diğerleri bir sıra yukarı kayar.</p>
+      </div>
+      <ol class="squad" id="benchList"></ol>
     </div>
   </section>
 
@@ -181,6 +185,13 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
           <button type="button" id="capPlus" aria-label="Bir artır">+</button>
         </div>
       </label>
+      <label for="resInput">Kaç yedek olsun?
+        <div class="stepper">
+          <button type="button" id="resMinus" aria-label="Bir azalt">−</button>
+          <input type="number" id="resInput" min="0" max="20" value="3">
+          <button type="button" id="resPlus" aria-label="Bir artır">+</button>
+        </div>
+      </label>
       <label for="titleInput">Maç adı
         <input type="text" id="titleInput" maxlength="40" placeholder="Çarşamba maçı">
       </label>
@@ -199,7 +210,7 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
         <input type="text" id="manualName" maxlength="30" placeholder="Arkadaşının adı">
         <button class="btn-ghost" id="manualAdd" type="button">Ekle</button>
       </div>
-      <p class="hint" style="margin-top:6px">Linke giremeyen arkadaşlar için. Kişi sınırı burada da geçerli.</p>
+      <p class="hint" style="margin-top:6px">Linke giremeyen arkadaşlar için. Kadro doluysa yedeğe yazılır; kadro ve yedek sınırı burada da geçerli.</p>
     </div>
     <div class="divider"></div>
     <div class="confirm" id="clearArea"></div>
@@ -228,7 +239,7 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
   const API = "api.php";
   const POLL_MS = 8000;
   const $ = (id) => document.getElementById(id);
-  const S = { data: null, busy: false, failed: false, confirmClear: false, adminFilled: false, loginOpen: false, draftName: null };
+  const S = { data: null, busy: false, failed: false, confirmClear: false, adminFilled: false, loginOpen: false, draftName: null, myIdx: null };
 
   // Her tarayıcıya rastgele bir kimlik: "Gelemiyorum" ile sadece kendi kaydını silebilsin diye.
   let token = null;
@@ -282,6 +293,7 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     try {
       const d = await call("state");
       S.data = d; S.failed = false;
+      checkPromotion();
       if (d.needsSetup && !d.admin) S.loginOpen = S.loginOpen || location.hash === "#yonetici";
     } catch (e) {
       S.failed = true;
@@ -295,6 +307,7 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     try {
       const d = await call(action, body || {});
       S.data = d;
+      S.myIdx = d.players.findIndex((p) => p.mine); if (S.myIdx < 0) S.myIdx = null;
       toast(d.msg);
       if (after) after(d);
     } catch (e) {
@@ -304,6 +317,21 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
   }
 
   const cap = () => (S.data ? Number(S.data.settings.capacity) || 14 : 14);
+  const reserve = () => {
+    const r = S.data ? Number(S.data.settings.reserve) : 3;
+    return Number.isFinite(r) && r >= 0 ? r : 3;
+  };
+
+  // Yedekten kadroya geçen kişiye haber ver.
+  function checkPromotion() {
+    if (!S.data) return;
+    const idx = S.data.players.findIndex((p) => p.mine);
+    const c = cap();
+    if (S.myIdx != null && S.myIdx >= c && idx >= 0 && idx < c) {
+      toast("Yedekten kadroya geçtin! Forman " + (idx + 1) + " numara.");
+    }
+    S.myIdx = idx >= 0 ? idx : null;
+  }
 
   // ---------- çizim ----------
   function renderHeader() {
@@ -318,7 +346,11 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     num.append(d ? String(inSquad) : "–", el("small", null, "/" + (d ? c : "–")));
     const left = c - inSquad, st = $("status"), bar = $("bar");
     if (!d) { st.textContent = S.failed ? "Bağlantı yok" : "Yükleniyor"; st.className = "pill"; }
-    else if (left <= 0) { st.textContent = "Kadro tamam"; st.className = "pill full"; }
+    else if (left <= 0) {
+      const rl = Math.max(0, c + reserve() - n);
+      st.textContent = rl > 0 ? "Kadro tamam · " + rl + " yedek yeri" : (reserve() > 0 ? "Kadro ve yedek dolu" : "Kadro tamam");
+      st.className = "pill full";
+    }
     else if (left <= 2) { st.textContent = "Son " + left + " yer"; st.className = "pill warn"; }
     else { st.textContent = left + " yer boş"; st.className = "pill"; }
     bar.className = "bar" + (d && left > 0 && left <= 2 ? " warn" : "");
@@ -333,29 +365,35 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
         el("p", null, S.failed ? "Sunucuya ulaşılamadı. Sayfa birkaç saniyede bir yeniden deniyor." : "Kimlerin geldiği birazdan burada görünecek."));
       return;
     }
-    const c = cap(), idx = d.players.findIndex((p) => p.mine);
+    const c = cap(), r = reserve(), n = d.players.length, idx = d.players.findIndex((p) => p.mine);
     if (idx >= 0) {
       const onBench = idx >= c;
-      box.append(el("h3", null, onBench ? "Yedektesin" : "Kadrodasın, forman " + (idx + 1) + " numara"),
-        el("p", null, onBench ? "Kişi sayısı düşürüldüğü için sınırın dışında kaldın. Biri çıkarsa kadroya girersin."
-                              : "Gelemeyeceksen yerini boşalt, başka biri girsin."));
-      const row = el("div", "row"), b = el("button", "btn-danger", "Gelemiyorum, beni çıkar");
+      box.append(el("h3", null, onBench ? "Yedektesin, sıran " + (idx - c + 1) : "Kadrodasın, forman " + (idx + 1) + " numara"),
+        el("p", null, onBench ? "Kadrodan biri çıkarsa sırayla yukarı geçersin. Kadroya girince bu sayfada haber verilir."
+                              : "Gelemeyeceksen yerini boşalt. Yerine 1. yedek kendiliğinden geçer."));
+      const row = el("div", "row"), b = el("button", "btn-danger", onBench ? "Yedekten çık" : "Gelemiyorum, beni çıkar");
       b.type = "button"; b.disabled = S.busy;
       b.addEventListener("click", () => act("leave"));
       row.append(b); box.append(row);
       return;
     }
-    if (d.players.length >= c) {
-      box.append(el("h3", null, "Kadro doldu (" + c + "/" + c + ")"),
+    if (n >= c + r) {
+      box.append(el("h3", null, r > 0 ? "Kadro ve yedek doldu" : "Kadro doldu (" + c + "/" + c + ")"),
         el("p", null, "Tüm yerler alındı. Biri çıkarsa yer açılır, sayfa kendiliğinden güncellenir."));
       return;
     }
-    box.append(el("h3", null, "Geliyor musun?"), el("p", null, (c - d.players.length) + " yer kaldı. Adını yaz, kadroya gir."));
+    const toBench = n >= c;
+    if (toBench) {
+      box.append(el("h3", null, "Kadro doldu, yedeğe yazıl"),
+        el("p", null, (c + r - n) + " yedek yeri kaldı. Kadrodan biri çıkarsa sırayla kadroya geçersin."));
+    } else {
+      box.append(el("h3", null, "Geliyor musun?"), el("p", null, (c - n) + " yer kaldı. Adını yaz, kadroya gir."));
+    }
     const row = el("div", "row"), inp = el("input");
     inp.type = "text"; inp.id = "nameInput"; inp.maxLength = 30; inp.placeholder = "Adın"; inp.autocomplete = "nickname";
     inp.value = S.draftName || "";
     inp.addEventListener("input", () => { S.draftName = inp.value; });
-    const b = el("button", "btn-primary", "Geliyorum");
+    const b = el("button", "btn-primary", toBench ? "Yedeğe yaz" : "Geliyorum");
     b.type = "button"; b.disabled = S.busy;
     const go = () => {
       const name = inp.value.trim();
@@ -392,13 +430,21 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
       ul.append(li);
     }
     const extra = d ? d.players.slice(c) : [];
-    $("bench").hidden = extra.length === 0;
+    const slots = Math.max(reserve(), extra.length);
+    $("bench").hidden = slots === 0;
     const bl = $("benchList"); bl.textContent = "";
-    extra.forEach((p) => {
-      const li = el("li"); li.append(el("span", null, p.name + (p.mine ? " (sen)" : "")));
-      if (admin) li.append(removeBtn(p, true));
+    for (let i = 0; i < slots; i++) {
+      const p = extra[i];
+      const li = el("li", "slot res" + (p ? "" : " empty") + (p && p.mine ? " me" : ""));
+      const shirt = el("span", "shirt", "Y" + (i + 1)); shirt.title = (i + 1) + ". yedek";
+      li.append(shirt);
+      const who = el("div", "who");
+      who.append(el("div", "name", p ? p.name : "Boş yedek yeri"));
+      if (p) who.append(el("div", "sub", (p.mine ? "Sen · " : "") + (i === 0 ? "İlk yer açılınca kadroya girer" : (i + 1) + ". sırada")));
+      li.append(who);
+      if (p && admin) li.append(removeBtn(p));
       bl.append(li);
-    });
+    }
   }
 
   function renderLogin() {
@@ -423,12 +469,13 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     if (a.hidden) { S.adminFilled = false; return; }
     if (!S.adminFilled) {
       $("capInput").value = cap();
+      $("resInput").value = reserve();
       $("titleInput").value = d.settings.title || "";
       $("whenInput").value = d.settings.when || "";
       $("placeInput").value = d.settings.place || "";
       S.adminFilled = true;
     }
-    ["saveSettings", "manualAdd", "capMinus", "capPlus", "logoutBtn"].forEach((id) => { $(id).disabled = S.busy; });
+    ["saveSettings", "manualAdd", "capMinus", "capPlus", "resMinus", "resPlus", "logoutBtn"].forEach((id) => { $(id).disabled = S.busy; });
     const area = $("clearArea"); area.textContent = "";
     if (S.confirmClear) {
       area.append(el("span", null, d.players.length + " oyuncunun tamamı silinecek."));
@@ -463,7 +510,9 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
   $("saveSettings").addEventListener("click", () => {
     const c = Math.floor(Number($("capInput").value));
     if (!(c >= 2 && c <= 40)) { toast("Kişi sayısı 2 ile 40 arasında olmalı.", true); return; }
-    act("settings", { capacity: c, title: $("titleInput").value, when: $("whenInput").value, place: $("placeInput").value },
+    const r = Math.floor(Number($("resInput").value));
+    if (!(r >= 0 && r <= 20)) { toast("Yedek sayısı 0 ile 20 arasında olmalı.", true); return; }
+    act("settings", { capacity: c, reserve: r, title: $("titleInput").value, when: $("whenInput").value, place: $("placeInput").value },
       () => { S.adminFilled = false; });
   });
   $("manualAdd").addEventListener("click", () => {
@@ -473,6 +522,8 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
   });
   $("manualName").addEventListener("keydown", (e) => { if (e.key === "Enter") $("manualAdd").click(); });
   $("capMinus").addEventListener("click", () => { const i = $("capInput"); i.value = Math.max(2, (Number(i.value) || 14) - 1); });
+  $("resMinus").addEventListener("click", () => { const i = $("resInput"); i.value = Math.max(0, (Number(i.value) || 0) - 1); });
+  $("resPlus").addEventListener("click", () => { const i = $("resInput"); i.value = Math.min(20, (Number(i.value) || 0) + 1); });
   $("capPlus").addEventListener("click", () => { const i = $("capInput"); i.value = Math.min(40, (Number(i.value) || 14) + 1); });
   $("pwForm").addEventListener("submit", (e) => {
     e.preventDefault();

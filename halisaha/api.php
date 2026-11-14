@@ -14,6 +14,7 @@ const DATA_FILE     = DATA_DIR . '/kadro.php';
 const GUARD         = "<?php http_response_code(404); exit; ?>\n";
 const MIN_CAP       = 2;
 const MAX_CAP       = 40;
+const MAX_RESERVE   = 20;
 const MAX_ENTRIES   = 80;   // yedekler dahil toplam kayıt üst sınırı
 const NAME_MAX      = 30;
 const LOGIN_TRIES   = 5;    // bu kadar hatalı denemeden sonra
@@ -36,7 +37,7 @@ function fail(int $code, string $msg): void
 function default_state(): array
 {
     return [
-        'settings' => ['capacity' => 14, 'title' => 'Halı Saha', 'when' => '', 'place' => ''],
+        'settings' => ['capacity' => 14, 'reserve' => 3, 'title' => 'Halı Saha', 'when' => '', 'place' => ''],
         'players'  => [],
         'admin'    => ['hash' => '', 'version' => 1],
         'logins'   => [],
@@ -198,6 +199,14 @@ if (!is_array($in)) $in = [];
 $out = with_state(function (array &$s) use ($action, $in) {
     $admin = is_admin($s);
     $cap = (int)$s['settings']['capacity'];
+    $reserve = max(0, (int)($s['settings']['reserve'] ?? 3));
+    $limit = $cap + $reserve;   // kadro + yedek
+    // Sıra = katılım sırası. Kadrodan biri çıkınca listedeki sonraki kişi (1. yedek) kendiliğinden kadroya girer.
+    $placed = function () use (&$s, $cap): string {
+        $n = count($s['players']);
+        return $n <= $cap ? 'Kadrodasın! Görüşürüz sahada.'
+                          : 'Kadro dolu, ' . ($n - $cap) . '. yedek olarak yazıldın. Biri çıkarsa sırayla kadroya geçeceksin.';
+    };
 
     switch ($action) {
 
@@ -211,18 +220,24 @@ $out = with_state(function (array &$s) use ($action, $in) {
                 if (isset($p['token']) && hash_equals($p['token'], $tok)) fail(409, 'Zaten kadrodasın.');
                 if (same_name($p['name'], $name)) fail(409, 'Bu isim listede zaten var. Soyadının ilk harfini ekle.');
             }
-            if (count($s['players']) >= $cap) fail(409, 'Kadro doldu, son yer başkasına gitti.');
+            if (count($s['players']) >= $limit) {
+                fail(409, $reserve > 0 ? 'Kadro ve yedek listesi doldu, son yer başkasına gitti.' : 'Kadro doldu, son yer başkasına gitti.');
+            }
             $s['players'][] = ['id' => bin2hex(random_bytes(8)), 'name' => $name, 'token' => $tok, 'manual' => false, 'at' => time()];
-            return ['msg' => 'Kadrodasın! Görüşürüz sahada.'];
+            return ['msg' => $placed()];
         }
 
         case 'leave': {
             $tok = player_token_hash();
-            $n = count($s['players']);
-            $s['players'] = array_values(array_filter($s['players'],
-                fn($p) => !($tok !== '' && isset($p['token']) && hash_equals($p['token'], $tok))));
-            if ($n === count($s['players'])) fail(404, 'Listede kaydın bulunamadı.');
-            return ['msg' => 'Kadrodan çıktın. Yerin boşaldı.'];
+            $idx = -1;
+            foreach ($s['players'] as $i => $p) {
+                if ($tok !== '' && isset($p['token']) && hash_equals($p['token'], $tok)) { $idx = $i; break; }
+            }
+            if ($idx < 0) fail(404, 'Listede kaydın bulunamadı.');
+            $promoted = ($idx < $cap && isset($s['players'][$cap])) ? $s['players'][$cap]['name'] : '';
+            array_splice($s['players'], $idx, 1);
+            if ($idx >= $cap) return ['msg' => 'Yedek listesinden çıktın.'];
+            return ['msg' => $promoted !== '' ? "Kadrodan çıktın. Yerine yedekten $promoted geçti." : 'Kadrodan çıktın. Yerin boşaldı.'];
         }
 
         // ----- yönetici girişi -----
@@ -269,23 +284,26 @@ $out = with_state(function (array &$s) use ($action, $in) {
         case 'settings': {
             $c = (int)($in['capacity'] ?? 0);
             if ($c < MIN_CAP || $c > MAX_CAP) fail(400, 'Kişi sayısı ' . MIN_CAP . ' ile ' . MAX_CAP . ' arasında olmalı.');
+            $r = (int)($in['reserve'] ?? 3);
+            if ($r < 0 || $r > MAX_RESERVE) fail(400, 'Yedek sayısı 0 ile ' . MAX_RESERVE . ' arasında olmalı.');
             $when = (string)($in['when'] ?? '');
             if ($when !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $when)) $when = '';
             $s['settings'] = [
                 'capacity' => $c,
+                'reserve'  => $r,
                 'title'    => clean_text($in['title'] ?? '', 40),
                 'when'     => $when,
                 'place'    => clean_text($in['place'] ?? '', 60),
             ];
             $over = count($s['players']) - $c;
-            return ['msg' => $over > 0 ? "Kaydedildi. $over kişi yedeğe düştü." : "Kaydedildi. Kadro $c kişi."];
+            return ['msg' => "Kaydedildi. Kadro $c kişi, $r yedek." . ($over > 0 ? " Şu an $over kişi yedekte." : '')];
         }
 
         case 'add': {
             $name = clean_text($in['name'] ?? '', NAME_MAX);
             if ($name === '') fail(400, 'Eklenecek kişinin adını yaz.');
             foreach ($s['players'] as $p) if (same_name($p['name'], $name)) fail(409, 'Bu isim listede zaten var.');
-            if (count($s['players']) >= $cap) fail(409, 'Kadro dolu. Önce kişi sayısını artır ya da birini çıkar.');
+            if (count($s['players']) >= $limit) fail(409, 'Kadro ve yedek dolu. Önce kişi ya da yedek sayısını artır veya birini çıkar.');
             if (count($s['players']) >= MAX_ENTRIES) fail(409, 'Liste çok uzun.');
             $s['players'][] = ['id' => bin2hex(random_bytes(8)), 'name' => $name, 'token' => '', 'manual' => true, 'at' => time()];
             return ['msg' => "$name listeye eklendi."];
@@ -293,10 +311,12 @@ $out = with_state(function (array &$s) use ($action, $in) {
 
         case 'remove': {
             $id = (string)($in['id'] ?? '');
-            $n = count($s['players']);
-            $s['players'] = array_values(array_filter($s['players'], fn($p) => $p['id'] !== $id));
-            if ($n === count($s['players'])) fail(404, 'Oyuncu bulunamadı.');
-            return ['msg' => 'Oyuncu listeden çıkarıldı.'];
+            $idx = -1;
+            foreach ($s['players'] as $i => $p) if ($p['id'] === $id) { $idx = $i; break; }
+            if ($idx < 0) fail(404, 'Oyuncu bulunamadı.');
+            $promoted = ($idx < $cap && isset($s['players'][$cap])) ? $s['players'][$cap]['name'] : '';
+            array_splice($s['players'], $idx, 1);
+            return ['msg' => 'Oyuncu listeden çıkarıldı.' . ($promoted !== '' ? " Yerine yedekten $promoted geçti." : '')];
         }
 
         case 'clear': {
