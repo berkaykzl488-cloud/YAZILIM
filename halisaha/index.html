@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Halı Saha Kadrosu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="stil.css?v=6">
+</head>
+<body>
+
+<header class="band">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Bu haftanın maçı</div>
+      <h1 id="title">Halı Saha</h1>
+      <div class="meta"><span id="when"></span><span id="place"></span><span id="fee"></span></div>
+    </div>
+    <div class="score">
+      <div class="num" id="count">–<small>/–</small></div>
+      <span class="split" id="split"></span>
+      <span class="pill" id="status">Yükleniyor</span>
+    </div>
+    <div class="bar" id="bar"><i></i></div>
+    <div class="cd" id="cd" hidden>
+      <span class="cd-label">Maça kalan</span>
+      <strong id="cdMain"></strong>
+      <span id="cdSub"></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="tabs" role="tablist" aria-label="Bölümler">
+    <button type="button" role="tab" id="tab-kadro" aria-controls="panel-kadro" aria-selected="true">Kadro</button>
+    <button type="button" role="tab" id="tab-takimlar" aria-controls="panel-takimlar" aria-selected="false">Takımlar &amp; Saha<span class="dot" id="teamsDot" hidden></span></button>
+  </nav>
+
+  <!-- KADRO -->
+  <div class="tabpanel" id="panel-kadro" role="tabpanel" aria-labelledby="tab-kadro">
+    <section class="card" id="joinBox" aria-live="polite">
+      <h3>Kadro yükleniyor…</h3>
+      <p>Kimlerin geldiği birazdan burada görünecek.</p>
+    </section>
+
+    <section id="keepersSec" hidden>
+      <div class="section-head">
+        <h2>Kaleciler</h2>
+        <p>Kalecileri yönetici atar.</p>
+      </div>
+      <ol class="squad" id="keepers"></ol>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Kadro</h2>
+        <p id="squadHint">Her forma bir oyuncu. Boş yerler dolunca liste kapanır.</p>
+      </div>
+      <ol class="squad" id="squad"></ol>
+      <div id="bench" hidden>
+        <div class="section-head bench-head">
+          <h2>Yedekler</h2>
+          <p>Kadrodan biri çıkarsa 1. yedek kendiliğinden kadroya geçer, diğerleri bir sıra yukarı kayar.</p>
+        </div>
+        <ol class="squad" id="benchList"></ol>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Kadro hareketleri</h3>
+      <ul class="log" id="log"></ul>
+    </section>
+  </div>
+
+  <!-- TAKIMLAR & SAHA -->
+  <div class="tabpanel" id="panel-takimlar" role="tabpanel" aria-labelledby="tab-takimlar" hidden>
+    <section id="teamsSec">
+      <div class="section-head">
+        <h2>Takımlar</h2>
+        <div class="team-tools" id="teamTools"></div>
+      </div>
+      <p class="hint" id="teamHint"></p>
+      <div id="pitchHost"></div>
+    </section>
+    <div class="teams" id="teams" hidden>
+      <div class="team a">
+        <div class="team-head"><span class="bib" aria-hidden="true"></span><h3>Yelekliler</h3><span class="tcount" id="countA"></span></div>
+        <ol id="teamA"></ol>
+      </div>
+      <div class="team b">
+        <div class="team-head"><span class="bib" aria-hidden="true"></span><h3>Yeleksizler</h3><span class="tcount" id="countB"></span></div>
+        <ol id="teamB"></ol>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="ortak.js?v=6"></script>
+<script>
+(function () {
+  "use strict";
+  // Eski "#yonetici" bağlantıları yönetim paneline gider.
+  if (location.hash === "#yonetici") { location.replace("yonetim.html"); return; }
+
+  const { $, el, toast, call } = HS;
+  const POLL_MS = 8000;
+  const S = { data: null, busy: false, failed: false, draftName: null, myIdx: null, tab: "kadro", teamsKey: null };
+  const cap = () => HS.cap(S.data), reserve = () => HS.reserve(S.data);
+
+  // Yedekten kadroya geçen kişiye haber ver.
+  function trackMe(notify) {
+    if (!S.data) return;
+    const idx = S.data.players.findIndex((p) => p.mine), c = cap();
+    if (notify && S.myIdx != null && S.myIdx >= c && idx >= 0 && idx < c) {
+      toast("Yedekten kadroya geçtin! Forman " + (idx + 1) + " numara.");
+    }
+    S.myIdx = idx >= 0 ? idx : null;
+  }
+
+  // Takımlar bu sayfa açıkken kurulursa haber ver.
+  function trackTeams(notify) {
+    const key = S.data && S.data.teams ? S.data.teams.at : null;
+    if (notify && key && S.teamsKey === 0) toast(S.data.teams.auto ? "Takımlar otomatik kuruldu! Takımlar & Saha sekmesine bak." : "Takımlar kuruldu! Takımlar & Saha sekmesine bak.");
+    S.teamsKey = key || 0;
+  }
+
+  async function refresh() {
+    try { S.data = await call("state"); S.failed = false; trackMe(true); trackTeams(true); }
+    catch (e) { S.failed = true; }
+    render();
+  }
+
+  async function act(action, body, after) {
+    if (S.busy) return;
+    S.busy = true; render();
+    try {
+      S.data = await call(action, body || {});
+      trackMe(false); trackTeams(false);
+      toast(S.data.msg);
+      if (after) after();
+    } catch (e) { toast(e.message, true); refresh(); }
+    finally { S.busy = false; render(); }
+  }
+
+  // ---------- sekmeler ----------
+  function setTab(tab, push) {
+    S.tab = tab === "takimlar" ? "takimlar" : "kadro";
+    ["kadro", "takimlar"].forEach((t) => {
+      $("tab-" + t).setAttribute("aria-selected", String(t === S.tab));
+      $("panel-" + t).hidden = t !== S.tab;
+    });
+    if (push) history.replaceState(null, "", S.tab === "takimlar" ? "#takimlar" : location.pathname + location.search);
+  }
+  $("tab-kadro").addEventListener("click", () => setTab("kadro", true));
+  $("tab-takimlar").addEventListener("click", () => setTab("takimlar", true));
+  window.addEventListener("hashchange", () => setTab(location.hash === "#takimlar" ? "takimlar" : "kadro", false));
+
+  // ---------- kadro sekmesi ----------
+  function renderJoin() {
+    const box = $("joinBox"), d = S.data;
+    box.textContent = "";
+    if (!d) {
+      box.append(el("h3", null, S.failed ? "Liste yüklenemedi" : "Kadro yükleniyor…"),
+        el("p", null, S.failed ? "Sunucuya ulaşılamadı. Sayfa birkaç saniyede bir yeniden deniyor." : "Kimlerin geldiği birazdan burada görünecek."));
+      return;
+    }
+    const c = cap(), r = reserve(), n = d.players.length, idx = d.players.findIndex((p) => p.mine);
+    if (idx >= 0) {
+      const onBench = idx >= c;
+      const t = !onBench && d.teams ? (d.teams.a.includes(d.players[idx].id) ? " · Yeleklisin" : " · Yeleksizsin") : "";
+      box.append(el("h3", null, onBench ? "Yedektesin, sıran " + (idx - c + 1) : "Kadrodasın, forman " + (idx + 1) + " numara" + t),
+        el("p", null, onBench ? "Kadrodan biri çıkarsa sırayla yukarı geçersin. Kadroya girince bu sayfada haber verilir."
+                              : "Gelemeyeceksen yerini boşalt. Yerine 1. yedek kendiliğinden geçer."));
+      const row = el("div", "row"), b = el("button", "btn-danger", onBench ? "Yedekten çık" : "Gelemiyorum, beni çıkar");
+      b.type = "button"; b.disabled = S.busy;
+      b.addEventListener("click", () => act("leave"));
+      row.append(b); box.append(row);
+      return;
+    }
+    if (n >= c + r) {
+      box.append(el("h3", null, r > 0 ? "Kadro ve yedek doldu" : "Kadro doldu (" + c + "/" + c + ")"),
+        el("p", null, "Tüm yerler alındı. Biri çıkarsa yer açılır, sayfa kendiliğinden güncellenir."));
+      return;
+    }
+    const toBench = n >= c;
+    if (toBench) box.append(el("h3", null, "Kadro doldu, yedeğe yazıl"),
+      el("p", null, (c + r - n) + " yedek yeri kaldı. Kadrodan biri çıkarsa sırayla kadroya geçersin."));
+    else box.append(el("h3", null, "Geliyor musun?"), el("p", null, (c - n) + " oyuncu yeri kaldı. Adını yaz, kadroya gir."));
+    const row = el("div", "row"), inp = el("input");
+    inp.type = "text"; inp.id = "nameInput"; inp.maxLength = 30; inp.placeholder = "Adın"; inp.autocomplete = "nickname";
+    inp.value = S.draftName || "";
+    inp.addEventListener("input", () => { S.draftName = inp.value; });
+    const b = el("button", "btn-primary", toBench ? "Yedeğe yaz" : "Geliyorum");
+    b.type = "button"; b.disabled = S.busy;
+    const go = () => {
+      const name = inp.value.trim();
+      if (!name) { toast("Önce adını yaz.", true); inp.focus(); return; }
+      act("join", { name }, () => { S.draftName = ""; });
+    };
+    b.addEventListener("click", go);
+    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+    row.append(inp, b); box.append(row);
+  }
+
+  function slot(cls, label, p, sub, emptyText) {
+    const li = el("li", "slot " + cls + (p ? "" : " empty") + (p && p.mine ? " me" : ""));
+    li.append(el("span", "shirt", label));
+    const who = el("div", "who");
+    who.append(el("div", "name", p ? p.name : emptyText));
+    if (p && sub) who.append(el("div", "sub", sub));
+    li.append(who);
+    return li;
+  }
+
+  function renderKeepers() {
+    const d = S.data, on = HS.keepers(d);
+    $("keepersSec").hidden = !on;
+    $("squadHint").textContent = on
+      ? "Kalecilerden ayrı " + cap() + " oyuncu yeri. Boş yerler dolunca liste kapanır."
+      : "Her forma bir oyuncu. Boş yerler dolunca liste kapanır.";
+    if (!on) return;
+    const ol = $("keepers"); ol.textContent = "";
+    [[d.settings.gkA, "Yelekliler kalecisi"], [d.settings.gkB, "Yeleksizler kalecisi"]].forEach(([name, sub]) => {
+      ol.append(slot("keeper", "K", name ? { name } : null, sub, "Kaleci bekleniyor · " + sub.split(" ")[0]));
+    });
+  }
+
+  function renderSquad() {
+    const d = S.data, c = cap(), ul = $("squad");
+    ul.textContent = "";
+    for (let i = 0; i < c; i++) {
+      const p = d ? d.players[i] : null;
+      ul.append(slot("", String(i + 1), p, p && (p.mine ? "Sen" : (p.manual ? "Yönetici ekledi" : "Kendi katıldı")), "Boş yer"));
+    }
+    const extra = d ? d.players.slice(c) : [], slots = Math.max(reserve(), extra.length);
+    $("bench").hidden = slots === 0;
+    const bl = $("benchList"); bl.textContent = "";
+    for (let i = 0; i < slots; i++) {
+      const p = extra[i];
+      bl.append(slot("res", "Y" + (i + 1), p, p && ((p.mine ? "Sen · " : "") + (i === 0 ? "İlk yer açılınca kadroya girer" : (i + 1) + ". sırada")), "Boş yedek yeri"));
+    }
+  }
+
+  // ---------- takımlar sekmesi ----------
+  function renderTeams() {
+    const d = S.data, teams = d && d.teams;
+    $("teamsDot").hidden = !teams;
+    const tools = $("teamTools"); tools.textContent = "";
+    const host = $("pitchHost");
+    $("teams").hidden = !teams;
+    if (!d) { host.textContent = ""; return; }
+    const hint = $("teamHint");
+    if (!teams) {
+      const h = Number(d.settings.autoDraw) || 0, cd = HS.countdown(d);
+      hint.textContent = "";
+      host.textContent = "";
+      const wait = el("div", "pitch-wait");
+      wait.append(el("strong", null, "Takımlar henüz kurulmadı"));
+      if (h > 0 && d.kickoff) wait.append(el("span", null, "Maça " + h + " saat kala takımlar otomatik kurulur." + (cd && cd.sub ? " " + cd.sub + "." : "")));
+      else if (h > 0) wait.append(el("span", null, "Yönetici maç saatini girince, maça " + h + " saat kala takımlar otomatik kurulur."));
+      else wait.append(el("span", null, "Takımları yönetici kuracak."));
+      host.append(wait);
+      return;
+    }
+    tools.append(...HS.shareButtons(d));
+    const at = new Date(teams.at * 1000);
+    const when = String(at.getHours()).padStart(2, "0") + ":" + String(at.getMinutes()).padStart(2, "0");
+    hint.textContent = (teams.auto ? "Kura otomatik çekildi (" + when + ")." : "Takımları yönetici kurdu (" + when + ").")
+      + " Kadrodan biri çıkarsa yerine geçen yedek, takımlar dengeli kalacak şekilde eklenir.";
+    HS.renderPitch(host, d);
+    HS.renderTeamLists(d);
+  }
+
+  function render() {
+    const focused = document.activeElement && document.activeElement.id;
+    HS.renderHeader(S.data, S.failed);
+    document.title = ((S.data && S.data.settings.title) || "Halı Saha") + " · Kadro";
+    renderJoin(); renderKeepers(); renderSquad(); renderTeams();
+    HS.renderLog($("log"), S.data);
+    if (focused === "nameInput" && $("nameInput")) $("nameInput").focus();
+  }
+
+  setTab(location.hash === "#takimlar" ? "takimlar" : "kadro", false);
+  render();
+  refresh();
+  setInterval(() => { if (!document.hidden && !S.busy) refresh(); }, POLL_MS);
+  // Geri sayım her saniye; kura zamanı gelince sunucudan takımları iste.
+  let drawAsked = false;
+  setInterval(() => {
+    const cd = HS.renderCountdown(S.data);
+    if (cd && cd.drawDue && !drawAsked && !S.busy) { drawAsked = true; refresh(); setTimeout(() => { drawAsked = false; }, 15000); }
+  }, 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+})();
+</script>
+</body>
+</html>

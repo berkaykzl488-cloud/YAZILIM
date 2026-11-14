@@ -1,0 +1,38 @@
+HALI SAHA KADROSU · KURULUM
+===========================
+
+Dosyalar
+  index.html    Herkese açık liste (arkadaşlarına bu linki gönder)
+  yonetim.html  Yönetim paneli (kullanıcı adı + şifre ile girilir)
+  api.php       Sunucu tarafı
+  stil.css, ortak.js  İki sayfanın ortak dosyaları
+  data/         Liste ve yönetici hesabı burada tutulur (dışarıya kapalı)
+
+1) "halisaha" klasörünü hostingde public_html içine yükleyin
+   (adres: https://siteniz.com/halisaha/). PHP 7.4 veya üstü yeterli, veritabanı gerekmez.
+
+2) halisaha/data klasörünün yazılabilir olduğundan emin olun (genelde 755 yeterli).
+
+3) Yükler yüklemez https://siteniz.com/halisaha/yonetim.html adresini açın ve
+   kullanıcı adınızı ve en az 8 karakterlik şifrenizi belirleyin. Hesap bir kez
+   oluşturulur; sonra kimse yeni hesap açamaz. Linki arkadaşlarınıza bundan SONRA gönderin.
+
+4) Arkadaşlarınıza sadece https://siteniz.com/halisaha/ linkini gönderin.
+   Kayıt gerekmez: adını yazıp "Geliyorum" der. Ana sayfada yönetim bağlantısı
+   ya da yönetim düğmesi yoktur; panel adresini sadece siz bilirsiniz.
+
+Özellikler (yönetim panelinden ayarlanır)
+  - Kaleciler: "Kalecileri ben atayacağım" açıkken toplam kadronun 2 yeri kalecilere ayrılır
+    (ör. 14 = 2 kaleci + 12 oyuncu). Kaleci adlarını siz yazarsınız, oyuncular kaleci olarak yazılamaz.
+  - Kişi başı ücret: başlıkta ve WhatsApp metninde görünür (0 = gösterme).
+  - Otomatik kura: maça seçilen süre (varsayılan 2 saat) kala takımlar kendiliğinden kurulur.
+    Maç saati Türkiye saatine göre yorumlanır (api.php içindeki TIMEZONE).
+  - Ana sayfada maça geri sayım, "Takımlar & Saha" sekmesinde saha dizilişi,
+    "Kadro hareketleri" listesinde kim ne zaman yazıldı/çıktı görünür.
+
+Önceki sürümden güncelliyorsanız: tüm dosyaları değiştirin, data/ klasörüne dokunmayın.
+Eski şifreniz geçerlidir, kullanıcı adınız "yonetici" olur (panelden değiştirebilirsiniz).
+Kaleci ataması eski kurulumlarda kapalı başlar; kadro sayınız değişmez. İsterseniz panelden açın.
+
+Şifreyi unutursanız: data/kadro.php dosyasındaki "hash" değerini "" yapın
+(liste silinmez), sonra 3. adımı tekrarlayın.
