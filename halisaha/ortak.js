@@ -91,5 +91,79 @@
     }
   }
 
-  window.HS = { $, el, toast, fmtWhen, call, cap, reserve, renderHeader };
+  /** Herkese açık listenin adresi (yönetim panelinden çağrılsa da ana sayfayı verir). */
+  function listUrl() {
+    return location.origin + location.pathname.replace(/[^/]*$/, "");
+  }
+
+  /** Takımları WhatsApp grubuna yapıştırılacak metne çevirir. */
+  function teamsText(d) {
+    const c = cap(d), s = d.settings, squad = d.players.slice(0, c);
+    const byId = {}; squad.forEach((p, i) => { byId[p.id] = { p, no: i + 1 }; });
+    const team = (ids) => ids.filter((id) => byId[id]).sort((x, y) => byId[x].no - byId[y].no).map((id) => byId[id].p.name);
+    const a = team(d.teams.a), b = team(d.teams.b);
+    const lines = ["⚽ *" + (s.title || "Halı Saha") + "*"];
+    const when = fmtWhen(s.when);
+    if (when) lines.push("📅 " + when);
+    if (s.place) lines.push("📍 " + s.place);
+    lines.push("", "🟡 *Yelekliler* (" + a.length + ")");
+    a.forEach((n, i) => lines.push((i + 1) + ". " + n));
+    lines.push("", "🟢 *Yeleksizler* (" + b.length + ")");
+    b.forEach((n, i) => lines.push((i + 1) + ". " + n));
+    const bench = d.players.slice(c).map((p) => p.name);
+    if (bench.length) {
+      lines.push("", "🔁 *Yedekler*");
+      bench.forEach((n, i) => lines.push((i + 1) + ". " + n));
+    }
+    lines.push("", "Liste: " + listUrl());
+    return lines.join("\n");
+  }
+
+  /** Panoya kopyalar; olmazsa eski yöntemi dener. Başarıyı döndürür. */
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
+    } catch (e) {}
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px";
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+    return ok;
+  }
+
+  /** Takım paylaşım düğmelerini (Kopyala + WhatsApp) üretir. */
+  function shareButtons(d) {
+    const text = teamsText(d);
+    const copy = el("button", "btn-ghost", "Takımları kopyala");
+    copy.type = "button";
+    copy.addEventListener("click", async () => {
+      if (await copyText(text)) {
+        toast("Takımlar kopyalandı. WhatsApp grubuna yapıştırabilirsin.");
+        copy.textContent = "Kopyalandı ✓";
+        setTimeout(() => { copy.textContent = "Takımları kopyala"; }, 2000);
+      } else {
+        toast("Otomatik kopyalanamadı. Aşağıdaki metni seçip kopyala.", true);
+        showManual(text);
+      }
+    });
+    const wa = el("a", "btn-ghost", "WhatsApp'ta paylaş");
+    wa.href = "https://wa.me/?text=" + encodeURIComponent(text);
+    wa.target = "_blank"; wa.rel = "noopener";
+    return [copy, wa];
+  }
+
+  function showManual(text) {
+    let box = $("manualCopy");
+    if (!box) {
+      box = el("textarea"); box.id = "manualCopy"; box.readOnly = true; box.rows = 12;
+      box.className = "manual-copy";
+      const host = $("teamsSec") || $("teams");
+      host.appendChild(box);
+    }
+    box.value = text; box.hidden = false; box.focus(); box.select();
+  }
+
+  window.HS = { $, el, toast, fmtWhen, call, cap, reserve, renderHeader, teamsText, copyText, shareButtons };
 })();

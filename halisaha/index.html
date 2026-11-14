@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="stil.css?v=4">
+<link rel="stylesheet" href="stil.css?v=5">
 </head>
 <body>
 
@@ -36,8 +36,9 @@
   <section id="teamsSec" hidden>
     <div class="section-head">
       <h2>Takımlar</h2>
-      <p id="teamHint">Takımları yönetici kurdu. Kadro değişirse takımlar dengeli kalır.</p>
+      <div class="team-tools" id="teamTools"></div>
     </div>
+    <p class="hint" id="teamHint">Takımları yönetici kurdu. Kadro değişirse takımlar dengeli kalır.</p>
     <div class="teams">
       <div class="team a">
         <div class="team-head"><span class="bib" aria-hidden="true"></span><h3>Yelekliler</h3><span class="tcount" id="countA"></span></div>
@@ -68,7 +69,7 @@
 
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="ortak.js?v=4"></script>
+<script src="ortak.js?v=5"></script>
 <script>
 (function () {
   "use strict";
@@ -158,6 +159,8 @@
     const d = S.data, teams = d && d.teams;
     $("teamsSec").hidden = !teams;
     if (!teams) return;
+    const tools = $("teamTools"); tools.textContent = "";
+    tools.append(...HS.shareButtons(d));
     const byId = {}; d.players.slice(0, cap()).forEach((p, i) => { byId[p.id] = { p, no: i + 1 }; });
     [["a", "teamA", "countA"], ["b", "teamB", "countB"]].forEach(([k, listId, countId]) => {
       const ol = $(listId); ol.textContent = "";
