@@ -12,7 +12,7 @@ Metin2 Yang, Won, EP ve İtem pazaryeri arayüzü (tek dosyalık HTML uygulamas�
 
 ## Halı saha kadrosu (`halisaha/`)
 
-Bağımsız küçük uygulama: yöneticinin belirlediği kişi sayısı dolunca yedek listesine geçen katılım listesi; kadrodan biri çıkınca 1. yedek kendiliğinden kadroya girer.
+Bağımsız küçük uygulama: yöneticinin belirlediği kişi sayısı dolunca yedek listesine geçen katılım listesi; kadrodan biri çıkınca 1. yedek kendiliğinden kadroya girer. Yönetici kadroyu tek tuşla rastgele iki takıma (Yelekliler / Yeleksizler) böler.
 `halisaha/index.html` + `halisaha/api.php` (PHP 7.4+, veritabanı yok; veri `halisaha/data/kadro.php`'de, dışarıya kapalı).
 Yönetici paneli şifreyle açılır; kişi sınırı sunucuda uygulanır. Kurulum: `halisaha/KURULUM.txt`.
 

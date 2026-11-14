@@ -89,6 +89,28 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .x { flex: none; width: 32px; height: 32px; padding: 0; border-radius: 8px; background: transparent; color: var(--muted); border: 1px solid var(--line); font-size: 18px; line-height: 1; }
 .x:hover { color: var(--danger); border-color: var(--danger); }
 
+/* Takımlar: yelekliler / yeleksizler */
+.teams { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.team { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; }
+.team-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.team-head h3 { margin: 0; flex: 1; font-family: var(--font-display); font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: .02em; }
+.team-head .tcount { font-size: 13px; color: var(--muted); font-weight: 600; }
+.bib { flex: none; width: 24px; height: 28px; clip-path: polygon(18% 0, 36% 0, 50% 20%, 64% 0, 82% 0, 100% 16%, 100% 100%, 0 100%, 0 16%); }
+.team.a .bib { background: var(--accent); }
+.team.b .bib { background: var(--pitch); }
+.team ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.team li { display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 10px; border-radius: 10px; background: var(--bg); min-height: 44px; }
+.team li.me { box-shadow: inset 0 0 0 2px var(--ok); }
+.team li .no { flex: none; width: 24px; font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.team li .nm { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.team li .tag { font-size: 12px; color: var(--ok); font-weight: 600; }
+.team .x { font-size: 15px; }
+.team .x:hover { color: var(--ink); border-color: var(--muted); }
+#teamHint.warn { color: var(--danger); font-weight: 600; }
+.team-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.team-tools button { padding: 8px 14px; }
+#teamsSec .hint { margin: -4px 0 12px; }
+
 .bench-head { margin-top: 22px; }
 .bench-head h2 { font-size: 22px; }
 .slot.res .shirt { background: var(--accent); color: var(--accent-ink); font-size: 16px; }
@@ -143,6 +165,24 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
   <section class="card" id="joinBox" aria-live="polite">
     <h3>Kadro yükleniyor…</h3>
     <p>Kimlerin geldiği birazdan burada görünecek.</p>
+  </section>
+
+  <section id="teamsSec" hidden>
+    <div class="section-head">
+      <h2>Takımlar</h2>
+      <div class="team-tools" id="teamTools"></div>
+    </div>
+    <p class="hint" id="teamHint"></p>
+    <div class="teams" id="teams">
+      <div class="team a">
+        <div class="team-head"><span class="bib" aria-hidden="true"></span><h3>Yelekliler</h3><span class="tcount" id="countA"></span></div>
+        <ol id="teamA"></ol>
+      </div>
+      <div class="team b">
+        <div class="team-head"><span class="bib" aria-hidden="true"></span><h3>Yeleksizler</h3><span class="tcount" id="countB"></span></div>
+        <ol id="teamB"></ol>
+      </div>
+    </div>
   </section>
 
   <section>
@@ -368,7 +408,8 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     const c = cap(), r = reserve(), n = d.players.length, idx = d.players.findIndex((p) => p.mine);
     if (idx >= 0) {
       const onBench = idx >= c;
-      box.append(el("h3", null, onBench ? "Yedektesin, sıran " + (idx - c + 1) : "Kadrodasın, forman " + (idx + 1) + " numara"),
+      const t = !onBench && d.teams ? (d.teams.a.includes(d.players[idx].id) ? " · Yeleklisin" : " · Yeleksizsin") : "";
+      box.append(el("h3", null, onBench ? "Yedektesin, sıran " + (idx - c + 1) : "Kadrodasın, forman " + (idx + 1) + " numara" + t),
         el("p", null, onBench ? "Kadrodan biri çıkarsa sırayla yukarı geçersin. Kadroya girince bu sayfada haber verilir."
                               : "Gelemeyeceksen yerini boşalt. Yerine 1. yedek kendiliğinden geçer."));
       const row = el("div", "row"), b = el("button", "btn-danger", onBench ? "Yedekten çık" : "Gelemiyorum, beni çıkar");
@@ -447,6 +488,61 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     }
   }
 
+  function btn(cls, text, fn) {
+    const b = el("button", cls, text); b.type = "button"; b.disabled = S.busy;
+    b.addEventListener("click", fn); return b;
+  }
+
+  function renderTeams() {
+    const d = S.data, sec = $("teamsSec");
+    const admin = !!(d && d.admin), teams = d && d.teams;
+    sec.hidden = !d || (!teams && !admin);
+    if (sec.hidden) return;
+    const c = cap(), squad = d.players.slice(0, c);
+    const byId = {}; squad.forEach((p, i) => { byId[p.id] = { p, no: i + 1 }; });
+
+    const tools = $("teamTools"); tools.textContent = "";
+    if (admin) {
+      if (!teams) {
+        const b = btn("btn-primary", "Takımları kur", () => act("teams"));
+        b.disabled = S.busy || squad.length < 2;
+        tools.append(b);
+      } else {
+        tools.append(btn("btn-ghost", "Yeniden karıştır", () => act("teams")),
+                     btn("btn-ghost", "Takımları kaldır", () => act("teams_reset")));
+      }
+    }
+    const hint = $("teamHint");
+    if (!teams) hint.textContent = squad.length < 2
+      ? "Kadroda en az 2 kişi olunca takımları kurabilirsin."
+      : "Kadroyu rastgele iki eşit takıma ayırır. Herkes aynı takımları görür.";
+    else if (squad.length < c) hint.textContent = "Kadro henüz dolmadı. Sonradan gelenler sayısı az olan takıma eklenir.";
+    else hint.textContent = "Kadrodan biri çıkarsa yerine geçen yedek, takımlar dengeli kalacak şekilde eklenir.";
+    const diff = teams ? Math.abs(teams.a.length - teams.b.length) : 0;
+    hint.className = "hint" + (admin && diff > 1 ? " warn" : "");
+    if (admin && diff > 1) hint.textContent = "Takımlar dengesiz: " + teams.a.length + " - " + teams.b.length + ". Bir oyuncuyu ⇄ ile diğer takıma geçir.";
+
+    $("teams").hidden = !teams;
+    if (!teams) return;
+    [["a", "teamA", "countA", "Yeleksizlere"], ["b", "teamB", "countB", "Yeleklilere"]].forEach(([k, listId, countId, other]) => {
+      const ol = $(listId); ol.textContent = "";
+      const ids = teams[k].filter((id) => byId[id]);
+      $(countId).textContent = ids.length + " kişi";
+      ids.sort((x, y) => byId[x].no - byId[y].no).forEach((id) => {
+        const { p, no } = byId[id];
+        const li = el("li", p.mine ? "me" : "");
+        li.append(el("span", "no", String(no)), el("span", "nm", p.name));
+        if (p.mine) li.append(el("span", "tag", "Sen"));
+        if (admin) {
+          const x = btn("x", "⇄", () => act("move", { id }));
+          x.title = other + " geçir"; x.setAttribute("aria-label", p.name + ", " + other.toLowerCase() + " geçir");
+          li.append(x);
+        }
+        ol.append(li);
+      });
+    });
+  }
+
   function renderLogin() {
     const d = S.data, show = !!d && !d.admin && S.loginOpen;
     $("loginBox").hidden = !show;
@@ -494,7 +590,7 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
 
   function render() {
     const focused = document.activeElement && document.activeElement.id;
-    renderHeader(); renderJoin(); renderSquad(); renderLogin(); renderAdmin();
+    renderHeader(); renderJoin(); renderTeams(); renderSquad(); renderLogin(); renderAdmin();
     if (focused === "nameInput" && $("nameInput")) $("nameInput").focus();
   }
 

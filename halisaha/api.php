@@ -41,6 +41,7 @@ function default_state(): array
         'players'  => [],
         'admin'    => ['hash' => '', 'version' => 1],
         'logins'   => [],
+        'teams'    => null,   // ['a' => [oyuncu id], 'b' => [oyuncu id]]
     ];
 }
 
@@ -61,6 +62,8 @@ function with_state(callable $fn, bool $write = true)
         if (is_array($dec)) $state = array_replace_recursive(default_state(), $dec);
         if (isset($dec['players']) && is_array($dec['players'])) $state['players'] = array_values($dec['players']);
         if (isset($dec['logins']) && is_array($dec['logins'])) $state['logins'] = $dec['logins'];
+        $state['teams'] = (isset($dec['teams']['a'], $dec['teams']['b']) && is_array($dec['teams']['a']) && is_array($dec['teams']['b']))
+            ? ['a' => array_values($dec['teams']['a']), 'b' => array_values($dec['teams']['b'])] : null;
     }
     $before = json_encode($state);
     $result = $fn($state);
@@ -125,6 +128,45 @@ function is_admin(array $state): bool
         && ($_SESSION['admin_v'] ?? 0) === $state['admin']['version'];
 }
 
+/** Kadrodaki (ilk "capacity" kişi) oyuncuların id'leri, sırayla. */
+function squad_ids(array $state): array
+{
+    $cap = (int)$state['settings']['capacity'];
+    return array_map(fn($p) => $p['id'], array_slice($state['players'], 0, $cap));
+}
+
+/**
+ * Kayıtlı takımları güncel kadroya uydurur: kadrodan çıkanlar düşer,
+ * sonradan kadroya girenler (ör. yedekten geçen) sayısı az olan takıma eklenir.
+ */
+function current_teams(array $state): ?array
+{
+    if (!$state['teams']) return null;
+    $squad = squad_ids($state);
+    $in = array_flip($squad);
+    $a = array_values(array_filter($state['teams']['a'], fn($id) => isset($in[$id])));
+    $inA = array_flip($a);
+    $b = array_values(array_filter($state['teams']['b'], fn($id) => isset($in[$id]) && !isset($inA[$id])));
+    $seen = array_flip(array_merge($a, $b));
+    foreach ($squad as $id) {
+        if (isset($seen[$id])) continue;
+        if (count($a) <= count($b)) $a[] = $id; else $b[] = $id;
+    }
+    return ['a' => $a, 'b' => $b];
+}
+
+/** Kadroyu rastgele iki takıma böler (tek sayıda kişide fazlası A'ya). */
+function shuffle_teams(array $state): array
+{
+    $ids = squad_ids($state);
+    for ($i = count($ids) - 1; $i > 0; $i--) {
+        $j = random_int(0, $i);
+        [$ids[$i], $ids[$j]] = [$ids[$j], $ids[$i]];
+    }
+    $half = (int)ceil(count($ids) / 2);
+    return ['a' => array_slice($ids, 0, $half), 'b' => array_slice($ids, $half)];
+}
+
 function public_view(array $state, bool $admin): array
 {
     $me = player_token_hash();
@@ -143,6 +185,7 @@ function public_view(array $state, bool $admin): array
         'players'    => $players,
         'admin'      => $admin,
         'needsSetup' => $state['admin']['hash'] === '',
+        'teams'      => current_teams($state),
     ];
 }
 
@@ -319,7 +362,33 @@ $out = with_state(function (array &$s) use ($action, $in) {
             return ['msg' => 'Oyuncu listeden çıkarıldı.' . ($promoted !== '' ? " Yerine yedekten $promoted geçti." : '')];
         }
 
+        case 'teams': {
+            if (count(squad_ids($s)) < 2) fail(409, 'Takım kurmak için kadroda en az 2 kişi olmalı.');
+            $had = (bool)$s['teams'];
+            $s['teams'] = shuffle_teams($s);
+            return ['msg' => $had ? 'Takımlar yeniden karıştırıldı.' : 'Takımlar kuruldu.'];
+        }
+
+        case 'teams_reset': {
+            $s['teams'] = null;
+            return ['msg' => 'Takımlar kaldırıldı.'];
+        }
+
+        case 'move': {
+            $t = current_teams($s);
+            if (!$t) fail(409, 'Önce takımları kur.');
+            $id = (string)($in['id'] ?? '');
+            if (($k = array_search($id, $t['a'], true)) !== false) {
+                array_splice($t['a'], $k, 1); $t['b'][] = $id;
+            } elseif (($k = array_search($id, $t['b'], true)) !== false) {
+                array_splice($t['b'], $k, 1); $t['a'][] = $id;
+            } else fail(404, 'Oyuncu kadroda değil.');
+            $s['teams'] = $t;
+            return ['msg' => 'Oyuncu diğer takıma geçti. ' . count($t['a']) . ' - ' . count($t['b'])];
+        }
+
         case 'clear': {
+            $s['teams'] = null;
             $s['players'] = [];
             return ['msg' => 'Liste temizlendi. Yeni hafta için hazır.'];
         }
