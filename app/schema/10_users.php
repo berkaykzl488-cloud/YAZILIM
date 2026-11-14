@@ -17,6 +17,8 @@ return [
             'ref_by' => 'ref?', 'ref_code' => 'str:40?', 'ref_paid' => 'tinyint=0', 'refs' => 'int=0', 'src' => 'str:60?',
             'tc_ok' => 'tinyint=0', 'tc_enc' => 'text?', 'tc_hash' => 'char:64?', 'tc_mask' => 'str:20?', 'tc_year' => 'int?',
             'tc_by' => 'ref?', 'tc_at' => 'bigint?', 'tc_tries' => 'int=0', 'tc_lock_until' => 'bigint?', 'tc_ask_at' => 'bigint?',
+            // tc_state: '' | 'inceleme' (NVİ'ye ulaşılamadı, ekip elle inceleyecek). tc_by: doğrulayan çalışan (elle onay / tam no girişi)
+            'tc_state' => 'str:12=', 'tc_src' => 'str:10=',
             'session_ver' => 'int=1', 'created_at' => 'bigint',
         ],
         'unique' => [['name_norm'], ['email'], ['tc_hash']],
