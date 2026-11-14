@@ -39,7 +39,7 @@ function default_state(): array
     return [
         'settings' => ['capacity' => 14, 'reserve' => 3, 'title' => 'Halı Saha', 'when' => '', 'place' => ''],
         'players'  => [],
-        'admin'    => ['hash' => '', 'version' => 1],
+        'admin'    => ['user' => '', 'hash' => '', 'version' => 1],
         'logins'   => [],
         'teams'    => null,   // ['a' => [oyuncu id], 'b' => [oyuncu id]]
     ];
@@ -167,6 +167,21 @@ function shuffle_teams(array $state): array
     return ['a' => array_slice($ids, 0, $half), 'b' => array_slice($ids, $half)];
 }
 
+/** Kayıtlı yönetici kullanıcı adı (eski kurulumlarda boşsa "yonetici"). */
+function admin_user(array $state): string
+{
+    return $state['admin']['user'] !== '' ? $state['admin']['user'] : 'yonetici';
+}
+
+function clean_username($v): string
+{
+    $u = is_string($v) ? trim($v) : '';
+    if (!preg_match('/^[\p{L}\p{N}._-]{3,30}$/u', $u)) {
+        fail(400, 'Kullanıcı adı 3-30 karakter olmalı; harf, rakam, nokta, alt çizgi ve tire kullanılabilir.');
+    }
+    return $u;
+}
+
 function public_view(array $state, bool $admin): array
 {
     $me = player_token_hash();
@@ -186,6 +201,7 @@ function public_view(array $state, bool $admin): array
         'admin'      => $admin,
         'needsSetup' => $state['admin']['hash'] === '',
         'teams'      => current_teams($state),
+        'user'       => $admin ? admin_user($state) : null,
     ];
 }
 
@@ -285,26 +301,31 @@ $out = with_state(function (array &$s) use ($action, $in) {
 
         // ----- yönetici girişi -----
         case 'setup': {
-            if ($s['admin']['hash'] !== '') fail(409, 'Yönetici şifresi zaten oluşturulmuş. Giriş yap.');
+            if ($s['admin']['hash'] !== '') fail(409, 'Yönetici hesabı zaten oluşturulmuş. Giriş yap.');
+            $user = clean_username($in['username'] ?? '');
             $pw = (string)($in['password'] ?? '');
             if (mb_strlen($pw) < 8) fail(400, 'Şifre en az 8 karakter olmalı.');
+            $s['admin']['user'] = $user;
             $s['admin']['hash'] = password_hash($pw, PASSWORD_DEFAULT);
             $s['admin']['version'] = ($s['admin']['version'] ?? 0) + 1;
             session_regenerate_id(true);
             $_SESSION['admin'] = true;
             $_SESSION['admin_v'] = $s['admin']['version'];
-            return ['msg' => 'Yönetici şifresi oluşturuldu. Giriş yaptın.'];
+            return ['msg' => 'Yönetici hesabı oluşturuldu. Giriş yaptın.'];
         }
 
         case 'login': {
-            if ($s['admin']['hash'] === '') fail(409, 'Önce yönetici şifresi oluşturulmalı.');
+            if ($s['admin']['hash'] === '') fail(409, 'Önce yönetici hesabı oluşturulmalı.');
             $wait = login_locked($s);
             if ($wait > 0) fail(429, 'Çok fazla hatalı deneme. ' . (int)ceil($wait / 60) . ' dakika sonra tekrar dene.');
             $pw = (string)($in['password'] ?? '');
-            if (!password_verify($pw, $s['admin']['hash'])) {
+            $user = is_string($in['username'] ?? null) ? trim($in['username']) : '';
+            $userOk = hash_equals(mb_strtolower(admin_user($s), 'UTF-8'), mb_strtolower($user, 'UTF-8'));
+            $pwOk = password_verify($pw, $s['admin']['hash']);   // kullanıcı adı yanlış olsa da çalışır (süre farkı olmasın)
+            if (!$userOk || !$pwOk) {
                 login_failed($s);
                 // with_state'in dosyayı kaydetmesi için hata yerine işaret döndür
-                return ['__fail' => [401, 'Şifre yanlış.']];
+                return ['__fail' => [401, 'Kullanıcı adı veya şifre yanlış.']];
             }
             unset($s['logins'][client_ip()]);
             session_regenerate_id(true);
@@ -393,14 +414,22 @@ $out = with_state(function (array &$s) use ($action, $in) {
             return ['msg' => 'Liste temizlendi. Yeni hafta için hazır.'];
         }
 
-        case 'password': {
+        case 'account': {
             if (!password_verify((string)($in['current'] ?? ''), $s['admin']['hash'])) fail(401, 'Mevcut şifre yanlış.');
+            $user = clean_username($in['username'] ?? '');
             $pw = (string)($in['password'] ?? '');
-            if (mb_strlen($pw) < 8) fail(400, 'Yeni şifre en az 8 karakter olmalı.');
-            $s['admin']['hash'] = password_hash($pw, PASSWORD_DEFAULT);
-            $s['admin']['version']++;          // diğer cihazlardaki oturumlar kapanır
-            $_SESSION['admin_v'] = $s['admin']['version'];
-            return ['msg' => 'Şifre değişti. Diğer cihazlardaki yönetici oturumları kapandı.'];
+            if ($pw !== '' && mb_strlen($pw) < 8) fail(400, 'Yeni şifre en az 8 karakter olmalı.');
+            $changed = [];
+            if ($user !== admin_user($s)) { $s['admin']['user'] = $user; $changed[] = 'kullanıcı adı'; }
+            if ($pw !== '') {
+                $s['admin']['hash'] = password_hash($pw, PASSWORD_DEFAULT);
+                $s['admin']['version']++;          // diğer cihazlardaki oturumlar kapanır
+                $_SESSION['admin_v'] = $s['admin']['version'];
+                $changed[] = 'şifre';
+            }
+            if (!$changed) return ['msg' => 'Değişiklik yok.'];
+            $what = count($changed) === 2 ? 'Kullanıcı adı ve şifre' : ($changed[0] === 'şifre' ? 'Şifre' : 'Kullanıcı adı');
+            return ['msg' => $what . ' güncellendi.' . ($pw !== '' ? ' Diğer cihazlardaki oturumlar kapandı.' : '')];
         }
     }
 

@@ -1,18 +1,28 @@
 HALI SAHA KADROSU · KURULUM
 ===========================
 
+Dosyalar
+  index.html    Herkese açık liste (arkadaşlarına bu linki gönder)
+  yonetim.html  Yönetim paneli (kullanıcı adı + şifre ile girilir)
+  api.php       Sunucu tarafı
+  stil.css, ortak.js  İki sayfanın ortak dosyaları
+  data/         Liste ve yönetici hesabı burada tutulur (dışarıya kapalı)
+
 1) "halisaha" klasörünü hostingde public_html içine yükleyin
    (adres: https://siteniz.com/halisaha/). PHP 7.4 veya üstü yeterli, veritabanı gerekmez.
 
 2) halisaha/data klasörünün yazılabilir olduğundan emin olun (genelde 755 yeterli).
 
-3) Yükler yüklemez https://siteniz.com/halisaha/#yonetici adresini açın ve
-   en az 8 karakterlik yönetici şifrenizi oluşturun. Şifre bir kez oluşturulur;
-   sonra kimse yenisini oluşturamaz. Linki arkadaşlarınıza bundan SONRA gönderin.
+3) Yükler yüklemez https://siteniz.com/halisaha/yonetim.html adresini açın ve
+   kullanıcı adınızı ve en az 8 karakterlik şifrenizi belirleyin. Hesap bir kez
+   oluşturulur; sonra kimse yeni hesap açamaz. Linki arkadaşlarınıza bundan SONRA gönderin.
 
 4) Arkadaşlarınıza sadece https://siteniz.com/halisaha/ linkini gönderin.
-   Onlar listeyi görür, adını yazıp "Geliyorum" der. Yönetici paneli yalnız
-   şifreyle giriş yapan kişiye görünür.
+   Kayıt gerekmez: adını yazıp "Geliyorum" der. Ana sayfada yönetim bağlantısı
+   ya da yönetim düğmesi yoktur; panel adresini sadece siz bilirsiniz.
+
+Önceki sürümden güncelliyorsanız: tüm dosyaları değiştirin, data/ klasörüne dokunmayın.
+Eski şifreniz geçerlidir, kullanıcı adınız "yonetici" olur (panelden değiştirebilirsiniz).
 
 Şifreyi unutursanız: data/kadro.php dosyasındaki "hash" değerini "" yapın
 (liste silinmez), sonra 3. adımı tekrarlayın.

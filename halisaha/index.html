@@ -8,141 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap">
-<style>
-/* Layout: çim yeşili skor bandı (maç bilgisi + sayı), forma numaralı kadro, en altta yalnız yöneticiye görünen panel. */
-:root {
-  --bg: #edf1ea; --surface: #ffffff; --ink: #15241b; --muted: #5a6a5f; --line: #d3dcd1;
-  --pitch: #1d5a3b; --pitch-2: #236845; --pitch-ink: #f2f7f0; --chalk: rgba(255,255,255,.22);
-  --accent: #d99a1c; --accent-ink: #2a1d00; --danger: #b93d2a; --ok: #1f7a4a; --focus: #2f7dd1;
-  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e1611; --surface: #16221a; --ink: #e5ede6; --muted: #98aa9d; --line: #2a3a2f;
-    --pitch: #153b27; --pitch-2: #19452e; --pitch-ink: #eaf3ec; --chalk: rgba(255,255,255,.14);
-    --accent: #eeb63a; --accent-ink: #231800; --danger: #e2664f; --ok: #4cc283; --focus: #6aa8ee;
-    color-scheme: dark;
-  }
-}
-* { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
-[hidden] { display: none !important; }
-.wrap { max-width: 920px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-
-.band { position: relative; overflow: hidden; color: var(--pitch-ink);
-  background: repeating-linear-gradient(90deg, var(--pitch) 0 80px, var(--pitch-2) 80px 160px); }
-.band::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--chalk); }
-.band::after { content: ""; position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; margin: -110px 0 0 -110px; border: 2px solid var(--chalk); border-radius: 50%; }
-.band .wrap { position: relative; z-index: 1; padding-block: calc(28px + env(safe-area-inset-top, 0px)) 30px; display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: flex-end; justify-content: space-between; }
-.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; opacity: .8; font-weight: 600; }
-h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 7vw, 54px); line-height: 1; margin: 6px 0 10px; text-wrap: balance; letter-spacing: .01em; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; opacity: .92; }
-.meta span:empty { display: none; }
-.score { text-align: right; min-width: 0; }
-.score .num { font-family: var(--font-display); font-weight: 700; font-size: clamp(60px, 14vw, 92px); line-height: .9; font-variant-numeric: tabular-nums; }
-.score .num small { font-size: .5em; opacity: .7; }
-.pill { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.16); }
-.pill.warn { background: var(--accent); color: var(--accent-ink); }
-.pill.full { background: var(--pitch-ink); color: var(--pitch); }
-.bar { flex-basis: 100%; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: hidden; }
-.bar i { display: block; height: 100%; width: 0; background: var(--pitch-ink); transition: width .4s ease; }
-.bar.warn i { background: var(--accent); }
-
-main.wrap { padding-block: 24px 24px; display: grid; gap: 28px; }
-h2 { font-family: var(--font-display); font-weight: 700; font-size: 26px; letter-spacing: .02em; margin: 0; text-transform: uppercase; }
-.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.section-head p { margin: 0; color: var(--muted); font-size: 14px; }
-
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 12px; }
-.card h3 { margin: 0; font-size: 18px; }
-.card p { margin: 0; color: var(--muted); }
-.row { display: flex; flex-wrap: wrap; gap: 10px; }
-.row > input { flex: 1 1 200px; min-width: 0; width: auto; }
-input, button { font: inherit; }
-input[type=text], input[type=password], input[type=number], input[type=datetime-local] {
-  padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-width: 0; width: 100%; }
-button { cursor: pointer; border-radius: 10px; border: 1px solid transparent; padding: 11px 18px; font-weight: 600; }
-button:disabled { cursor: not-allowed; opacity: .5; }
-.btn-primary { background: var(--pitch); color: var(--pitch-ink); }
-.btn-primary:hover:not(:disabled) { background: var(--pitch-2); }
-.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn-ghost:hover:not(:disabled) { border-color: var(--muted); }
-.btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
-.btn-danger.solid { background: var(--danger); color: #fff; }
-.link { background: none; border: 0; padding: 4px 2px; color: var(--muted); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
-.link:hover { color: var(--ink); }
-:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-
-.squad { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
-.slot { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); min-height: 60px; min-width: 0; }
-.slot.empty { background: transparent; border-style: dashed; color: var(--muted); }
-.slot.me { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
-.shirt { flex: none; width: 38px; height: 38px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 20px; font-variant-numeric: tabular-nums;
-  background: var(--pitch); color: var(--pitch-ink); clip-path: polygon(25% 0, 75% 0, 100% 18%, 88% 38%, 80% 32%, 80% 100%, 20% 100%, 20% 32%, 12% 38%, 0 18%); }
-.slot.empty .shirt { background: var(--line); color: var(--muted); }
-.slot .who { flex: 1; min-width: 0; }
-.slot .name { font-weight: 600; overflow-wrap: anywhere; }
-.slot .sub { font-size: 12px; color: var(--muted); }
-.x { flex: none; width: 32px; height: 32px; padding: 0; border-radius: 8px; background: transparent; color: var(--muted); border: 1px solid var(--line); font-size: 18px; line-height: 1; }
-.x:hover { color: var(--danger); border-color: var(--danger); }
-
-/* Takımlar: yelekliler / yeleksizler */
-.teams { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.team { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; }
-.team-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.team-head h3 { margin: 0; flex: 1; font-family: var(--font-display); font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: .02em; }
-.team-head .tcount { font-size: 13px; color: var(--muted); font-weight: 600; }
-.bib { flex: none; width: 24px; height: 28px; clip-path: polygon(18% 0, 36% 0, 50% 20%, 64% 0, 82% 0, 100% 16%, 100% 100%, 0 100%, 0 16%); }
-.team.a .bib { background: var(--accent); }
-.team.b .bib { background: var(--pitch); }
-.team ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.team li { display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 10px; border-radius: 10px; background: var(--bg); min-height: 44px; }
-.team li.me { box-shadow: inset 0 0 0 2px var(--ok); }
-.team li .no { flex: none; width: 24px; font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.team li .nm { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
-.team li .tag { font-size: 12px; color: var(--ok); font-weight: 600; }
-.team .x { font-size: 15px; }
-.team .x:hover { color: var(--ink); border-color: var(--muted); }
-#teamHint.warn { color: var(--danger); font-weight: 600; }
-.team-tools { display: flex; flex-wrap: wrap; gap: 8px; }
-.team-tools button { padding: 8px 14px; }
-#teamsSec .hint { margin: -4px 0 12px; }
-
-.bench-head { margin-top: 22px; }
-.bench-head h2 { font-size: 22px; }
-.slot.res .shirt { background: var(--accent); color: var(--accent-ink); font-size: 16px; }
-.slot.res.empty .shirt { background: var(--line); color: var(--muted); }
-.slot.res:not(.empty) { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
-
-.admin { gap: 18px; }
-.grid2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); min-width: 0; }
-.stepper { display: flex; }
-.stepper button { padding: 0 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 18px; }
-.stepper button:first-child { border-radius: 10px 0 0 10px; }
-.stepper button:last-child { border-radius: 0 10px 10px 0; }
-.stepper input { border-radius: 0; text-align: center; font-family: var(--font-display); font-size: 22px; font-weight: 700; padding: 6px; border-left: 0; border-right: 0; }
-.divider { height: 1px; background: var(--line); }
-.hint { font-size: 13px; color: var(--muted); margin: 0; }
-.confirm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-details summary { cursor: pointer; font-weight: 600; }
-details[open] summary { margin-bottom: 10px; }
-
-footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; }
-
-.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20;
-  max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 12px; background: var(--ink); color: var(--bg); font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
-.toast.err { background: var(--danger); color: #fff; }
-
-@media (max-width: 560px) {
-  .score { text-align: left; }
-  .band::after { width: 160px; height: 160px; margin: -80px 0 0 -80px; }
-}
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-</style>
+<link rel="stylesheet" href="stil.css?v=4">
 </head>
 <body>
 
@@ -170,10 +36,9 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
   <section id="teamsSec" hidden>
     <div class="section-head">
       <h2>Takımlar</h2>
-      <div class="team-tools" id="teamTools"></div>
+      <p id="teamHint">Takımları yönetici kurdu. Kadro değişirse takımlar dengeli kalır.</p>
     </div>
-    <p class="hint" id="teamHint"></p>
-    <div class="teams" id="teams">
+    <div class="teams">
       <div class="team a">
         <div class="team-head"><span class="bib" aria-hidden="true"></span><h3>Yelekliler</h3><span class="tcount" id="countA"></span></div>
         <ol id="teamA"></ol>
@@ -199,145 +64,35 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
       <ol class="squad" id="benchList"></ol>
     </div>
   </section>
-
-  <!-- Yönetici girişi: yalnız "Yönetici girişi" bağlantısına basınca açılır -->
-  <section class="card" id="loginBox" hidden>
-    <h3 id="loginTitle">Yönetici girişi</h3>
-    <p id="loginText">Kişi sayısını ve maç bilgilerini değiştirmek için şifreni gir.</p>
-    <form id="loginForm" class="row" autocomplete="on">
-      <input type="text" name="username" value="yonetici" autocomplete="username" hidden>
-      <input type="password" id="loginPw" autocomplete="current-password" placeholder="Şifre" required minlength="1">
-      <button class="btn-primary" type="submit" id="loginBtn">Giriş yap</button>
-      <button class="btn-ghost" type="button" id="loginCancel">Vazgeç</button>
-    </form>
-  </section>
-
-  <section class="card admin" id="admin" hidden>
-    <div class="section-head" style="margin:0">
-      <h2>Yönetici</h2>
-      <button class="btn-ghost" id="logoutBtn" type="button">Çıkış yap</button>
-    </div>
-    <div class="grid2">
-      <label for="capInput">Kaç kişi gelecek?
-        <div class="stepper">
-          <button type="button" id="capMinus" aria-label="Bir azalt">−</button>
-          <input type="number" id="capInput" min="2" max="40" value="14">
-          <button type="button" id="capPlus" aria-label="Bir artır">+</button>
-        </div>
-      </label>
-      <label for="resInput">Kaç yedek olsun?
-        <div class="stepper">
-          <button type="button" id="resMinus" aria-label="Bir azalt">−</button>
-          <input type="number" id="resInput" min="0" max="20" value="3">
-          <button type="button" id="resPlus" aria-label="Bir artır">+</button>
-        </div>
-      </label>
-      <label for="titleInput">Maç adı
-        <input type="text" id="titleInput" maxlength="40" placeholder="Çarşamba maçı">
-      </label>
-      <label for="whenInput">Tarih ve saat
-        <input type="datetime-local" id="whenInput">
-      </label>
-      <label for="placeInput">Saha
-        <input type="text" id="placeInput" maxlength="60" placeholder="Saha adı, semt">
-      </label>
-    </div>
-    <div class="row"><button class="btn-primary" id="saveSettings" type="button">Maç bilgilerini kaydet</button></div>
-    <div class="divider"></div>
-    <div>
-      <label for="manualName">Listeye elle oyuncu ekle</label>
-      <div class="row" style="margin-top:6px">
-        <input type="text" id="manualName" maxlength="30" placeholder="Arkadaşının adı">
-        <button class="btn-ghost" id="manualAdd" type="button">Ekle</button>
-      </div>
-      <p class="hint" style="margin-top:6px">Linke giremeyen arkadaşlar için. Kadro doluysa yedeğe yazılır; kadro ve yedek sınırı burada da geçerli.</p>
-    </div>
-    <div class="divider"></div>
-    <div class="confirm" id="clearArea"></div>
-    <div class="divider"></div>
-    <details>
-      <summary>Yönetici şifresini değiştir</summary>
-      <form id="pwForm" class="grid2">
-        <input type="text" name="username" value="yonetici" autocomplete="username" hidden>
-        <label for="pwCurrent">Mevcut şifre <input type="password" id="pwCurrent" autocomplete="current-password" required></label>
-        <label for="pwNew">Yeni şifre (en az 8 karakter) <input type="password" id="pwNew" autocomplete="new-password" minlength="8" required></label>
-        <div class="row"><button class="btn-ghost" type="submit">Şifreyi değiştir</button></div>
-      </form>
-    </details>
-  </section>
 </main>
-
-<footer class="wrap">
-  <button class="link" id="openLogin" type="button">Yönetici girişi</button>
-</footer>
 
 <div class="toast" id="toast" hidden role="status"></div>
 
+<script src="ortak.js?v=4"></script>
 <script>
 (function () {
   "use strict";
-  const API = "api.php";
+  // Eski "#yonetici" bağlantıları yönetim paneline gider.
+  if (location.hash === "#yonetici") { location.replace("yonetim.html"); return; }
+
+  const { $, el, toast, call, renderHeader } = HS;
   const POLL_MS = 8000;
-  const $ = (id) => document.getElementById(id);
-  const S = { data: null, busy: false, failed: false, confirmClear: false, adminFilled: false, loginOpen: false, draftName: null, myIdx: null };
+  const S = { data: null, busy: false, failed: false, draftName: null, myIdx: null };
+  const cap = () => HS.cap(S.data), reserve = () => HS.reserve(S.data);
 
-  // Her tarayıcıya rastgele bir kimlik: "Gelemiyorum" ile sadece kendi kaydını silebilsin diye.
-  let token = null;
-  try { token = localStorage.getItem("halisaha_token"); } catch (e) {}
-  if (!token || !/^[a-f0-9]{32,64}$/.test(token)) {
-    const b = new Uint8Array(16); crypto.getRandomValues(b);
-    token = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
-    try { localStorage.setItem("halisaha_token", token); } catch (e) {}
-  }
-
-  let toastTimer;
-  function toast(msg, err) {
-    if (!msg) return;
-    const t = $("toast");
-    t.textContent = msg; t.className = "toast" + (err ? " err" : ""); t.hidden = false;
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3800);
-  }
-  function el(tag, cls, text) {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
-  }
-  function fmtWhen(v) {
-    if (!v) return "";
-    const d = new Date(v);
-    if (isNaN(d)) return "";
-    try { return new Intl.DateTimeFormat("tr-TR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(d); }
-    catch (e) { return d.toLocaleString(); }
-  }
-
-  async function call(action, body) {
-    const opts = { headers: { "X-Player-Token": token }, credentials: "same-origin", cache: "no-store" };
-    if (body !== undefined) {
-      opts.method = "POST";
-      opts.headers["Content-Type"] = "application/json";
-      opts.body = JSON.stringify(body);
+  // Yedekten kadroya geçen kişiye haber ver.
+  function trackMe(notify) {
+    if (!S.data) return;
+    const idx = S.data.players.findIndex((p) => p.mine), c = cap();
+    if (notify && S.myIdx != null && S.myIdx >= c && idx >= 0 && idx < c) {
+      toast("Yedekten kadroya geçtin! Forman " + (idx + 1) + " numara.");
     }
-    let res, json;
-    try {
-      res = await fetch(API + "?action=" + encodeURIComponent(action), opts);
-      json = await res.json();
-    } catch (e) {
-      throw new Error("Sunucuya ulaşılamadı. İnternet bağlantını kontrol et.");
-    }
-    if (!res.ok || !json.ok) throw new Error((json && json.error) || "İşlem yapılamadı.");
-    return json;
+    S.myIdx = idx >= 0 ? idx : null;
   }
 
   async function refresh() {
-    try {
-      const d = await call("state");
-      S.data = d; S.failed = false;
-      checkPromotion();
-      if (d.needsSetup && !d.admin) S.loginOpen = S.loginOpen || location.hash === "#yonetici";
-    } catch (e) {
-      S.failed = true;
-    }
+    try { S.data = await call("state"); S.failed = false; trackMe(true); }
+    catch (e) { S.failed = true; }
     render();
   }
 
@@ -345,56 +100,12 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     if (S.busy) return;
     S.busy = true; render();
     try {
-      const d = await call(action, body || {});
-      S.data = d;
-      S.myIdx = d.players.findIndex((p) => p.mine); if (S.myIdx < 0) S.myIdx = null;
-      toast(d.msg);
-      if (after) after(d);
-    } catch (e) {
-      toast(e.message, true);
-      refresh();
-    } finally { S.busy = false; render(); }
-  }
-
-  const cap = () => (S.data ? Number(S.data.settings.capacity) || 14 : 14);
-  const reserve = () => {
-    const r = S.data ? Number(S.data.settings.reserve) : 3;
-    return Number.isFinite(r) && r >= 0 ? r : 3;
-  };
-
-  // Yedekten kadroya geçen kişiye haber ver.
-  function checkPromotion() {
-    if (!S.data) return;
-    const idx = S.data.players.findIndex((p) => p.mine);
-    const c = cap();
-    if (S.myIdx != null && S.myIdx >= c && idx >= 0 && idx < c) {
-      toast("Yedekten kadroya geçtin! Forman " + (idx + 1) + " numara.");
-    }
-    S.myIdx = idx >= 0 ? idx : null;
-  }
-
-  // ---------- çizim ----------
-  function renderHeader() {
-    const d = S.data, c = cap();
-    const n = d ? d.players.length : 0, inSquad = Math.min(n, c);
-    const s = d ? d.settings : {};
-    $("title").textContent = s.title || "Halı Saha";
-    document.title = (s.title || "Halı Saha") + " · Kadro";
-    $("when").textContent = fmtWhen(s.when);
-    $("place").textContent = s.place || "";
-    const num = $("count"); num.textContent = "";
-    num.append(d ? String(inSquad) : "–", el("small", null, "/" + (d ? c : "–")));
-    const left = c - inSquad, st = $("status"), bar = $("bar");
-    if (!d) { st.textContent = S.failed ? "Bağlantı yok" : "Yükleniyor"; st.className = "pill"; }
-    else if (left <= 0) {
-      const rl = Math.max(0, c + reserve() - n);
-      st.textContent = rl > 0 ? "Kadro tamam · " + rl + " yedek yeri" : (reserve() > 0 ? "Kadro ve yedek dolu" : "Kadro tamam");
-      st.className = "pill full";
-    }
-    else if (left <= 2) { st.textContent = "Son " + left + " yer"; st.className = "pill warn"; }
-    else { st.textContent = left + " yer boş"; st.className = "pill"; }
-    bar.className = "bar" + (d && left > 0 && left <= 2 ? " warn" : "");
-    bar.firstElementChild.style.width = (d ? (inSquad / c) * 100 : 0) + "%";
+      S.data = await call(action, body || {});
+      trackMe(false);
+      toast(S.data.msg);
+      if (after) after();
+    } catch (e) { toast(e.message, true); refresh(); }
+    finally { S.busy = false; render(); }
   }
 
   function renderJoin() {
@@ -424,12 +135,9 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
       return;
     }
     const toBench = n >= c;
-    if (toBench) {
-      box.append(el("h3", null, "Kadro doldu, yedeğe yazıl"),
-        el("p", null, (c + r - n) + " yedek yeri kaldı. Kadrodan biri çıkarsa sırayla kadroya geçersin."));
-    } else {
-      box.append(el("h3", null, "Geliyor musun?"), el("p", null, (c - n) + " yer kaldı. Adını yaz, kadroya gir."));
-    }
+    if (toBench) box.append(el("h3", null, "Kadro doldu, yedeğe yazıl"),
+      el("p", null, (c + r - n) + " yedek yeri kaldı. Kadrodan biri çıkarsa sırayla kadroya geçersin."));
+    else box.append(el("h3", null, "Geliyor musun?"), el("p", null, (c - n) + " yer kaldı. Adını yaz, kadroya gir."));
     const row = el("div", "row"), inp = el("input");
     inp.type = "text"; inp.id = "nameInput"; inp.maxLength = 30; inp.placeholder = "Adın"; inp.autocomplete = "nickname";
     inp.value = S.draftName || "";
@@ -446,188 +154,58 @@ footer.wrap { padding-block: 8px calc(40px + env(safe-area-inset-bottom, 0px)); 
     row.append(inp, b); box.append(row);
   }
 
-  function removeBtn(p, small) {
-    const x = el("button", "x", "×");
-    x.type = "button"; x.title = "Listeden çıkar";
-    x.setAttribute("aria-label", p.name + " listeden çıkar");
-    if (small) { x.style.width = "26px"; x.style.height = "26px"; }
-    x.disabled = S.busy;
-    x.addEventListener("click", () => act("remove", { id: p.id }));
-    return x;
-  }
-
-  function renderSquad() {
-    const d = S.data, c = cap(), ul = $("squad"), admin = d && d.admin;
-    ul.textContent = "";
-    for (let i = 0; i < c; i++) {
-      const p = d ? d.players[i] : null;
-      const li = el("li", "slot" + (p ? "" : " empty") + (p && p.mine ? " me" : ""));
-      li.append(el("span", "shirt", String(i + 1)));
-      const who = el("div", "who");
-      who.append(el("div", "name", p ? p.name : "Boş yer"));
-      if (p) who.append(el("div", "sub", p.mine ? "Sen" : (p.manual ? "Yönetici ekledi" : "Kendi katıldı")));
-      li.append(who);
-      if (p && admin) li.append(removeBtn(p));
-      ul.append(li);
-    }
-    const extra = d ? d.players.slice(c) : [];
-    const slots = Math.max(reserve(), extra.length);
-    $("bench").hidden = slots === 0;
-    const bl = $("benchList"); bl.textContent = "";
-    for (let i = 0; i < slots; i++) {
-      const p = extra[i];
-      const li = el("li", "slot res" + (p ? "" : " empty") + (p && p.mine ? " me" : ""));
-      const shirt = el("span", "shirt", "Y" + (i + 1)); shirt.title = (i + 1) + ". yedek";
-      li.append(shirt);
-      const who = el("div", "who");
-      who.append(el("div", "name", p ? p.name : "Boş yedek yeri"));
-      if (p) who.append(el("div", "sub", (p.mine ? "Sen · " : "") + (i === 0 ? "İlk yer açılınca kadroya girer" : (i + 1) + ". sırada")));
-      li.append(who);
-      if (p && admin) li.append(removeBtn(p));
-      bl.append(li);
-    }
-  }
-
-  function btn(cls, text, fn) {
-    const b = el("button", cls, text); b.type = "button"; b.disabled = S.busy;
-    b.addEventListener("click", fn); return b;
-  }
-
   function renderTeams() {
-    const d = S.data, sec = $("teamsSec");
-    const admin = !!(d && d.admin), teams = d && d.teams;
-    sec.hidden = !d || (!teams && !admin);
-    if (sec.hidden) return;
-    const c = cap(), squad = d.players.slice(0, c);
-    const byId = {}; squad.forEach((p, i) => { byId[p.id] = { p, no: i + 1 }; });
-
-    const tools = $("teamTools"); tools.textContent = "";
-    if (admin) {
-      if (!teams) {
-        const b = btn("btn-primary", "Takımları kur", () => act("teams"));
-        b.disabled = S.busy || squad.length < 2;
-        tools.append(b);
-      } else {
-        tools.append(btn("btn-ghost", "Yeniden karıştır", () => act("teams")),
-                     btn("btn-ghost", "Takımları kaldır", () => act("teams_reset")));
-      }
-    }
-    const hint = $("teamHint");
-    if (!teams) hint.textContent = squad.length < 2
-      ? "Kadroda en az 2 kişi olunca takımları kurabilirsin."
-      : "Kadroyu rastgele iki eşit takıma ayırır. Herkes aynı takımları görür.";
-    else if (squad.length < c) hint.textContent = "Kadro henüz dolmadı. Sonradan gelenler sayısı az olan takıma eklenir.";
-    else hint.textContent = "Kadrodan biri çıkarsa yerine geçen yedek, takımlar dengeli kalacak şekilde eklenir.";
-    const diff = teams ? Math.abs(teams.a.length - teams.b.length) : 0;
-    hint.className = "hint" + (admin && diff > 1 ? " warn" : "");
-    if (admin && diff > 1) hint.textContent = "Takımlar dengesiz: " + teams.a.length + " - " + teams.b.length + ". Bir oyuncuyu ⇄ ile diğer takıma geçir.";
-
-    $("teams").hidden = !teams;
+    const d = S.data, teams = d && d.teams;
+    $("teamsSec").hidden = !teams;
     if (!teams) return;
-    [["a", "teamA", "countA", "Yeleksizlere"], ["b", "teamB", "countB", "Yeleklilere"]].forEach(([k, listId, countId, other]) => {
+    const byId = {}; d.players.slice(0, cap()).forEach((p, i) => { byId[p.id] = { p, no: i + 1 }; });
+    [["a", "teamA", "countA"], ["b", "teamB", "countB"]].forEach(([k, listId, countId]) => {
       const ol = $(listId); ol.textContent = "";
-      const ids = teams[k].filter((id) => byId[id]);
+      const ids = teams[k].filter((id) => byId[id]).sort((x, y) => byId[x].no - byId[y].no);
       $(countId).textContent = ids.length + " kişi";
-      ids.sort((x, y) => byId[x].no - byId[y].no).forEach((id) => {
-        const { p, no } = byId[id];
-        const li = el("li", p.mine ? "me" : "");
+      ids.forEach((id) => {
+        const { p, no } = byId[id], li = el("li", p.mine ? "me" : "");
         li.append(el("span", "no", String(no)), el("span", "nm", p.name));
         if (p.mine) li.append(el("span", "tag", "Sen"));
-        if (admin) {
-          const x = btn("x", "⇄", () => act("move", { id }));
-          x.title = other + " geçir"; x.setAttribute("aria-label", p.name + ", " + other.toLowerCase() + " geçir");
-          li.append(x);
-        }
         ol.append(li);
       });
     });
   }
 
-  function renderLogin() {
-    const d = S.data, show = !!d && !d.admin && S.loginOpen;
-    $("loginBox").hidden = !show;
-    $("openLogin").hidden = !d || d.admin || S.loginOpen;
-    if (!show) return;
-    const setup = d.needsSetup;
-    $("loginTitle").textContent = setup ? "Yönetici şifresi oluştur" : "Yönetici girişi";
-    $("loginText").textContent = setup
-      ? "Henüz yönetici yok. En az 8 karakterlik bir şifre belirle; bundan sonra paneli sadece bu şifreyle açabilirsin."
-      : "Kişi sayısını ve maç bilgilerini değiştirmek için şifreni gir.";
-    $("loginPw").autocomplete = setup ? "new-password" : "current-password";
-    $("loginPw").minLength = setup ? 8 : 1;
-    $("loginBtn").textContent = setup ? "Şifreyi oluştur" : "Giriş yap";
-    $("loginBtn").disabled = S.busy;
+  function slot(cls, label, p, sub) {
+    const li = el("li", "slot " + cls + (p ? "" : " empty") + (p && p.mine ? " me" : ""));
+    li.append(el("span", "shirt", label));
+    const who = el("div", "who");
+    who.append(el("div", "name", p ? p.name : (cls === "res" ? "Boş yedek yeri" : "Boş yer")));
+    if (p) who.append(el("div", "sub", sub));
+    li.append(who);
+    return li;
   }
 
-  function renderAdmin() {
-    const d = S.data, a = $("admin");
-    a.hidden = !d || !d.admin;
-    if (a.hidden) { S.adminFilled = false; return; }
-    if (!S.adminFilled) {
-      $("capInput").value = cap();
-      $("resInput").value = reserve();
-      $("titleInput").value = d.settings.title || "";
-      $("whenInput").value = d.settings.when || "";
-      $("placeInput").value = d.settings.place || "";
-      S.adminFilled = true;
+  function renderSquad() {
+    const d = S.data, c = cap(), ul = $("squad");
+    ul.textContent = "";
+    for (let i = 0; i < c; i++) {
+      const p = d ? d.players[i] : null;
+      ul.append(slot("", String(i + 1), p, p && (p.mine ? "Sen" : (p.manual ? "Yönetici ekledi" : "Kendi katıldı"))));
     }
-    ["saveSettings", "manualAdd", "capMinus", "capPlus", "resMinus", "resPlus", "logoutBtn"].forEach((id) => { $(id).disabled = S.busy; });
-    const area = $("clearArea"); area.textContent = "";
-    if (S.confirmClear) {
-      area.append(el("span", null, d.players.length + " oyuncunun tamamı silinecek."));
-      const yes = el("button", "btn-danger solid", "Evet, temizle"), no = el("button", "btn-ghost", "Vazgeç");
-      yes.type = no.type = "button";
-      yes.addEventListener("click", () => { S.confirmClear = false; act("clear"); });
-      no.addEventListener("click", () => { S.confirmClear = false; render(); });
-      area.append(yes, no);
-    } else {
-      const b = el("button", "btn-danger", "Listeyi temizle (yeni hafta)");
-      b.type = "button"; b.disabled = S.busy || d.players.length === 0;
-      b.addEventListener("click", () => { S.confirmClear = true; render(); });
-      area.append(b);
+    const extra = d ? d.players.slice(c) : [], slots = Math.max(reserve(), extra.length);
+    $("bench").hidden = slots === 0;
+    const bl = $("benchList"); bl.textContent = "";
+    for (let i = 0; i < slots; i++) {
+      const p = extra[i];
+      bl.append(slot("res", "Y" + (i + 1), p, p && ((p.mine ? "Sen · " : "") + (i === 0 ? "İlk yer açılınca kadroya girer" : (i + 1) + ". sırada"))));
     }
   }
 
   function render() {
     const focused = document.activeElement && document.activeElement.id;
-    renderHeader(); renderJoin(); renderTeams(); renderSquad(); renderLogin(); renderAdmin();
+    renderHeader(S.data, S.failed);
+    document.title = ((S.data && S.data.settings.title) || "Halı Saha") + " · Kadro";
+    renderJoin(); renderTeams(); renderSquad();
     if (focused === "nameInput" && $("nameInput")) $("nameInput").focus();
   }
 
-  // ---------- olaylar ----------
-  $("openLogin").addEventListener("click", () => { S.loginOpen = true; render(); $("loginPw").focus(); });
-  $("loginCancel").addEventListener("click", () => { S.loginOpen = false; $("loginPw").value = ""; render(); });
-  $("loginForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const pw = $("loginPw").value;
-    act(S.data && S.data.needsSetup ? "setup" : "login", { password: pw }, () => { $("loginPw").value = ""; S.loginOpen = false; });
-  });
-  $("logoutBtn").addEventListener("click", () => act("logout"));
-  $("saveSettings").addEventListener("click", () => {
-    const c = Math.floor(Number($("capInput").value));
-    if (!(c >= 2 && c <= 40)) { toast("Kişi sayısı 2 ile 40 arasında olmalı.", true); return; }
-    const r = Math.floor(Number($("resInput").value));
-    if (!(r >= 0 && r <= 20)) { toast("Yedek sayısı 0 ile 20 arasında olmalı.", true); return; }
-    act("settings", { capacity: c, reserve: r, title: $("titleInput").value, when: $("whenInput").value, place: $("placeInput").value },
-      () => { S.adminFilled = false; });
-  });
-  $("manualAdd").addEventListener("click", () => {
-    const name = $("manualName").value.trim();
-    if (!name) { toast("Eklenecek kişinin adını yaz.", true); return; }
-    act("add", { name }, () => { $("manualName").value = ""; });
-  });
-  $("manualName").addEventListener("keydown", (e) => { if (e.key === "Enter") $("manualAdd").click(); });
-  $("capMinus").addEventListener("click", () => { const i = $("capInput"); i.value = Math.max(2, (Number(i.value) || 14) - 1); });
-  $("resMinus").addEventListener("click", () => { const i = $("resInput"); i.value = Math.max(0, (Number(i.value) || 0) - 1); });
-  $("resPlus").addEventListener("click", () => { const i = $("resInput"); i.value = Math.min(20, (Number(i.value) || 0) + 1); });
-  $("capPlus").addEventListener("click", () => { const i = $("capInput"); i.value = Math.min(40, (Number(i.value) || 14) + 1); });
-  $("pwForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    act("password", { current: $("pwCurrent").value, password: $("pwNew").value },
-      () => { $("pwCurrent").value = ""; $("pwNew").value = ""; });
-  });
-
-  if (location.hash === "#yonetici") S.loginOpen = true;
   render();
   refresh();
   setInterval(() => { if (!document.hidden && !S.busy) refresh(); }, POLL_MS);
