@@ -10,6 +10,12 @@ Metin2 Yang, Won, EP ve İtem pazaryeri arayüzü (tek dosyalık HTML uygulamas�
 > Ödeme anahtarları, IBAN, VKN, telefon ve cüzdan bilgileri demo değerlerdir.
 > e-Gider Pusulası belgeleri tarayıcıda üretilen örneklerdir; gerçek GİB/entegratör bağlantısı yoktur.
 
+## Halı saha kadrosu (`halisaha/`)
+
+Bağımsız küçük uygulama: yöneticinin belirlediği kişi sayısı dolunca kapanan katılım listesi.
+`halisaha/index.html` + `halisaha/api.php` (PHP 7.4+, veritabanı yok; veri `halisaha/data/kadro.php`'de, dışarıya kapalı).
+Yönetici paneli şifreyle açılır; kişi sınırı sunucuda uygulanır. Kurulum: `halisaha/KURULUM.txt`.
+
 ## Sunucu API paketi (`api/`)
 
 PayTR, Paraşüt ve Bizim Hesap bağlantıları için PHP paketi. Hiçbir dosya düzenlenmez:

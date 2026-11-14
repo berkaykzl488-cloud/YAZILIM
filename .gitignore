@@ -10,3 +10,7 @@ uploads/*
 # cron'un site köküne yazdığı SEO dosyaları
 /sitemap.xml
 /robots.txt
+# halı saha uygulamasının çalışma zamanı verisi (liste + yönetici şifresi)
+halisaha/data/*
+!halisaha/data/.htaccess
+!halisaha/data/index.php
