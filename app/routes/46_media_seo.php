@@ -94,7 +94,7 @@ return function (Router $r) {
     // Sunucu tarafı meta (index.php kullanamıyorsa ön yüz de sorabilir): ?path=/ilan/…-l12
     $r->get('seo/meta', function (Req $q, Db $db) {
         $x = Seo::head($db, $q->q('path', '/'));
-        unset($x['html']);
+        unset($x['html'], $x['srv'], $x['lst'], $x['cnt'], $x['priv'], $x['intro']); // ham satırlar dışarı çıkmaz
         return ['data' => $x];
     }, ['auth' => 'none', 'csrf' => false]);
 

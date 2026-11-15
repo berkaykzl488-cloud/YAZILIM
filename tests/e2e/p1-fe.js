@@ -3,7 +3,7 @@
 //   A 3 fotoğraflı ilan verir (biri büyük: tarayıcıda ≤1600 px'e küçültülür), B Metin2 TR → server → kategori/arama/sıralama → ilan (görüntülenme +1),
 //   üst arama önerileri, satıcı profili, ilan onayı açıkken ilan yönetici onaylayana kadar gizli (Yönetim › İlanlar), A düzenler / kaldırır / üste taşır,
 //   yönetici Serverlar çekmecesinde ekler / düzenler / siler, >24 ilanla "Daha fazla" (anahtar kümesi), Bakım › Güncellemeleri uygula,
-//   SEO: /index.php?p=ilan/<slug>-l<id> ham HTML'inde <title> ve canonical, temiz adres açılışı. Tüm API istekleri /api/v1/index.php?r= biçiminde.
+//   SEO: ?p= yedeği ve eski adresler (301), ham HTML'de <title>/canonical, temiz adresle açılış (rewrite doğrulanır). Tüm API istekleri /api/v1/index.php?r= biçiminde.
 //   Konsol/sayfa hatası yok, 390 px taşma yok, gece + gündüz teması. Son olarak güncelleme paketi kurulu sitenin üzerine açılır (storage/ korunur).
 //
 //   node tests/e2e/p1-fe.js          (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
@@ -132,8 +132,8 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     ok('fotoğraflar: kapak işareti ve kaldır düğmeleri', await A.locator('#pup_s .pup-b').count() === 1 && await A.locator('#pup_s [data-act=pupdel]').count() === 3);
     await shot(A, 'ilan-ver-fotograflar');
     await A.click('form[data-form=sell] button.btn-primary');
-    ok('ilan yayında (toast) ve ilan sayfasına gidildi', await toast(A, /yayında/) && await until(A, () => /#ilan-l\d+$/.test(location.hash)));
-    const L1 = (A.url().match(/#ilan-(l\d+)$/) || [])[1];
+    ok('ilan yayında (toast) ve ilan sayfasına gidildi', await toast(A, /yayında/) && await until(A, () => /^ilan-l\d+$/.test(route())));
+    const L1 = ((await A.evaluate(() => route())).match(/^ilan-(l\d+)$/) || [])[1];
     await A.waitForSelector('.lhero'); await A.waitForTimeout(400);
     ok('ilan sayfası: başlık, fiyat, 3 fotoğraf galerisi', (await txt(A, '#app')).includes(T1) && /125,50/.test(await txt(A, '.lprice')) && await A.locator('.lgal button').count() === 3);
     ok('ilan sayfası (sahibi): düzenle / üste taşı / kaldır, doping al (P2)', await A.locator('[data-act=edit-l]').count() === 1 && await A.locator('[data-act=unlist]').count() === 1 && await A.locator('[data-act=dope]').count() === 3);
@@ -144,7 +144,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     ok('ana sayfa: yeni ilan "Son Eklenen İlanlar"da (açılış verisinden)', (await txt(Bp, '#app')).includes(T1));
     await shot(Bp, 'ana-sayfa-ilanlar');
     await go(Bp, 'metin2-tr'); await Bp.waitForSelector('.sgrid .scard');
-    const card = Bp.locator(`.sgrid a.scard[href="#server-${SV}"]`);
+    const card = Bp.locator(`.sgrid a.scard:is([href="#server-${SV}"],[data-h="server-${SV}"])`);
     ok('Metin2 TR: server kartında ilan sayısı sunucudan (1 aktif ilan)', /1\s*aktif ilan/.test(await card.innerText()), await card.innerText());
     await card.click(); await Bp.waitForSelector('.shero'); await Bp.waitForTimeout(500);
     ok('server sayfası: son eklenen ilanlarda ilan var', (await txt(Bp, '#app')).includes(T1));
@@ -157,7 +157,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await Bp.click('[data-act=p1-qclear]'); await Bp.waitForTimeout(500);
     await Bp.selectOption('#p1_sort', 'ucuz'); await Bp.waitForTimeout(600);
     ok('sıralama: "En ucuz" seçili kalır, ilan listede', (await Bp.inputValue('#p1_sort')) === 'ucuz' && (await txt(Bp, '#app')).includes(T1));
-    await Bp.click(`.lrows a[href="#ilan-${L1}"]`); await Bp.waitForSelector('.lhero'); await Bp.waitForTimeout(500);
+    await Bp.click(`.lrows a:is([href="#ilan-${L1}"],[data-h="ilan-${L1}"])`); await Bp.waitForSelector('.lhero'); await Bp.waitForTimeout(500);
     ok('B ilanı açtı: görüntülenme 1', (await txt(Bp, '#lViews')).trim() === '1', await txt(Bp, '#lViews'));
     ok('B: satın al → onay penceresi, bakiye yetersiz → "Bakiye yükle" (P2)', await (async () => { await Bp.click('[data-act=buy]'); try { await Bp.waitForSelector('#modal [data-act=p2-topup]', { timeout: 5000 }); } catch (e) { return false; } const ok_ = (await Bp.locator('#modal').innerText()).includes('Bakiyeniz yetersiz'); await Bp.click('#modal [data-act=close]'); return ok_; })());
     await shot(Bp, 'ilan-detay');
@@ -166,10 +166,10 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     ok('üst arama önerisi: ilan sunucudan gelir', await until(Bp, t => { const b = document.querySelector('#qsug'); return b && !b.hidden && b.innerText.includes(t); }, T1));
     ok('arama önerisi isteği search/suggest ile', await (async () => { for (let i = 0; i < 20; i++) { if (apiReq.some(r => /r=search%2Fsuggest&q=/.test(r))) return true; await sleep(150); } return false; })(), apiReq.filter(r => /suggest/.test(r)).join(','));
     await Bp.press('#q', 'Enter'); await Bp.waitForTimeout(700);
-    ok('arama sonuçları sayfası: ilan bulundu', /#ara$/.test(Bp.url()) && (await txt(Bp, '#app')).includes(T1));
+    ok('arama sonuçları sayfası: ilan bulundu', (await Bp.evaluate(() => route())) === 'ara' && (await txt(Bp, '#app')).includes(T1));
     // satıcı profili
     await go(Bp, 'ilan-' + L1, 600); await Bp.click('.seller a.p1seller'); await Bp.waitForTimeout(600);
-    ok('satıcı profili: ad ve aktif ilanı', /#uye-u\d+$/.test(Bp.url()) && (await txt(Bp, '#app')).includes(UA.name) && (await txt(Bp, '#app')).includes(T1));
+    ok('satıcı profili: ad ve aktif ilanı', /^uye-u\d+$/.test(await Bp.evaluate(() => route())) && (await txt(Bp, '#app')).includes(UA.name) && (await txt(Bp, '#app')).includes(T1));
     await go(A, 'home', 200); await go(A, 'ilan-' + L1, 700);
     ok('A: görüntülenme sahibi tarafında da 1', (await txt(A, '#lViews')).trim() === '1');
 
@@ -182,8 +182,8 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     const T2 = 'Moderasyon Testi 100 Won Paketi';
     await A.selectOption('#s_server_tr', SV); await A.selectOption('#s_cat', 'yang'); await A.fill('#s_title', T2); await A.fill('#s_price', '9.90'); await A.fill('#s_stock', '100');
     await A.click('form[data-form=sell] button.btn-primary');
-    ok('ilan onaya gönderildi', await toast(A, /onaya gönderildi/) && await until(A, () => /#ilan-l\d+$/.test(location.hash)));
-    const L2 = (A.url().match(/#ilan-(l\d+)$/) || [])[1]; await A.waitForTimeout(500);
+    ok('ilan onaya gönderildi', await toast(A, /onaya gönderildi/) && await until(A, () => /^ilan-l\d+$/.test(route())));
+    const L2 = ((await A.evaluate(() => route())).match(/^ilan-(l\d+)$/) || [])[1]; await A.waitForTimeout(500);
     ok('sahibi: "onay bekliyor" notu', (await txt(A, '#app')).includes('onay bekliyor'));
     await go(Bp, 'ilan-' + L2, 800);
     ok('B: onay bekleyen ilan görünmez (ayrıntı)', (await txt(Bp, '#app')).includes('İlan bulunamadı') && !(await txt(Bp, '#app')).includes(T2));
@@ -263,22 +263,34 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     const pr = await Bp.$$eval('.lrows a.lcard .lc-p b', L => L.map(x => +x.textContent.replace(/[^\d,]/g, '').replace(',', '.')));
     ok('ucuz sıralamada sayfalama: artan fiyat, 27 ilan', pr.length === 27 && pr.every((x, i) => i === 0 || x >= pr[i - 1]), pr.join(','));
 
-    /* ---------- 12. SEO: ham HTML (index.php?p=…), temiz adres, açılışta hash rotası ---------- */
+    /* ---------- 12. SEO: ?p= yedeği (rewrite doğrulanmadan), eski adresler → 301, temiz adresle açılış → rewrite doğrulanır ---------- */
     const l1 = (await (await fetch(`${B}/api/v1/index.php?r=listings/${L1}`)).json()).data.listing;
     const slug = await A.evaluate(t => slugify(t), l1.title);
-    const raw = await (await fetch(`${B}/index.php?p=ilan/${slug}-${L1}`)).text();
+    const svSlug = (await pcall(Bp, 'GET', 'servers/' + SV)).server.slug;
+    const LP = `/metin2-tr/${svSlug}/${l1.cat === 'yang' ? 'won' : l1.cat}/${slug}-${L1}`;
+    // adres kipi: yönetici girişinden sonraki arka plan denetimi (rewrite doğrulaması) temiz adresleri açmış olabilir; ?p= kipi seo.sh'de
+    const MODE = (await (await fetch(`${B}/api/v1/index.php?r=boot`)).json()).data.set.seo.mode;
+    const H = p => MODE === 'clean' ? p : '/?p=' + p.slice(1);
+    ok('SEO: adres kipi sunucudan (clean | p)', MODE === 'clean' || MODE === 'p', MODE);
+    const r301 = await fetch(`${B}/index.php?p=ilan/${slug}-${L1}`, { redirect: 'manual' });
+    ok('SEO: eski ?p=ilan/… → 301 hiyerarşik adres', r301.status === 301 && r301.headers.get('location') === H(LP), r301.status + ' ' + r301.headers.get('location'));
+    const raw = await (await fetch(B + H(LP))).text();
     const tt = (raw.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
     ok('SEO ham HTML: <title> ilan başlığını içerir', tt.includes(T1) && tt.includes('Yang Test'), tt);
-    ok('SEO ham HTML: canonical temiz adres', new RegExp(`<link rel="canonical" href="${B.replace(/[.:/]/g, '\\$&')}/ilan/${slug}-${L1}">`).test(raw), (raw.match(/<link rel="canonical"[^>]*>/) || [''])[0]);
-    ok('SEO ham HTML: Product JSON-LD, og:title, tek <title>', /"@type":"Product"/.test(raw) && /property="og:title"/.test(raw) && (raw.match(/<title>/g) || []).length === 1);
+    ok('SEO ham HTML: canonical hiyerarşik adres', raw.includes(`<link rel="canonical" href="${B}${H(LP)}">`), (raw.match(/<link rel="canonical"[^>]*>/) || [''])[0]);
+    ok('SEO ham HTML: Product JSON-LD, og:title, tek <title>, önceden oluşturulmuş H1', /"@type":"Product"/.test(raw) && /property="og:title"/.test(raw) && (raw.match(/<title>/g) || []).length === 1 && raw.includes('data-ssr>') && raw.includes('<h1>'));
     const raw404 = await fetch(`${B}/index.php?p=ilan/yok-l999999`);
     ok('SEO: olmayan ilan 404 + noindex', raw404.status === 404 && /noindex/.test(await raw404.text()));
-    const rawS = await (await fetch(`${B}/index.php?p=server/${(await pcall(Bp, 'GET', 'servers/' + SV)).server.slug}`)).text();
-    ok('SEO: server sayfası başlığı ve canonical /server/<slug>', rawS.includes(`<title>${SVN}`) && /<link rel="canonical" href="[^"]*\/server\/[a-z0-9-]+">/.test(rawS));
+    const rS = await fetch(`${B}/index.php?p=server/${svSlug}`, { redirect: 'manual' });
+    ok('SEO: eski ?p=server/<slug> → 301 /metin2-tr/<slug>', rS.status === 301 && rS.headers.get('location') === H(`/metin2-tr/${svSlug}`), rS.headers.get('location'));
+    const rawS = await (await fetch(B + H(`/metin2-tr/${svSlug}`))).text();
+    ok('SEO: server sayfası başlığı ve canonical', rawS.includes(`<title>${SVN}`) && rawS.includes(`<link rel="canonical" href="${B}${H('/metin2-tr/' + svSlug)}">`));
     const G = await mk('google'); await G.goto(`${B}/ilan/${slug}-${L1}`); await G.waitForSelector('.lhero', { timeout: 10000 }).catch(() => {});
-    ok('temiz adresle açılış: ilan gösterilir, adres hash rotasına döner, varlıklar yüklenir', (await txt(G, '#app')).includes(T1) && G.url().endsWith('/#ilan-' + L1) && await G.evaluate(() => !!document.querySelector('link[rel=stylesheet][href*="assets/app.css"]') && getComputedStyle(document.body).backgroundColor !== 'rgba(0, 0, 0, 0)'));
-    await G.goto(`${B}/index.php?p=server/${(await pcall(Bp, 'GET', 'servers/' + SV)).server.slug}`); await G.waitForSelector('.shero', { timeout: 10000 }).catch(() => {});
-    ok('?p= ile açılış (yönlendirmesiz sunucu): server sayfası', (await txt(G, '#app')).includes(SVN) && /#server-sv\d+$/.test(G.url()));
+    ok('eski temiz adresle açılış: rewrite doğrulanır, 301 ile hiyerarşik adrese, ilan gösterilir, varlıklar yüklenir', (await txt(G, '#app')).includes(T1) && G.url() === B + LP && await G.evaluate(() => !!document.querySelector('link[rel=stylesheet][href*="assets/app.css"]') && getComputedStyle(document.body).backgroundColor !== 'rgba(0, 0, 0, 0)'), G.url());
+    await G.goto(`${B}/index.php?p=server/${svSlug}`); await G.waitForSelector('.shero', { timeout: 10000 }).catch(() => {});
+    ok('?p= ile açılış (temiz kipte): server sayfası, adres /metin2-tr/<slug>', (await txt(G, '#app')).includes(SVN) && G.url() === `${B}/metin2-tr/${svSlug}`, G.url());
+    await G.goto(`${B}/#ilan-${L1}`); await G.waitForSelector('.lhero', { timeout: 10000 }).catch(() => {}); await G.waitForTimeout(300);
+    ok('#ilan-… ile açılış: adres çubuğu temiz adrese döner', G.url() === B + LP && (await txt(G, '#app')).includes(T1), G.url());
     await G.context().close();
 
     /* ---------- 13. Bakım › Güncellemeleri uygula ---------- */

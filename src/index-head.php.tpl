@@ -62,7 +62,6 @@ $ypBase = rtrim(str_replace('\\', '/', dirname(isset($_SERVER['SCRIPT_NAME']) ? 
 $ypJ = function ($v) {
     return json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_PARTIAL_OUTPUT_ON_ERROR);
 };
-$ypBootTag = '<script>window.YP_MODE="prod";window.YP_BASE=' . $ypJ($ypBase) . ';window.YP_BOOT=' . $ypJ($ypBoot) . ';</script>';
 // Sunucu tarafı SEO: <title>, description, robots, canonical, Open Graph, JSON-LD, 301 ve 404. Hiçbir zaman hata fırlatmaz.
 // <base>: temiz adreste açılan sayfada göreli assets/ yolları site kökünden çözülsün.
 $ypSeo = YP\Seo::forRequest();
@@ -77,6 +76,14 @@ if ($ypSeo && !headers_sent()) {
     }
     header('X-YP-Page: ' . preg_replace('/[^A-Za-z0-9_\/?=&.-]/', '', (string)$ypSeo['route']));
 }
+// ilk temiz adres isteği rewrite'ı doğrulamış olabilir: açılış verisindeki adres kipi güncel olsun
+if ($ypSeo && is_array($ypBoot) && isset($ypBoot['set']) && is_array($ypBoot['set'])) {
+    try {
+        $ypBoot['set']['seo'] = YP\Seo::publicSeo(YP\Db::main());
+    } catch (\Throwable $e) {
+    }
+}
+$ypBootTag = '<script>window.YP_MODE="prod";window.YP_BASE=' . $ypJ($ypBase) . ';window.YP_BOOT=' . $ypJ($ypBoot) . ';</script>';
 $ypHead = '<base href="' . htmlspecialchars($ypBase, ENT_QUOTES, 'UTF-8') . '">' . "\n"
     . ($ypSeo ? $ypSeo['html'] : '<title>yangpazar.com · Metin2 Yang, Won, EP ve İtem Pazaryeri</title>' . "\n");
 $ypBody = '';

@@ -629,7 +629,8 @@ final class Seo
             }
             return $out !== '' ? '<ul class="ssr-l">' . $out . '</ul>' : '';
         };
-        $h1 = $h['route'] === 'home' ? $h['h1'] : ($h['cat'] !== '' && $h['srv'] ? $h['srv']['name'] . ' · ' . self::catLabel($h['cat'], $h['srv']['sec']) : $h['h1']);
+        $isL = $h['lst'] && strpos((string)$h['route'], 'ilan-') === 0;
+        $h1 = $isL ? $h['lst']['title'] : ($h['cat'] !== '' && $h['srv'] ? $h['srv']['name'] . ' · ' . self::catLabel($h['cat'], $h['srv']['sec']) : $h['h1']);
         $html = '';
         if ($h['crumbs']) {
             $c = $h['crumbs'];
@@ -642,7 +643,9 @@ final class Seo
         if ($h['status'] === 404) {
             return '<div class="wrap ssr" data-ssr>' . $html . '<p>Aradığınız sayfa kaldırılmış veya bağlantı hatalı olabilir.</p><p>' . $a('/', 'Ana sayfaya dön') . '</p></div>';
         }
-        $html .= '<p>' . $e($h['intro']) . '</p>';
+        if (!$isL) {
+            $html .= '<p>' . $e($h['intro']) . '</p>';
+        }
         $r = $h['route'];
         if ($r === 'home' || $r === 'metin2-tr' || $r === 'metin2-pvp' || $r === 'serverler' || $r === 'kategori-metin2') {
             $cnt = [];
