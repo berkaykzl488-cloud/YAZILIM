@@ -1,20 +1,10 @@
 <?php
 /**
- * POST /api/cikis.php — panel API oturumunu kapatır.
+ * POST /api/cikis.php — KAPATILDI (P3). Ayrı API oturumu çıkışı artık site uygulamasında: site çıkışı (POST auth/logout).
+ * Eski api/ paketinin ayrı "API şifresi" ile açılan oturumu kaldırıldı; ayarlar Yönetim › Entegrasyonlar sayfasından,
+ * birleşik çalışan oturumuyla ([muhasebe|odeme] yetkisi) yapılır. Bu dosya güncelleme paketiyle eski sürümün ÜZERİNE yazılsın diye
+ * duruyor: hiçbir ayarı okumaz/yazmaz, hiçbir bakiye ya da kayıt oluşturmaz; her istekte 404 döner.
  */
 require_once __DIR__ . '/_lib.php';
-yp_boot(['methods' => ['POST']]);
-yp_require_auth();
-
-$_SESSION = [];
-$p = session_get_cookie_params();
-setcookie(session_name(), '', [
-    'expires'  => time() - 3600,
-    'path'     => $p['path'],
-    'domain'   => $p['domain'],
-    'secure'   => $p['secure'],
-    'httponly' => true,
-    'samesite' => 'Strict',
-]);
-session_destroy();
-yp_json(['ok' => true]);
+yp_boot(['methods' => ['GET', 'POST', 'PUT', 'DELETE'], 'origin' => false]);
+yp_error('Bu eski adres kapatıldı. Ayrı API oturumu çıkışı artık Yönetim › Entegrasyonlar ve yönetim panelinden, kendi çalışan hesabınızla yapılır.', 'moved', 404, ['moved_to' => '#yonetim/entegrasyon']);

@@ -340,13 +340,11 @@ chk "ana sayfa vitrini: listings?dop=vitrin yalnız vitrini süren ilanlar" '[ "
 api "$J_ADM" GET admin/today ""
 chk "Bugün: bekleyen yükleme / teslim bekleyen / itirazlı sayıları gerçek" '[ "$(j .data.queues.deps)" = "$(sq "SELECT COUNT(*) FROM yp_deposits WHERE status='\''bekliyor'\'' AND gw IN ('\''havale'\'','\''kripto'\'')")" ] && [ "$(j .data.queues.orders)" = "$(sq "SELECT COUNT(*) FROM yp_orders WHERE status='\''odendi'\''")" ] && [ "$(j .data.queues.orders)" -gt 0 ] && [ "$(j .data.queues.disputes)" = 0 ]'
 
-echo "=== 12. PayTR ayarlanır (api/ Entegrasyonlar) → token → bildirim (gerçek hash) ==="
-MID=123456; KEY=AbCdEf1234567890; SALT=SaLt0987654321zz; PW='Cok-Gizli-Sifre-2026'
-OUT=$(curl -s -b "$J_API" -c "$J_API" -X POST -H 'Content-Type: application/json' --data "{\"password\":\"$PW\",\"site_url\":\"http://127.0.0.1:$PORT\"}" "$B/api/kurulum.php")
-API_CSRF=$(echo "$OUT" | jq -r .csrf)
-OUT=$(curl -s -b "$J_API" -c "$J_API" -X POST -H 'Content-Type: application/json' -H "X-CSRF-Token: $API_CSRF" \
-  --data "{\"service\":\"paytr\",\"values\":{\"merchant_id\":\"$MID\",\"merchant_key\":\"$KEY\",\"merchant_salt\":\"$SALT\",\"test_mode\":true,\"max_installment\":0}}" "$B/api/ayarlar.php")
-chk "Entegrasyonlar: PayTR kaydedildi (api/data şifreli depo)" 'echo "$OUT" | jq -e ".configured==true" >/dev/null'
+echo "=== 12. PayTR ayarlanır (Yönetim › Entegrasyonlar, P3: birleşik çalışan oturumu) → token → bildirim (gerçek hash) ==="
+# P3: eski api/kurulum.php + api/ayarlar.php (ayrı "API şifresi") kapatıldı; tek kaynak PUT admin/integrations/paytr [odeme]
+MID=123456; KEY=AbCdEf1234567890; SALT=SaLt0987654321zz
+api "$J_OD" PUT admin/integrations/paytr "{\"values\":{\"merchant_id\":\"$MID\",\"merchant_key\":\"$KEY\",\"merchant_salt\":\"$SALT\",\"test_mode\":true,\"max_installment\":0}}" -H "X-CSRF-Token: $CS_OD"
+chk "Entegrasyonlar: PayTR kaydedildi (settings, şifreli)" '[ "$CODE" = 200 ] && [ "$(j .data.service.configured)" = true ] && ! echo "$BODY" | grep -q "$KEY"'
 api "$J_X" GET boot ""
 chk "boot: PayTR artık açık (otomatik)" '[ "$(j ".data.gws[] | select(.id==\"paytr\") | .on")" = true ] && [ "$(j ".data.gws[] | select(.id==\"paytr\") | .soon")" = null ]'
 rl_reset
@@ -380,7 +378,7 @@ OID3="$(j .data.oid)"
 OUT=$(cb "$OID3" success 10000 "$(hsh "$OID3" success 10000)")
 chk "PayTR Havale/EFT → çekilebilir (+100 nakit)" '[ "$OUT" = OK ] && [ "$(sq "SELECT cash FROM yp_wallets WHERE user_id=${UB#u}")" = $((C0 + 10000)) ]'
 OUT=$(cb "YPBILINMEYEN1" success 1000 "$(hsh YPBILINMEYEN1 success 1000)")
-chk "tanınmayan sipariş no: eski dosya kaydına düşer (OK)" '[ "$OUT" = OK ] && [ -f "$RUN/api/data/odemeler.json" ]'
+chk "tanınmayan sipariş no: OK, bakiye yok, audit kaydı (P3: eski dosya kaydı yok)" '[ "$OUT" = OK ] && [ "$(sq "SELECT COUNT(*) FROM yp_audit_log WHERE action='\''paytr_unknown_oid'\'' AND entity_id='\''YPBILINMEYEN1'\''")" = 1 ]'
 api "$J_B" POST deposits/paytr '{"gw":"paytr","amount":50}' -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: pt4-$(ik)"
 OID4="$(j .data.oid)"
 cron_at $(( $(nowms) + 4*86400000 )) >/dev/null

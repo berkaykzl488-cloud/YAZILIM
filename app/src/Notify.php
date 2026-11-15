@@ -8,6 +8,17 @@ if (!defined('YP_APP')) { http_response_code(404); exit; }
  */
 final class Notify
 {
+    /** Ayarda açıkça kapatılmadıkça e-posta/SMS ile de gönderilen olaylar (para çekme ve kimlik — P3) */
+    const DEFAULT_ON = ['withdraw_req', 'withdraw', 'withdraw_no', 'tc_ok', 'tc_ask'];
+
+    private static function evOn(array $cfg, $ev)
+    {
+        if (isset($cfg['ev'][$ev])) {
+            return !empty($cfg['ev'][$ev]);
+        }
+        return in_array($ev, self::DEFAULT_ON, true);
+    }
+
     public static function send(Db $db, $userId, $text, $link = '', $ev = '', array $vars = [])
     {
         $id = $db->insert('notifications', [
@@ -19,12 +30,12 @@ final class Notify
             if ($u) {
                 $v = Templates::vars($u, array_merge(['mesaj' => $text], $vars));
                 $mail = Settings::get('mail', $db);
-                if (!empty($mail['on']) && !empty($mail['ev'][$ev]) && $u['email']) {
+                if (!empty($mail['on']) && self::evOn($mail, $ev) && $u['email']) {
                     list($s, $b) = Templates::mail($ev, $v);
                     Outbox::queue($db, 'mail', $u['id'], $u['email'], $ev, $s, $b);
                 }
                 $sms = Settings::get('sms', $db);
-                if (!empty($sms['on']) && !empty($sms['ev'][$ev]) && $u['tel']) {
+                if (!empty($sms['on']) && self::evOn($sms, $ev) && $u['tel']) {
                     Outbox::queue($db, 'sms', $u['id'], $u['tel'], $ev, '', Templates::sms($ev, $v));
                 }
             }

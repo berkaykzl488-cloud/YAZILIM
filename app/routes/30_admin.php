@@ -228,6 +228,7 @@ return function (Router $r) {
             'outbox' => ['queued' => (int)$db->val("SELECT COUNT(*) FROM {outbox} WHERE status='queued'"),
                          'failed' => (int)$db->val("SELECT COUNT(*) FROM {outbox} WHERE status='failed'")],
         ];
+        $out['queues'] = \YP\Hooks::run('admin_queues', $out['queues'], $db, $u); // P3: wd (bekleyen çekim)
         if (Perm::has($u, 'panel')) {
             $out['kpi'] = [
                 'users' => (int)$db->val('SELECT COUNT(*) FROM {users}'),

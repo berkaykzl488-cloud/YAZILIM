@@ -4,12 +4,11 @@ namespace YP\Money;
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 /**
- * PayTR köprüsü. Mağaza bilgileri (merchant_id/key/salt, test modu) Yönetim › Entegrasyonlar sayfasından api/ paketine
- * kaydedilir: api/data/ayarlar.php (api/data/anahtar.php ile şifreli). Bu sınıf o depoyu YALNIZ OKUR; api/_lib.php
- * yardımcılarını (yp_settings, yp_service_configured, yp_paytr_get_token, yp_paytr_callback_hash) olduğu gibi kullanır.
+ * PayTR köprüsü. Mağaza bilgileri (merchant_id/key/salt, test modu) P3'ten itibaren yalnız Yönetim › Entegrasyonlar
+ * sayfasından girilir ve settings tablosunda şifreli tutulur (YP\Integrations, tek kaynak). api/_lib.php yardımcıları
+ * (yp_paytr_get_token, yp_paytr_callback_hash) olduğu gibi kullanılır.
  *
- * api/ deposunun şifreleme anahtarı uygulamanınkinden (storage/anahtar.php) farklıdır; okuma sırasında anahtar geçici olarak
- * değiştirilir ve hemen geri konur.
+ * withApiKey(): eski api/data deposunu (farklı anahtar) yalnız bir kez aktarmak için (0004 göçü).
  *
  * Ayarlar yapılmamışsa PayTR yöntemleri üyelere hiç gösterilmez ve deposits/paytr "Kart ile ödeme yakında" der (elle kapatma gerekmez).
  */
@@ -49,16 +48,12 @@ final class Paytr
             return self::$cache;
         }
         $cfg = null;
-        if (is_file(YP_DATA . '/anahtar.php') && is_file(YP_DATA . '/ayarlar.php')) {
-            try {
-                $cfg = self::withApiKey(function () {
-                    $s = yp_settings();
-                    return yp_service_configured($s, 'paytr') ? $s['paytr'] : null;
-                });
-            } catch (\Throwable $e) {
-                \YP\Log::write('hata', 'PayTR ayarları okunamadı: ' . $e->getMessage());
-                $cfg = null;
-            }
+        try {
+            // P3: tek kaynak Yönetim › Entegrasyonlar (settings.paytr, şifreli). Eski api/data deposu 0004 göçüyle aktarılır.
+            $cfg = \YP\Integrations::configured('paytr') ? \YP\Integrations::raw('paytr') : null;
+        } catch (\Throwable $e) {
+            \YP\Log::write('hata', 'PayTR ayarları okunamadı: ' . $e->getMessage());
+            $cfg = null;
         }
         return self::$cache = $cfg;
     }
@@ -94,9 +89,7 @@ final class Paytr
         if (yp_test_mode() && getenv('YP_TEST_PAYTR') === 'fake' && \YP\Db::hasMain() && \YP\Db::main()->dialect === 'sqlite') {
             return ['ok' => true, 'token' => 'TEST' . $p['oid'], 'msg' => 'sahte'];
         }
-        return self::withApiKey(function () use ($cfg, $p) {
-            return yp_paytr_get_token($cfg, $p);
-        });
+        return yp_paytr_get_token($cfg, $p);
     }
 
     /** Bildirim hash'i doğru mu? */
@@ -109,5 +102,48 @@ final class Paytr
     public static function iframeUrl($tip, $token)
     {
         return 'https://www.paytr.com/odeme/' . ($tip === 'eft' ? 'api' : 'guvenli') . '/' . rawurlencode($token);
+    }
+
+    /**
+     * PayTR Bildirim URL'si (/api/paytr_bildirim.php) — ince kabuk bu yöntemi çağırır. $post: $_POST.
+     * hash: base64(hmac_sha256(merchant_oid + merchant_salt + status + total_amount, merchant_key)) — hash_equals.
+     * Doğru hash'li bildirim satır kilidiyle tek kez işlenir (Deposits::paytrCallback); tekrarlar "OK" döner, hiçbir şeyi değiştirmez.
+     * Dönüş: [http kodu, düz metin]. PayTR "OK" görene kadar yeniden dener; geçici hatada 500 döneriz ki yeniden denesin.
+     */
+    public static function notify(\YP\Db $db, array $post)
+    {
+        $cfg = self::config();
+        if (!$cfg) {
+            return [503, 'PAYTR notification failed: not configured'];
+        }
+        $f = function ($k) use ($post) {
+            return isset($post[$k]) && is_scalar($post[$k]) ? (string)$post[$k] : '';
+        };
+        $oid = $f('merchant_oid');
+        $status = $f('status');
+        $total = $f('total_amount');
+        $hash = $f('hash');
+        if ($oid === '' || $hash === '' || $status === '' || $total === '') {
+            return [400, 'PAYTR notification failed: bad request'];
+        }
+        if (!self::verify($cfg, $oid, $status, $total, $hash)) {
+            \YP\Log::write('paytr', 'Bildirim reddedildi: hash hatalı', ['merchant_oid' => yp_str($oid, 64), 'ip' => yp_client_ip()]);
+            return [400, 'PAYTR notification failed: bad hash'];
+        }
+        if (!preg_match('/^[A-Za-z0-9]{1,64}$/', $oid) || !in_array($status, ['success', 'failed'], true) || !preg_match('/^[0-9]{1,12}$/', $total)) {
+            \YP\Log::write('paytr', 'Bildirim reddedildi: geçersiz alan', ['merchant_oid' => yp_str($oid, 64)]);
+            return [400, 'PAYTR notification failed: bad request'];
+        }
+        $pay = preg_match('/^[0-9]{1,12}$/', $f('payment_amount')) ? (int)$f('payment_amount') : null;
+        $res = Deposits::paytrCallback($db, [
+            'merchant_oid' => $oid, 'status' => $status, 'total_amount' => $total, 'payment_amount' => $pay,
+            'test_mode' => $f('test_mode'), 'payment_type' => $f('payment_type'), 'failed_reason_msg' => $f('failed_reason_msg'),
+        ]);
+        if ($res === null) {
+            // Bu sitede açılmamış sipariş numarası (ör. eski paytr_token.php ile): bakiye yüklenmez; PayTR'ın yeniden denemesi durur.
+            \YP\Log::write('paytr', 'Tanınmayan sipariş numarası (işlenmedi)', ['merchant_oid' => $oid, 'status' => $status]);
+            \YP\Audit::log($db, null, 'paytr_unknown_oid', 'deposit', $oid, ['status' => $status, 'total' => $total]);
+        }
+        return [200, 'OK'];
     }
 }

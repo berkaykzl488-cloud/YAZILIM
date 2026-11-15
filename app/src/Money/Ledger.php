@@ -218,6 +218,13 @@ final class Ledger
                 $err[] = 'Havuz uyuşmuyor: açık siparişler ' . $open . ', ESCROW:ORD ' . $esc;
             }
         }
+        if ($db->tableExists('withdrawals')) {
+            $pend = (int)$db->val("SELECT COALESCE(SUM(amount),0) FROM {withdrawals} WHERE status='bekliyor'");
+            $pay = self::balance($db, 'PAYABLE:WD');
+            if ($pend !== $pay) {
+                $err[] = 'Çekim bekleyen uyuşmuyor: bekleyen talepler ' . $pend . ', PAYABLE:WD ' . $pay;
+            }
+        }
         return ['ok' => !$err, 'errors' => array_slice($err, 0, 50)];
     }
 }

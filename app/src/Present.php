@@ -34,7 +34,9 @@ final class Present
             'bal' => self::tl($w['cash']), 'bonus' => self::tl($w['credit']), 'pts' => (int)$u['pts'],
             'perms' => Perm::of($u), 'tfa' => (string)$u['tfa'], 'banned' => $u['status'] === 'banned',
             'refs' => (int)$u['refs'], 'refBy' => Ids::u($u['ref_by']), 'refCode' => Text::refCode($u['name']),
-            'tc' => (int)$u['tc_ok'] ? ['ok' => true, 'mask' => (string)$u['tc_mask'], 'masked' => true] : null,
+            'tc' => Kimlik::present($u), // maskeli; tam numara asla
+            'tcLock' => $u['tc_lock_until'] !== null && (int)$u['tc_lock_until'] > yp_now_ms() ? (int)$u['tc_lock_until'] : null,
+            'tcAsk' => $u['tc_ask_at'] !== null ? (int)$u['tc_ask_at'] : null,
             'ibans' => array_map([__CLASS__, 'iban'], $ib),
             'created' => (int)$u['created_at'],
         ]);
@@ -61,6 +63,8 @@ final class Present
             'perms' => Perm::of($u), 'banned' => $u['status'] === 'banned', 'tfa' => (string)$u['tfa'] !== '',
             'refs' => (int)$u['refs'], 'refBy' => Ids::u($u['ref_by']), 'created' => (int)$u['created_at'],
             'tcOk' => (bool)(int)$u['tc_ok'],
+            'tc' => Kimlik::present($u), // maskeli (P3): mask, full (kayıtlı mı), state ('inceleme')
+            'tcAsk' => $u['tc_ask_at'] !== null ? (int)$u['tc_ask_at'] : null,
         ]);
     }
 

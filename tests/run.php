@@ -855,6 +855,7 @@ section('store', function () {
 
 require __DIR__ . '/unit_p1.php';
 require __DIR__ . '/unit_p2.php';
+require __DIR__ . '/unit_p3.php';
 
 echo "\nSONUÇ (birim): $PASS geçti, $FAIL kaldı\n";
 exit($FAIL ? 1 : 0);

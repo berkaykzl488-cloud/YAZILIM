@@ -14,6 +14,8 @@ use YP\Notify;
  *   deposit_expiry  her tik: 3 günden eski bekleyen PayTR yüklemeleri → suresi_doldu, kupon serbest
  *   ledger_check    günlük: defter tutarlılık denetimi; bozuksa yöneticilere bildirim + audit + log
  *   proof_retention günlük: kapanmış siparişlerin site.proofDays (varsayılan 90) günden eski teslim kanıtlarını siler
+ *   accounting      her tik (P3): accounting_jobs kuyruğu (Paraşüt / Bizim Hesap), hata olursa artan beklemeyle yeniden dener
+ *   hakedis         saatlik (P3): PayTR tahsilatı → Paraşüt (PayTR ayarlı değilse atlanır; saplama)
  */
 final class Jobs
 {
@@ -31,6 +33,12 @@ final class Jobs
             }],
             'proof_retention' => [86400000, function (Db $db, $deadline) {
                 return ['deleted' => Orders::purgeProofs($db, Rules::site($db)['proofDays'])];
+            }],
+            'accounting' => [0, function (Db $db, $deadline) {
+                return \YP\Accounting\Queue::run($db, $deadline);
+            }],
+            'hakedis' => [3600000, function (Db $db, $deadline) {
+                return \YP\Accounting\Queue::hakedis($db);
             }],
         ];
     }
