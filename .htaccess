@@ -33,11 +33,16 @@ ServerSignature Off
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^robots\.txt$ api/v1/index.php?r=seo/robots.txt [L,QSA]
 
-  # Temiz adresler (/server/…, /ilan/…, /metin2-tr …) → index.php (sunucu tarafı başlık/meta + uygulama).
-  # Çalışmayan sunucularda aynı sayfa /index.php?p=ilan/… ile açılır.
+  # Temiz adresler (/metin2-pvp/<server>/<kategori>/<ilan>-l7, /metin2-tr, /borsa …) → index.php (sunucu tarafı başlık/meta,
+  # önceden oluşturulmuş içerik, 301/404 + uygulama). Bu kural çalışmazsa site kendiliğinden /?p=metin2-pvp/… adreslerine
+  # döner (Yönetim › SEO "Temiz adres denetimi"); hiçbir sayfa kaybolmaz.
+  # (Lookahead kullanılmaz: api/ kurulum/ uploads/ assets/ altındaki olmayan dosyalar önce olduğu gibi bırakılır → normal 404.)
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^(?!api/|kurulum/|uploads/|assets/)[A-Za-z0-9][A-Za-z0-9_/\-]*/?$ index.php [L,QSA]
+  RewriteRule ^(api|kurulum|uploads|assets)(/|$) - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^[A-Za-z0-9][A-Za-z0-9_/-]*/?$ index.php [L,QSA]
 </IfModule>
 
 # mod_rewrite yoksa bile klasörler kapalı kalsın (Apache 2.4 / LiteSpeed)

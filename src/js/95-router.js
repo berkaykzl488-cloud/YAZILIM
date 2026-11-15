@@ -1,4 +1,4 @@
-function route(){ if(window.__r) return window.__r; if(seoClean()&&location.hash.length<=1) return pathToRoute(location.pathname); return (location.hash||'#home').slice(1)||'home'}
+function route(){ if(window.__r) return window.__r; if(seoClean()&&location.hash.length<=1) return pathToRoute(curPath()); return (location.hash||'#home').slice(1)||'home'}
 function go(h){ if(route()===h){ render(); window.scrollTo(0,0);} else location.hash=h; }
 function view(r){
   if(maintOn()&&!isPanel()) return vMaint();
@@ -33,6 +33,7 @@ function view(r){
   return vNotFound();
 }
 function render(){
+  try{ seoSync(); }catch(e){}
   { const h=route(); if(/^davet-[A-Za-z0-9]+$/.test(h)){ const c=h.slice(6).toUpperCase(); const R=refUser(c); if(R&&S.set.refOn){ try{ localStorage.setItem('yangpazar_ref',c); }catch(e){} } history.replaceState(null,'','#home'); if(R&&S.set.refOn&&!me()) setTimeout(()=>{ toast(`${R.name} seni davet etti! Üye olunca davet kodun otomatik eklenecek.`); mRegister(); },300); } }
   autoConfirm();
   const u=me(); if(u){ if(!u.lastSeen||now()-u.lastSeen>60000){u.lastSeen=now(); save();} }

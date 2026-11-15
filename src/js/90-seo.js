@@ -1,24 +1,65 @@
 /* ================== yönlendirme ================== */
 /* ================== SEO, rehber ve paylaşım ================== */
-const slugify = s => String(s||'').toLocaleLowerCase('tr-TR').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u').replace(/â/g,'a').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||'sayfa';
+const slugify = s => String(s||'').toLocaleLowerCase('tr-TR').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/İ/g,'i').replace(/i\u0307/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u').replace(/â/g,'a').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||'sayfa';
 const siteBase = () => (S.set.siteUrl||'https://www.yangpazar.com').replace(/\/+$/,'');
 const isLive = () => /^https?:$/.test(location.protocol) && !/claude|anthropic|localhost|127\.0\.0\.1/.test(location.hostname);
-const seoClean = () => (!!window.__SEO_CLEAN||!!(S.set.seo&&S.set.seo.clean)) && isLive();
+/* --- adresler ---------------------------------------------------------------------------------------------------
+   Hiyerarşik temiz adresler (sayfadaki "Ana Sayfa › Metin2 PVP › Albamt2 › Karakter" konum çubuğuyla aynı):
+     /metin2-pvp · /metin2-pvp/<server> · /metin2-pvp/<server>/<yang|won|item|karakter|ep|hepsi> · …/<kategori>/<başlık>-<ilan kimliği>
+     /ilan/<başlık>-<kimlik> (serversiz ilan) · /rehber/<slug> · /sayfa/<slug> · /uye/<kimlik> · /<rota> (borsa, reklam-ver …)
+   Adres kipi (urlMode): 'clean' temiz adres · 'p' /?p=<yol> (canlıda rewrite doğrulanmadıysa; sunucu boot.set.seo.mode ile bildirir)
+   · 'hash' #rota (demo/önizleme). Yönetim (#yonetim/…) her kipte hash rotasında kalır (noindex).
+   Sunucu tarafı karşılığı: app/src/Seo.php (path/resolve/href) — iki taraf aynı adresleri üretmeli. */
+const ypProd = () => window.YP_MODE==='prod';
+function urlMode(){ const SE=S.set.seo||{}; if(ypProd()) return SE.mode==='clean'||SE.mode==='p'?SE.mode:'hash'; return SE.clean?'clean':'hash'; }
+const seoClean = () => ypProd() ? urlMode()!=='hash' : (!!window.__SEO_CLEAN||!!(S.set.seo&&S.set.seo.clean)) && isLive();
+/** Adres çubuğunda kullanılan kip: seoClean değilse hash */
+const navMode = () => !seoClean() ? 'hash' : ypProd() ? urlMode() : 'clean';
+const seoBase = () => window.YP_BASE||'/';
 const PRIV_R = r => /^(hesabim|yonetim|mesajlar|bildirimler|siparis-|ilan-ver$|ara$|davet-|widget-)/.test(r);
-function routeToPath(r){ r=r||'home'; if(r==='home') return '/'; let m;
-  if((m=r.match(/^server-([^-]+)(?:-(.+))?$/))){ const s=srv(m[1]); if(s) return '/server/'+slugify(s.name)+(m[2]?'/'+m[2]:''); }
-  if(r.startsWith('ilan-')&&r!=='ilan-ver'){ const l=lst(r.slice(5)); if(l) return '/ilan/'+slugify(l.title)+'-'+l.id; }
-  if(r.startsWith('rehber-')) return '/rehber/'+r.slice(7);
-  if(r.startsWith('sayfa-')) return '/sayfa/'+r.slice(6);
+const SEC_P = {tr:'metin2-tr',pvp:'metin2-pvp'};
+const CAT_SL = {yang:'yang',won:'yang',item:'item',karakter:'karakter',ep:'ep',hepsi:'hepsi'};
+/** kategori → adres parçası (TR serverlarında yang "won") */
+const catSlug = (c,sec) => c==='yang'&&sec==='tr'?'won':c;
+const srvSlug = s => s.slug||slugify(s.name);
+const srvPath = s => '/'+(SEC_P[s.sec]||'metin2-pvp')+'/'+srvSlug(s);
+function lstPath(l){ const s=l.server?srv(l.server):null, tail=slugify(l.title)+'-'+l.id;
+  return s&&(l.game||'metin2')==='metin2'&&M2CAT.includes(l.cat)?srvPath(s)+'/'+catSlug(l.cat,s.sec)+'/'+tail:'/ilan/'+tail; }
+/** Rota → temiz yol; server/ilan henüz yüklenmemişse '' */
+function routePathX(r){ r=r||'home'; if(r==='home') return '/'; if(r==='serverler'||r==='kategori-metin2') return '/metin2-pvp'; let m;
+  if((m=r.match(/^server-([^-]+)(?:-(.+))?$/))){ const s=srv(m[1]); return s?srvPath(s)+(m[2]?'/'+catSlug(m[2],s.sec):''):''; }
+  if(r.startsWith('ilan-')&&r!=='ilan-ver'){ const l=lst(r.slice(5)); return l?lstPath(l):''; }
+  for(const k of ['rehber','sayfa','uye']) if(r.startsWith(k+'-')) return '/'+k+'/'+r.slice(k.length+1);
   return '/'+r; }
-function pathToRoute(p){ try{ p=decodeURIComponent(p||''); }catch(e){} p=p.replace(/^\/+|\/+$/g,'').replace(/\/index\.html$/,''); if(!p||p==='index.html') return 'home'; const a=p.split('/');
-  if(a[0]==='server'&&a[1]){ const s=S.servers.find(x=>slugify(x.name)===a[1]); return s?'server-'+s.id+(a[2]?'-'+a[2]:''):'yok'; }
-  if(a[0]==='ilan'&&a[1]) return 'ilan-'+a[1].slice(a[1].lastIndexOf('-')+1);
-  if(a[0]==='rehber'&&a[1]) return 'rehber-'+a[1];
-  if(a[0]==='sayfa'&&a[1]) return 'sayfa-'+a[1];
-  if(a[0]==='yonetim') return a.join('/')+(location.search||'');
+function routeToPath(r){ return routePathX(r)||'/'+(r||'home'); }
+function pathToRoute(p){ try{ p=decodeURIComponent(p||''); }catch(e){} p=String(p).replace(/^\/+|\/+$/g,'').replace(/(^|\/)index\.(php|html)$/,''); if(!p||p==='home') return 'home';
+  const a=p.split('/'), a0=a[0].toLowerCase(), n=a.length, bySlug=x=>{ x=String(x||'').toLowerCase(); return S.servers.find(s=>s.slug===x)||S.servers.find(s=>slugify(s.name)===x); };
+  if(a0==='metin2-tr'||a0==='metin2-pvp'){ if(n===1) return a0; if(n>4) return 'yok'; const s=bySlug(a[1]); if(!s&&!ypProd()) return 'yok'; const sid=s?s.id:a[1].toLowerCase(); if(n===2) return 'server-'+sid;
+    const c=CAT_SL[a[2].toLowerCase()]; if(!c) return 'yok'; if(n===3) return 'server-'+sid+'-'+c; return 'ilan-'+a[3].slice(a[3].lastIndexOf('-')+1); }
+  if(a0==='server'&&a[1]){ const s=bySlug(a[1]), c=a[2]?CAT_SL[a[2].toLowerCase()]||a[2]:''; return s?'server-'+s.id+(c?'-'+c:''):ypProd()?'server-'+a[1].toLowerCase()+(c?'-'+c:''):'yok'; }
+  if(a0==='ilan'&&a[1]) return 'ilan-'+a[1].slice(a[1].lastIndexOf('-')+1);
+  if((a0==='rehber'||a0==='sayfa'||a0==='uye')&&a[1]) return a0+'-'+a[1];
+  if(a0==='yonetim') return a.join('/')+(navMode()==='clean'?location.search||'':'');
   return a.join('-'); }
-const shareUrl = r => siteBase()+(S.set.seo&&S.set.seo.clean?routeToPath(r):'/#'+r);
+/** Adres çubuğundaki yol (site köküne göre): ?p= varsa o, yoksa kök klasör çıkarılmış pathname */
+function curPath(){ const p=new URLSearchParams(location.search).get('p'); if(p) return '/'+p; let x=location.pathname; const b=seoBase(); if(x.indexOf(b)===0) x='/'+x.slice(b.length); return x; }
+const pQ = p => encodeURIComponent(p.replace(/^\//,'')).replace(/%2F/gi,'/');
+/** Rota → bağlantı (geçerli kipte; sitenin kök klasörüyle) */
+function routeHref(r,path){ const m=navMode(); if(m==='hash') return '#'+r; const p=path||routeToPath(r), b=seoBase(); if(p==='/') return b; return m==='p'?b+'?p='+pQ(p):b+p.slice(1); }
+/** Temiz yol → mutlak adres (canonical, JSON-LD, paylaşım): ?p= kipinde /?p=… */
+const absPath = p => siteBase()+(urlMode()==='p'&&p!=='/'?'/?p='+pQ(p):p);
+const absRoute = r => absPath(routeToPath(r));
+/** Adres çubuğunu geçerli kipteki kanonik adrese getirir (replaceState; geçmişe kayıt eklemez). render() başında çalışır.
+   #server-sv36-yang → /metin2-pvp/albamt2/yang, /server/<slug> → yeni şema, ?p= ↔ temiz adres. Diğer sorgu parametreleri korunur. */
+function seoSync(){ if(!seoClean()||window.__r) return; const h=location.hash.slice(1), b=seoBase(), sp=new URLSearchParams(location.search), hadP=sp.has('p'); sp.delete('p'); const qs=sp.toString();
+  const join=u=>u+(qs?(u.includes('?')?'&':'?')+qs:''), rep=u=>{ try{ history.replaceState(history.state,'',u); }catch(e){} };
+  if(h){ if(isAdmRoute(h)){ if(location.pathname!==b||hadP) rep(join(b)+'#'+h); return; } rep(join(routeHref(h))); return; }
+  const r=pathToRoute(curPath()); if(r==='yok') return; if(isAdmRoute(r)){ rep(join(b)+'#'+r); return; }
+  const x=routePathX(r); if(!x) return; const m=navMode();
+  if(!(m==='clean'&&hadP)&&!(m==='p'&&!hadP&&x!=='/')&&!/^(home$|server-|ilan-|serverler$|kategori-metin2$|metin2-(tr|pvp)$|uye-)/.test(r)) return;
+  const want=join(routeHref(r,x)); if(want!==location.pathname+location.search) rep(want); }
+/** Paylaşım adresi: demoda "Temiz adresler" kapalıysa /#rota */
+const shareUrl = r => !ypProd()&&!(S.set.seo&&S.set.seo.clean)?siteBase()+'/#'+r:absRoute(r);
 function shareBar(r,title){ const u=shareUrl(r), t=title||S.set.siteName, eu=encodeURIComponent(u), et=encodeURIComponent(t);
   return `<div class="shbar" aria-label="Paylaş"><span class="muted">Paylaş:</span><button type="button" class="btn btn-sm" data-act="copy" data-v="${esc(u)}">Bağlantıyı kopyala</button><a class="btn btn-sm" target="_blank" rel="noopener" href="https://wa.me/?text=${et}%20${eu}">WhatsApp</a><a class="btn btn-sm" target="_blank" rel="noopener" href="https://t.me/share/url?url=${eu}&text=${et}">Telegram</a><a class="btn btn-sm" target="_blank" rel="noopener" href="https://x.com/intent/post?url=${eu}&text=${et}">X</a><a class="btn btn-sm" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${eu}">Facebook</a></div>`; }
 function srvAuto(s){ const n=active().filter(l=>l.server===s.id).length;
@@ -65,25 +106,27 @@ function seoData(r){ const SE=S.set.seo, nm=S.set.siteName, base=siteBase(); let
     rehber:['Metin2 Rehberi','Metin2 yang, EP, item ve karakter alım satımında güvenli alışveriş ipuçları ve rehberler.']};
   if(r==='serverler'||r==='kategori-metin2') canon='metin2-pvp';
   if(r==='home'){ t=SE.homeTitle||`${nm} · Metin2 Item, Yang, Won, EP ve Karakter Pazarı`; d=SE.desc;
-    ld.push({'@type':'WebSite','@id':base+'/#website',url:base+'/',name:nm,inLanguage:'tr-TR'},{'@type':'Organization','@id':base+'/#org',name:nm,url:base+'/',logo:base+'/rozet.svg'}); }
+    const qa=absPath('/ara'); ld.push({'@type':'WebSite','@id':base+'/#website',url:base+'/',name:nm,inLanguage:'tr-TR',publisher:{'@id':base+'/#org'},potentialAction:{'@type':'SearchAction',target:{'@type':'EntryPoint',urlTemplate:qa+(qa.includes('?')?'&':'?')+'q={search_term_string}'},'query-input':'required name=search_term_string'}},{'@type':'Organization','@id':base+'/#org',name:nm,url:base+'/',logo:base+'/rozet.svg'}); }
   else if(P[canon]){ [t,d]=P[canon]; cr.push([t,canon]); }
   let m;
   if((m=r.match(/^server-([^-]+)(?:-(.+))?$/))){ const s=srv(m[1]); if(s){ const c=m[2]&&m[2]!=='hepsi'?m[2]:''; const cl=c==='ep'?'EP':c?catLabel(c,s.sec):'';
-      t=c==='ep'?`${s.name} EP Satın Al · Anında Kod`:c?`${s.name} ${cl} İlanları`:`${s.name} Item, Yang${srvEp(s)?', EP':''} ve Karakter İlanları`; d=cut(c==='ep'?`${s.name} EP kodları ${S.set.siteName} tarafından satılır; ödeme sonrası kod anında teslim edilir. `+(s.seo||srvAuto(s)):c?`${s.name} ${cl.toLowerCase()} ilanları. `+(s.seo||srvAuto(s)):(s.seo||srvAuto(s)),158);
+      t=c==='ep'?`${s.name} EP Satın Al · Anında Kod`:c?`${s.name} ${cl} İlanları`:m[2]==='hepsi'?`${s.name} Tüm İlanlar`:`${s.name} ${s.sec==='tr'?'Won':'Yang'}, Item${srvEp(s)?', EP':''} ve Karakter İlanları`; d=cut(c==='ep'?`${s.name} EP kodları ${S.set.siteName} tarafından satılır; ödeme sonrası kod anında teslim edilir. `+(s.seo||srvAuto(s)):c?`${s.name} ${cl.toLowerCase()} ilanları. `+(s.seo||srvAuto(s)):(s.seo||srvAuto(s)),158);
       cr.push([s.sec==='tr'?'Metin2 TR':'Metin2 PVP',s.sec==='tr'?'metin2-tr':'metin2-pvp'],[s.name,'server-'+s.id]); if(c) cr.push([cl,r]); } else noidx=true; }
   if(r.startsWith('ilan-')&&r!=='ilan-ver'){ const l=lst(r.slice(5)); if(l){ const s=srv(l.server); t=`${l.title}${s&&!l.title.toLocaleLowerCase('tr-TR').includes(s.name.toLocaleLowerCase('tr-TR'))?' · '+s.name:''}`; d=cut(`${TL(l.price)} · ${s?s.name+' ':''}${catLabel(l.cat,s?s.sec:'pvp')}. ${l.desc||''}`,158); type='product';
-      if(l.status!=='aktif'&&l.status!=='satildi') noidx=true; if(s) cr.push([s.sec==='tr'?'Metin2 TR':'Metin2 PVP',s.sec==='tr'?'metin2-tr':'metin2-pvp'],[s.name,'server-'+s.id]); cr.push([cut(l.title,40),r]);
+      if(l.status!=='aktif'&&l.status!=='satildi') noidx=true; if(s){ cr.push([s.sec==='tr'?'Metin2 TR':'Metin2 PVP',s.sec==='tr'?'metin2-tr':'metin2-pvp'],[s.name,'server-'+s.id]); if(!lstPath(l).startsWith('/ilan/')) cr.push([catLabel(l.cat,s.sec),'server-'+s.id+'-'+l.cat]); } cr.push([cut(l.title,40),r]);
       const im=(l.img&&/^https?:/.test(l.img))?l.img:img; if(im) img=im;
-      ld.push({'@type':'Product',name:l.title,description:cut(l.desc||l.title,300),category:'Metin2 '+(s?s.name+' ':'')+l.cat,...(im?{image:im}:{}),offers:{'@type':'Offer',price:String(l.price),priceCurrency:'TRY',availability:'https://schema.org/'+(l.status==='aktif'&&l.stock>0?'InStock':'SoldOut'),url:base+routeToPath(r),seller:{'@type':'Person',name:(user(l.seller)||{}).name||'Satıcı'}}}); } else noidx=true; }
+      ld.push({'@type':'Product',name:l.title,description:cut(l.desc||l.title,300),category:'Metin2 '+(s?s.name+' ':'')+l.cat,...(im?{image:im}:{}),offers:{'@type':'Offer',price:String(l.price),priceCurrency:'TRY',availability:'https://schema.org/'+(l.status==='aktif'&&l.stock>0?'InStock':'SoldOut'),url:absRoute(r),seller:{'@type':'Person',name:(user(l.seller)||{}).name||'Satıcı'}}}); } else noidx=true; }
   if(r.startsWith('rehber-')){ const p=(S.posts||[]).find(x=>x.slug===r.slice(7)); if(p){ t=p.title; d=cut(p.ozet,158); type='article'; cr.push(['Rehber','rehber'],[cut(p.title,40),r]); if(!p.on) noidx=true;
-      ld.push({'@type':'Article',headline:p.title,description:cut(p.ozet,300),datePublished:new Date(p.t).toISOString(),dateModified:new Date(p.up||p.t).toISOString(),inLanguage:'tr-TR',author:{'@type':'Organization',name:nm},publisher:{'@id':base+'/#org'},mainEntityOfPage:base+routeToPath(r)}); } else noidx=true; }
+      ld.push({'@type':'Article',headline:p.title,description:cut(p.ozet,300),datePublished:new Date(p.t).toISOString(),dateModified:new Date(p.up||p.t).toISOString(),inLanguage:'tr-TR',author:{'@type':'Organization',name:nm},publisher:{'@id':base+'/#org'},mainEntityOfPage:absRoute(r)}); } else noidx=true; }
   if(r.startsWith('sayfa-')){ const pg=PAGES[r.slice(6)]; if(pg){ t=pg[0]; d=cut(pg[1],158); cr.push([pg[0],r]); } else noidx=true; }
-  if(r==='yang-fiyatlari'){ const R=priceRows(); ld.push({'@type':'Dataset',name:'Metin2 yang ve won fiyatları',description:'Metin2 serverlarında aktif yang ilanı sayısı ve başlangıç fiyatları',url:base+routeToPath(r),dateModified:new Date().toISOString(),creator:{'@id':base+'/#org'},inLanguage:'tr-TR',variableMeasured:['Yang ilanı sayısı','Başlangıç fiyatı (TRY)']},{'@type':'ItemList',itemListElement:R.slice(0,30).map((x,i)=>({'@type':'ListItem',position:i+1,name:x.s.name+' yang',url:base+routeToPath('server-'+x.s.id+'-yang')}))}); }
+  if(r==='yang-fiyatlari'){ const R=priceRows(); ld.push({'@type':'Dataset',name:'Metin2 yang ve won fiyatları',description:'Metin2 serverlarında aktif yang ilanı sayısı ve başlangıç fiyatları',url:absRoute(r),dateModified:new Date().toISOString(),creator:{'@id':base+'/#org'},inLanguage:'tr-TR',variableMeasured:['Yang ilanı sayısı','Başlangıç fiyatı (TRY)']},{'@type':'ItemList',itemListElement:R.slice(0,30).map((x,i)=>({'@type':'ListItem',position:i+1,name:x.s.name+' yang',url:absRoute('server-'+x.s.id+'-yang')}))}); }
   if(r==='guvenli'||/^server-[^-]+(-yang)?$/.test(r)){ const q=[...document.querySelectorAll('#app details.faq')].map(x=>({'@type':'Question',name:(x.querySelector('summary')||{}).textContent||'',acceptedAnswer:{'@type':'Answer',text:(x.querySelector('p')||{}).textContent||''}})).filter(x=>x.name); if(q.length) ld.push({'@type':'FAQPage',mainEntity:q}); }
   if(!t){ const h=document.querySelector('#app h1'); t=isAdmRoute(r)?'Yönetim paneli':h?h.textContent.trim():'Sayfa bulunamadı'; } if(!d) d=SE.desc;
-  if(cr.length) ld.push({'@type':'BreadcrumbList',itemListElement:[['Ana sayfa','home'],...cr].map(([n,rr],i)=>({'@type':'ListItem',position:i+1,name:n,item:base+routeToPath(rr)}))});
-  if(document.querySelector('#app .notfound, #app [data-404]')) noidx=true;
-  return {title:r==='home'?t:cut(t,60)+(SE.sep||' | ')+nm, desc:cut(d,160), url:base+routeToPath(canon), type, img, noidx, ld}; }
+  if(cr.length) ld.push({'@type':'BreadcrumbList',itemListElement:[['Ana Sayfa','home'],...cr].map(([n,rr],i)=>({'@type':'ListItem',position:i+1,name:n,item:absRoute(rr)}))});
+  if(document.querySelector('#app .notfound, #app [data-404]')||seoNoidxX(r)) noidx=true;
+  return {title:r==='home'?t:cut(t,60)+(SE.sep||' | ')+nm, desc:cut(d,160), url:absRoute(canon), type, img, noidx, ld}; }
+/** Ek noindex kuralı (canlıda "Yakında" ve boş sayfalar; prod/97s-seo.js değiştirir) */
+function seoNoidxX(r){ return false; }
 let seoLastPath='';
 function seoApply(r){ if(!S.set.seo) return; const x=seoData(r), SE=S.set.seo; document.documentElement.lang='tr';
   if(document.title!==x.title) document.title=x.title; setMeta('name','description',x.desc); setMeta('name','robots',x.noidx?'noindex, follow':'index, follow, max-image-preview:large');
@@ -94,12 +137,14 @@ function seoApply(r){ if(!S.set.seo) return; const x=seoData(r), SE=S.set.seo; d
   let s=document.getElementById('ldjson'); if(x.ld.length){ if(!s){ s=document.createElement('script'); s.type='application/ld+json'; s.id='ldjson'; document.head.appendChild(s); } const j=JSON.stringify({'@context':'https://schema.org','@graph':x.ld}).replace(/</g,'\\u003c'); if(s.textContent!==j) s.textContent=j; } else if(s) s.remove();
   if(ensurePixel()&&!PRIV_R(r)&&window.__fbPath!==r){ window.__fbPath=r; fbq('track','PageView'); }
   if(ensureTags()&&window.gtag){ const pth=routeToPath(r); if(pth!==seoLastPath&&!PRIV_R(r)&&!r.startsWith('widget-')){ seoLastPath=pth; gtag('event','page_view',{page_title:x.title,page_location:siteBase()+pth}); } }
-  if(seoClean()) ['#app','#hdr','#cats','#ftr'].forEach(sel=>{ const el=$(sel); if(el) el.querySelectorAll('a[href^="#"]').forEach(a=>{ const h=a.getAttribute('href').slice(1); if(!h) return; a.dataset.h=h; a.setAttribute('href',routeToPath(h)); }); }); }
+  // bağlantılar: #rota → geçerli kipteki adres (data-h tıklamada kullanılır). Yönetim ekranında ve #yonetim bağlantılarında hash kalır
+  // (kaydedilmemiş değişiklik koruması a[href^="#"] üzerinden çalışır).
+  if(seoClean()&&!document.body.classList.contains('adm-mode')) ['#strip','#hdr','#cats','#app','#ftr'].forEach(sel=>{ const el=$(sel); if(el) el.querySelectorAll('a[href^="#"]').forEach(a=>{ const h=a.getAttribute('href').slice(1); if(!h||isAdmRoute(h)) return; a.dataset.h=h; a.setAttribute('href',routeHref(h)); }); }); }
 document.addEventListener('click',e=>{ if(!seoClean()||e.defaultPrevented||e.button||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey) return; const a=e.target.closest('a[data-h]'); if(!a||a.target==='_blank') return; e.preventDefault(); const h=a.dataset.h; if(route()===h){ render(); window.scrollTo(0,0); } else location.hash=h; });
 window.addEventListener('popstate',()=>{ if(typeof admDirtyNow==='function'&&admDirtyNow()) return; if(seoClean()&&location.hash.length<=1){ PV.seen.clear(); render(); window.scrollTo(0,0); } });
 /* --- sitemap / robots / htaccess --- */
 function sitemapUrls(){ const day=new Date().toISOString().slice(0,10), iso=t=>new Date(t).toISOString().slice(0,10); const U=[];
-  const add=(r,lm,pr,cf)=>U.push({loc:siteBase()+routeToPath(r),lm:lm||day,pr,cf});
+  const add=(r,lm,pr,cf)=>U.push({loc:absRoute(r),lm:lm||day,pr,cf});
   add('home',day,'1.0','hourly'); ['metin2-tr','metin2-pvp','metin2-ep','borsa','cekilis','reklam-ver','guvenli','rehber'].forEach(r=>add(r,day,'0.8','daily'));
   Object.keys(PAGES).forEach(k=>add('sayfa-'+k,day,'0.3','yearly'));
   S.servers.forEach(s=>{ const L=active().filter(l=>l.server===s.id); const lm=L.length?iso(Math.max(...L.map(l=>l.bump||l.t))):day; add('server-'+s.id,lm,'0.9','hourly'); M2CAT.filter(c=>c!=='ep'&&L.some(l=>l.cat===c)).forEach(c=>add('server-'+s.id+'-'+c,lm,'0.7','hourly')); if(srvEp(s)) add('server-'+s.id+'-ep',day,'0.7','daily'); });
@@ -117,7 +162,7 @@ RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Statik SEO sayfaları: /server/ejderha2 -> server/ejderha2.html
+# Statik SEO sayfaları: /metin2-pvp/ejderha2 -> metin2-pvp/ejderha2.html
 RewriteCond %{REQUEST_URI} !\.html$
 RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.+?)/?$ $1.html [L]
@@ -127,7 +172,7 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Diğer tüm adresler (/server/..., /ilan/..., /rehber/...) siteyi açar
+# Diğer tüm adresler (/metin2-pvp/..., /rehber/...) siteyi açar
 RewriteRule ^ index.html [L]
 
 # SSL / güvenlik başlıkları (sertifika aktif olduktan sonra)
@@ -161,7 +206,7 @@ const SEO_README = () => `${S.set.siteName.toUpperCase()} · SEO DOSYALARI
 Bu klasördeki dosyaları sitenin kök dizinine (index.html ile aynı yere) yükleyin:
 - sitemap.xml  : Arama motorlarına tüm sayfaları bildirir (${sitemapUrls().length} adres). Google Search Console > Site haritaları bölümüne "sitemap.xml" yazıp gönderin.
 - robots.txt   : Üye paneli, yönetim, mesajlar ve ödeme dosyalarını aramaya kapatır.
-- .htaccess    : /server/..., /ilan/..., /rehber/... gibi temiz adreslerin açılmasını sağlar, HTTPS'e yönlendirir, sıkıştırma ve önbellek açar (Apache / LiteSpeed). Nginx kullanıyorsanız "try_files $uri $uri/ /index.html;" ekleyin.
+- .htaccess    : /metin2-pvp/..., /metin2-tr/..., /rehber/... gibi temiz adreslerin açılmasını sağlar, HTTPS'e yönlendirir, sıkıştırma ve önbellek açar (Apache / LiteSpeed). Nginx kullanıyorsanız "try_files $uri $uri/ /index.html;" ekleyin.
 - rozet.svg    : Server sahiplerinin sitelerine koyacağı rozet görseli (geri bağlantı / backlink için).
 
 Sıra:
@@ -176,7 +221,7 @@ function seoChecks(){ const SE=S.set.seo, P=posts(), noSeo=S.servers.filter(s=>!
     [dl>=70&&dl<=160,'Ana sayfa açıklaması 70-160 karakter',dl+' karakter'],
     [!!SE.ogImg,'Paylaşım görseli (Open Graph)',SE.ogImg?'Var':'WhatsApp, X ve Facebook paylaşımlarında görünecek 1200×630 görsel adresi girin'],
     [!!SE.gsc,'Google Search Console doğrulaması',SE.gsc?'Kod girildi':'Search Console\'dan HTML etiketi kodunu alın'],
-    [!!SE.clean,'Temiz adresler (/server/ejderha2)',SE.clean?'Açık':'Kapalıyken arama motorları sayfaları ayrı ayrı göremez'],
+    [!!SE.clean,'Temiz adresler (/metin2-pvp/ejderha2)',SE.clean?'Açık':'Kapalıyken arama motorları sayfaları ayrı ayrı göremez'],
     [!!SE.ga,'Google Analytics',SE.ga?esc(SE.ga):'İsteğe bağlı: G-XXXXXXX ölçüm kimliği'],
     [noSeo===0,'Server SEO açıklamaları',noSeo?`${noSeo} serverda özel açıklama yok (otomatik metin kullanılıyor)`:'Hepsi dolu'],
     [P.length>=5,'Rehber yazıları',`${P.length} yayında yazı · düzenli içerik sıralamayı ve geri bağlantıyı artırır`],
@@ -200,7 +245,7 @@ function seoAdmin(part){ const SE=S.set.seo, C=seoChecks(), ok=C.filter(c=>c[0])
     <div class="serp" id="serp"><span class="serp-u">${esc(siteBase().replace(/^https?:\/\//,''))}</span><b class="serp-t">${esc(hd.title)}</b><span class="serp-d">${esc(hd.desc)}</span></div>
     <div class="row3"><div class="fld"><label for="se_sep">Başlık ayıracı</label><select class="inp" id="se_sep">${[' | ',' · ',' - ',' – '].map(x=>`<option value="${x}" ${SE.sep===x?'selected':''}>Sayfa${x}${esc(S.set.siteName)}</option>`).join('')}</select></div><div class="fld"><label for="se_og">Paylaşım görseli adresi (1200×630)</label><input class="inp mono" id="se_og" value="${esc(SE.ogImg||'')}" placeholder="https://.../paylasim.jpg"></div><div class="fld"><label for="se_ga">Google Analytics ölçüm kimliği</label><input class="inp mono" id="se_ga" value="${esc(SE.ga||'')}" placeholder="G-XXXXXXXXXX" readonly aria-describedby="se_ga_n"><span class="muted" id="se_ga_n" style="font-size:11.5px"><a href="#yonetim/seo/reklam">Reklam & kampanyalar</a> sekmesinden düzenlenir</span></div></div>
     <div class="row3"><div class="fld"><label for="se_g">Google Search Console kodu</label><input class="inp mono" id="se_g" value="${esc(SE.gsc||'')}" placeholder="content=&quot;...&quot; içindeki kod"></div><div class="fld"><label for="se_b">Bing Webmaster kodu</label><input class="inp mono" id="se_b" value="${esc(SE.bing||'')}"></div><div class="fld"><label for="se_y">Yandex Webmaster kodu</label><input class="inp mono" id="se_y" value="${esc(SE.yandex||'')}"></div></div>
-    <label class="chk" for="se_cl"><input type="checkbox" id="se_cl" ${SE.clean?'checked':''}> Temiz adresler kullan (<span class="mono">/server/ejderha2/item</span>, <span class="mono">/ilan/...</span>, <span class="mono">/rehber/...</span>)</label>
+    <label class="chk" for="se_cl"><input type="checkbox" id="se_cl" ${SE.clean?'checked':''}> Temiz adresler kullan (<span class="mono">/metin2-pvp/ejderha2/item</span>, <span class="mono">/metin2-pvp/ejderha2/item/...</span>, <span class="mono">/rehber/...</span>)</label>
     <span class="muted" style="font-size:12px;margin-top:-6px">Açmadan önce aşağıdaki .htaccess dosyasını sunucunuza yükleyin. Bu önizlemede adresler # ile çalışmaya devam eder; ayar yalnızca kendi alan adınızda devreye girer.</span>
     <label class="chk" for="se_ni"><input type="checkbox" id="se_ni" ${SE.noindex?'checked':''}> Siteyi arama motorlarına kapat (yapım aşaması / test sitesi)</label>
   </div>${aSave('SEO ayarlarını kaydet')}</form>

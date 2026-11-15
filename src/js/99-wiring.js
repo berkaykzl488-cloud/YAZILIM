@@ -148,7 +148,7 @@ window.addEventListener('beforeunload',e=>{ if(admDirtyNow()){ e.preventDefault(
 window.addEventListener('hashchange',e=>{ if(admDirtyNow()){ let oldH=''; try{ oldH=new URL(e.oldURL).hash; }catch(x){}
     if(isAdmRoute(oldH.slice(1))){ e.stopImmediatePropagation(); const to=e.newURL; try{ history.pushState(null,'',e.oldURL); }catch(x){ return; }
       openConfirm({t:'Kaydedilmemiş değişiklikler var',d:'Kaydedilmemiş değişiklikler kaybolacak.',ok:'Kaydetmeden çık',danger:1,onOk:()=>{ admDirtyClear(); const from=location.href; try{ history.pushState(null,'',to); }catch(x){ location.href=to; return; } window.dispatchEvent(new HashChangeEvent('hashchange',{oldURL:from,newURL:to})); }}); } } });
-window.addEventListener('hashchange',()=>{ document.body.classList.remove('adm-menu'); cmdClose(); if(seoClean()&&location.hash.length>1&&!isAdmRoute(location.hash.slice(1))){ history.replaceState(null,'',routeToPath(location.hash.slice(1))+location.search); } PV.seen.clear(); render(); window.scrollTo(0,0); });
+window.addEventListener('hashchange',()=>{ document.body.classList.remove('adm-menu'); cmdClose(); seoSync(); PV.seen.clear(); render(); window.scrollTo(0,0); });
 
 /* ================== ETBİS (Elektronik Ticaret Bilgi Sistemi) ================== */
 const ETBIS_HOSTS=['etbis.ticaret.gov.tr','etbis.eticaret.gov.tr'];

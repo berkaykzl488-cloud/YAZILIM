@@ -114,9 +114,12 @@ function prod(bool $demo, string $out, bool $zip, bool $upd = false): void {
   }
   if (str_contains(shell(), '<?')) fail('shell.html içinde "<?" olamaz (PHP olarak yorumlanır)');
   $html = $page('<?php echo $ypBootTag; ?>');
-  // sunucu tarafı SEO: statik <title> yerine index.php'nin ürettiği başlık/meta/canonical (+ <base>)
+  // sunucu tarafı SEO: statik <title> yerine index.php'nin ürettiği başlık/meta/canonical/JSON-LD (+ <base>)
   $html = preg_replace('~<title>[^<]*</title>~', '<?php echo $ypHead; ?>', $html, 1, $nt);
   if ($nt !== 1) fail('shell.html: <title> bulunamadı');
+  // arama motorları için önceden oluşturulmuş içerik (YP\Seo::body); uygulama açılınca #app'i kendi görünümüyle değiştirir
+  $html = str_replace('<main id="app"></main>', '<main id="app"><?php echo $ypBody; ?></main>', $html, $nb);
+  if ($nb !== 1) fail('shell.html: <main id="app"></main> bulunamadı');
   wr("$out/index.php", rd(SRC . '/index-head.php.tpl') . $html);
   // sunucu tarafı: app/ api/ kurulum/ ve koruma dosyaları
   $n = copyTree(ROOT . '/app', "$out/app");

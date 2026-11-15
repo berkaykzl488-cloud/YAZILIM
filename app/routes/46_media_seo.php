@@ -5,11 +5,15 @@
  *   GET  media/{id}         dosyanın kendisi; özel (private) türlerde yalnız sahibi ve yetkili çalışan
  *   GET  seo/sitemap.xml    GET seo/robots.txt   (site kökündeki dosyalar yazılamadığında da çalışır)
  *   GET  admin/system/update  POST admin/system/update [bakim]   veritabanı güncelleme durumu / elle uygula
+ *   GET  admin/settings/seo   PUT admin/settings/seo [seo]        SEO ayarları (temiz adresler, başlık, açıklama, doğrulama kodları)
+ *   POST admin/seo/probe [seo]                                     tarayıcının rewrite denetimi sonucu ({ok, code})
+ *   boot.set.seo: herkese açık SEO ayarları + adres kipi (mode: clean | p)
  */
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 use YP\Auth;
 use YP\Db;
+use YP\Hooks;
 use YP\Http\HttpError;
 use YP\Http\Raw;
 use YP\Http\Req;
@@ -20,8 +24,17 @@ use YP\Perm;
 use YP\RateLimit;
 use YP\Seo;
 use YP\Updater;
+use YP\V;
 
 return function (Router $r) {
+    // boot: SEO ayarları ve adres kipi (ön yüz bağlantıları temiz adres ya da ?p= olarak yazar)
+    Hooks::on('boot', function (array $data, Db $db, $u) {
+        if (isset($data['set']) && is_array($data['set'])) {
+            $data['set']['seo'] = Seo::publicSeo($db);
+        }
+        return $data;
+    }, 'seo');
+
     $r->post('media', function (Req $q, Db $db) {
         $u = Auth::$user;
         $kind = isset($_POST['kind']) && is_string($_POST['kind']) ? $_POST['kind'] : $q->q('kind', 'listing');
@@ -96,4 +109,57 @@ return function (Router $r) {
         YP\Audit::log($db, Auth::$user['id'], 'schema_update_manual', 'system', '', ['done' => $done]);
         return ['msg' => $done ? 'Veritabanı güncellendi (' . count($done) . ' işlem).' : 'Veritabanı zaten güncel.', 'data' => ['done' => $done, 'seo' => $files] + Updater::status($db)];
     }, ['auth' => 'staff', 'perm' => 'bakim']);
+
+    $seoOut = function (Db $db) {
+        list(, $SE, ) = Seo::settings($db);
+        $base = rtrim(Media::webBase(), '/');
+        return ['seo' => Seo::publicSeo($db), 'probe' => $base . '/metin2-pvp?yp_probe=1', 'sitemap' => $base . '/sitemap.xml', 'robots' => $base . '/robots.txt',
+            'example' => ['clean' => '/metin2-pvp/albamt2/karakter', 'p' => '/?p=metin2-pvp/albamt2/karakter']];
+    };
+    $r->get('admin/settings/seo', function (Req $q, Db $db) use ($seoOut) {
+        return ['data' => $seoOut($db)];
+    }, ['auth' => 'staff', 'perm' => 'seo']);
+
+    $r->put('admin/settings/seo', function (Req $q, Db $db) use ($seoOut) {
+        $v = new V($q->body());
+        $patch = [];
+        foreach (['homeTitle' => 70, 'desc' => 170, 'ogImg' => 300, 'gsc' => 120, 'bing' => 120, 'yandex' => 120] as $k => $max) {
+            if ($v->has($k)) {
+                $patch[$k] = $v->str($k, 0, $max, $k === 'ogImg' ? '#^https?://\S+$#i' : ($max === 120 ? '/^[A-Za-z0-9_=.\-]+$/' : null));
+            }
+        }
+        if ($v->has('sep')) {
+            $patch['sep'] = $v->oneOf('sep', [' | ', ' · ', ' - ', ' – ']);
+        }
+        foreach (['clean', 'noindex'] as $k) {
+            if ($v->has($k)) {
+                $patch[$k] = $v->bool($k);
+            }
+        }
+        $v->done();
+        list(, $old, ) = Seo::settings($db);
+        $SE = Seo::saveSeo($db, $patch, Auth::$user['id']);
+        if (Seo::mode($old) !== Seo::mode($SE) || (bool)$old['noindex'] !== (bool)$SE['noindex']) {
+            Seo::writeFiles($db);
+        }
+        YP\Audit::log($db, Auth::$user['id'], 'settings_seo', 'settings', 'seo', ['keys' => array_keys($patch), 'clean' => (bool)$SE['clean'], 'noindex' => (bool)$SE['noindex']]);
+        return ['msg' => 'SEO ayarları kaydedildi.', 'data' => $seoOut($db), 'patch' => ['set' => ['seo' => Seo::publicSeo($db)]]];
+    }, ['auth' => 'staff', 'perm' => 'seo']);
+
+    // Tarayıcıdaki denetim: /metin2-pvp?yp_probe=… yanıtında X-YP-Page: probe var mı? Başarı index.php'de zaten kaydedilir
+    // (istek temiz adresle ulaştı); burada başarısızlık kaydedilir → site ?p= adreslerine döner.
+    $r->post('admin/seo/probe', function (Req $q, Db $db) use ($seoOut) {
+        $in = $q->body();
+        $ok = !empty($in['ok']);
+        $code = isset($in['code']) && is_numeric($in['code']) ? (int)$in['code'] : 0;
+        list(, $SE, ) = Seo::settings($db);
+        if ($ok) {
+            Seo::noteRewrite($db, true, 'yonetim', $code);
+        } else {
+            Seo::noteRewrite($db, false, 'yonetim', $code);
+        }
+        $out = $seoOut($db);
+        return ['msg' => $ok ? 'Temiz adresler çalışıyor.' : 'Temiz adresler bu sunucuda çalışmıyor; site ?p= adresleriyle devam ediyor.', 'data' => $out,
+            'patch' => ['set' => ['seo' => $out['seo']]]];
+    }, ['auth' => 'staff', 'perm' => 'seo']);
 };

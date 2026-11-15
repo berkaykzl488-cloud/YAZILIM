@@ -363,37 +363,97 @@ section('seo', function () {
     $s = $db->one("SELECT * FROM {servers} WHERE name='Ruby Türkiye Charon'");
     $l = mkListing($db, $u['id'], $s, ['title' => '1 Won <script>x</script> & hızlı', 'price' => 2650, 'descr' => 'Anında teslim "tırnak"']);
     $pend = mkListing($db, $u['id'], $s, ['status' => 'beklemede', 'title' => 'Bekleyen ilan']);
-    $h = Seo::head($db, '/ilan/' . Text::slug($l['title']) . '-l' . $l['id']);
+    $LP = '/metin2-tr/ruby-turkiye-charon/won/' . Text::slug($l['title']) . '-l' . $l['id'];
+    // rewrite doğrulanmadı → ?p= kipi (yedek adresler)
+    $h = Seo::head($db, '/?p=' . ltrim($LP, '/'));
+    ok('kip: rewrite denetimi yokken p', $h['mode'] === 'p' && $h['redirect'] === null, $h['redirect']);
+    ok('ilan (p kipi): canonical ?p= hiyerarşik adres', $h['canonical'] === 'https://test.yangpazar.com/?p=' . ltrim($LP, '/'), $h['canonical']);
     ok('ilan: başlık + server adı + site adı', $h['title'] === Text::cut('1 Won <script>x</script> & hızlı · Ruby Türkiye Charon', 60) . ' | Yang Test', $h['title']);
-    ok('ilan: canonical temiz adres', $h['canonical'] === 'https://test.yangpazar.com/ilan/' . Text::slug($l['title']) . '-l' . $l['id']);
     ok('ilan: açıklama fiyatla', strpos($h['desc'], '26,50 ₺ · Ruby Türkiye Charon Won.') === 0, $h['desc']);
     ok('ilan: JSON-LD Product + Offer InStock + Breadcrumb', strpos($h['html'], '"@type":"Product"') !== false && strpos($h['html'], 'https://schema.org/InStock') !== false
-        && strpos($h['html'], '"@type":"BreadcrumbList"') !== false && strpos($h['html'], '"price":"26.5"') !== false);
+        && strpos($h['html'], '"@type":"BreadcrumbList"') !== false && strpos($h['html'], '"price":"26.5"') !== false && strpos($h['html'], '"priceCurrency":"TRY"') !== false);
     ok('HTML kaçışı: <script> yok, JSON-LD kırılamaz', substr_count($h['html'], '<script') === 1 && strpos($h['html'], '&lt;script&gt;') !== false && strpos($h['html'], '<script') !== false);
     ok('index, follow', $h['robots'] === 'index, follow, max-image-preview:large');
+    $names = array_map(function ($x) { return $x['name']; }, $h['ld'][1]['itemListElement']);
+    ok('ilan: konum çubuğu Ana Sayfa › Metin2 TR › server › Won › ilan', array_slice($names, 0, 4) === ['Ana Sayfa', 'Metin2 TR', 'Ruby Türkiye Charon', 'Won'] && count($names) === 5, $names);
+    ok('p kipinde temiz adres → 301 ?p= (sorgu korunur)', Seo::head($db, $LP . '?utm_source=x')['redirect'] === '/?p=' . ltrim($LP, '/') . '&utm_source=x');
+    ok('p kipinde eski ?p=ilan/… → 301 yeni ?p=', Seo::head($db, '/index.php?p=ilan/eski-baslik-l' . $l['id'])['redirect'] === '/?p=' . ltrim($LP, '/'));
     $h2 = Seo::head($db, '/index.php?p=ilan/x-l' . $pend['id']);
     ok('bekleyen ilan (?p= yolu): noindex, canonical yok', $h2['robots'] === 'noindex, follow' && $h2['canonical'] === '' && strpos($h2['html'], 'Bekleyen') === false);
     ok('olmayan ilan → 404 + noindex', Seo::head($db, '/ilan/yok-l999999')['status'] === 404);
-    $hs = Seo::head($db, '/server/ruby-turkiye-charon/yang');
-    ok('server kategori sayfası', $hs['title'] === 'Ruby Türkiye Charon Won İlanları | Yang Test' && $hs['canonical'] === 'https://test.yangpazar.com/server/ruby-turkiye-charon/yang', $hs);
+    // temiz adresler: rewrite doğrulandı
+    Seo::noteRewrite($db, true, 'istek');
+    $h = Seo::head($db, $LP);
+    ok('kip: rewrite doğrulanınca clean', $h['mode'] === 'clean' && $h['redirect'] === null && $h['canonical'] === 'https://test.yangpazar.com' . $LP, $h['canonical']);
+    ok('clean: eski /ilan/<slug>-l<id> → 301 hiyerarşik', Seo::head($db, '/ilan/herhangi-l' . $l['id'])['redirect'] === $LP);
+    ok('clean: ?p= → 301 temiz adres', Seo::head($db, '/index.php?p=' . ltrim($LP, '/'))['redirect'] === $LP);
+    ok('clean: yanlış server/kategori/başlık → 301 kanonik', Seo::head($db, '/metin2-pvp/ejder2/item/baska-l' . $l['id'])['redirect'] === $LP);
+    ok('clean: eski /server/<slug>/yang → 301 /metin2-tr/<slug>/won', Seo::head($db, '/server/ruby-turkiye-charon/yang')['redirect'] === '/metin2-tr/ruby-turkiye-charon/won');
+    ok('clean: sonda / ve büyük harf → 301', Seo::head($db, '/Metin2-TR/')['redirect'] === '/metin2-tr' && Seo::head($db, '/metin2-tr/ruby-turkiye-charon/')['redirect'] === '/metin2-tr/ruby-turkiye-charon');
+    ok('clean: tek parça hash rotası /server-sv<id>-yang → 301', Seo::head($db, '/server-sv' . $s['id'] . '-yang')['redirect'] === '/metin2-tr/ruby-turkiye-charon/won');
+    $hs = Seo::head($db, '/metin2-tr/ruby-turkiye-charon/won');
+    ok('server kategori sayfası', $hs['title'] === 'Ruby Türkiye Charon Won İlanları | Yang Test' && $hs['canonical'] === 'https://test.yangpazar.com/metin2-tr/ruby-turkiye-charon/won' && $hs['redirect'] === null, $hs['title']);
+    ok('ilanı olmayan kategori noindex', Seo::head($db, '/metin2-tr/ruby-turkiye-charon/karakter')['robots'] === 'noindex, follow');
+    ok('olmayan kategori → 404', Seo::head($db, '/metin2-tr/ruby-turkiye-charon/silah')['status'] === 404);
     ok('server açıklaması (srvAuto, ilan sayısı; 158 karakterde kesilir)', strpos(Seo::srvAuto($db, $s, 'Yang Test'), 'şu an 1 aktif ilan var') !== false
-        && mb_strlen(Seo::head($db, '/server/ruby-turkiye-charon')['desc']) <= 160);
-    ok('olmayan server → 404', Seo::head($db, '/server/boyle-yok')['status'] === 404);
+        && mb_strlen(Seo::head($db, '/metin2-tr/ruby-turkiye-charon')['desc']) <= 160);
+    ok('olmayan server → 404', Seo::head($db, '/metin2-pvp/boyle-yok')['status'] === 404 && Seo::head($db, '/server/boyle-yok')['status'] === 404);
+    ok('bilinmeyen adres → 404, yönlendirme yok', Seo::head($db, '/boyle/bir/sayfa')['status'] === 404 && Seo::head($db, '/xyz')['status'] === 404 && Seo::head($db, '/xyz')['redirect'] === null);
     $hh = Seo::head($db, '/');
-    ok('ana sayfa: WebSite + Organization', $hh['title'] === 'Yang Test · Metin2 Item, Yang, Won, EP ve Karakter Pazarı' && strpos($hh['html'], '"@type":"WebSite"') !== false && $hh['canonical'] === 'https://test.yangpazar.com/');
+    ok('ana sayfa: WebSite + SearchAction + Organization', $hh['title'] === 'Yang Test · Metin2 Item, Yang, Won, EP ve Karakter Pazarı' && strpos($hh['html'], '"@type":"WebSite"') !== false
+        && strpos($hh['html'], '"@type":"SearchAction"') !== false && strpos($hh['html'], '/ara?q={search_term_string}') !== false && $hh['canonical'] === 'https://test.yangpazar.com/');
     ok('statik sayfa (metin2-pvp)', Seo::head($db, '/metin2-pvp')['title'] === 'Metin2 PVP Serverlar · Item, Yang ve EP İlanları | Yang Test');
     ok('özel sayfa (hesabim) noindex', Seo::head($db, '/hesabim')['robots'] === 'noindex, follow');
+    ok('yakında sayfası (borsa) noindex', Seo::head($db, '/borsa')['robots'] === 'noindex, follow' && Seo::head($db, '/borsa')['status'] === 200);
+    $body = Seo::body($db, Seo::head($db, '/metin2-tr/ruby-turkiye-charon'));
+    ok('önceden oluşturulmuş içerik: H1, konum çubuğu, kategori ve ilan bağlantıları', strpos($body, '<h1>Ruby Türkiye Charon') !== false && strpos($body, 'href="/metin2-tr"') !== false
+        && strpos($body, 'href="/metin2-tr/ruby-turkiye-charon/won"') !== false && strpos($body, 'href="' . $LP . '"') !== false && strpos($body, '&lt;script&gt;') !== false, $body);
+    ok('önceden oluşturulmuş içerik: özel sayfada yok', Seo::body($db, Seo::head($db, '/hesabim')) === '');
     $xml = Seo::sitemapXml($db);
     ok('sitemap: geçerli XML', @simplexml_load_string($xml) !== false);
-    ok('sitemap: server, server/kategori, aktif ilan; bekleyen yok', strpos($xml, '<loc>https://test.yangpazar.com/server/ruby-turkiye-charon</loc>') !== false
-        && strpos($xml, '/server/ruby-turkiye-charon/yang</loc>') !== false && strpos($xml, '-l' . $l['id'] . '</loc>') !== false && strpos($xml, '-l' . $pend['id'] . '<') === false);
-    ok('sitemap: EP açık PVP server için /ep', strpos($xml, '/server/ejder2/ep</loc>') !== false);
+    ok('sitemap: bölüm, server, server/kategori, aktif ilan; bekleyen yok', strpos($xml, '<loc>https://test.yangpazar.com/metin2-tr/ruby-turkiye-charon</loc>') !== false
+        && strpos($xml, '<loc>https://test.yangpazar.com/metin2-pvp</loc>') !== false
+        && strpos($xml, '/metin2-tr/ruby-turkiye-charon/won</loc>') !== false && strpos($xml, $LP . '</loc>') !== false && strpos($xml, '-l' . $pend['id'] . '<') === false);
+    ok('sitemap: özel, yakında, eski biçim ve boş kategori yok', !preg_match('#/(hesabim|yonetim|borsa|ilan-ver|server/)#', $xml) && strpos($xml, '/ruby-turkiye-charon/karakter<') === false && strpos($xml, '/ep</loc>') === false);
+    Settings::set('seo', array_replace(Settings::get('seo', $db), ['clean' => false]), null, $db);
+    ok('temiz adres anahtarı kapalı → p kipi, sitemap ?p=', Seo::head($db, '/')['mode'] === 'p' && strpos(Seo::sitemapXml($db), '<loc>https://test.yangpazar.com/?p=metin2-tr</loc>') !== false);
+    Settings::set('seo', array_replace(Settings::get('seo', $db), ['clean' => true]), null, $db);
     $rb = Seo::robotsTxt($db);
     ok('robots: Sitemap satırı, özel yollar kapalı', strpos($rb, 'Sitemap: https://test.yangpazar.com/sitemap.xml') !== false && strpos($rb, 'Disallow: /yonetim') !== false && strpos($rb, 'Disallow: /api/') !== false);
     $w = Seo::writeFiles($db);
     ok('kök dosyalar yazıldı (0644)', $w['sitemap'] === true && $w['robots'] === true && is_file(YP_PUBLIC . '/sitemap.xml') && (fileperms(YP_PUBLIC . '/robots.txt') & 0777) === 0644);
     file_put_contents(YP_PUBLIC . '/robots.txt', "User-agent: *\nDisallow:\n");
     ok('sahibin elle yazdığı robots.txt korunur', Seo::writeFiles($db)['robots'] === 'elle' && file_get_contents(YP_PUBLIC . '/robots.txt') === "User-agent: *\nDisallow:\n");
+});
+
+section('seo-slug', function () {
+    // Text::slug (PHP: server slug'ları, ilan adres parçası) ↔ slugify (src/js/90-seo.js) aynı sonucu vermeli
+    $js = file_get_contents(dirname(__DIR__) . '/src/js/90-seo.js');
+    ok('slugify 90-seo.js içinde', preg_match('/^const slugify = .*$/m', $js, $m) === 1);
+    $node = trim((string)@shell_exec('command -v node 2>/dev/null'));
+    if ($node === '') {
+        ok('node yok: eşlik testi atlandı', true);
+        return;
+    }
+    $cases = ['Albamt2', 'Ruby Türkiye Charon', 'İSTANBUL ÇAĞLAYAN', 'ışık ĞÜŞÖÇ', 'IĞDIR ışıl', 'Ejder Kılıcı +9 Efsunlu', 'Kâğıt Hâlâ', 'Şeytan Göz Taşı (100 adet)',
+        '1 Won <script>x</script> & hızlı', '  --Çift   boşluk--  ', 'ÖZEL', 'Mavi Ejderha 1-99', '', '!!!', 'Ünlü Üçgen Ğğ İi Iı', 'çok-uzun ' . str_repeat('başlık ', 20),
+        'Metin2 PVP · Item & Yang', 'Diamond Nite', 'ÇÖĞŞÜİ', 'i̇stanbul'];
+    $f = tempnam(sys_get_temp_dir(), 'yp-slug');
+    file_put_contents($f, $m[0] . "\nconst I=JSON.parse(require('fs').readFileSync(0,'utf8'));process.stdout.write(JSON.stringify(I.map(slugify)));\n");
+    $p = proc_open([$node, $f], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pp);
+    fwrite($pp[0], json_encode($cases));
+    fclose($pp[0]);
+    $out = json_decode(stream_get_contents($pp[1]), true);
+    proc_close($p);
+    @unlink($f);
+    $bad = [];
+    foreach ($cases as $i => $c) {
+        if (!isset($out[$i]) || $out[$i] !== Text::slug($c)) {
+            $bad[] = $c . ' → php:' . Text::slug($c) . ' js:' . (isset($out[$i]) ? $out[$i] : '?');
+        }
+    }
+    ok('Text::slug = slugify (' . count($cases) . ' Türkçe örnek)', is_array($out) && !$bad, implode(' | ', $bad));
+    ok('Türkçe harf çevirisi', Text::slug('İSTANBUL ÇAĞLAYAN ışık ĞÜŞÖ') === 'istanbul-caglayan-isik-guso' && Text::slug('Albamt2') === 'albamt2');
 });
 
 section('catalog-limits', function () {

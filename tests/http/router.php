@@ -3,6 +3,7 @@
  * php -S yönlendiricisi: kök .htaccess kurallarının test karşılığı.
  *   - app/, storage/, tests/, tools/, docs/ ve gizli dosyalar → 403
  *   - /api/v1/* → api/v1/index.php
+ *   - temiz adresler (/metin2-pvp/…, /borsa …; dosya/klasör değilse) → index.php (varsa; .htaccess'teki son kural)
  *   - geri kalanı (api/*.php, kurulum/, statik dosyalar) olduğu gibi
  */
 $uri = (string)parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', PHP_URL_PATH);
@@ -35,6 +36,15 @@ if (preg_match('#^/api/v1(/|$)#', $uri)) {
 if (preg_match('#^/kurulum/?(index\.php)?$#', $uri)) {
     $_SERVER['SCRIPT_NAME'] = '/kurulum/index.php';
     require $root . '/kurulum/index.php';
+    return true;
+}
+// temiz adresler → index.php (kök .htaccess: api|kurulum|uploads|assets hariç, dosya/klasör değilse; sorgu dizesi korunur)
+if (preg_match('#^/[A-Za-z0-9][A-Za-z0-9_/-]*/?$#', $uri) && !preg_match('#^/(api|kurulum|uploads|assets)(/|$)#', $uri)
+    && !file_exists($root . $uri) && is_file($root . '/index.php')) {
+    $_SERVER['SCRIPT_NAME'] = '/index.php';
+    $_SERVER['SCRIPT_FILENAME'] = $root . '/index.php';
+    $_SERVER['PHP_SELF'] = '/index.php';
+    require $root . '/index.php';
     return true;
 }
 return false;
