@@ -178,7 +178,7 @@ chk "en az çekim tutarı (50 TL) → 422" '[ "$CODE" = 422 ] && j .error | grep
 rl_reset
 for i in 1 2 3 4 5; do
   curl -s -b "$J_B" -X POST -H 'Content-Type: application/json' -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: par$i-$(ik)" \
-    --data "{\"amount\":300,\"iban\":\"$IBAN\",\"bank\":\"Ziraat Bankası\",\"name\":\"Test Uye\",\"save\":true}" -o "$RUN/wd$i.json" -w '%{http_code}' "$(url withdrawals)" > "$RUN/wd$i.code" & PIDS+=($!)
+    --data "{\"amount\":300,\"iban\":\"$IBAN\",\"bank\":\"Ziraat Bankası\",\"name\":\"Test Uye\",\"save\":true}" -o "$RUN/wd$i.json" -w '%{http_code}\n' "$(url withdrawals)" > "$RUN/wd$i.code" & PIDS+=($!)
 done
 wjobs
 OKN=$(cat "$RUN"/wd*.code | grep -c 200); NON=$(cat "$RUN"/wd*.code | grep -c 409)
