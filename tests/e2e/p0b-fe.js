@@ -115,7 +115,7 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     await A.fill('#rg_p', U1.pw); await A.evaluate(() => { const n = document.querySelector('#modal .note-bad'); if (n) n.remove(); }); await shot(A, 'uye-ol-pencere');
     await A.click('form[data-form=registerf] button.btn-primary');
     ok('üyelik: Deniz_TR hesabı açıldı ve giriş yapıldı', await modalGone(A) && (await txt(A, '#hdr')).includes(U1.name));
-    ok('üyelik: hoş geldin bildirimi', await A.locator('#hdr a[href="#bildirimler"] i').count() === 1);
+    ok('üyelik: hoş geldin bildirimi', await A.locator('#hdr :is(a[href="#bildirimler"],a[data-h="bildirimler"]) i').count() === 1);
 
     /* ---------- 6. çıkış / giriş ---------- */
     await go(A, 'hesabim'); await A.click('#app button[data-act=logout]');

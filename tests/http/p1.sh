@@ -278,14 +278,15 @@ api "$J_X" GET "media/m999999" ""; chk "olmayan → 404" '[ "$CODE" = 404 ]'
 
 echo "=== 12. SEO: sitemap, robots, meta ==="
 OUT=$(curl -s -w '\n%{http_code}' "$B/sitemap.xml"); CODE="${OUT##*$'\n'}"; BODY="${OUT%$'\n'*}"
-chk "/sitemap.xml (dosya yokken API) → XML, ilan + server adresleri" '[ "$CODE" = 200 ] && echo "$BODY" | grep -q "<urlset" && echo "$BODY" | grep -q "/server/diamond-nite</loc>" && echo "$BODY" | grep -q "\-$L1</loc>" && ! echo "$BODY" | grep -q "\-$LM</loc>"'
+# rewrite henüz doğrulanmadı (bu kurulumda index.php yok) → yedek ?p= adresleri; hiyerarşik şema (bölüm/server/kategori/ilan)
+chk "/sitemap.xml (dosya yokken API) → XML, ilan + server adresleri (?p= kipi)" '[ "$CODE" = 200 ] && echo "$BODY" | grep -q "<urlset" && echo "$BODY" | grep -q "/?p=metin2-tr/diamond-nite</loc>" && echo "$BODY" | grep -q "/?p=metin2-tr/diamond-nite/won/[a-z0-9-]*-$L1</loc>" && ! echo "$BODY" | grep -q "\-$LM</loc>" && ! echo "$BODY" | grep -q "/server/"'
 OUT=$(curl -s -w '\n%{http_code}' "$(url seo/robots.txt)"); CODE="${OUT##*$'\n'}"; BODY="${OUT%$'\n'*}"
 chk "robots.txt (?r= ile) → Sitemap satırı" '[ "$CODE" = 200 ] && echo "$BODY" | grep -q "Sitemap: http://127.0.0.1:$PORT/sitemap.xml" && echo "$BODY" | grep -q "Disallow: /yonetim"'
 ( cd "$RUN" && YP_TEST=1 php app/cron.php >"$RUN/cron.out" 2>&1 )
 chk "cron: sitemap.xml + robots.txt site köküne gerçek dosya" '[ -f "$RUN/sitemap.xml" ] && [ -f "$RUN/robots.txt" ] && grep -q "\-$L1</loc>" "$RUN/sitemap.xml" && grep -q "\"seo\"" "$RUN/cron.out"'
 OUT=$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "$B/robots.txt"); chk "/robots.txt statik dosya" '[ "${OUT%% *}" = 200 ]'
 api "$J_X" GET "seo/meta?path=/ilan/herhangi-$L1" ""
-chk "seo/meta: ilan başlığı, canonical (başlıktan slug), Product JSON-LD" '[ "$CODE" = 200 ] && [ "$(j .data.title)" = "1 Won Diamond Nite — toptan | Yang P1" ] && [ "$(j .data.canonical)" = "$B/ilan/1-won-diamond-nite-toptan-$L1" ] && [ "$(j ".data.ld[0][\"@type\"]")" = Product ] && [ "$(j .data.ld[0].offers.price)" = 25.9 ]'
+chk "seo/meta: ilan başlığı, canonical (hiyerarşik ?p=), eski adres → 301 hedefi, ham satır yok, Product JSON-LD" '[ "$CODE" = 200 ] && [ "$(j .data.title)" = "1 Won Diamond Nite — toptan | Yang P1" ] && [ "$(j .data.canonical)" = "$B/?p=metin2-tr/diamond-nite/won/1-won-diamond-nite-toptan-$L1" ] && [ "$(j .data.redirect)" = "/?p=metin2-tr/diamond-nite/won/1-won-diamond-nite-toptan-$L1" ] && [ "$(j .data.lst)" = null ] && [ "$(j ".data.ld[0][\"@type\"]")" = Product ] && [ "$(j .data.ld[0].offers.price)" = 25.9 ]'
 api "$J_X" GET "seo/meta?path=/ilan/x-$LM" ""; chk "seo/meta: kaldırılan ilan noindex" '[ "$(j .data.robots)" = "noindex, follow" ]'
 
 echo "=== 13. Sınırlar ve diğer ==="

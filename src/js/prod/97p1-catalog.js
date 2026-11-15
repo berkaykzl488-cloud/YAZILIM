@@ -4,8 +4,7 @@
    satıcı profili (#uye-<id>), ilan ver (önce yükle: fotoğraflar tarayıcıda ≤1600 px küçültülüp POST media ile yüklenir),
    ilan düzenle / kaldır / ücretsiz üste taşı, Hesabım › İlanlarım, Yönetim › İlanlar, Serverlar, Bakım › Güncellemeler.
    Henüz sunucuda olmayanlar (mesaj, EP, borsa, reklam) "Yakında" uyarısı verir; satın alma ve doping P2 dosyalarında (97p2/98p2).
-   Tüm adresler hash rotasıdır (#ilan-l7); yönlendirmesiz (rewrite'sız) sunucularda da çalışır. Temiz adresler
-   (/ilan/<başlık>-l7, /server/<slug>, /index.php?p=…) yalnız sunucu tarafı meta/canonical içindir; açılışta hash'e çevrilir. */
+   Adresler: hiyerarşik temiz adresler ya da ?p= yedeği (90-seo.js: routeToPath/pathToRoute/seoSync; kip sunucudan, boot.set.seo.mode). */
 const P1 = { last: null, uk: 0, sugT: 0, sugDone: {}, fresh: {} };
 const p1N = (s, c) => +((((s || {}).n) || {})[c || 'all']) || 0;
 const p1Len = s => [...String(s || '')].length;
@@ -39,26 +38,6 @@ function p1Filt(ph) {
   return `<form class="p1filt" data-form="p1f" role="search"><input class="inp" id="p1_q" type="search" value="${esc(ui.f.q || '')}" placeholder="${esc(ph || 'Başlık veya ilan no ile ara')}" autocomplete="off" aria-label="İlanlarda ara">${p1Sel(ui.f.sort)}<button class="btn btn-sm btn-primary">Ara</button>${ui.f.q ? '<button type="button" class="btn btn-sm" data-act="p1-qclear">Aramayı temizle</button>' : ''}</form>`;
 }
 
-/* ---- açılış: temiz adres (/ilan/…, /server/…, ?p=…) → hash rotası ---- */
-function p1PathRoute(p) {
-  try { p = decodeURIComponent(p || ''); } catch (e) { }
-  p = String(p).replace(/^\/+|\/+$/g, '').replace(/(^|\/)index\.(php|html)$/, ''); if (!p) return null;
-  const a = p.split('/');
-  if (a[0] === 'server' && a[1]) { const s = S.servers.find(x => x.slug === a[1]) || S.servers.find(x => slugify(x.name) === a[1]); return 'server-' + (s ? s.id : a[1]) + (a[2] ? '-' + a[2] : ''); }
-  if (a[0] === 'ilan' && a[1]) return 'ilan-' + a[1].slice(a[1].lastIndexOf('-') + 1);
-  if ((a[0] === 'rehber' || a[0] === 'sayfa') && a[1]) return a[0] + '-' + a[1];
-  if (a[0] === 'yonetim') return a.join('/');
-  if (/^(api|kurulum|uploads|assets)$/.test(a[0])) return null;
-  return a.join('-');
-}
-if (YP_PROD) {
-  try {
-    const base = window.YP_BASE || '/'; const sp = new URLSearchParams(location.search); let p = sp.get('p');
-    if (!p && location.pathname.indexOf(base) === 0) { const rest = location.pathname.slice(base.length); if (rest && !/^index\.(php|html)$/.test(rest)) p = rest; }
-    if (p && location.hash.length <= 1) { const r = p1PathRoute(p); if (r) history.replaceState(null, '', base + '#' + r); }
-  } catch (e) { }
-}
-
 /* ---- prod-only biçimler ---- */
 if (YP_PROD) document.head.insertAdjacentHTML('beforeend', `<style id="p1css">
 .p1filt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}.p1filt .inp{flex:1 1 200px;min-width:0;width:auto}.p1filt .p1sort{flex:0 1 170px}
@@ -78,9 +57,6 @@ if (YP_PROD) {
 /* yeni rota: satıcı profili */
 { const v0 = view; view = function (r) { if (/^uye-u[0-9]+$/.test(r) && !API.booting && !(maintOn() && !isPanel())) { if (ui.lastView !== 'uye') { ui.f = {}; ui.lastView = 'uye'; } return pProfile(r.slice(4)); } return v0(r); }; }
 
-/* SEO: server adresleri sunucudaki adres parçasıyla (slug) */
-{ const f = routeToPath; routeToPath = function (r) { const m = String(r || '').match(/^server-([^-]+)(?:-(.+))?$/); if (m) { const s = srv(m[1]); if (s && s.slug) return '/server/' + s.slug + (m[2] ? '/' + m[2] : ''); } return f(r); }; }
-{ const f = pathToRoute; pathToRoute = function (p) { const r = p1PathRoute(p); return r || f(p); }; }
 srvAuto = function (s) { const n = p1N(s);
   return `${s.name}, ${secName(s.sec)} bölümündeki serverlardan biridir. ${S.set.siteName} üzerinde ${s.name} item, yang${srvEp(s) ? ', EP' : ''} ve karakter ilanlarını inceleyebilir, kendi ilanınızı verebilirsiniz${n ? `; şu an ${n} aktif ilan var` : ''}. Ödemeniz, ürünü teslim aldığınızı onaylayana kadar güvenli havuzda bekler.`; };
 

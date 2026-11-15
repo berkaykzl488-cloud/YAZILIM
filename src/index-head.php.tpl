@@ -6,7 +6,11 @@
  * - Açılış verisini (GET /api/v1/boot ile aynı: CSRF, herkese açık ayarlar, oturumdaki üye, bildirimler)
  *   sayfaya window.YP_BOOT olarak yazar; böylece ilk açılışta ayrı bir istek gerekmez.
  * - window.YP_MODE='prod': ön yüz localStorage demo yerine sunucu API'sini kullanır.
- * - <head>: YP\Seo::forRequest() başlık/meta/canonical/JSON-LD (statik <title> yerine).
+ * - <head>: YP\Seo::forRequest() başlık/meta/canonical/JSON-LD (statik <title> yerine); <main id="app">: arama motorları
+ *   için önceden oluşturulmuş içerik (YP\Seo::body; uygulama açılınca kendi görünümüyle değiştirir).
+ * - Adresler: /metin2-pvp/<server>/<kategori>/<ilan>-l7 (rewrite çalışıyorsa) ya da /?p=metin2-pvp/… (yedek). Eski biçimler,
+ *   ?p= ↔ temiz adres ve sonda / olan adresler 301 ile kanonik adrese gider; bilinmeyen adres gerçek 404 döner.
+ * - ?yp_probe=…: rewrite denetimi (Yönetim › SEO). Yanıt X-YP-Page: probe başlığı taşır; temiz adresle gelen istek kaydedilir.
  */
 require __DIR__ . '/app/bootstrap.php';
 
@@ -20,6 +24,15 @@ if (!headers_sent()) {
 }
 if (!YP\Store::installed()) {
     header('Location: kurulum/', true, 302);
+    exit;
+}
+if (isset($_GET['yp_probe'])) {
+    // rewrite denetimi: buraya temiz adresle (/metin2-pvp?yp_probe=…) ulaşıldıysa rewrite çalışıyor (forRequest kaydeder)
+    YP\Seo::forRequest();
+    header('Content-Type: text/plain; charset=utf-8');
+    header('X-YP-Page: probe');
+    header('X-Robots-Tag: noindex');
+    echo 'ok';
     exit;
 }
 $ypBoot = null;
@@ -49,14 +62,36 @@ $ypBase = rtrim(str_replace('\\', '/', dirname(isset($_SERVER['SCRIPT_NAME']) ? 
 $ypJ = function ($v) {
     return json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_PARTIAL_OUTPUT_ON_ERROR);
 };
-$ypBootTag = '<script>window.YP_MODE="prod";window.YP_BASE=' . $ypJ($ypBase) . ';window.YP_BOOT=' . $ypJ($ypBoot) . ';</script>';
-// Sunucu tarafı SEO (P1): <title>, description, robots, canonical, Open Graph, JSON-LD. Hiçbir zaman hata fırlatmaz.
-// Temiz adresler (/ilan/<başlık>-l7, /server/<slug>) ve yönlendirmesiz sunucular için /index.php?p=ilan/<başlık>-l7.
+// Sunucu tarafı SEO: <title>, description, robots, canonical, Open Graph, JSON-LD, 301 ve 404. Hiçbir zaman hata fırlatmaz.
 // <base>: temiz adreste açılan sayfada göreli assets/ yolları site kökünden çözülsün.
 $ypSeo = YP\Seo::forRequest();
-if ($ypSeo && (int)$ypSeo['status'] === 404 && !headers_sent()) {
-    http_response_code(404);
+$ypM = isset($_SERVER['REQUEST_METHOD']) ? strtoupper((string)$_SERVER['REQUEST_METHOD']) : 'GET';
+if ($ypSeo && !empty($ypSeo['redirect']) && ($ypM === 'GET' || $ypM === 'HEAD') && !headers_sent()) {
+    header('Location: ' . $ypBase . ltrim((string)$ypSeo['redirect'], '/'), true, 301);
+    exit;
 }
+if ($ypSeo && !headers_sent()) {
+    if ((int)$ypSeo['status'] === 404) {
+        http_response_code(404);
+    }
+    header('X-YP-Page: ' . preg_replace('/[^A-Za-z0-9_\/?=&.-]/', '', (string)$ypSeo['route']));
+}
+// ilk temiz adres isteği rewrite'ı doğrulamış olabilir: açılış verisindeki adres kipi güncel olsun
+if ($ypSeo && is_array($ypBoot) && isset($ypBoot['set']) && is_array($ypBoot['set'])) {
+    try {
+        $ypBoot['set']['seo'] = YP\Seo::publicSeo(YP\Db::main());
+    } catch (\Throwable $e) {
+    }
+}
+$ypBootTag = '<script>window.YP_MODE="prod";window.YP_BASE=' . $ypJ($ypBase) . ';window.YP_BOOT=' . $ypJ($ypBoot) . ';</script>';
 $ypHead = '<base href="' . htmlspecialchars($ypBase, ENT_QUOTES, 'UTF-8') . '">' . "\n"
     . ($ypSeo ? $ypSeo['html'] : '<title>yangpazar.com · Metin2 Yang, Won, EP ve İtem Pazaryeri</title>' . "\n");
+$ypBody = '';
+if ($ypSeo) {
+    try {
+        $ypBody = YP\Seo::body(YP\Db::main(), $ypSeo);
+    } catch (\Throwable $e) {
+        YP\Log::write('hata', 'SEO içerik: ' . get_class($e) . ': ' . $e->getMessage());
+    }
+}
 ?>

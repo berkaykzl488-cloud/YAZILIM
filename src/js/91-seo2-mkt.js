@@ -107,7 +107,7 @@ ziyaretçide ise site her zamanki gibi açılır ve çalışır.
 
 Kurulum (Apache / LiteSpeed):
 1) Zip içeriğini sitenizin kök dizinine (public_html) olduğu gibi yükleyin.
-   index.html, assets/, server/, ilan/, rehber/ ... aynı yerde olmalı.
+   index.html, assets/, metin2-tr/, metin2-pvp/, rehber/ ... aynı yerde olmalı.
 2) .htaccess dosyası temiz adresleri, HTTPS yönlendirmesini ve güvenlik başlıklarını açar.
 3) Yönetim > SEO'da "Temiz adresler" açık olsun.
 4) Google Search Console > Site haritaları: sitemap.xml gönderin.
@@ -118,7 +118,8 @@ etkinleştirin. Sertifika aktif olunca .htaccess tüm trafiği https'e yönlendi
 Ayarlar'daki site adresi https:// ile başlamalıdır.
 `;
 /* --- sitemap parçaları, RSS --- */
-function sitemapPart(kind){ const U=sitemapUrls().filter(u=>{ const p=u.loc.slice(siteBase().length); return kind==='server'?p.startsWith('/server/'):kind==='ilan'?p.startsWith('/ilan/'):kind==='rehber'?p.startsWith('/rehber/'):!/^\/(server|ilan|rehber)\//.test(p); });
+function sitemapPart(kind){ const K=p=>/^\/metin2-(tr|pvp)\/[^/]+\/[^/]+\/[^/]+$/.test(p)||p.startsWith('/ilan/')?'ilan':/^\/metin2-(tr|pvp)\/./.test(p)?'server':p.startsWith('/rehber/')?'rehber':'sayfa';
+  const U=sitemapUrls().filter(u=>K(u.loc.slice(siteBase().length))===kind);
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${U.map(u=>`  <url><loc>${xmlEsc(u.loc)}</loc><lastmod>${u.lm}</lastmod><changefreq>${u.cf}</changefreq><priority>${u.pr}</priority></url>`).join('\n')}\n</urlset>\n`; }
 const sitemapIndex = () => { const day=new Date().toISOString().slice(0,10); return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${['sayfalar','serverler','ilanlar','rehber'].map(k=>`  <sitemap><loc>${siteBase()}/sitemap-${k}.xml</loc><lastmod>${day}</lastmod></sitemap>`).join('\n')}\n</sitemapindex>\n`; };
 const rssXml = () => `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${xmlEsc(S.set.siteName)} Rehber</title><link>${siteBase()}/rehber</link><description>Metin2 yang, EP, item ve karakter alım satımı rehberleri</description><language>tr</language>\n${posts().slice(0,30).map(p=>`<item><title>${xmlEsc(p.title)}</title><link>${siteBase()+routeToPath('rehber-'+p.slug)}</link><guid>${siteBase()+routeToPath('rehber-'+p.slug)}</guid><pubDate>${new Date(p.t).toUTCString()}</pubDate><description>${xmlEsc(p.ozet)}</description></item>`).join('\n')}\n</channel></rss>\n`;
@@ -232,7 +233,7 @@ function ensurePixel(){ const SE=S.set.seo; if(!SE||!isLive()||!SE.fb||!/^\d{8,2
     const t=document.createElement('script'); t.async=true; t.src='https://connect.facebook.net/en_US/fbevents.js'; document.head.appendChild(t); fbq('init',SE.fb); } return true; }
 const FBEV={uye:'CompleteRegistration',satin:'Purchase',ep:'Purchase',yukleme:'AddPaymentInfo',ilan:'Lead'};
 const UTM_PRE=[['google','cpc','Google Ads'],['facebook','paid_social','Facebook reklam'],['instagram','paid_social','Instagram reklam'],['tiktok','paid_social','TikTok reklam'],['x','paid_social','X (Twitter) reklam'],['youtube','video','YouTube / yayıncı'],['twitch','sponsor','Twitch / Kick yayıncı'],['discord','community','Discord'],['forum','referral','Forum'],['telegram','social','Telegram kanalı'],['whatsapp','social','WhatsApp grubu']];
-function utmUrl(pg,src,med,camp,ct){ const u=new URL(siteBase()+(S.set.seo.clean?routeToPath(pg):'/')); if(src) u.searchParams.set('utm_source',src); if(med) u.searchParams.set('utm_medium',med); if(camp) u.searchParams.set('utm_campaign',slugify(camp)); if(ct) u.searchParams.set('utm_content',slugify(ct)); return u.toString()+(S.set.seo.clean||pg==='home'?'':'#'+pg); }
+function utmUrl(pg,src,med,camp,ct){ const u=new URL(S.set.seo.clean?absRoute(pg):siteBase()+'/'); if(src) u.searchParams.set('utm_source',src); if(med) u.searchParams.set('utm_medium',med); if(camp) u.searchParams.set('utm_campaign',slugify(camp)); if(ct) u.searchParams.set('utm_content',slugify(ct)); return u.toString()+(S.set.seo.clean||pg==='home'?'':'#'+pg); }
 function campRows(){ const M={}; S.users.filter(u=>!u.admin&&!u.staff).forEach(u=>{ const s=u.src; const k=s&&s.s?`${s.s} / ${s.m||'-'}${s.c?' / '+s.c:''}`:'Doğrudan / organik'; const r=M[k]=M[k]||{k,u:0,buyers:0,rev:0,dep:0};
     r.u++; const O=S.orders.filter(o=>o.buyer===u.id&&o.status!=='iptal'); if(O.length) r.buyers++; r.rev+=O.reduce((a,o)=>a+o.total,0)+S.epOrders.filter(o=>o.u===u.id).reduce((a,o)=>a+o.price,0); r.dep+=(S.deposits||[]).filter(d=>d.u===u.id&&d.status==='onay').reduce((a,d)=>a+(+d.amount||0),0); });
   return Object.values(M).sort((a,b)=>b.rev-a.rev); }

@@ -204,8 +204,8 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await A.check('#d_vitrin'); await A.selectOption('#dd_vitrin', '3'); await A.waitForTimeout(200);
     ok('doping toplamı 21 TL', /21,00/.test(await txt(A, '#dopTot')), await txt(A, '#dopTot'));
     await A.click('form[data-form=sell] button.btn-primary');
-    ok('ilan dopingle yayında (Doping ücreti 21 TL)', await toast(A, /Doping ücreti: ₺?21,00/) && await until(A, () => /#ilan-l\d+$/.test(location.hash)));
-    const L1 = (A.url().match(/#ilan-(l\d+)$/) || [])[1]; await A.waitForSelector('.lhero'); await A.waitForTimeout(500);
+    ok('ilan dopingle yayında (Doping ücreti 21 TL)', await toast(A, /Doping ücreti: ₺?21,00/) && await until(A, () => /^ilan-l\d+$/.test(route())));
+    const L1 = ((await A.evaluate(() => route())).match(/^ilan-(l\d+)$/) || [])[1]; await A.waitForSelector('.lhero'); await A.waitForTimeout(500);
     ok('ilan sayfası (sahibi): vitrin aktif, doping al bölümü', (await txt(A, '#app')).includes('Doping al') && /Aktif · 2 gün|Aktif · 3 gün/.test(await txt(A, '#app')));
     await A.selectOption(`#dg_${L1}_acil`, '1'); await A.click(`[data-act=dope][data-id=${L1}][data-k=acil]`); await cfm(A);
     ok('ilan sayfasından acil dopingi alındı (4,50 TL)', await toast(A, /Acil Satılık.*uygulandı.*4,50/));
@@ -232,8 +232,8 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await Bp.fill('#b_info', 'KarakterBora'); await Bp.selectOption('#b_ch', '2'); await Bp.selectOption('#b_place', 'Pazar alanı depocu');
     await shot(Bp, 'satin-al-onay', false);
     await Bp.click('#modal form[data-form=p2buy] button.btn-primary');
-    ok('ödeme alındı, sipariş sayfasına gidildi', await toast(Bp, 'Ödeme alındı') && await until(Bp, () => /#siparis-S\d+$/.test(location.hash)));
-    const O1 = (Bp.url().match(/#siparis-(S\d+)$/) || [])[1]; await Bp.waitForSelector('.steps'); await Bp.waitForTimeout(400);
+    ok('ödeme alındı, sipariş sayfasına gidildi', await toast(Bp, 'Ödeme alındı') && await until(Bp, () => /^siparis-S\d+$/.test(route())));
+    const O1 = ((await Bp.evaluate(() => route())).match(/^siparis-(S\d+)$/) || [])[1]; await Bp.waitForSelector('.steps'); await Bp.waitForTimeout(400);
     ok('sipariş sayfası: havuz mesajı, durum, geri sayım (lateAt)', (await txt(Bp, '#app')).includes('havuza alındı') && (await txt(Bp, '#app')).includes('Ödemeniz havuzda güvende') && (await txt(Bp, '#app')).includes('Teslimat bekleniyor') && await Bp.locator('[data-p2cd]').count() >= 1);
     ok('sipariş isteğinde Idempotency-Key', idemOrders.length >= 1 && idemOrders.every(k => /^[A-Za-z0-9_-]{8,80}$/.test(k)), idemOrders.join(','));
     ok('B bakiyesi 1.050 − 240 = 810', await waitBal(Bp, '810,00', 5000), JSON.stringify(await hdrBal(Bp)));
@@ -280,8 +280,8 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     /* ---------- 15. itiraz → yönetici alıcı lehine ---------- */
     await go(Bp, 'ilan-' + L1, 900); await Bp.waitForSelector('[data-act=buy]'); await Bp.click('[data-act=buy]'); await Bp.waitForSelector('#modal form[data-form=p2buy]');
     await Bp.fill('#b_info', 'KarakterBora'); await Bp.selectOption('#b_ch', '1'); await Bp.selectOption('#b_place', 'Mavi bayrak gardiyanı');
-    await Bp.click('#modal form[data-form=p2buy] button.btn-primary'); await toast(Bp, 'Ödeme alındı'); await until(Bp, () => /#siparis-S\d+$/.test(location.hash));
-    const O2 = (Bp.url().match(/#siparis-(S\d+)$/) || [])[1]; await Bp.waitForSelector('[data-act=dispute]');
+    await Bp.click('#modal form[data-form=p2buy] button.btn-primary'); await toast(Bp, 'Ödeme alındı'); await until(Bp, () => /^siparis-S\d+$/.test(route()));
+    const O2 = ((await Bp.evaluate(() => route())).match(/^siparis-(S\d+)$/) || [])[1]; await Bp.waitForSelector('[data-act=dispute]');
     ok('ikinci sipariş (stok 1)', !!O2 && O2 !== O1);
     await Bp.click('[data-act=dispute]'); await Bp.waitForSelector('#modal form[data-form=p2disp]');
     await Bp.selectOption('#dp_r', 'Ürün teslim edilmedi'); await Bp.fill('#dp_d', 'Satıcı oyuna gelmedi, mesajlara cevap yok.');
@@ -306,8 +306,8 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     const fast = await pcall(A, 'POST', 'listings', { game: 'metin2', server: SV, cat: 'yang', title: 'Hızlı Yang Paketi', price: 10, stock: 5, del: 'Anında' });
     await go(Bp, 'ilan-' + fast.listing.id, 900); await Bp.click('[data-act=buy]'); await Bp.waitForSelector('#modal form[data-form=p2buy]');
     await Bp.fill('#b_info', 'KarakterBora'); await Bp.selectOption('#b_ch', '3'); await Bp.selectOption('#b_place', 'Pazar alanı depocu');
-    await Bp.click('#modal form[data-form=p2buy] button.btn-primary'); await until(Bp, () => /#siparis-S\d+$/.test(location.hash)); await Bp.waitForSelector('.steps');
-    const O3 = (Bp.url().match(/#siparis-(S\d+)$/) || [])[1];
+    await Bp.click('#modal form[data-form=p2buy] button.btn-primary'); await until(Bp, () => /^siparis-S\d+$/.test(route())); await Bp.waitForSelector('.steps');
+    const O3 = ((await Bp.evaluate(() => route())).match(/^siparis-(S\d+)$/) || [])[1];
     ok('teslim süresi dolmadan iade düğmesi yok', await Bp.locator('[data-act=guarantee]').count() === 0);
     sq(`UPDATE yp_orders SET created_at=created_at-1500000 WHERE id=${+O3.slice(1) - 100000}`);
     await go(Bp, 'home', 200); await go(Bp, 'siparis-' + O3, 1000); await Bp.waitForSelector('[data-act=guarantee]', { timeout: 8000 }).catch(() => {});
