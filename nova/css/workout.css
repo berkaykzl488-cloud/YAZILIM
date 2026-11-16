@@ -292,3 +292,4 @@ body.wk-live #view { padding-bottom: calc(150px + var(--safe-b)); }
   .wk-cur { grid-template-columns: 132px minmax(0, 1fr); }
   .wk-srow { gap: 6px; grid-template-columns: 30px minmax(0, .9fr) minmax(0, 1.2fr) minmax(0, 1fr) 46px; }
 }
+.wk-swap svg { width: 19px; height: 19px; flex: none; }
