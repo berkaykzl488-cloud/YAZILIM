@@ -9,6 +9,7 @@ import { renderSession } from './session.js';
 import { renderTimer } from './timer.js';
 import { renderHistory, renderLog } from './history.js';
 import { getActive, setActive, daySummary } from './data.js';
+import { todayKey } from '../../core/store.js';
 import { alertEnd } from './kit.js';
 
 /** Geliştirici sayfası: tüm animasyonların anahtar kareleri (#/workout/lab) */
@@ -61,7 +62,7 @@ export default {
   summary(dateKey) {
     const d = daySummary(dateKey);
     const active = getActive();
-    const isToday = dateKey === new Date().toISOString().slice(0, 10) || dateKey === fmtToday();
+    const isToday = dateKey === todayKey();
     let sub = d.count ? `${d.count} antrenman · ${fmt.n(d.vol)} kg` : 'Bugün antrenman yok';
     if (isToday && active) sub = 'Devam eden antrenman var';
     return { label: 'Antrenman', value: fmt.n(d.mins), unit: 'dk', sub, progress: Math.min(1, d.mins / 30), color: 'var(--lime)', icon: 'dumbbell' };
@@ -71,8 +72,3 @@ export default {
     return Math.round(daySummary(dateKey).kcal);
   },
 };
-
-function fmtToday() {
-  const d = new Date(), p = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
