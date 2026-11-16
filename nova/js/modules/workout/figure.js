@@ -583,15 +583,49 @@ const PROPS = {
   },
 };
 
+// ---------- Otomatik kadraj ----------
+const boxCache = new WeakMap();
+/** Animasyonun tüm hareket alanını kapsayan, 240:200 oranlı görüş kutusu */
+export function fitBox(anim, minW = 150) {
+  const key = minW;
+  const cache = boxCache.get(anim) || {};
+  if (cache[key]) return cache[key];
+  const c = compile(anim);
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  const eat = (p, r = 0) => { x0 = Math.min(x0, p[0] - r); y0 = Math.min(y0, p[1] - r); x1 = Math.max(x1, p[0] + r); y1 = Math.max(y1, p[1] + r); };
+  const heavy = (anim.props || []).some(pr => ['barbell', 'kettlebell', 'dumbbell'].includes(pr.type));
+  for (let i = 0; i <= 24; i++) {
+    const J = solve(poseAt(anim, (c.total * i) / 24).pose);
+    eat(J.head, S.headR + 2); eat(J.hip, 12); eat(J.sh, 12);
+    for (const k of [1, 2]) { eat(J['a' + k].hand, heavy ? 16 : 4); eat(J['a' + k].e, 6); eat(J['l' + k].toe, 3); eat(J['l' + k].heel, 3); eat(J['l' + k].k, 6); }
+  }
+  for (const pr of anim.props || []) {
+    if (pr.type === 'bench' || pr.type === 'box' || pr.type === 'seat') { eat([pr.x ?? 70, pr.y ?? FLOOR - (pr.h ?? 34)]); eat([(pr.x ?? 70) + (pr.w ?? 40), FLOOR]); }
+    if (pr.type === 'pullbar' || pr.type === 'dipbar') eat([pr.x, pr.y], 6);
+  }
+  y1 = Math.max(y1, FLOOR + 4);
+  const pad = 10;
+  x0 -= pad; x1 += pad; y0 -= pad; y1 += 2;
+  let w = Math.max(minW, x1 - x0), hh = Math.max(w * 200 / 240, y1 - y0);
+  w = hh * 240 / 200;
+  const cx = (x0 + x1) / 2;
+  let bx = cx - w / 2, by = y1 - hh;
+  if (w >= 240) { bx = cx - w / 2; }
+  const box = [bx, by, w, hh].map(v => Math.round(v * 10) / 10);
+  cache[key] = box; boxCache.set(anim, cache);
+  return box;
+}
+
 // ---------- Sahne oluşturma ----------
 function el(tag, cls) { return svg(tag, { class: cls }); }
 
 function buildFigure(anim, muscles, mode) {
   const view = anim.view || 'side';
   const F = view === 'front';
-  const root = svg('svg', { viewBox: `0 0 ${VW} ${VH}`, class: 'fig-svg fig-' + mode, 'aria-hidden': 'true' });
+  const vb = fitBox(anim, mode === 'sm' ? 130 : mode === 'md' ? 165 : 185);
+  const root = svg('svg', { viewBox: vb.join(' '), class: 'fig-svg fig-' + mode, 'aria-hidden': 'true' });
   const floorY = FLOOR;
-  root.append(svg('path', { d: `M8 ${floorY}L232 ${floorY}`, class: 'fig-floor' }));
+  root.append(svg('path', { d: `M${vb[0] - 20} ${floorY}L${vb[0] + vb[2] + 20} ${floorY}`, class: 'fig-floor' }));
   const shadow = svg('ellipse', { cy: floorY + 1, rx: 40, ry: 3.2, class: 'fig-shadow' });
   root.append(shadow);
   const props = (anim.props || []).map(pc => ({ cfg: pc, ...PROPS[pc.type](pc) }));

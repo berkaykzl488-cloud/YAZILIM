@@ -49,7 +49,7 @@ function totals(items) {
 function score(t, target) {
   const kErr = Math.abs(t.kcal - target.kcal) / target.kcal;
   const pShort = Math.max(0, target.protein - t.p) / target.protein;
-  const pOver = Math.max(0, t.p - target.protein * 1.45) / target.protein;
+  const pOver = Math.max(0, t.p - target.protein * 1.3) / target.protein;
   const fOver = Math.max(0, t.f - target.fat * 1.3) / target.fat;
   return kErr * 3 + pShort * 2.2 + pOver * 0.6 + fOver * 0.6;
 }
@@ -185,7 +185,7 @@ export function renderPlan(el) {
         state.items.forEach(it => addToDiary(getRecipe(it.id), it.portions, it.slot, today));
         haptic([10, 40, 10]);
         toastAction('4 öğün bugünün günlüğüne eklendi', 'Günlüğü gör', goDiary);
-      } }, icon('plus'), 'Hepsini bugüne ekle'));
+      } }, icon('plus'), 'Bugüne ekle'));
   }
 
   function paint() { paintSummary(); paintOpts(); paintMeals(); paintActions(); }

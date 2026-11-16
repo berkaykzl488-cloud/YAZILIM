@@ -101,10 +101,11 @@ export function renderCook(el, r) {
         h('div', { class: 'grow' },
           h('div', { class: 'rcp-timer-title' }, title, h('span', { class: 'muted' }, ' · ' + t.label)),
           h('div', { class: 'rcp-timer-left', dataset: { tleft: key } }, fmt.duration(Math.ceil(left(t))))),
-        state !== 'idle' && state !== 'done' && h('button', { type: 'button', class: 'rcp-round-btn sm', 'aria-label': 'Sıfırla', onClick: () => resetTimer(key) }, icon('refresh')),
         h('button', { type: 'button', class: 'btn ' + (state === 'run' ? '' : 'primary') + ' rcp-timer-btn', onClick: () => toggleTimer(key) },
           icon(state === 'run' ? 'pause' : 'play'), state === 'run' ? 'Duraklat' : state === 'paused' ? 'Devam' : state === 'done' ? 'Yeniden' : 'Başlat')),
-      h('div', { class: 'progress thin' }, h('i', { dataset: { tprog: key }, style: { width: (100 - (left(t) / t.total) * 100) + '%' } })));
+      h('div', { class: 'rcp-timer-foot' },
+        h('div', { class: 'progress thin grow' }, h('i', { dataset: { tprog: key }, style: { width: (100 - (left(t) / t.total) * 100) + '%' } })),
+        (state === 'run' || state === 'paused') && h('button', { type: 'button', class: 'rcp-linkbtn rcp-timer-reset', onClick: () => resetTimer(key) }, icon('refresh', { size: 15 }), 'Sıfırla')));
   }
 
   // ---------- Ekran açık kalsın ----------
@@ -192,7 +193,7 @@ export function renderCook(el, r) {
     [...segs.children].forEach(s => { s.className = 'done'; });
     strip.replaceChildren();
     mount(main, h('div', { class: 'rcp-finish' },
-      h('div', { class: 'rcp-finish-emoji', style: { background: tint(r.cat, 0.34) } }, r.emoji),
+      h('div', { class: 'rcp-finish-emoji', style: { background: tint(r.cat, 0.5) } }, r.emoji),
       h('h2', null, 'Afiyet olsun!'),
       h('p', { class: 'muted' }, `${r.name} hazır. Yediğin porsiyonu günlüğüne eklemeyi unutma.`),
       h('button', { type: 'button', class: 'btn primary lg block', onClick: () => openAddToMeal(r, { portions: 1 }) }, icon('plus'), 'Öğüne ekle'),

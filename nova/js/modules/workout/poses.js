@@ -207,7 +207,7 @@ export const A = {
 
   'wall-sit': { props: [{ type: 'wall', x: 72 }], phases: PH.hold, frames: hold(
     { r: [85, 145], t: -1, n: 0, a1: [30, 40], a2: [30, 40], ik: feet(121, 118) },
-    { r: [85, 145.6], t: -1, n: 2, a1: [30, 42], a2: [30, 42], ik: feet(121, 118) }) },
+    { r: [85, 146.2], t: -1, n: 5, a1: [36, 48], a2: [36, 48], ik: feet(121, 118) }) },
 
   'sumo-squat': { view: 'front', props: [{ type: 'kettlebell', hang: true }], phases: PH.squat, frames: rep(
     FW({ r: [120, 118], ik: { f1: [156, ANK], f2: [84, ANK], h1: [123, 140], h2: [117, 140] }, bend: { h1: 1, h2: 1 } }),
@@ -303,7 +303,7 @@ export const A = {
   // ======================= KARIN / CORE =======================
   plank: { props: [MAT], phases: PH.hold, frames: hold(
     { t: 79, n: -8, anc: ['toe1', 52, FLOOR], a1: [79, 90], a2: [79, 90] },
-    { t: 78.6, n: -8, cv: 0.06, anc: ['toe1', 52, FLOOR], a1: [78.6, 90], a2: [78.6, 90] }) },
+    { t: 78, n: -11, cv: 0.12, anc: ['toe1', 52, FLOOR], a1: [78, 90], a2: [78, 90] }) },
 
   'side-plank': { view: 'front', props: [MAT], phases: PH.hold, frames: hold(
     { r: [120, 150], rot: 77, n: -8, anc: ['elb1', 162, 181], a1: [77, 90], a2: [100, 0], l1: [0, 0, 0], l2: [3, 0, 0] },

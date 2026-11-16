@@ -20,7 +20,7 @@ function macroBlock(r) {
     h('div', { class: 'rcp-macro-bar', role: 'img', 'aria-label': `Protein yüzde ${pct(pk)}, karbonhidrat yüzde ${pct(ck)}, yağ yüzde ${pct(fk)}` },
       seg(pk, 'p'), seg(ck, 'c'), seg(fk, 'f')),
     h('div', { class: 'rcp-macro-cols' },
-      [['p', 'Protein', s.p, pk], ['c', 'Karbonhidrat', s.c, ck], ['f', 'Yağ', s.f, fk]].map(([k, label, v, kc]) =>
+      [['p', 'Protein', s.p, pk], ['c', 'Karb.', s.c, ck], ['f', 'Yağ', s.f, fk]].map(([k, label, v, kc]) =>
         h('div', { class: 'rcp-mcol' },
           h('div', { class: 'rcp-mcol-label' }, h('span', { class: 'rcp-mdot ' + k }), label),
           h('div', { class: 'rcp-mcol-val' }, g(v), h('span', null, ' g')),
@@ -97,7 +97,7 @@ export function renderDetail(el, r) {
 
   el.append(
     h('div', { class: 'rcp-detail-top' }, nav.button('recipes', 'Geri'), h('div', { class: 'row gap-s' }, shareBtn, favBtn)),
-    h('div', { class: 'rcp-hero', style: { background: tint(r.cat, 0.34) } },
+    h('div', { class: 'rcp-hero', style: { background: tint(r.cat, 0.5) } },
       h('span', { class: 'rcp-hero-cat' }, cat.emoji, ' ', cat.label),
       h('span', { class: 'rcp-hero-big', 'aria-hidden': 'true' }, r.emoji)),
     h('h1', { class: 'rcp-title' }, r.name),

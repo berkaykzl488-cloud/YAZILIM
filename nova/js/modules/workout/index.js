@@ -63,7 +63,7 @@ export default {
     const d = daySummary(dateKey);
     const active = getActive();
     const isToday = dateKey === todayKey();
-    let sub = d.count ? `${d.count} antrenman · ${fmt.n(d.vol)} kg` : 'Bugün antrenman yok';
+    let sub = d.count ? `${d.count} antrenman · ${fmt.n(d.vol)} kg` : (isToday ? 'Bugün antrenman yok' : 'Antrenman yok');
     if (isToday && active) sub = 'Devam eden antrenman var';
     return { label: 'Antrenman', value: fmt.n(d.mins), unit: 'dk', sub, progress: Math.min(1, d.mins / 30), color: 'var(--lime)', icon: 'dumbbell' };
   },

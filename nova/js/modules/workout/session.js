@@ -41,7 +41,7 @@ export function renderSession(el) {
   const restTime = h('div', { class: 'wk-rest-time' });
   mount(restSheet, h('div', { class: 'wk-rest-ring' }, rr.el, h('span', null, icon('clock'))),
     h('div', { class: 'grow' }, h('div', { class: 'small muted' }, 'Dinlenme'), restTime),
-    h('button', { class: 'btn sm', type: 'button', 'aria-label': '15 saniye azalt', onClick: () => adjustRest(-15) }, '−15'),
+    h('button', { class: 'btn sm wk-minus15', type: 'button', 'aria-label': '15 saniye azalt', onClick: () => adjustRest(-15) }, '−15'),
     h('button', { class: 'btn sm', type: 'button', 'aria-label': '15 saniye ekle', onClick: () => adjustRest(15) }, '+15'),
     h('button', { class: 'btn sm primary', type: 'button', onClick: () => endRest(false) }, 'Geç'));
 
@@ -74,11 +74,12 @@ export function renderSession(el) {
       h('div', { class: 'wk-cur-info' },
         h('div', { class: 'small muted' }, `Egzersiz ${a.cur + 1} / ${a.exercises.length} · ${groupLabel(e.group)}`),
         h('h2', { class: 'wk-cur-name' }, e.name),
-        h('div', { class: 'wk-cur-target' }, `Hedef: ${targetText(x.target)} · ${x.target.rest} sn dinlenme`),
-        h('div', { class: 'row wrap gap-s wk-cur-actions' },
-          h('button', { class: 'btn sm', type: 'button', onClick: () => howTo(e) }, icon('info'), 'Nasıl yapılır?'),
-          h('button', { class: 'btn sm ghost', type: 'button', onClick: swapExercise }, icon('repeat'), 'Değiştir'),
-          h('button', { class: 'btn sm ghost icon', type: 'button', 'aria-label': 'Egzersizi çıkar', onClick: removeExercise }, icon('trash')))),
+        h('div', { class: 'wk-cur-target' }, `Hedef: ${targetText(x.target)}`),
+        h('div', { class: 'wk-cur-target' }, `Dinlenme: ${x.target.rest} sn`)),
+      h('div', { class: 'row gap-s wk-cur-actions' },
+        h('button', { class: 'btn sm', type: 'button', onClick: () => howTo(e) }, icon('info'), 'Nasıl yapılır?'),
+        h('button', { class: 'btn sm ghost wk-swap', type: 'button', 'aria-label': 'Egzersizi değiştir', onClick: swapExercise }, icon('repeat'), h('span', { class: 'wk-swap-txt' }, 'Değiştir')),
+        h('button', { class: 'btn sm ghost icon', type: 'button', 'aria-label': 'Egzersizi çıkar', onClick: removeExercise }, icon('trash'))),
       hint ? h('div', { class: 'wk-hint' }, icon('bolt'), h('span', null, hint)) : null);
     paintTable();
     paintNext();

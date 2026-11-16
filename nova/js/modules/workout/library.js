@@ -14,7 +14,7 @@ export function renderLibrary(el) {
   st.q = '';
   const grid = h('div', { class: 'wk-grid' });
   const count = h('p', { class: 'small muted wk-count', 'aria-live': 'polite' });
-  const search = h('input', { class: 'input', type: 'search', placeholder: 'Egzersiz ya da kas ara (ör. squat, göğüs)', 'aria-label': 'Egzersiz ara', onInput: e => { st.q = e.target.value; paint(); } });
+  const search = h('input', { class: 'input', type: 'search', placeholder: 'Ara: squat, göğüs, dambıl…', 'aria-label': 'Egzersiz ara', onInput: e => { st.q = e.target.value; paint(); } });
   const locRow = h('div', { class: 'chips' }), groupRow = h('div', { class: 'chips' }), eqRow = h('div', { class: 'chips' });
 
   const chipRow = (row, items, key) => {

@@ -122,11 +122,11 @@ export function addToShopping(items) {
 }
 
 const AISLES = [
+  { id: 'pantry', label: 'Baharat, yağ ve sos', emoji: '🧂', re: /(tuz|karabiber|pul biber|toz biber|kimyon|kekik|kuru nane|tarçın|zerdeçal|köri|sumak|muskat|biberiye|defne|yenibahar|vanilya|yağı|yağ\b|salça|sirke|soya sosu|hardal|^bal$|nar ekşisi|tahin|kakao|kabartma|nişasta|kapari|susam|sarımsak tozu|şeker)/ },
   { id: 'produce', label: 'Meyve ve sebze', emoji: '🥕', re: /(domates|biber|soğan|sarımsak|havuç|patates|kabak|patlıcan|ıspanak|brokoli|karnabahar|mantar|marul|roka|salatalık|maydanoz|dereotu|nane yaprağı|kişniş|limon|muz|elma|çilek|yaban mersini|orman meyvesi|avokado|balkabağı|pırasa|enginar|taze fasulye|bezelye|mango|portakal|zencefil|yeşillik|asma yaprağı|kayısı|yeşil soğan)/ },
   { id: 'protein', label: 'Et, tavuk ve balık', emoji: '🍗', re: /(tavuk|dana|kıyma|hindi(?!stan)|somon|levrek|çupra|hamsi|uskumru|mezgit|karides|kalamar|ton balığı|kuşbaşı|bonfile)/ },
   { id: 'dairy', label: 'Süt ürünleri ve yumurta', emoji: '🥚', re: /^(?!.*(badem|soya|hindistan)).*(süt|yoğurt|peynir|lor|kaşar|parmesan|labne|kefir|tereyağı|yumurta)/ },
   { id: 'grains', label: 'Bakliyat, tahıl ve ekmek', emoji: '🌾', re: /(mercimek|nohut|fasulye|barbunya|bulgur|pirinç|kinoa|yulaf|makarna|şehriye|\bun\b|unu|ekmek|lavaş|tarhana|bakla|galeta|bisküvi|irmik)/ },
-  { id: 'pantry', label: 'Baharat, yağ ve sos', emoji: '🧂', re: /(tuz|karabiber|pul biber|kimyon|kekik|nane|tarçın|zerdeçal|köri|toz biber|sumak|muskat|biberiye|defne|yenibahar|vanilya|yağı|yağ\b|salça|sirke|soya sosu|hardal|\bbal\b|nar ekşisi|tahin|kakao|kabartma|nişasta|kapari|susam|sarımsak tozu|şeker)/ },
   { id: 'other', label: 'Diğer', emoji: '🛒', re: /.*/ },
 ];
 export function aisleOf(name) {
@@ -139,10 +139,10 @@ export { AISLES };
 export const isPantryStaple = name => /^(su|sıcak su|soğuk su|buz|tuz)$/.test(String(name).toLocaleLowerCase('tr'));
 
 // ---------- Görsel parçalar ----------
-export function tint(cat, a = 0.22) {
+export function tint(cat, a = 0.38) {
   const g = CAT[cat]?.grad || ['#666', '#444'];
   const rgba = (hex, al) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${al})`; };
-  return `linear-gradient(145deg, ${rgba(g[0], a + 0.08)}, ${rgba(g[1], a)})`;
+  return `radial-gradient(120% 90% at 25% 15%, rgba(255,255,255,.12), transparent 60%), linear-gradient(145deg, ${rgba(g[0], a + 0.2)}, ${rgba(g[1], a)})`;
 }
 export const fullGrad = cat => { const g = CAT[cat]?.grad || ['#666', '#444']; return `linear-gradient(135deg, ${g[0]}, ${g[1]})`; };
 
@@ -157,8 +157,8 @@ export function recipeCard(r, { onOpen, fav = false } = {}) {
       fav && h('span', { class: 'rcp-card-fav', 'aria-label': 'Favori' }, icon('heart', { size: 14 }))),
     h('div', { class: 'rcp-card-body' },
       h('div', { class: 'rcp-card-name' }, r.name),
-      h('div', { class: 'rcp-card-macro' }, h('b', null, fmt.n(r.perServing.kcal)), ' kcal', h('span', { class: 'rcp-dot' }), h('b', null, fmt.n(r.perServing.p)), ' g protein'),
-      h('div', { class: 'rcp-card-meta' }, icon('clock', { size: 13 }), minText(totalMin(r)), h('span', { class: 'rcp-dot' }), diffLabel(r.difficulty))));
+      h('div', { class: 'rcp-card-macro' }, icon('flame', { size: 13 }), h('b', null, fmt.n(r.perServing.kcal)), ' kcal', h('span', { class: 'rcp-dot' }), icon('clock', { size: 13 }), minText(totalMin(r))),
+      h('div', { class: 'rcp-card-meta' }, h('b', null, fmt.n(r.perServing.p) + ' g'), ' protein', h('span', { class: 'rcp-dot' }), diffLabel(r.difficulty))));
 }
 
 /** Liste satırı tarzı küçük kart (plan, favori satırı) */
