@@ -68,7 +68,8 @@ function pw(prof, t) {
   }
   return [prof[n - 1][1], prof[n - 1][2]];
 }
-function tsOf(prof) {
+function tsOf(prof, lite) {
+  if (lite) return prof._tl || (prof._tl = prof.map(r => r[0]));
   if (!prof._ts) {
     const out = [];
     prof.forEach((r, i) => { out.push(r[0]); if (i < prof.length - 1) out.push((r[0] + prof[i + 1][0]) / 2); });
@@ -82,8 +83,8 @@ function capPts(fr, prof, t, s, k) { // s: +1 uç, -1 baş
   return P;
 }
 /** Uzvun dış hattı: profil örneklenir, iki uca yuvarlak kapak */
-function outlinePath(fr, prof, k0 = 0.95, k1 = 0.95) {
-  const ts = tsOf(prof), pts = [];
+function outlinePath(fr, prof, k0 = 0.95, k1 = 0.95, lite = false) {
+  const ts = tsOf(prof, lite), pts = [];
   for (const t of ts) pts.push(fr.P(t, pw(prof, t)[0]));
   pts.push(...capPts(fr, prof, ts[ts.length - 1], 1, k1));
   for (let i = ts.length - 1; i >= 0; i--) pts.push(fr.P(ts[i], -pw(prof, ts[i])[1]));
@@ -92,9 +93,9 @@ function outlinePath(fr, prof, k0 = 0.95, k1 = 0.95) {
 }
 const bump = u => Math.pow(Math.sin(Math.PI * clampN(u, 0, 1)), 0.7);
 /** Kas ya da kıyafet bandı. mode: f (ön kenar), b (arka kenar), c (orta), w (tam genişlik), cap (deltoid başlığı) */
-function bandPath(fr, prof, d) {
+function bandPath(fr, prof, d, n = 7) {
   const [, t0r, t1, mode, a = 0, b = 0] = d;
-  const ts = tsOf(prof), tA = ts[0], n = 7, out = [], inn = [];
+  const ts = tsOf(prof), tA = ts[0], out = [], inn = [];
   const t0 = Math.max(t0r, tA);
   if (mode === 'cap') {
     for (let i = 0; i <= n; i++) {
@@ -168,7 +169,7 @@ const MUS_F = {
   chest: [['poly', [[1.2, 41.6], [8, 42.3], [12.4, 39.8], [12.6, 35.6], [9.6, 32.4], [4.6, 31.8], [1.2, 33.6]], true]],
   abs: [['poly', [[-4.8, 31], [4.8, 31], [5.2, 22], [4.8, 10], [3, 5], [-3, 5], [-4.8, 10], [-5.2, 22]], false]],
   obliques: [['poly', [[6.2, 29.6], [9.4, 26.6], [9.6, 18], [9.6, 10.4], [6.4, 9], [5.6, 20]], true]],
-  lats: [['poly', [[10.4, 30.6], [12.8, 35.4], [13.5, 32.6], [11.6, 25], [9.8, 21.6]], true]],
+  lats: [['poly', [[9.4, 31.4], [12.6, 37.4], [14.1, 35.2], [13.2, 28.6], [11, 22], [9.4, 18.6], [8.2, 25]], true]],
   traps: [['poly', [[3.6, 49.4], [10.5, 46.8], [12.6, 45.6], [7.4, 45.2], [3.2, 46.4]], true]],
   upperBack: [['poly', [[4, 48.6], [9.4, 46.6], [5.2, 45.8]], true]],
   glutes: [['poly', [[9.4, -4], [10.8, 2], [10.2, 8.4], [8.4, 3]], true]],
@@ -186,7 +187,7 @@ const MUS_F = {
 const CON_S = {
   upper: [[[0.28, 0.95], [0.47, 0.15], [0.3, -0.95]]],
   fore: [[[0.08, 0.35], [0.45, -0.05], [0.7, -0.2]]],
-  thigh: [[[0.2, 0.5], [0.55, 0.22], [0.9, 0.38]], [[0.9, 0.98], [0.97, 0.55], [1.04, 0.9]]],
+  thigh: [[[0.46, 0.4], [0.68, 0.24], [0.9, 0.38]], [[0.9, 0.98], [0.97, 0.55], [1.04, 0.9]]],
   shin: [[[0.08, -0.25], [0.38, 0.05], [0.66, -0.3]]],
 };
 const CON_F = {
@@ -203,7 +204,7 @@ const SHADE_STOPS = [[0, '#ffffff', 0.32], [0.15, '#ffffff', 0.07], [0.5, '#ffff
 
 // Baş, el ve ayakkabı: yerel koordinatlarda sabit şekiller
 const HEAD_S = 'M-0.6 -8.9C4.2 -9.2 7.5 -6.2 7.4 -2.6L7.7 -1.2Q7.9 -0.2 8.6 1.1Q9.6 1.9 8.4 2.5L7.8 2.8Q8.1 3.6 7.6 4.3Q7.9 5 7.4 5.6Q7.2 7.2 5.4 7.6Q3 8.1 1.2 7.4L-1.6 6.4C-6.2 6.6 -8.8 3.4 -8.7 -0.8C-8.6 -5.6 -5.2 -8.7 -0.6 -8.9Z';
-const HAIR_S = 'M7.2 -3.6C7 -7.6 3.2 -9.9 -1.2 -9.6C-6.6 -9.2 -9.6 -5 -8.9 0.4C-8.6 2.6 -7.8 3.8 -6.6 4.6C-6.6 2 -5.6 -0.2 -3.6 -1.4C-1.4 -2.8 1.6 -3.2 4.4 -3C5.6 -3 6.6 -3.2 7.2 -3.6Z';
+const HAIR_S = 'M6.9 -4.4C6.2 -7.9 2.8 -9.7 -1.2 -9.5C-6.2 -9.1 -9.1 -5.4 -8.8 -1.2C-8.7 0.4 -8.2 1.6 -7.4 2.4C-7.2 0.2 -6.4 -1.6 -4.6 -2.8C-2.4 -4.2 0.6 -4.6 3.4 -4.4C4.8 -4.3 6 -4.2 6.9 -4.4Z';
 const HEAD_F = 'M0 -9.2C5 -9.2 7.4 -5.6 7.3 -1.2C7.2 3.4 5.2 8.2 0 8.6C-5.2 8.2 -7.2 3.4 -7.3 -1.2C-7.4 -5.6 -5 -9.2 0 -9.2Z';
 const HAIR_F = 'M-7.4 -0.6C-8 -6.4 -4.6 -9.9 0 -9.9C4.6 -9.9 8 -6.4 7.4 -0.6C6.6 -3.4 5.2 -5.4 3 -5.8C0.6 -6.2 -1.6 -5.6 -3.4 -5.6C-5.4 -5.4 -6.8 -3.6 -7.4 -0.6Z';
 const FIST = 'M-0.6 -2.6C1.4 -3.2 4.2 -3.4 5.7 -2.4C7 -1.4 7 1.6 5.7 2.6C4.2 3.4 1.6 3.3 -0.6 2.7Z';
@@ -280,7 +281,7 @@ export function makeBody({ F, mode, muscles, uid, defs }) {
   const ears = F ? [el('ellipse', 'ear', { cx: 7.1, cy: 0.6, rx: 1.4, ry: 2.3 }), el('ellipse', 'ear', { cx: -7.1, cy: 0.6, rx: 1.4, ry: 2.3 })] : [];
   head.append(...ears, pth(F ? HEAD_F : HEAD_S, 'hd'));
   if (rich) head.append(pth(F ? HEAD_F : HEAD_S, 'hd-shade'));
-  if (!F) head.append(el('ellipse', 'ear', { cx: -1.8, cy: 0.6, rx: 1.5, ry: 2.4 }), el('ellipse', 'eye', { cx: 5.3, cy: -0.4, rx: 0.55, ry: 0.75 }));
+  if (!F) head.append(el('ellipse', 'ear ear-s', { cx: -1.2, cy: 0.9, rx: 1.25, ry: 2 }), el('ellipse', 'eye', { cx: 5.4, cy: -0.5, rx: 0.5, ry: 0.7 }), pth('M4.2 -2.4Q5.4 -2.9 6.6 -2.4', 'brow'));
   else if (rich) head.append(pth('M0.2 -0.4L0.9 2.6L-0.3 2.9', 'nose'));
   head.append(pth(F ? HAIR_F : HAIR_S, 'hair'));
   T.g.append(head);
@@ -316,10 +317,11 @@ export function makeBody({ F, mode, muscles, uid, defs }) {
   }
   function drawSeg(s, J) {
     const fr = frameFor(J, s.seg, s.i);
-    const d = outlinePath(fr, s.prof, s.seg === 'torso' ? 0.5 : 0.95, 0.95);
+    const d = outlinePath(fr, s.prof, s.seg === 'torso' ? 0.5 : 0.95, 0.95, !rich);
     s.ol.setAttribute('d', d); s.fill.setAttribute('d', d);
-    for (const b of s.bands) b.e.setAttribute('d', bandPath(fr, s.prof, b.d));
-    for (const m of s.mus) m.e.setAttribute('d', bandPath(fr, s.prof, m.d));
+    const nb = rich ? 7 : 4;
+    for (const b of s.bands) b.e.setAttribute('d', bandPath(fr, s.prof, b.d, nb));
+    for (const m of s.mus) m.e.setAttribute('d', bandPath(fr, s.prof, m.d, nb));
     if (s.con) s.con.setAttribute('d', contourPath(fr, s.prof, CON[s.seg]));
     if (s.shade) {
       s.shade.setAttribute('d', d);
@@ -429,12 +431,12 @@ function bandEnds(c, J) {
 export const PROPS = {
   barbell: {
     make(c) {
-      const r = c.r || 15, g = grp('eq');
+      const r = c.r || 17, g = grp('eq');
       g.append(circ(0, 0, r, 'eq-plate'), circ(0, 0, r * 0.84, 'eq-plate-in'), circ(0, 0, r * 0.44, 'eq-plate-hub'),
         pth(arc(r * 0.92, 250, 330), 'eq-hl'), circ(0, 0, 3.6, 'eq-sleeve'), circ(0, 0, 1.7, 'eq-hole'));
       return { front: true, el: g, upd(J) { place(g, barbellAt(c, J)); } };
     },
-    pts: (c, J) => [[...barbellAt(c, J), (c.r || 15) + 1]],
+    pts: (c, J) => [[...barbellAt(c, J), (c.r || 17) + 1]],
   },
   barF: {
     make(c) {
@@ -649,15 +651,16 @@ export const PROPS = {
       const g = grp('eq'), r = pth('', 'eq-jrope'), hd = pth('', 'eq-knob');
       g.append(r, hd);
       return { front: true, el: g, upd(J) {
-        const p = J.a1.grip, ctr = [J.hip[0] + 4, J.hip[1] - 4], a = J.p.rp * RAD, R = 86;
-        const q = [ctr[0] + Math.sin(a) * R * 0.55, ctr[1] + Math.cos(a) * R];
-        const ctrl = [q[0] + Math.sin(a) * 10, q[1] + Math.cos(a) * 6];
-        r.setAttribute('d', `M${fp(p)}Q${fp(ctrl)} ${fp(q)}`);
+        // İp, gövdenin çevresinde (yan görünümde ön-arka düzleminde) döner: elden çıkıp en uç noktadan geri ele
+        const p = J.a1.grip, ctr = [J.hip[0] + 2, J.hip[1] - 6], a = J.p.rp * RAD, R = 84;
+        const at = (k, s = 1) => [ctr[0] + Math.sin(a + k) * R * 0.5 * s, ctr[1] + Math.cos(a + k) * R * s];
+        const q = at(0), c1 = at(-0.75, 1.02), c2 = at(0.75, 1.02);
+        r.setAttribute('d', `M${fp(p)}Q${fp(c1)} ${fp(q)}Q${fp(c2)} ${fp(add(p, [0.8, 0.4]))}`);
         const fd = dir(J.a1.pf);
         hd.setAttribute('d', capsule(add(p, fd, -3), add(p, fd, 3), 1.5));
       } };
     },
-    pts: J => [],
+    pts: (c, J) => [[J.hip[0] + 2, J.hip[1] - 90, 1], [J.hip[0] + 2 + 42, J.hip[1] - 6, 1], [J.hip[0] + 2 - 42, J.hip[1] - 6, 1]],
   },
   pulldown: {
     make(c) {

@@ -2,6 +2,7 @@
 // Açılar derece. Yan görünümde figür sağa bakar. t: gövde eğimi (+ öne; 90 yüzüstü, -90 sırtüstü),
 // a: [omuz, dirsek], l: [kalça, diz, ayak bileği]. ik: { h1, h2 (el bileği), f1, f2 (ayak bileği) } hedefleri.
 // anc: [nokta, x, y] figürü o noktaya sabitler. 1 = yakın taraf (ön görünümde ekranın sağı), 2 = uzak taraf.
+// İsteğe bağlı cue: { pt: 'hip'|'grip1'|… (yön okunun izlediği nokta), off, side, arrow: false, ang: 'knee'|'elb'|'hip'|false }.
 import { HIP_Y, ANK, FLOOR } from './figure.js';
 
 const Y = HIP_Y + 0.6;
@@ -226,7 +227,7 @@ export const A = {
     { t: -42, n: 20, anc: ['sh', 96, 140], ik: { h1: [131, 156], h2: [131, 156], f1: [166, ANK], f2: [162, ANK] } },
     { t: -90, n: 34, anc: ['sh', 96, 140], ik: { h1: [134, 124], h2: [134, 124], f1: [166, ANK], f2: [162, ANK] } }, { down: 1000, up: 1100, bottom: 500 }) },
 
-  'donkey-kick': { props: [MAT], phases: ['Dört ayak pozisyonu', 'Topuğu tavana it — nefes ver', 'Kontrollü indir — nefes al'], frames: rep(
+  'donkey-kick': { props: [MAT], cue: { ang: false }, phases: ['Dört ayak pozisyonu', 'Topuğu tavana it — nefes ver', 'Kontrollü indir — nefes al'], frames: rep(
     QUAD, { ...QUAD, l1: [-22, 92, -10] }, { down: 800, up: 900, bottom: 400 }) },
 
   'side-leg-raise': { view: 'front', props: [MAT], phases: ['Yan yat, bacaklar düz', 'Üstteki bacağı kaldır — nefes ver', 'Yavaşça indir — nefes al'], frames: rep(
@@ -341,7 +342,7 @@ export const A = {
     HANG({ l1: [10, 62, 30], l2: [4, 66, 30] }),
     HANG({ t: -8, cv: 0.25, l1: [104, 100, 20], l2: [100, 104, 20] }), { down: 900, up: 1300 }) },
 
-  'bird-dog': { props: [MAT], phases: ['Dört ayak pozisyonu', 'Karşı kol ve bacağı uzat — nefes ver', 'Geri getir, diğer taraf'], frames: [
+  'bird-dog': { props: [MAT], cue: { ang: false }, phases: ['Dört ayak pozisyonu', 'Karşı kol ve bacağı uzat — nefes ver', 'Geri getir, diğer taraf'], frames: [
     F(QUAD, 0, 900, 300),
     F({ ...QUAD, a1: [178, 0], l2: [-2, 0, 60], ik: { h1: null, h2: [131, 181] } }, 1, 1000, 500),
     F(QUAD, 2, 900, 300),
@@ -424,7 +425,7 @@ export const A = {
     { r: [80, 165], t: -22, n: 4, ik: { h1: [96, 130], h2: [96, 130], f1: [150, 160], f2: [147, 160] }, fa: { f1: 150, f2: 150 } }, { down: 800, up: 1300, top: 150, bottom: 150 }) },
 
   // ======================= ESNEME / MOBİLİTE =======================
-  'cat-cow': { props: [MAT], phases: ['Dört ayak pozisyonu', 'Deve: belini çukurlaştır, başı kaldır — nefes al', 'Kedi: sırtını yuvarla, çeneyi indir — nefes ver'], frames: [
+  'cat-cow': { props: [MAT], cue: { ang: false }, phases: ['Dört ayak pozisyonu', 'Deve: belini çukurlaştır, başı kaldır — nefes al', 'Kedi: sırtını yuvarla, çeneyi indir — nefes ver'], frames: [
     F(QUAD, 0, 900, 200),
     F({ ...QUAD, cv: -0.55, n: -36 }, 1, 1400, 500),
     F({ ...QUAD, cv: 0.75, n: 36 }, 2, 1600, 500),
@@ -473,8 +474,8 @@ export const A = {
 
   'quad-stretch': { phases: PH.stretch, frames: [
     F(stand(), 0, 900, 400),
-    F({ r: [118, Y], t: 2, a1: [-22, 0], a2: [80, 10], l1: [-10, 150, 30], ik: { f2: [119, ANK] } }, 1, 1400, 400),
-    F({ r: [118, Y], t: 2, a1: [-24, 0], a2: [82, 10], l1: [-16, 152, 30], ik: { f2: [119, ANK] } }, 2, 1200, 1000),
+    F({ r: [118, Y], t: 2, a2: [80, 10], l1: [-10, 150, 30], ik: { f2: [119, ANK], h1: [100.5, 110.5] }, bend: { h1: 1 } }, 1, 1400, 400),
+    F({ r: [118, Y], t: 2, a2: [82, 10], l1: [-16, 152, 30], ik: { f2: [119, ANK], h1: [101.5, 108.2] }, bend: { h1: 1 } }, 2, 1200, 1000),
     F(stand(), 0, 1300, 0),
   ] },
 

@@ -78,12 +78,12 @@ export function cuesOf(anim) {
   // Eklem açısı: en çok değişen eklemin en dar (kilit) karesi
   let ang = null;
   if (cfg.ang !== false && c.view !== 'front') {
-    const cands = cfg.ang ? [cfg.ang] : ['knee', 'elb', 'hip'];
+    const cands = cfg.ang ? [cfg.ang] : ['knee'];
     let best = null;
     for (const j of cands) {
       const ds = Js.map(J => interior(J, j).deg);
       const mn = Math.min(...ds), mx = Math.max(...ds);
-      if ((cfg.ang || (mx - mn >= 40 && mn >= 55 && mn <= 150)) && (!best || mx - mn > best.range)) best = { j, range: mx - mn, ext: mn };
+      if ((cfg.ang || (mx - mn >= 40 && mn >= 60 && mn <= 125)) && (!best || mx - mn > best.range)) best = { j, range: mx - mn, ext: mn };
     }
     if (best) ang = { j: best.j, ext: best.ext, label: Math.round(best.ext / 5) * 5 + '°' };
   }
@@ -222,7 +222,8 @@ function buildScene(anim, muscles, mode) {
         const cr = ua[0] * va[1] - ua[1] * va[0];
         angArc.setAttribute('d', `M${fp(add(r.o, ua, R))}A${R} ${R} 0 0 ${cr > 0 ? 1 : 0} ${fp(add(r.o, va, R))}`);
         let bs = [ua[0] + va[0], ua[1] + va[1]]; const bl = Math.hypot(...bs) || 1; bs = [bs[0] / bl, bs[1] / bl];
-        const lp = add(r.o, bs, -13);
+        let lp = add(r.o, bs, -13);
+        if (lp[1] > FLOOR - 6) lp = add(r.o, bs, 15);
         angTxt.setAttribute('transform', `translate(${fp(lp)})`);
       }
     }
@@ -237,12 +238,25 @@ function buildScene(anim, muscles, mode) {
 // ---------- Ortak animasyon döngüsü ----------
 const active = new Set();
 let raf = 0;
+// Küçük resimler kare bütçesiyle (en eski çizilen önce) güncellenir; kaydırma akıcı kalır.
+const SM_INTERVAL = 50, SM_BUDGET = 5;
 function loop(now) {
   raf = 0;
+  const thumbs = [];
   for (const p of active) {
     if (!p.host.isConnected) { if (p._seen) { active.delete(p); io?.unobserve(p.host); } continue; }
     p._seen = true;
-    p._tick(now);
+    p._advance(now);
+    if (p.mode === 'sm') thumbs.push(p); else p.render();
+  }
+  if (thumbs.length) {
+    thumbs.sort((a, b) => a.lastDraw - b.lastDraw);
+    const t0 = performance.now();
+    for (const p of thumbs) {
+      if (now - p.lastDraw < SM_INTERVAL) continue;
+      if (performance.now() - t0 > SM_BUDGET) break;
+      p.lastDraw = now; p.render();
+    }
   }
   if (active.size) raf = requestAnimationFrame(loop);
 }
@@ -265,7 +279,7 @@ export function figure(anim, { mode = 'md', muscles = null, autoplay = true, spe
   const host = h('div', { class: 'fig-host fig-host-' + mode });
   let scene = null;
   const ctl = {
-    el: host, host, playing: autoplay && !reducedMotion, visible: !lazy, speed, t: startMs, last: 0, lastDraw: 0, phase: -1, onPhase, ghostOn: false,
+    el: host, host, mode, playing: autoplay && !reducedMotion, visible: !lazy, speed, t: startMs, last: 0, lastDraw: 0, phase: -1, onPhase, ghostOn: false,
     _ensure() { if (!scene) { scene = buildScene(anim, muscles, mode); host.append(scene.root); this.setGhost(this.ghostOn); this.render(); } },
     render() {
       if (!scene) return;
@@ -273,13 +287,10 @@ export function figure(anim, { mode = 'md', muscles = null, autoplay = true, spe
       scene.draw(solve(pose), this.t, phase);
       if (phase !== this.phase) { this.phase = phase; this.onPhase?.(phase); }
     },
-    _tick(now) {
+    _advance(now) {
       if (!this.last) this.last = now;
       const dt = Math.min(100, now - this.last); this.last = now;
       this.t += dt * this.speed;
-      if (mode === 'sm' && now - this.lastDraw < 40) return;
-      this.lastDraw = now;
-      this.render();
     },
     _sync() {
       if (this.visible) this._ensure();

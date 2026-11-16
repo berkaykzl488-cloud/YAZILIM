@@ -4,47 +4,111 @@
 .fig-host { position: relative; width: 100%; aspect-ratio: 240 / 200; }
 .fig-svg { display: block; width: 100%; height: auto; aspect-ratio: 240 / 200; overflow: hidden; }
 .fig-host .fig-svg { height: 100%; }
-.fig .body { fill: #e6e8ec; stroke: var(--fig-bg, #1a1a1e); stroke-width: 1.1; stroke-linejoin: round; }
-.fig .face { fill: #e6e8ec; }
-.fig .limb.far .body, .fig .limb.far .face { fill: #8e939c; }
-.fig .mus { fill: var(--accent); }
-.fig .mus-s { opacity: .45; }
-.fig .limb.far .mus { opacity: .55; }
-.fig .limb.far .mus-s { opacity: .28; }
-.fig-floor { stroke: rgba(255,255,255,.14); stroke-width: 1.5; stroke-linecap: round; }
-.fig-shadow { fill: rgba(0,0,0,.38); }
-.eq-plate { fill: #3a3d44; stroke: #a8adb6; stroke-width: 1.4; }
-.eq-ring { fill: none; stroke: #6f747d; stroke-width: 1.2; }
-.eq-hub, .eq-roll { fill: #a8adb6; }
-.eq-bar, .eq-barS { stroke: #a8adb6; stroke-width: 2.4; stroke-linecap: round; fill: none; }
-.eq-plateF { stroke: #4b4f57; stroke-linecap: round; fill: none; }
-.eq-head { fill: #5d626b; stroke: #a8adb6; stroke-width: 1; }
-.eq-far { opacity: .55; }
-.eq-handle { fill: none; stroke: #a8adb6; stroke-width: 2.2; stroke-linecap: round; }
-.eq-pad { stroke: #5b6069; stroke-width: 6; stroke-linecap: round; fill: none; }
-.eq-frame { stroke: #44484f; stroke-width: 2.6; stroke-linecap: round; fill: none; }
-.eq-box { fill: #2b2d33; stroke: #5b6069; stroke-width: 1.4; }
-.eq-wall { stroke: #393c43; stroke-width: 4; }
-.eq-mat { fill: #2a2c33; }
-.eq-stack { fill: #3a3d44; stroke: #5b6069; }
-.eq-cable { stroke: #8e939c; stroke-width: 1.1; fill: none; }
-.eq-band { stroke: var(--amber); stroke-width: 2.2; stroke-linecap: round; fill: none; opacity: .9; }
-.eq-rope { stroke: var(--amber); stroke-width: 1.6; fill: none; stroke-linecap: round; }
-.eq-seat { fill: #5b6069; }
+/* Ten, kıyafet ve ayakkabı tonları — yakın taraf açık, uzak taraf koyu */
+.fig { --sk: #d9dce1; --sk-d: #b9bdc5; --cl: #5d636e; --cl-s: #3d414a; --shoe: #e3e5e9; --sole: #f4f5f7; --hair: #33363d; --ol: #101013; --mus: #ff7a1a; --mus2: #ffb27a; }
+.fig .far { --sk: #8f949d; --sk-d: #7b8089; --cl-s: #2c2f36; --shoe: #8e939b; --sole: #a4a8af; --mus: #c45d17; --mus2: #a9805f; }
+.fig .ol { fill: var(--ol); stroke: var(--ol); stroke-width: 1.5; stroke-linejoin: round; }
+.fig .sk { fill: var(--sk); }
+.fig .cl { fill: var(--cl); }
+.fig .cl-s { fill: var(--cl-s); }
+.fig .shade { pointer-events: none; }
+.fig .con { fill: none; stroke: rgba(20, 20, 24, .2); stroke-width: .6; stroke-linecap: round; }
+.fig .mus { fill: var(--mus); }
+.fig .mus-p { fill-opacity: var(--mp, .9); }
+.fig .mus-s { fill: var(--mus2); fill-opacity: .72; }
+.fig .mus-line { fill: none; stroke: rgba(120, 40, 0, .45); stroke-width: .6; stroke-linecap: round; }
+.fig .hd { fill: var(--sk); stroke: var(--ol); stroke-width: 1.4; paint-order: stroke; }
+.fig .hd-shade { fill: url(#nvf-head); }
+.fig .hair { fill: var(--hair); stroke: var(--ol); stroke-width: 1; paint-order: stroke; }
+.fig .ear { fill: var(--sk-d); stroke: var(--ol); stroke-width: .8; paint-order: stroke; }
+.fig .eye { fill: #2b2d33; }
+.fig .ear-s { stroke: none; fill: #bfc3ca; }
+.fig .brow { fill: none; stroke: rgba(40,40,46,.5); stroke-width: .5; stroke-linecap: round; }
+.fig .nose { fill: none; stroke: rgba(30, 30, 36, .35); stroke-width: .6; stroke-linecap: round; stroke-linejoin: round; }
+.fig .hand { fill: var(--sk); stroke: var(--ol); stroke-width: 1.2; paint-order: stroke; stroke-linejoin: round; }
+.fig .shoe-up { fill: var(--shoe); stroke: var(--ol); stroke-width: 1.2; paint-order: stroke; stroke-linejoin: round; }
+.fig .shoe-sole { fill: var(--sole); stroke: var(--ol); stroke-width: 1.1; paint-order: stroke; stroke-linejoin: round; }
+.fig .shoe-stripe { fill: none; stroke: #8c919a; stroke-width: .9; stroke-linecap: round; }
+.fig-sm .fig .ol { stroke-width: 1.3; }
+.fig-ground { fill: url(#nvf-ground); }
+.fig-floor { stroke: rgba(255,255,255,.12); stroke-width: .8; fill: none; }
+.fig-shadow { fill: url(#nvf-shadow); }
+.fig-ghost { fill: rgba(255,255,255,.1); display: none; }
+.fig-ghost.on { display: inline; }
+/* Hareket ipuçları */
+.cue-line { fill: none; stroke: rgba(245,245,247,.8); stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 3.2 2.4; }
+.cue-head { fill: rgba(245,245,247,.9); }
+.cue-arc { fill: none; stroke: rgba(245,245,247,.85); stroke-width: .9; }
+.cue-lab rect { fill: rgba(16,16,19,.86); stroke: rgba(255,255,255,.25); stroke-width: .5; }
+.cue-lab text { fill: #f5f5f7; font: 700 6px var(--font-body); font-variant-numeric: tabular-nums; }
+
+/* Ekipman: nötr griler, ince parlaklıklar */
+.eq-steel { fill: none; stroke: #9da2ab; stroke-width: 2.4; stroke-linecap: round; }
+.eq-steel-hi { fill: none; stroke: rgba(255,255,255,.45); stroke-width: .7; stroke-linecap: round; }
+.eq-plate { fill: #2c2f35; stroke: #5a5f69; stroke-width: 1.1; }
+.eq-plate-in { fill: none; stroke: #43474f; stroke-width: 1.2; }
+.eq-plate-hub { fill: #34373e; stroke: #4c5059; stroke-width: .8; }
+.eq-hl { fill: none; stroke: rgba(255,255,255,.28); stroke-width: 1.1; stroke-linecap: round; }
+.eq-sleeve { fill: #b3b8c1; stroke: #6f747e; stroke-width: .8; }
+.eq-hole { fill: #1e2024; }
+.eq-sleeveS { fill: none; stroke: #b3b8c1; stroke-width: 3.6; stroke-linecap: butt; }
+.eq-plateF { fill: #2e3137; stroke: #5d626c; stroke-width: .9; stroke-linejoin: round; }
+.eq-plateF2 { fill: #3a3d44; stroke: #5d626c; stroke-width: .9; stroke-linejoin: round; }
+.eq-collar { fill: #8e939c; stroke: #5d626c; stroke-width: .6; }
+.eq-iron { fill: #3a3d44; stroke: #626772; stroke-width: 1; stroke-linejoin: round; }
+.eq-iron-d { fill: #26282d; stroke: #4a4e57; stroke-width: 1; stroke-linejoin: round; }
+.eq-iron-in { fill: none; stroke: #4f535c; stroke-width: .8; stroke-linejoin: round; }
+.eq-facet { fill: none; stroke: rgba(255,255,255,.12); stroke-width: .6; }
+.eq-collarS { fill: none; stroke: #8e939c; stroke-width: 1.6; stroke-linecap: round; }
+.eq-far { opacity: .6; }
+.eq-kb-h { fill: none; stroke: #4a4e57; stroke-width: 2.8; stroke-linecap: round; }
+.eq-kb-base { fill: none; stroke: #1f2125; stroke-width: 1.2; }
+.eq-handle { fill: #3a3d44; stroke: #8e939c; stroke-width: 1.4; stroke-linejoin: round; }
+.eq-grip { fill: #2a2c31; stroke: #6a6f78; stroke-width: .8; }
+.eq-knob { fill: #2a2c31; stroke: #6a6f78; stroke-width: .7; }
+.eq-rope2 { fill: none; stroke: #8a8f98; stroke-width: 1.8; stroke-linecap: round; }
+.eq-pad { fill: #3c4048; stroke: #23252a; stroke-width: .8; stroke-linejoin: round; }
+.eq-pad-hi { fill: none; stroke: rgba(255,255,255,.14); stroke-width: .8; stroke-linecap: round; }
+.eq-padS { fill: none; stroke: #3c4048; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.eq-frame { fill: none; stroke: #4b5059; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.eq-frameF { fill: #474b54; stroke: #2d3036; stroke-width: .6; }
+.eq-foot { fill: #2c2e34; stroke: #43474f; stroke-width: .6; }
+.eq-lever { fill: none; stroke: #555a63; stroke-width: 3.6; stroke-linecap: round; }
+.eq-box { fill: #34373e; stroke: #4f535c; stroke-width: 1; }
+.eq-box-in { fill: none; stroke: rgba(0,0,0,.25); stroke-width: .8; }
+.eq-slot { fill: #1f2125; }
+.eq-wall { fill: #222327; }
+.eq-wall-edge { stroke: #3b3e45; stroke-width: 1.2; }
+.eq-mat { fill: #2e3138; stroke: #23252a; stroke-width: .5; }
+.eq-mat-hi { fill: none; stroke: rgba(255,255,255,.1); stroke-width: .7; }
+.eq-barEnd { fill: #b3b8c1; stroke: #6f747e; stroke-width: .8; }
+.eq-stack { fill: #34373e; stroke: #24262b; stroke-width: .6; }
+.eq-pulley { fill: #3a3d44; stroke: #8e939c; stroke-width: 1.2; }
+.eq-cable { fill: none; stroke: #a3a8b1; stroke-width: .9; }
+.eq-band { fill: none; stroke: #6f8aa0; stroke-width: 2.4; stroke-linecap: round; }
+.eq-band-hi { fill: none; stroke: rgba(255,255,255,.3); stroke-width: .6; stroke-linecap: round; }
+.eq-jrope { fill: none; stroke: #9ea3ac; stroke-width: 1.1; stroke-linecap: round; }
+.eq-roll { fill: #3c4048; stroke: #23252a; stroke-width: .9; }
+.eq-roll-in { fill: #2a2c31; }
+.eq-wheel { fill: #2c2f35; stroke: #6a6f78; stroke-width: 1.6; }
 
 /* Oynatıcı */
 .fig-player { display: flex; flex-direction: column; gap: 12px; }
-.fig-stage { position: relative; border-radius: var(--radius-s); background: radial-gradient(120% 90% at 50% 0%, #26262c 0%, #1a1a1e 70%); --fig-bg: #1d1d22; padding: 6px 4px 0; overflow: hidden; }
-.fig-phase-label { position: absolute; left: 10px; top: 10px; right: 10px; font-size: 14px; font-weight: 600; color: var(--text); pointer-events: none; }
-.fig-ctrls { display: flex; align-items: center; gap: 10px; }
+.fig-stage { position: relative; border-radius: var(--radius-s); background: radial-gradient(120% 90% at 50% 0%, #2a2a30 0%, #1b1b20 72%); overflow: hidden; }
+.fig-phase-label { position: absolute; left: 12px; top: 10px; right: 12px; font-size: 14px; font-weight: 600; color: var(--text); pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.fig-ctrls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
+.fig-ghost-btn { min-height: 44px; }
+.fig-rm-note { margin: -4px 0 0; }
 .seg-ctl { display: inline-flex; padding: 3px; gap: 3px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line); }
-.seg-btn { min-width: 52px; min-height: 38px; border: none; border-radius: 999px; background: none; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; }
+.seg-btn { min-width: 50px; min-height: 38px; border: none; border-radius: 999px; background: none; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; }
 .seg-btn.on { background: var(--accent); color: var(--on-accent); }
 .phase-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-.phase { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 10px; border-radius: 12px; color: var(--muted); font-size: 15px; cursor: pointer; transition: background .2s, color .2s; }
+.phase { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 10px; border: none; border-radius: 12px; background: none; color: var(--muted); font: inherit; font-size: 15px; text-align: left; cursor: pointer; transition: background .2s, color .2s; }
+.phase:disabled { cursor: default; }
 .phase-n { width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.07); font-size: 13px; font-weight: 700; color: var(--text); }
 .phase.on { background: var(--accent-soft); color: var(--text); }
 .phase.on .phase-n { background: var(--accent); color: var(--on-accent); }
+@media (prefers-reduced-motion: reduce) { .phase { transition: none; } }
 
 /* ---------- Genel ---------- */
 .mod-workout .hud-sub { margin-bottom: 14px; }
@@ -283,6 +347,7 @@ body.wk-live #view { padding-bottom: calc(150px + var(--safe-b)); }
 .lab-big .lab-grid { grid-template-columns: repeat(6, 140px); }
 .lab-big .panel { padding: 6px; margin-bottom: 4px; }
 .lab-grid .fig-svg { background: #1d1d22; border-radius: 8px; }
+.lab-big .lab-grid { grid-template-columns: repeat(6, 200px); }
 
 @media (max-width: 389px) {
   .wk-swap-txt { display: none; }
