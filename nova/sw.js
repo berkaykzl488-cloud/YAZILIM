@@ -1,10 +1,23 @@
-// NOVA//2300 servis çalışanı: uygulama dosyalarını önbelleğe alır, çevrimdışı çalışır.
+// NOVA Fit servis çalışanı: uygulama dosyalarını önbelleğe alır, çevrimdışı çalışır.
 // Sürümü artırınca eski önbellek temizlenir.
 const VERSION = 'nova-v1';
 const SHELL = ['./', './index.html', './css/core.css', './js/app.js', './manifest.webmanifest', './icons/icon.svg'];
 
+// Kurulumda tüm uygulama dosyalarını (precache.json listesi) önbelleğe al: ilk açılıştan sonra tamamen çevrimdışı çalışır
+async function precacheAll(cache) {
+  await cache.addAll(SHELL);
+  try {
+    const res = await fetch('./precache.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const files = await res.json();
+    for (let i = 0; i < files.length; i += 20) {
+      await Promise.all(files.slice(i, i + 20).map(f => cache.add(f).catch(() => null)));
+    }
+  } catch { /* liste yoksa yalnız kabuk önbellekte kalır */ }
+}
+
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(precacheAll).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
