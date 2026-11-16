@@ -474,6 +474,7 @@ const PROPS = {
     const pth = svg('path', { class: 'eq-band' });
     g.append(pth);
     return { front: !c.back, el: g, upd(J) {
+      if (c.legs) { pth.setAttribute('d', `M${fp(lerpP(J.l1.k, J.l1.a, 0.15))}L${fp(lerpP(J.l2.k, J.l2.a, 0.15))}`); return; }
       const handsF = J.F ? [J.a1.grip, J.a2.grip] : [J.a1.grip];
       let d = '';
       for (const [idx, p] of handsF.entries()) {
@@ -511,7 +512,7 @@ const PROPS = {
   },
   legpress(c) {
     const g = svg('g', { class: 'eq' });
-    const rail = svg('path', { d: `M${c.x0} ${c.y0}L${c.x1} ${c.y1}`, class: 'eq-frame' });
+    const rail = svg('path', { class: 'eq-frame' });
     const seat = svg('path', { d: c.seat, class: 'eq-pad' });
     const plate = svg('path', { class: 'eq-pad' });
     g.append(rail, seat, plate);
@@ -520,6 +521,8 @@ const PROPS = {
       const nrm = [-u[1], u[0]];
       const a = add(add(L.heel, u, -6), nrm, 3), b = add(add(L.toe, u, 6), nrm, 3);
       plate.setAttribute('d', `M${fp(a)}L${fp(b)}`);
+      const m = lerpP(a, b, 0.5), q = add(m, nrm, 4);
+      rail.setAttribute('d', `M${fp(q)}L${f1(q[0] + (FLOOR - q[1]) * 0.9)} ${FLOOR}M${f1(q[0] + 10)} ${f1(q[1] + 10)}L${f1(q[0] + 60)} ${f1(q[1] - 40)}`);
     } };
   },
   rower(c) {

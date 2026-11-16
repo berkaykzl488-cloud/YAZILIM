@@ -87,7 +87,7 @@ export class MapView {
 
     this.canvas = h('canvas', { class: 'rn-map-canvas', 'aria-label': 'Rota haritası', role: 'img' });
     this.ctx = this.canvas.getContext('2d');
-    this.offlineBadge = h('div', { class: 'rn-map-offline hide' }, 'Harita görüntüsü yüklenemedi (internet yok)');
+    this.offlineBadge = h('div', { class: 'rn-map-offline hide', title: 'İnternet yok; rota yine de çiziliyor' }, 'Harita yüklenemedi');
     this.recenterBtn = h('button', { class: 'rn-map-btn rn-map-recenter hide', type: 'button', 'aria-label': 'Konumuma ortala',
       onClick: () => this.setFollow(true) }, icon('target', { size: 20 }), h('span', null, 'Ortala'));
     const controls = this.o.controls ? h('div', { class: 'rn-map-ctrls' },
@@ -119,7 +119,7 @@ export class MapView {
     this.W = Math.max(1, r.width); this.H = Math.max(1, r.height); this.dpr = dpr;
     this.canvas.width = Math.round(this.W * dpr); this.canvas.height = Math.round(this.H * dpr);
     this.canvas.style.width = this.W + 'px'; this.canvas.style.height = this.H + 'px';
-    if (this._pendingFit) this.fit(this._pendingFit.points, this._pendingFit.pad);
+    if (this._pendingFit) this.fit(this._pendingFit.points, this._pendingFit.pad, this._pendingFit.padTop);
     this.dirty = true;
   }
 
@@ -149,16 +149,18 @@ export class MapView {
     this.o.onFollowChange?.(on);
   }
   /** Rotayı görünüme sığdırır */
-  fit(points, pad = 36) {
+  fit(points, pad = 36, padTop = pad) {
     if (!points?.length) return;
-    if (this.W < 10 || this.H < 10) { this._pendingFit = { points, pad }; return; }
+    if (this.W < 10 || this.H < 10) { this._pendingFit = { points, pad, padTop }; return; }
     this._pendingFit = null;
     const b = boundsOf(points);
     const [x0, y1] = project(b.minLat, b.minLng), [x1, y0] = project(b.maxLat, b.maxLng);
     const dx = Math.max(x1 - x0, 1e-9), dy = Math.max(y1 - y0, 1e-9);
-    const z = Math.log2(Math.min((this.W - pad * 2) / (dx * TILE), (this.H - pad * 2) / (dy * TILE)));
+    const availH = Math.max(40, this.H - pad - padTop);
+    const z = Math.log2(Math.min((this.W - pad * 2) / (dx * TILE), availH / (dy * TILE)));
     this.zoom = clamp(Math.min(z, 17), MIN_Z, MAX_Z);
-    this.cx = (x0 + x1) / 2; this.cy = (y0 + y1) / 2;
+    const ws = TILE * 2 ** this.zoom;
+    this.cx = (x0 + x1) / 2; this.cy = (y0 + y1) / 2 - (padTop - pad) / 2 / ws;
     this.dirty = true;
   }
   centerOn(lat, lng, zoom) {

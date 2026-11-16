@@ -20,7 +20,7 @@ export default build('balik', [
     [235, 31.9, 12.65, 6.35, 3], 330],
 
   ['ton-balikli-makarna', 'Ton balıklı tam buğday makarna', '🍝', 'od mp', 2, 5, 12, 'kolay',
-    ['160 g tam buğday makarna', '160 g ton balığı|suyu süzülmüş', '200 g domates sosu', '1 tk zeytinyağı', '1 yk kapari', '1/2 demet maydanoz', '1 tutam pul biber'],
+    ['160 g tam buğday makarna', '160 g ton balığı|suyu süzülmüş', '200 g domates sosu', '1 tk zeytinyağı', '1 yk kapari', '25 g maydanoz', '1 tutam pul biber'],
     ['Makarnayı tuzlu suda paketteki süre kadar (yaklaşık 10 dakika) haşla.', 'Zeytinyağında domates sosunu ve kapariyi 4 dakika pişir.', 'Ton balığını ekleyip ufala, 1 dakika ısıt.', 'Süzülen makarnayı sosla karıştır, maydanoz ve pul biberle servis et.'],
     ['Öğrenci evi klasiği: ucuz, hızlı ve yüksek proteinli.'],
     [414, 32.7, 60, 5.25, 7.5], 330],
@@ -38,7 +38,7 @@ export default build('balik', [
     [226, 35.9, 7.45, 6.05, 1.8], 250],
 
   ['izgara-uskumru', 'Izgara uskumru ve soğan salatası', '🐠', 'gs', 2, 10, 10, 'kolay',
-    ['300 g uskumru fileto', '1 adet kırmızı soğan|piyazlık', '1 tk sumak', '1/2 demet maydanoz', '1 adet limon', '1 tutam tuz'],
+    ['300 g uskumru fileto', '1 adet kırmızı soğan|piyazlık', '1 tk sumak', '25 g maydanoz', '1 adet limon', '1 tutam tuz'],
     ['Soğanı sumak, tuz ve maydanozla ovuştur.', 'Uskumruyu kızgın ızgara tavada derili tarafından 4 dakika, diğer tarafından 2 dakika pişir.', 'Limon sıkıp soğan salatasıyla servis et.'],
     ['Uskumru kendi yağıyla piştiği için ekstra yağ gerekmez.'],
     [328, 29, 5, 21, 1.2], 220],
@@ -50,7 +50,7 @@ export default build('balik', [
     [335, 39, 26, 8.3, 3], 320],
 
   ['ton-balikli-kofte', 'Ton balıklı köfte', '🧆', 'mp od', 3, 15, 15, 'kolay',
-    ['320 g ton balığı|suyu süzülmüş', '1 adet yumurta', '40 g yulaf ezmesi', '1/2 adet soğan|rendelenmiş', '1/2 demet maydanoz', '1 tk zeytinyağı', '1 tk kimyon'],
+    ['320 g ton balığı|suyu süzülmüş', '1 adet yumurta', '40 g yulaf ezmesi', '1/2 adet soğan|rendelenmiş', '25 g maydanoz', '1 tk zeytinyağı', '1 tk kimyon'],
     ['Fırını 200 °C’ye ısıt.', 'Tüm malzemeleri yoğurup 9 köfte şekillendir.', 'Yağlı kâğıt serili tepsiye diz, üzerlerine zeytinyağı fırçala.', 'Fırında 15 dakika, yarısında çevirerek pişir.'],
     ['Yoğurtlu dereotu sosuyla çok iyi gider.'],
     [212, 31.7, 9.7, 5.2, 1.5], 140],

@@ -44,7 +44,7 @@ export default build('tavuk', [
     [356, 50, 11.5, 12.4, 4], 330],
 
   ['firinda-tavuk-kofte', 'Fırında tavuk köfte', '🧆', 'mp od', 4, 15, 20, 'kolay',
-    ['500 g tavuk kıyma|göğüs', '1 adet soğan|rendelenmiş, suyu sıkılmış', '40 g yulaf ezmesi', '1 adet yumurta', '1/2 demet maydanoz|ince kıyılmış', '1 tk kimyon', '1 tk pul biber', '1 tutam tuz'],
+    ['500 g tavuk kıyma|göğüs', '1 adet soğan|rendelenmiş, suyu sıkılmış', '40 g yulaf ezmesi', '1 adet yumurta', '25 g maydanoz|ince kıyılmış', '1 tk kimyon', '1 tk pul biber', '1 tutam tuz'],
     ['Fırını 200 °C’ye ısıt.', 'Tüm malzemeleri yoğur ve buzdolabında 15 dakika dinlendir.', 'Islak elle 16 köfte şekillendir, yağlı kâğıt serili tepsiye diz.', 'Fırında 20 dakika pişir.'],
     ['Köfteler buzdolabında 4 gün, dondurucuda 2 ay saklanır.'],
     [212, 32, 8.4, 5.1, 1.3], 150],
@@ -80,7 +80,7 @@ export default build('tavuk', [
     [255, 36, 8, 8.4, 2], 260],
 
   ['tavuk-tantuni', 'Fit tavuk tantuni', '🌯', 'od', 2, 10, 10, 'kolay',
-    ['300 g tavuk göğsü|ince şerit', '2 adet tam buğday lavaş', '1 adet domates|küp', '1 adet soğan|piyazlık', '1 tk sumak', '1 tk zeytinyağı', '1/2 demet maydanoz', '1 tk pul biber'],
+    ['300 g tavuk göğsü|ince şerit', '2 adet tam buğday lavaş', '1 adet domates|küp', '1 adet soğan|piyazlık', '1 tk sumak', '1 tk zeytinyağı', '25 g maydanoz', '1 tk pul biber'],
     ['Soğanı sumak ve maydanozla ovuştur.', 'Tavukları zeytinyağı ve pul biberle yüksek ateşte 6 dakika sotele.', 'Lavaşları tavada ısıt.', 'Tavuk, domates ve soğanı lavaşlara paylaştırıp sıkıca sar.'],
     null,
     [408, 41, 36.8, 10.1, 5], 280],

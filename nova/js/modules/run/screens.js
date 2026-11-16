@@ -134,7 +134,7 @@ export function renderStats(el) {
     const monthly = monthlySeries(12, runs).map((m, i, a) => ({ label: m.label.slice(0, 3), value: m.distM / 1000, highlight: i === a.length - 1 }));
     const chartBox = h('div');
     const paintChart = () => mount(chartBox, barChart(range === 'week' ? weekly : monthly, { height: 140, format: v => fmt.n(v, 1) + ' km' }),
-      h('p', { class: 'muted small', style: 'margin:8px 0 0' }, range === 'week' ? 'Son 12 hafta (km)' : 'Son 12 ay (km)'));
+      h('p', { class: 'muted small', style: 'margin:8px 0 0' }, range === 'week' ? 'Son 12 hafta, km (etiket: haftanın ilk günü)' : 'Son 12 ay, km'));
     paintChart();
     const effortRows = rec.efforts.map(e => e.best
       ? recRow('timer', `En hızlı ${e.label}`, fmt.duration(e.best.sec), `${fmt.date(runDay(e.best.run), 'short')} · ${paceText(type, e.D, e.best.sec)} ${paceUnit(type)}`, e.best.run)

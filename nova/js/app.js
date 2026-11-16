@@ -1,5 +1,5 @@
 // NOVA Fit — uygulama kabuğu
-import { h, icon, mount } from './core/ui.js';
+import { h, icon, mount, toast } from './core/ui.js';
 import * as router from './core/router.js';
 import { subscribe } from './core/store.js';
 import { levelInfo } from './core/xp.js';
@@ -60,6 +60,13 @@ function buildShell() {
   document.getElementById('app').replaceChildren(header, view, nav);
   return { nav, view };
 }
+
+let storageWarned = false;
+window.addEventListener('nova:storage-error', () => {
+  if (storageWarned) return;
+  storageWarned = true;
+  toast('Telefon hafızası dolu: son değişiklikler kaydedilemedi. Profil › Yedekleme ile verini yedekle.', { type: 'error', ms: 7000 });
+});
 
 async function boot() {
   const { nav, view } = buildShell();

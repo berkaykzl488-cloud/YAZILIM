@@ -6,7 +6,7 @@ import { cumDist, movingTimes, bestEffort } from './geo.js';
 // maxSpeed: m/sn üstü sıçrama sayılır; autoPause: bu hızın altı "duruyor" kabul edilir.
 export const TYPES = {
   run: { id: 'run', label: 'Koşu', icon: 'run', maxSpeed: 10.5, autoPause: 0.9, speedMode: false, xpPerKm: 15, gpx: 'running',
-    efforts: [[1000, '1 km'], [5000, '5 km'], [10000, '10 km'], [21097, 'Yarı maraton']] },
+    efforts: [[1000, '1 km'], [5000, '5 km'], [10000, '10 km'], [21097, 'yarı maraton']] },
   walk: { id: 'walk', label: 'Yürüyüş', icon: 'steps', maxSpeed: 7, autoPause: 0.45, speedMode: false, xpPerKm: 8, gpx: 'walking',
     efforts: [[1000, '1 km'], [5000, '5 km'], [10000, '10 km']] },
   bike: { id: 'bike', label: 'Bisiklet', icon: 'bike', maxSpeed: 25, autoPause: 1.6, speedMode: true, xpPerKm: 4, gpx: 'cycling',

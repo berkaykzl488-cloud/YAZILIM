@@ -1,8 +1,8 @@
 import { build } from './_build.js';
 
 export default build('baklagil', [
-  ['mercimek-koftesi', 'Mercimek köftesi', '🟠', 'vg mp od', 6, 20, 20, 'orta',
-    ['1 su bardağı kırmızı mercimek', '1 su bardağı köftelik bulgur', '1 adet soğan|ince doğranmış', '1 yk domates salçası', '1 yk biber salçası', '2 yk zeytinyağı', '3 su bardağı su', '1 demet yeşil soğan', '1/2 demet maydanoz', '1 tk kimyon', '1 tk pul biber'],
+  ['mercimek-koftesi', 'Mercimek köftesi', '🥬', 'vg mp od', 6, 20, 20, 'orta',
+    ['1 su bardağı kırmızı mercimek', '1 su bardağı köftelik bulgur', '1 adet soğan|ince doğranmış', '1 yk domates salçası', '1 yk biber salçası', '2 yk zeytinyağı', '3 su bardağı su', '6 adet yeşil soğan', '25 g maydanoz', '1 tk kimyon', '1 tk pul biber'],
     ['Mercimeği suyla birlikte kısık ateşte suyunu çekene kadar 15 dakika pişir.', 'Ocaktan alıp bulguru ekle, karıştır ve kapağı kapalı 15 dakika demlendir.', 'Soğanı zeytinyağında 4 dakika kavur, salçaları ekleyip 1 dakika çevir.', 'Kavrulmuş soğanı, baharatları ve ince kıyılmış yeşillikleri mercimeğe ekleyip yoğur.', 'Elinle sıkarak şekil ver, marul yaprağı ve limonla servis et.'],
     ['Buzdolabında 3 gün dayanır; yanına ayran eklersen protein artar.'],
     [258, 11.4, 42.3, 5.2, 7], 200],
@@ -20,7 +20,7 @@ export default build('baklagil', [
     [288, 15, 41.25, 7.3, 9.5], 350],
 
   ['firinda-falafel', 'Fırında falafel', '🧆', 'vg gs', 4, 20, 25, 'orta',
-    ['250 g kuru nohut|bir gece ıslatılmış, haşlanmamış', '1 adet soğan', '1 demet maydanoz', '1/2 demet kişniş', '3 adet sarımsak dişi', '1 tk kimyon', '1 tk kabartma tozu', '2 yk zeytinyağı', '1 tutam tuz'],
+    ['250 g kuru nohut|bir gece ıslatılmış, haşlanmamış', '1 adet soğan', '50 g maydanoz', '25 g kişniş', '3 adet sarımsak dişi', '1 tk kimyon', '1 tk kabartma tozu', '2 yk zeytinyağı', '1 tutam tuz'],
     ['Fırını 200 °C’ye ısıt.', 'Süzülmüş nohudu, soğanı, yeşillikleri ve sarımsağı rondoda iri kum kıvamına gelene kadar çek.', 'Baharatları ve kabartma tozunu ekleyip karıştır; 15 dakika buzdolabında beklet.', '16 top yap, hafifçe bastır ve zeytinyağı sürülmüş tepsiye diz.', 'Fırında 25 dakika, yarısında çevirerek pişir.'],
     ['Haşlanmış nohut kullanma; köfteler dağılır.', 'Tahinli yoğurt sosuyla servis et.'],
     [305, 12.6, 41, 10.6, 11], 150],
@@ -49,8 +49,8 @@ export default build('baklagil', [
     null,
     [244, 15.75, 35.75, 4.4, 9], 330],
 
-  ['fava', 'Fava', '🫛', 'vg gs mp', 4, 10, 40, 'orta',
-    ['250 g kuru bakla|kabuksuz, ıslatılmış', '1 adet soğan', '2 yk zeytinyağı', '1/2 demet dereotu', '1/2 adet limon|suyu', '700 ml su', '1 tutam tuz'],
+  ['fava', 'Fava', '🌿', 'vg gs mp', 4, 10, 40, 'orta',
+    ['250 g kuru bakla|kabuksuz, ıslatılmış', '1 adet soğan', '2 yk zeytinyağı', '25 g dereotu', '1/2 adet limon|suyu', '700 ml su', '1 tutam tuz'],
     ['Baklayı soğan ve suyla birlikte dağılana kadar 35 dakika pişir.', 'Blenderdan geçirip zeytinyağının yarısını, limonu ve tuzu ekle.', 'Kaplara dök ve buzdolabında 3 saat dinlendir.', 'Kalan zeytinyağı ve dereotuyla servis et.'],
     null,
     [285, 16.5, 38.5, 7.7, 12], 220],

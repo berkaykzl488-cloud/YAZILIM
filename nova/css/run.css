@@ -49,13 +49,12 @@ body.run-live .app-nav, body.run-live .app-header { display: none; }
 .rn-note.err > svg { color: var(--red); }
 .rn-hint { margin: -2px 0 12px; color: var(--muted); font-size: 14px; }
 
-.rn-startwrap { display: flex; justify-content: center; margin: -52px 0 14px; position: relative; z-index: 4; pointer-events: none; }
-.rn-start { pointer-events: auto; width: 108px; height: 108px; border-radius: 50%; border: 6px solid var(--bg); background: var(--accent); color: var(--on-accent);
+.rn-startwrap { display: flex; justify-content: center; margin: 4px 0 18px; }
+.rn-start { width: 104px; height: 104px; border-radius: 50%; border: none; background: var(--accent); color: var(--on-accent);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; font-size: 16px; font-weight: 700;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 1px var(--line); transition: transform .1s; }
+  box-shadow: 0 0 0 8px var(--accent-soft), 0 12px 30px rgba(0,0,0,.45); transition: transform .1s; }
 .rn-start:active { transform: scale(.96); }
 .rn-start svg { width: 30px; height: 30px; margin-left: 3px; }
-.rn-idle-mapwrap .rn-map-ctrls { bottom: 34px; }
 
 /* ---------- Ayarlar ---------- */
 .rn-settings { padding-bottom: 6px; }
@@ -89,9 +88,9 @@ body.run-live .app-nav, body.run-live .app-header { display: none; }
 .rn-map-attr { position: absolute; left: 0; bottom: 0; z-index: 2; padding: 3px 8px; font-size: 12px; color: var(--muted);
   background: rgba(12, 12, 14, .75); border-top-right-radius: 8px; }
 .rn-map-attr a { color: var(--muted); text-decoration: none; }
-.rn-map-offline { position: absolute; top: 10px; right: 10px; z-index: 2; max-width: calc(100% - 20px); padding: 6px 10px; border-radius: 10px;
+.rn-map-offline { position: absolute; top: 10px; right: 10px; z-index: 2; max-width: 46%; padding: 6px 12px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   background: rgba(12, 12, 14, .9); border: 1px solid var(--line-strong); font-size: 12px; color: var(--muted); }
-.rn-idle-mapwrap .rn-map-offline { top: 54px; left: 10px; right: auto; }
+.rn-live .rn-map-offline { top: auto; right: auto; left: 10px; bottom: 30px; max-width: calc(100% - 80px); }
 .rn-mapcard { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); margin-bottom: 12px; }
 .rn-map-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--muted); background: var(--panel); }
 .rn-legend { position: absolute; top: 10px; left: 10px; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 6px 12px;
@@ -132,7 +131,7 @@ body.run-live .app-nav, body.run-live .app-header { display: none; }
 .rn-live-grid.sub { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 10px 0; border-top: 1px solid var(--line); text-align: center; }
 .rn-live-grid.sub .rn-m-row { justify-content: center; }
 .rn-live-grid.sub .rn-m-val { font-size: 18px; }
-.rn-live-grid.sub .rn-m-unit { font-size: 12px; }
+.rn-live-grid.sub .rn-m-unit { display: none; }
 .rn-live-grid.sub .rn-m-label { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rn-pacer { display: flex; align-items: center; gap: 8px; min-height: 40px; margin: 0 0 10px; padding: 8px 14px; border-radius: 999px; background: var(--panel-hi); font-size: 14px; color: var(--muted); }
 .rn-pacer svg { flex: none; }
@@ -182,8 +181,8 @@ body.run-live .app-nav, body.run-live .app-header { display: none; }
 }
 
 /* ---------- Kayan şerit (başka sayfadayken) ---------- */
-.rn-pill { position: fixed; z-index: 40; left: 50%; transform: translateX(-50%); top: calc(var(--header-h) + var(--safe-t) + 8px);
-  max-width: calc(100vw - 32px); min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px;
+.rn-pill { position: fixed; z-index: 29; left: 16px; bottom: calc(var(--nav-h) + var(--nav-gap) + var(--safe-b) + 12px);
+  max-width: calc(100vw - 110px); min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px;
   border-radius: 999px; border: none; background: var(--accent); color: var(--on-accent); font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow); white-space: nowrap; }
 .rn-pill span { overflow: hidden; text-overflow: ellipsis; }
 .rn-pill b { font-variant-numeric: tabular-nums; }
@@ -218,7 +217,7 @@ textarea.input { resize: vertical; min-height: 80px; font-family: inherit; }
 .rn-split-pace { font-weight: 700; white-space: nowrap; }
 .rn-split-pace small { font-weight: 500; color: var(--muted); font-size: 12px; }
 .rn-split-bar { position: relative; height: 22px; display: flex; align-items: center; }
-.rn-split-bar i { display: block; height: 10px; border-radius: 5px; background: var(--accent-soft); border: 1px solid rgba(255,255,255,.04); }
+.rn-split-bar i { display: block; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--accent) 40%, var(--panel-hi)); }
 .rn-split-bar b { position: absolute; right: 0; font-size: 12px; font-weight: 700; color: var(--on-accent); background: var(--accent); padding: 1px 8px; border-radius: 999px; }
 .rn-split.best .rn-split-bar i { background: var(--accent); }
 .rn-split.best .rn-split-pace { color: var(--accent); }

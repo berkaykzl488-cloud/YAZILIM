@@ -36,7 +36,7 @@ export function routeMap(host, run, { height = 280 } = {}) {
   }
   const map = new MapView(box, { follow: false, live: false, controls: true });
   map.setRoute(run.points, run.breaks || []);
-  map.fit(run.points, 34);
+  map.fit(run.points, 36, 62);
   const legend = h('div', { class: 'rn-legend', 'aria-hidden': 'true' },
     h('span', null, 'Yavaş'), h('i', { style: { background: paceGradientCss() } }), h('span', null, 'Hızlı'));
   box.appendChild(legend);

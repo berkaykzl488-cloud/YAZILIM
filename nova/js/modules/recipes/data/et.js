@@ -2,7 +2,7 @@ import { build } from './_build.js';
 
 export default build('et', [
   ['izgara-kofte', 'Izgara köfte', '🍖', 'mp', 4, 15, 12, 'kolay',
-    ['500 g dana kıyma|yağsız', '1 adet soğan|rendelenmiş, suyu sıkılmış', '1 adet tam buğday ekmeği|bayat dilim, ufalanmış', '1 tk kimyon', '1 tk pul biber', '1/2 demet maydanoz|ince kıyılmış', '1 tutam tuz'],
+    ['500 g dana kıyma|yağsız', '1 adet soğan|rendelenmiş, suyu sıkılmış', '1 adet tam buğday ekmeği|bayat dilim, ufalanmış', '1 tk kimyon', '1 tk pul biber', '25 g maydanoz|ince kıyılmış', '1 tutam tuz'],
     ['Tüm malzemeleri 5 dakika iyice yoğur.', 'Harcı buzdolabında en az 30 dakika dinlendir.', 'Islak elle 16 köfte şekillendir.', 'Kızgın ızgara tavada her yüzünü 4-5 dakika pişir.'],
     ['Köfteleri sık çevirme; her yüzü bir kez pişsin, suyu içinde kalır.', 'Yanına bol yeşillik ve közlenmiş biber koy.'],
     [245, 26, 5.5, 12.8, 1], 130],
@@ -20,7 +20,7 @@ export default build('et', [
     [272, 32.8, 7.3, 12.1, 2], 260],
 
   ['hindi-kofte', 'Hindi köfte', '🧆', 'mp', 4, 15, 15, 'kolay',
-    ['500 g hindi kıyma', '1 adet soğan|rendelenmiş', '40 g yulaf ezmesi', '1 adet yumurta', '1/2 demet maydanoz', '1 tk kimyon', '1 tk tatlı toz biber', '1 tutam tuz'],
+    ['500 g hindi kıyma', '1 adet soğan|rendelenmiş', '40 g yulaf ezmesi', '1 adet yumurta', '25 g maydanoz', '1 tk kimyon', '1 tk tatlı toz biber', '1 tutam tuz'],
     ['Tüm malzemeleri yoğurup 10 dakika dinlendir.', 'Ceviz büyüklüğünde köfteler yap.', 'Yapışmaz tavada her yüzünü 5-6 dakika pişir ya da 200 °C fırında 15 dakika pişir.'],
     ['Hindi kıyma dana kıymaya göre daha az yağlıdır; kurumaması için fazla pişirme.'],
     [252, 28.2, 8.4, 11.3, 1.3], 140],
@@ -67,7 +67,7 @@ export default build('et', [
     null,
     [282, 31.7, 10.7, 12.9, 2.6], 260],
 
-  ['etli-bezelye', 'Etli bezelye', '🟢', 'gs', 4, 10, 45, 'kolay',
+  ['etli-bezelye', 'Etli bezelye', '🍲', 'gs', 4, 10, 45, 'kolay',
     ['250 g dana kuşbaşı|yağsız', '500 g bezelye', '1 adet havuç|küp', '1 adet patates|küp', '1 adet soğan', '1 yk domates salçası', '1 yk zeytinyağı', '500 ml sıcak su'],
     ['Eti zeytinyağında 6 dakika kavur, soğanı ekleyip 3 dakika çevir.', 'Salçayı ekle, ardından sıcak suyu ilave et; 25 dakika pişir.', 'Bezelye, havuç ve patatesi ekle.', 'Sebzeler yumuşayana kadar 15 dakika daha pişir.'],
     null,
@@ -80,7 +80,7 @@ export default build('et', [
     [360, 38.4, 30, 9.2, 4.5], 300],
 
   ['lavasta-fit-lahmacun', 'Lavaşta fit lahmacun', '🫓', 'od', 2, 15, 10, 'kolay',
-    ['2 adet tam buğday lavaş', '150 g dana kıyma|yağsız', '1 adet domates|çok ince doğranmış', '1 adet sivri biber|ince doğranmış', '1/2 adet soğan|rendelenmiş', '1 tk biber salçası', '1/2 demet maydanoz', '1 tk pul biber'],
+    ['2 adet tam buğday lavaş', '150 g dana kıyma|yağsız', '1 adet domates|çok ince doğranmış', '1 adet sivri biber|ince doğranmış', '1/2 adet soğan|rendelenmiş', '1 tk biber salçası', '25 g maydanoz', '1 tk pul biber'],
     ['Fırını 220 °C’ye ısıt.', 'Kıyma, sebzeler, salça ve baharatları iyice yoğur.', 'Harcı lavaşlara ince bir tabaka halinde yay.', 'Fırında 8-10 dakika, kenarları kızarana kadar pişir.', 'Maydanoz ve limonla servis et.'],
     null,
     [342, 21.6, 36.5, 11.7, 5], 210],

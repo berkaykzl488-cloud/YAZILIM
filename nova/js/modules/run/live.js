@@ -27,10 +27,11 @@ export function renderLive() {
   const mTime = metric('Süre', '00:00', '', 'hero');
   const mDist = metric('Mesafe', '0,00', 'km', 'big');
   const mPace = metric(speedMode ? 'Hız' : 'Tempo', '–', paceUnit(s.type), 'big');
-  const mAvg = metric(speedMode ? 'Ort. hız' : 'Ort. tempo', '–', paceUnit(s.type));
+  // Alt satırda yer dar: birimler etikette
+  const mAvg = metric(speedMode ? 'Ort. km/sa' : 'Ort. tempo', '–', paceUnit(s.type));
   const mKcal = metric('Kalori', '0', 'kcal');
-  const mElev = metric('Tırmanış', '0', 'm');
-  const mLast = metric(speedMode ? 'Son km hızı' : 'Son km', '–', paceUnit(s.type));
+  const mElev = metric('Tırmanış m', '0', 'm');
+  const mLast = metric(speedMode ? 'Son km, km/sa' : 'Son km', '–', paceUnit(s.type));
   const pacer = h('div', { class: 'rn-pacer hide', role: 'status' });
   const flash = h('div', { class: 'rn-flash hide', role: 'status', 'aria-live': 'assertive' });
 

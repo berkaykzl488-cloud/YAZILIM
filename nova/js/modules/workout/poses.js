@@ -45,7 +45,7 @@ const QUAD = { r: [88, 144], t: 90, n: -14, l1: [90, 90, 90], l2: [90, 90, 90], 
 const SUP = (o = {}) => ({ r: [122, 176], t: -90, n: 0, a1: [0, 0], a2: [0, 0], ...o, ik: { f1: [158, ANK], f2: [154, ANK], ...(o.ik || {}) } });
 const BENCH_LIE = { r: [150, 139], t: -90, n: 0 };
 const BFEET = { f1: [186, ANK], f2: [181, ANK] };
-const HANG = (o = {}) => ({ r: [124, 111], t: -2, l1: [6, 18, 30], l2: [-6, 22, 30], ...o, ik: { h1: [126, 20], h2: [126, 20], ...(o.ik || {}) } });
+const HANG = (o = {}) => ({ r: [124, 107], t: -2, l1: [14, 70, 30], l2: [2, 76, 30], ...o, ik: { h1: [126, 16], h2: [126, 16], ...(o.ik || {}) } });
 
 export const A = {
   // ======================= GÖĞÜS =======================
@@ -100,13 +100,13 @@ export const A = {
     { r: [120, 104], sh: 3, ik: { h1: [151, 19], h2: [89, 19] }, l1: [2, 0, 0], l2: [-2, 0, 0], ls: [1, 0.62] },
     { r: [120, 70], sh: -2, ik: { h1: [151, 19], h2: [89, 19] }, l1: [2, 0, 0], l2: [-2, 0, 0], ls: [1, 0.62] }, { down: 1000, up: 1400 }) },
 
-  chinup: { props: [{ type: 'pullbar', x: 126, y: 16 }], phases: PH.pull, frames: rep(
+  chinup: { props: [{ type: 'pullbar', x: 126, y: 12 }], phases: PH.pull, frames: rep(
     HANG(),
-    HANG({ r: [133, 80], t: -12, n: -4, l1: [20, 40, 30], l2: [10, 46, 30] }), { down: 1000, up: 1400 }) },
+    HANG({ r: [133, 76], t: -12, n: -4, l1: [24, 60, 30], l2: [12, 66, 30] }), { down: 1000, up: 1400 }) },
 
-  'inverted-row': { props: [{ type: 'pullbar', x: 92, y: 118, dx: -40 }], phases: PH.pull, frames: rep(
-    { t: -83, n: 4, anc: ['heel1', 214, FLOOR], l1: [0, 0, 10], l2: [0, 0, 10], ik: { h1: [94, 121], h2: [94, 121] }, bend: { h1: 1, h2: 1 } },
-    { t: -65, n: 8, anc: ['heel1', 214, FLOOR], l1: [0, 0, 10], l2: [0, 0, 10], ik: { h1: [94, 121], h2: [94, 121] }, bend: { h1: 1, h2: 1 } }) },
+  'inverted-row': { props: [{ type: 'pullbar', x: 94, y: 97, dx: -40 }], phases: PH.pull, frames: rep(
+    { t: -72, n: 4, anc: ['heel1', 214, FLOOR], l1: [0, 0, 10], l2: [0, 0, 10], ik: { h1: [95, 100], h2: [95, 100] }, bend: { h1: 1, h2: 1 } },
+    { t: -55, n: 8, anc: ['heel1', 214, FLOOR], l1: [0, 0, 10], l2: [0, 0, 10], ik: { h1: [95, 100], h2: [95, 100] }, bend: { h1: 1, h2: 1 } }) },
 
   'bb-row': { props: [BB], phases: PH.pull, frames: rep(
     { r: [96, 120], t: 60, n: -20, ik: { h1: [133, 146], h2: [133, 146], ...feet(120, 116) } },
@@ -142,9 +142,9 @@ export const A = {
     stand({ t: -4, ik: { h1: [158, 72], h2: [158, 72] } }),
     stand({ t: -6, ik: { h1: [128, 58], h2: [128, 58] }, bend: { h1: 1, h2: 1 } }), { down: 900, up: 1300 }) },
 
-  'back-extension': { props: [{ type: 'path', d: `M96 132L124 108M70 178L92 166M78 174L120 128L120 ${FLOOR}M104 ${FLOOR}L136 ${FLOOR}`, cls: 'eq-pad' }], phases: ['Kalçadan aşağı sarkın', 'Gövdeyi düz çizgiye kaldır — nefes ver', 'Kontrollü in — nefes al'], frames: rep(
-    { r: [110, 122], t: 140, n: 10, a1: [24, 140], a2: [24, 140], ik: { f1: [82, 170], f2: [79, 170] }, fa: { f1: 50, f2: 50 } },
-    { r: [110, 122], t: 34, n: 0, a1: [24, 140], a2: [24, 140], ik: { f1: [82, 170], f2: [79, 170] }, fa: { f1: 50, f2: 50 } }, { down: 1300, up: 1100 }) },
+  'back-extension': { props: [{ type: 'path', d: `M121 128L105 150M68 186L82 176`, cls: 'eq-pad' }, { type: 'path', d: `M110 150L112 ${FLOOR}M96 ${FLOOR}L128 ${FLOOR}M84 178L106 152` }], phases: ['Kalçadan aşağı sarkın', 'Gövdeyi düz çizgiye kaldır — nefes ver', 'Kontrollü in — nefes al'], frames: rep(
+    { r: [110, 122], t: 148, n: 10, a1: [24, 140], a2: [24, 140], ik: { f1: [78, 177], f2: [75, 177] }, fa: { f1: 60, f2: 60 } },
+    { r: [110, 122], t: 30, n: 0, a1: [24, 140], a2: [24, 140], ik: { f1: [78, 177], f2: [75, 177] }, fa: { f1: 60, f2: 60 } }, { down: 1300, up: 1100 }) },
 
   'db-shrug': { view: 'front', props: [DB], phases: ['Kollar yanda, omuzlar rahat', 'Omuzları kulaklara kaldır — nefes ver', 'Yavaşça indir — nefes al'], frames: rep(
     FW({ a1: [9, 4], a2: [9, 4], sh: 0 }), FW({ a1: [9, 4], a2: [9, 4], sh: 7 }), { down: 900, up: 700, bottom: 500 }) },
@@ -167,12 +167,12 @@ export const A = {
     { r: [109, 143], t: 14, n: -8, a1: [8, 8], a2: [8, 8], ik: { f1: [146, ANK], f2: [64, 146] }, fa: { f2: -96 } }, { down: 1400, up: 1000 }) },
 
   lunge: { phases: ['Başlangıç pozisyonu', 'Öne adım at ve in — nefes al', 'Topuktan itip dön — nefes ver'], frames: rep(
-    { r: [116, 118], t: 2, a1: [4, 12], a2: [-4, 12], ik: { f1: [150, ANK], f2: [86, 178] }, fa: { f2: 30 } },
-    { r: [117, 145], t: 4, a1: [6, 14], a2: [-6, 14], ik: { f1: [150, ANK], f2: [86, 178] }, fa: { f2: 30 } }) },
+    { r: [116, 118], t: 2, a1: [4, 12], a2: [-4, 12], ik: { f1: [150, ANK], f2: [86, 176] }, fa: { f2: 30 } },
+    { r: [117, 145], t: 4, a1: [6, 14], a2: [-6, 14], ik: { f1: [150, ANK], f2: [86, 176] }, fa: { f2: 30 } }) },
 
   'reverse-lunge': { phases: ['Ayakta başla', 'Geriye adım at ve in — nefes al', 'Öndeki topuktan it, dön — nefes ver'], frames: rep(
     stand({ r: [124, Y], ik: feet(127, 123) }),
-    { r: [104, 145], t: 6, a1: [10, 14], a2: [-8, 14], ik: { f1: [127, ANK], f2: [70, 178] }, fa: { f2: 30 } }, { down: 1200, up: 1100 }) },
+    { r: [104, 145], t: 6, a1: [10, 14], a2: [-8, 14], ik: { f1: [127, ANK], f2: [70, 176] }, fa: { f2: 30 } }, { down: 1200, up: 1100 }) },
 
   'side-lunge': { view: 'front', phases: ['Ayaklar geniş açık', 'Bir tarafa otur — nefes al', 'Topuktan itip ortala — nefes ver'], frames: [
     F(FW({ r: [120, 116], a1: [34, -86], a2: [34, -86], ik: { f1: [154, ANK], f2: [86, ANK] } }), 0, 1000, 400),
@@ -182,7 +182,7 @@ export const A = {
     F(FW({ r: [120, 116], a1: [34, -86], a2: [34, -86], ik: { f1: [154, ANK], f2: [86, ANK] } }), 2, 1000, 0),
   ] },
 
-  'leg-press': { props: [{ type: 'legpress', x0: 100, y0: 184, x1: 196, y1: 88, seat: 'M78 160L44 126M78 160L104 160M90 162L90 186' }], phases: PH.press, frames: rep(
+  'leg-press': { props: [{ type: 'legpress', x0: 128, y0: 184, x1: 204, y1: 100, seat: 'M78 160L44 126M78 160L104 160M90 162L90 186' }], phases: PH.press, frames: rep(
     { r: [86, 150], t: -50, n: 14, a1: [40, 20], a2: [40, 20], ik: { f1: [114, 120], f2: [111, 120] }, fa: { f1: -135, f2: -135 } },
     { r: [86, 150], t: -50, n: 14, a1: [40, 20], a2: [40, 20], ik: { f1: [134, 100], f2: [131, 100] }, fa: { f1: -135, f2: -135 } }, { down: 900, up: 1400 }) },
 
@@ -223,8 +223,8 @@ export const A = {
     SUP({ t: -126, n: 36, anc: ['sh', 78, 176], a1: [-36, 0], a2: [-36, 0], l1: [30, 10, 10], ik: { f1: null, f2: [154, ANK] } }), { down: 900, up: 1100, bottom: 500 }) },
 
   'hip-thrust': { props: [{ type: 'bench', x: 26, w: 72, y: 146 }, { type: 'barbell', at: 'hip' }], phases: PH.bridge, frames: rep(
-    { t: -42, n: 20, anc: ['sh', 96, 140], a1: [70, 40], a2: [70, 40], ik: { f1: [166, ANK], f2: [162, ANK] } },
-    { t: -90, n: 34, anc: ['sh', 96, 140], a1: [70, 40], a2: [70, 40], ik: { f1: [166, ANK], f2: [162, ANK] } }, { down: 1000, up: 1100, bottom: 500 }) },
+    { t: -42, n: 20, anc: ['sh', 96, 140], ik: { h1: [131, 156], h2: [131, 156], f1: [166, ANK], f2: [162, ANK] } },
+    { t: -90, n: 34, anc: ['sh', 96, 140], ik: { h1: [134, 124], h2: [134, 124], f1: [166, ANK], f2: [162, ANK] } }, { down: 1000, up: 1100, bottom: 500 }) },
 
   'donkey-kick': { props: [MAT], phases: ['Dört ayak pozisyonu', 'Topuğu tavana it — nefes ver', 'Kontrollü indir — nefes al'], frames: rep(
     QUAD, { ...QUAD, l1: [-22, 92, -10] }, { down: 800, up: 900, bottom: 400 }) },
@@ -234,8 +234,8 @@ export const A = {
     { r: [128, 172], rot: -90, n: 20, a1: [0, 10], a2: [180, 40], l1: [42, 0, 0], l2: [0, 0, 0] }, { down: 900, up: 900, bottom: 400 }) },
 
   'cable-kickback': { props: [{ type: 'cable', x: 186, y: 178, attach: 'ankle' }, { type: 'path', d: `M190 22L190 ${FLOOR}` }], phases: ['Öne eğil, tutamaktan tut', 'Bacağı geriye it — nefes ver', 'Kontrollü geri getir — nefes al'], frames: rep(
-    { r: [114, Y + 2], t: 22, n: -10, l1: [16, 14, 10], ik: { h1: [168, 96], h2: [168, 96], f2: [124, ANK] } },
-    { r: [114, Y + 2], t: 22, n: -10, l1: [-28, 8, 10], ik: { h1: [168, 96], h2: [168, 96], f2: [124, ANK] } }, { down: 900, up: 1000, bottom: 350 }) },
+    { r: [114, Y - 2], t: 22, n: -10, l1: [16, 14, 10], ik: { h1: [168, 96], h2: [168, 96], f2: [124, ANK] } },
+    { r: [114, Y - 2], t: 22, n: -10, l1: [-28, 8, 10], ik: { h1: [168, 96], h2: [168, 96], f2: [124, ANK] } }, { down: 900, up: 1000, bottom: 350 }) },
 
   'kb-swing': { props: [{ type: 'kettlebell' }], phases: ['Kalçadan eğil, kettlebell bacak arasında', 'Kalçayı patlayıcı it — nefes ver', 'Kontrollü salın — nefes al'], frames: [
     F({ r: [93, 128], t: 64, n: -22, a1: [42, 0], a2: [42, 0], ik: feet(120, 116) }, 0, 700, 120, 'out'),
@@ -318,10 +318,10 @@ export const A = {
     { r: [124, 177], t: -90, n: 0, a1: [0, 0], a2: [0, 0], l1: [86, 0, 10], l2: [86, 0, 10] }, { down: 1000, up: 1400 }) },
 
   'russian-twist': { view: 'front', phases: ['Otur, gövde hafif geride', 'Sağa dön — nefes ver', 'Sola dön — nefes ver'], frames: [
-    F({ r: [120, 166], t: 0, l1: [24, 0, 0], l2: [24, 0, 0], ls: [0.42, 0.42], ik: { h1: [124, 132], h2: [116, 132] }, bend: { h1: 1, h2: 1 } }, 0, 600, 200),
-    F({ r: [120, 166], t: 18, l1: [24, 0, 0], l2: [24, 0, 0], ls: [0.42, 0.42], ik: { h1: [154, 152], h2: [148, 152] }, bend: { h1: 1, h2: 1 } }, 1, 650, 150),
-    F({ r: [120, 166], t: -18, l1: [24, 0, 0], l2: [24, 0, 0], ls: [0.42, 0.42], ik: { h1: [92, 152], h2: [86, 152] }, bend: { h1: 1, h2: 1 } }, 2, 1000, 150),
-    F({ r: [120, 166], t: 0, l1: [24, 0, 0], l2: [24, 0, 0], ls: [0.42, 0.42], ik: { h1: [124, 132], h2: [116, 132] }, bend: { h1: 1, h2: 1 } }, 0, 650, 0),
+    F({ r: [120, 166], t: 0, l1: [68, 0, 0], l2: [68, 0, 0], ls: [0.5, 0.42], ik: { h1: [124, 132], h2: [116, 132] }, bend: { h1: 1, h2: 1 } }, 0, 600, 200),
+    F({ r: [120, 166], t: 18, l1: [68, 0, 0], l2: [68, 0, 0], ls: [0.5, 0.42], ik: { h1: [154, 152], h2: [148, 152] }, bend: { h1: 1, h2: 1 } }, 1, 650, 150),
+    F({ r: [120, 166], t: -18, l1: [68, 0, 0], l2: [68, 0, 0], ls: [0.5, 0.42], ik: { h1: [92, 152], h2: [86, 152] }, bend: { h1: 1, h2: 1 } }, 2, 1000, 150),
+    F({ r: [120, 166], t: 0, l1: [68, 0, 0], l2: [68, 0, 0], ls: [0.5, 0.42], ik: { h1: [124, 132], h2: [116, 132] }, bend: { h1: 1, h2: 1 } }, 0, 650, 0),
   ] },
 
   'bicycle-crunch': { props: [MAT], phases: ['Omuzlar hafif yukarıda', 'Sağ dizi çek, gövdeni çevir', 'Sol dizi çek, gövdeni çevir'], frames: [
@@ -337,8 +337,8 @@ export const A = {
     F({ r: [124, 177], t: -90, a1: [90, 0], a2: [90, 0], l1: [90, 90, 10], l2: [90, 90, 10] }, 2, 1000, 0),
   ] },
 
-  'hanging-knee-raise': { props: [{ type: 'pullbar', x: 126, y: 16 }], phases: ['Bardan asıl, gövde sabit', 'Dizleri göğse çek — nefes ver', 'Kontrollü indir — nefes al'], frames: rep(
-    HANG({ l1: [0, 4, 30], l2: [-2, 6, 30] }),
+  'hanging-knee-raise': { props: [{ type: 'pullbar', x: 126, y: 12 }], phases: ['Bardan asıl, gövde sabit', 'Dizleri göğse çek — nefes ver', 'Kontrollü indir — nefes al'], frames: rep(
+    HANG({ l1: [10, 62, 30], l2: [4, 66, 30] }),
     HANG({ t: -8, cv: 0.25, l1: [104, 100, 20], l2: [100, 104, 20] }), { down: 900, up: 1300 }) },
 
   'bird-dog': { props: [MAT], phases: ['Dört ayak pozisyonu', 'Karşı kol ve bacağı uzat — nefes ver', 'Geri getir, diğer taraf'], frames: [
@@ -350,8 +350,10 @@ export const A = {
   ] },
 
   'mountain-climber': { props: [MAT], phases: ['Yüksek plank', 'Sağ dizi göğse çek', 'Sol dizi göğse çek'], frames: [
-    F({ ...PU_TOP, anc: ['toe2', 52, FLOOR], l1: [96, 116, 10], l2: [0, 0, 0] }, 1, 330, 60),
-    F({ ...PU_TOP, anc: ['toe1', 52, FLOOR], l1: [0, 0, 0], l2: [96, 116, 10] }, 2, 330, 60),
+    F({ ...PU_TOP, anc: ['toe2', 52, FLOOR], l1: [122, 150, 95], l2: [0, 0, 0] }, 1, 170, 60),
+    F({ r: [117, 147], t: 67, n: -8, ik: { h1: [157, 181], h2: [155, 181] }, l1: [61, 150, 95], l2: [61, 150, 95] }, 2, 170, 0, 'lin'),
+    F({ ...PU_TOP, anc: ['toe1', 52, FLOOR], l1: [0, 0, 0], l2: [122, 150, 95] }, 2, 170, 60),
+    F({ r: [117, 147], t: 67, n: -8, ik: { h1: [157, 181], h2: [155, 181] }, l1: [61, 150, 95], l2: [61, 150, 95] }, 1, 170, 0, 'lin'),
   ] },
 
   // ======================= KARDİYO / HIIT =======================
@@ -364,7 +366,7 @@ export const A = {
   burpee: { props: [MAT], phases: ['Ayakta başla', 'Çömel, elleri yere koy', 'Ayakları geri at — plank', 'Ayakları ellere çek', 'Yukarı sıçra, kollar yukarı'], frames: [
     F(stand(), 0, 500, 200),
     F({ r: [102, 150], t: 52, n: -18, ik: { ...feet(), h1: [152, 181], h2: [150, 181] } }, 1, 550, 80),
-    F({ ...PU_TOP, ik: { h1: [152, 181], h2: [150, 181] } }, 2, 450, 200),
+    F({ r: [118, 146], t: 67, n: -8, ik: { h1: [152, 181], h2: [150, 181], f1: [50, 175], f2: [47, 175] }, fa: { f1: 25, f2: 25 } }, 2, 450, 200),
     F({ r: [102, 150], t: 52, n: -18, ik: { ...feet(), h1: [152, 181], h2: [150, 181] } }, 3, 450, 80),
     F({ r: [118, Y - 16], t: -2, a1: [172, 8], a2: [172, 8], l1: [0, 4, 40], l2: [0, 4, 40] }, 4, 420, 80, 'out'),
     F(stand(), 0, 380, 0, 'in'),
@@ -389,9 +391,9 @@ export const A = {
   ] },
 
   'skater-jump': { view: 'front', phases: ['Tek bacak üstünde dengede', 'Yana sıçra', 'Diğer bacağa yumuşak in'], frames: [
-    F({ r: [146, 130], t: -6, a1: [20, 10], a2: [70, 20], l1: [4, 0, 0], l2: [-26, 0, 0], ls: [1, 0.75], ik: { f1: [150, ANK] } }, 2, 500, 150),
+    F({ r: [146, 125], t: -6, a1: [20, 10], a2: [70, 20], l1: [4, 0, 0], l2: [-26, 0, 0], ls: [1, 0.75], ik: { f1: [150, ANK] } }, 2, 500, 150),
     F({ r: [120, 104], t: 0, a1: [40, 10], a2: [40, 10], l1: [10, 0, 0], l2: [10, 0, 0] }, 1, 330, 0, 'out'),
-    F({ r: [94, 130], t: 6, a1: [70, 20], a2: [20, 10], l1: [-26, 0, 0], l2: [4, 0, 0], ls: [1, 0.75], ik: { f2: [90, ANK] } }, 2, 330, 150, 'in'),
+    F({ r: [94, 125], t: 6, a1: [70, 20], a2: [20, 10], l1: [-26, 0, 0], l2: [4, 0, 0], ls: [1, 0.75], ik: { f2: [90, ANK] } }, 2, 330, 150, 'in'),
     F({ r: [120, 104], t: 0, a1: [40, 10], a2: [40, 10], l1: [10, 0, 0], l2: [10, 0, 0] }, 1, 330, 0, 'out'),
   ] },
 
@@ -445,8 +447,8 @@ export const A = {
 
   'childs-pose': { props: [MAT], phases: ['Dört ayak pozisyonu', 'Kalçayı topuklara götür — nefes ver', 'Kolları uzat ve gevşe — derin nefes'], frames: [
     F(QUAD, 0, 1000, 300),
-    F({ r: [98, 166], t: 96, n: 6, cv: 0.35, l1: [160, 160, 90], l2: [160, 160, 90], ik: { h1: [180, 180], h2: [178, 180] } }, 1, 1800, 400),
-    F({ r: [97, 167], t: 98, n: 8, cv: 0.4, l1: [160, 160, 90], l2: [160, 160, 90], ik: { h1: [182, 180], h2: [180, 180] } }, 2, 1500, 1000),
+    F({ r: [98, 162], t: 96, n: 6, cv: 0.35, ik: { h1: [180, 178], h2: [178, 178], f1: [94, 180], f2: [92, 180] }, fa: { f1: -90, f2: -90 } }, 1, 1800, 400),
+    F({ r: [97, 163], t: 98, n: 8, cv: 0.4, ik: { h1: [182, 178], h2: [180, 178], f1: [94, 180], f2: [92, 180] }, fa: { f1: -90, f2: -90 } }, 2, 1500, 1000),
     F(QUAD, 0, 1600, 0),
   ] },
 
@@ -462,11 +464,11 @@ export const A = {
   ] },
 
   'arm-circles': { cut: true, phases: ['Kollar yanda', 'Öne ve yukarı çevir', 'Geriye ve aşağı tamamla'], frames: [
-    F(stand({ a1: [0, 0], a2: [180, 0] }), 0, 400, 0, 'lin'),
-    F(stand({ a1: [90, 0], a2: [270, 0] }), 1, 450, 0, 'lin'),
-    F(stand({ a1: [180, 0], a2: [360, 0] }), 1, 450, 0, 'lin'),
-    F(stand({ a1: [270, 0], a2: [450, 0] }), 2, 450, 0, 'lin'),
-    F(stand({ a1: [360, 0], a2: [540, 0] }), 2, 450, 0, 'lin'),
+    F(stand({ a1: [0, 0], a2: [0, 0] }), 0, 400, 0, 'lin'),
+    F(stand({ a1: [90, 0], a2: [90, 0] }), 1, 450, 0, 'lin'),
+    F(stand({ a1: [180, 0], a2: [180, 0] }), 1, 450, 0, 'lin'),
+    F(stand({ a1: [270, 0], a2: [270, 0] }), 2, 450, 0, 'lin'),
+    F(stand({ a1: [360, 0], a2: [360, 0] }), 2, 450, 0, 'lin'),
   ] },
 
   'quad-stretch': { phases: PH.stretch, frames: [

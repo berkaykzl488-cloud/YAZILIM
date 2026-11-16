@@ -9,7 +9,12 @@ function rawGet(key) {
   try { return localStorage.getItem(PREFIX + key); } catch { return memory.get(key) ?? null; }
 }
 function rawSet(key, str) {
-  try { localStorage.setItem(PREFIX + key, str); } catch { memory.set(key, str); }
+  try { localStorage.setItem(PREFIX + key, str); }
+  catch (e) {
+    memory.set(key, str);
+    // Depolama dolu/kapalı: veri yalnız bellekte kalır, kullanıcı uyarılmalı
+    window.dispatchEvent(new CustomEvent('nova:storage-error', { detail: { key, error: e } }));
+  }
 }
 
 export function load(key, fallback = null) {

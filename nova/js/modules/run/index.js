@@ -24,9 +24,9 @@ function initPill() {
     const s = tracker.s;
     pill.classList.toggle('paused', s.status !== 'running' || s.autoPaused);
     mount(pill, h('i', { class: 'rn-dot' }), rIcon(typeOf(s.type).icon, { size: 16 }),
-      h('span', null, s.status === 'running' ? (s.autoPaused ? 'Otomatik duraklatıldı' : 'Kayıt sürüyor') : 'Duraklatıldı'),
       h('b', null, `${km(s.distM)} km · ${fmt.duration(tracker.movingSec())}`));
-    pill.setAttribute('aria-label', 'Kayda dön');
+    const st = s.status === 'running' ? (s.autoPaused ? 'otomatik duraklatıldı' : 'sürüyor') : 'duraklatıldı';
+    pill.setAttribute('aria-label', `Kayıt ${st}. Kayda dön`);
   };
   tracker.on(paint);
   window.addEventListener('hashchange', paint);

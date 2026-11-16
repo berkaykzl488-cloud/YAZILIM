@@ -13,13 +13,13 @@ export default build('kahvalti', [
     null,
     [265, 21.5, 12.3, 14, 3], 330],
 
-  ['muzlu-tarcinli-yulaf-lapasi', 'Muzlu tarçınlı yulaf lapası', '🥣', 'vj od', 1, 2, 6, 'kolay',
+  ['muzlu-tarcinli-yulaf-lapasi', 'Muzlu tarçınlı yulaf lapası', '🥣', 'vj od sz', 1, 2, 6, 'kolay',
     ['50 g yulaf ezmesi', '200 ml yarım yağlı süt', '1/2 adet muz|dilimlenmiş', '1 tk tarçın', '10 g ceviz içi|kırılmış'],
     ['Yulafı ve sütü küçük bir tencereye al.', 'Kısık ateşte sürekli karıştırarak 5 dakika pişir.', 'Koyulaşınca ocaktan al, tarçını karıştır.', 'Kaseye aktar, muz dilimleri ve cevizle süsle.'],
     ['Muz yeterince tatlandırdığı için şeker eklemene gerek yok.', 'Daha fazla protein için pişince 1 yemek kaşığı süzme yoğurt ekle.'],
     [395, 15, 54, 13, 7], 330],
 
-  ['protein-yulaf', 'Yaban mersinli protein yulaf', '🫐', 'vj', 1, 2, 5, 'kolay',
+  ['protein-yulaf', 'Yaban mersinli protein yulaf', '🫐', 'vj sz', 1, 2, 5, 'kolay',
     ['50 g yulaf ezmesi', '150 ml yarım yağlı süt', '30 g protein tozu|vanilyalı', '100 g yaban mersini'],
     ['Yulafı sütle birlikte 4 dakika kısık ateşte pişir.', 'Ocaktan alıp 1 dakika ılınmasını bekle.', 'Protein tozunu ekle ve topak kalmayana kadar hızlıca karıştır.', 'Yaban mersinini üzerine ekleyip servis et.'],
     ['Protein tozunu kaynarken eklersen topaklanabilir; mutlaka ılıyınca ekle.'],
@@ -37,13 +37,13 @@ export default build('kahvalti', [
     null,
     [262, 25.5, 4, 15.5, 1.5], 230],
 
-  ['muzlu-yulafli-pankek', 'Muzlu yulaflı pankek', '🥞', 'vj od', 2, 5, 10, 'kolay',
+  ['muzlu-yulafli-pankek', 'Muzlu yulaflı pankek', '🥞', 'vj od sz', 2, 5, 10, 'kolay',
     ['1 adet muz|olgun', '2 adet yumurta', '60 g yulaf ezmesi', '100 ml yarım yağlı süt', '1 tk kabartma tozu', '1 tk tarçın', '1/2 tk hindistan cevizi yağı|tava için'],
     ['Tüm malzemeleri (yağ hariç) blenderda pürüzsüz olana kadar çek.', 'Karışımı 5 dakika dinlendir, biraz koyulaşsın.', 'Tavayı yağla ve orta ateşte ısıt; her pankek için 2 yemek kaşığı hamur dök.', 'Yüzeyinde kabarcıklar çıkınca çevir, diğer tarafını 1 dakika pişir.'],
     ['Üzerine süzme yoğurt ve meyve koyarak protein oranını artırabilirsin.'],
     [275, 13, 34.5, 9, 3.5], 160],
 
-  ['lorlu-protein-pankek', 'Lorlu protein pankek', '🥞', 'vj', 2, 5, 10, 'kolay',
+  ['lorlu-protein-pankek', 'Lorlu protein pankek', '🥞', 'vj sz', 2, 5, 10, 'kolay',
     ['2 adet yumurta', '100 g lor peyniri', '30 g protein tozu|vanilyalı', '40 g yulaf ezmesi|un haline getirilmiş', '1/2 tk kabartma tozu', '1 tutam tarçın'],
     ['Tüm malzemeleri blenderda akışkan bir hamur olana kadar çek.', 'Yapışmaz tavayı orta ateşte ısıt.', 'Küçük pankekler dök, her yüzünü 1-2 dakika pişir.', 'Sıcak servis et; üzerine meyve ya da birkaç damla bal ekleyebilirsin.'],
     ['Hamur çok koyu olursa 2-3 yemek kaşığı süt ekle.'],
@@ -109,13 +109,13 @@ export default build('kahvalti', [
     ['Sabah aceleniz varsa folyoya sarıp yanına alabilirsin.'],
     [418, 28.5, 33.5, 18.5, 4.5], 220],
 
-  ['fistik-ezmeli-muzlu-tost', 'Fıstık ezmeli muzlu tost', '🍌', 'vg od hz', 1, 4, 3, 'kolay',
+  ['fistik-ezmeli-muzlu-tost', 'Fıstık ezmeli muzlu tost', '🍌', 'vg od hz sz', 1, 4, 3, 'kolay',
     ['2 adet tam buğday ekmeği|dilim', '1 yk fıstık ezmesi|şekersiz', '1/2 adet muz', '1 tutam tarçın'],
     ['Ekmekleri kızart.', 'Sıcakken fıstık ezmesini sür.', 'Muzu dilimleyip üzerine diz ve tarçın serp.'],
     ['Fıstık ezmesi alırken içeriğinde yalnızca fıstık ve tuz olanı seç.'],
     [300, 11.5, 42.5, 10.2, 6.5], 150],
 
-  ['tofu-scramble', 'Sebzeli tofu çırpma', '🟨', 'vg gs', 2, 8, 10, 'kolay',
+  ['tofu-scramble', 'Sebzeli tofu çırpma', '🍳', 'vg gs', 2, 8, 10, 'kolay',
     ['300 g tofu|sert, süzülmüş', '1 adet kırmızı biber|küp', '1/2 adet soğan|küçük doğranmış', '60 g ıspanak', '1 tk zerdeçal', '1 yk zeytinyağı', '1 tutam karabiber', '1 tutam tuz'],
     ['Tofuyu elinle iri parçalar halinde ufala.', 'Zeytinyağında soğan ve biberi 4 dakika sotele.', 'Tofuyu, zerdeçalı, tuz ve karabiberi ekleyip 4 dakika çevirerek pişir.', 'Ispanağı ekle, solana kadar 1 dakika karıştır ve servis et.'],
     ['Zerdeçal hem renk hem hafif bir yumurta havası verir.'],
