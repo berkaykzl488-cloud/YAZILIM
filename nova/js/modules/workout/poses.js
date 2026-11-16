@@ -87,9 +87,9 @@ export const A = {
     FW({ a1: [112, 14], a2: [112, 14], ik: { f1: [134, ANK], f2: [106, ANK] } }),
     FW({ a1: [12, -42], a2: [12, -42], ik: { f1: [134, ANK], f2: [106, ANK] } }), { down: 1000, up: 1400 }) },
 
-  'chest-dip': { props: [{ type: 'dipbar', x: 126, y: 118 }], phases: PH.push, frames: rep(
-    { r: [115, 110], t: 12, n: -6, l1: [-10, 80, 10], l2: [-14, 84, 10], ik: { h1: [126, 113], h2: [126, 113] } },
-    { r: [101, 132], t: 26, n: -10, l1: [-10, 80, 10], l2: [-14, 84, 10], ik: { h1: [126, 113], h2: [126, 113] } }) },
+  'chest-dip': { props: [{ type: 'dipbar', x: 126, y: 100 }], phases: PH.push, frames: rep(
+    { r: [115, 92], t: 12, n: -6, l1: [-10, 80, 10], l2: [-14, 84, 10], ik: { h1: [126, 95], h2: [126, 95] } },
+    { r: [101, 114], t: 26, n: -10, l1: [-10, 80, 10], l2: [-14, 84, 10], ik: { h1: [126, 95], h2: [126, 95] } }) },
 
   'db-pullover': { props: [{ type: 'bench', x: 64, w: 100, y: 147 }, { type: 'dumbbell', only: 1, neutral: true }], phases: ['Kollar göğüs üstünde', 'Başın arkasına indir — nefes al', 'Göğüs üstüne getir — nefes ver'], frames: rep(
     { ...BENCH_LIE, a1: [92, 12], a2: [92, 12], ik: BFEET },
