@@ -96,4 +96,59 @@ export default build('tavuk', [
     ['Fırını 200 °C’ye ısıt.', 'Tüm malzemeleri bir kapta harmanla.', 'Fırın poşetine al, ağzını bağla ve üzerine birkaç küçük delik aç.', 'Fırında 45 dakika pişir; poşeti dikkatlice aç.'],
     null,
     [325, 30.5, 20.3, 14, 2.8], 340],
+
+  // --- Ek tarifler ---
+  ['firinda-yogurtlu-tavuk-but', 'Fırında yoğurtlu tavuk but', '🍗', 'gs mp', 4, 10, 35, 'kolay',
+    ['800 g tavuk but|derisiz, kemiksiz', '150 g yoğurt', '1 yk domates salçası', '1 yk zeytinyağı', '2 adet sarımsak dişi|ezilmiş', '1 tk pul biber', '1 tk kimyon', '1 tutam tuz'],
+    ['Yoğurt, salça, zeytinyağı, sarımsak ve baharatları karıştır.', 'Tavuk butları bu karışıma bula; mümkünse 1 saat buzdolabında beklet.', 'Fırını 200 °C’ye ısıt ve butları tepsiye tek kat diz.', 'Yaklaşık 35 dakika, üstü kızarana kadar pişir.'],
+    ['Yoğurt eti yumuşatır; akşamdan marine edersen daha lezzetli olur.', 'Yanına bulgur pilavı ve çoban salata yakışır.'],
+    [305, 41.1, 3.8, 12.9, 0.5], 210],
+
+  ['tavuklu-bezelye', 'Tavuklu bezelye', '🫛', 'gs od', 4, 10, 30, 'kolay',
+    ['400 g tavuk göğsü|kuşbaşı', '400 g bezelye|dondurulmuş olabilir', '2 adet havuç|küp', '1 adet soğan', '1 yk domates salçası', '1 yk zeytinyağı', '400 ml su', '1 tutam tuz'],
+    ['Soğanı zeytinyağında 3 dakika kavur.', 'Tavukları ekleyip renk değiştirene kadar 5 dakika pişir.', 'Salçayı ekle, 1 dakika çevir; havuç, bezelye ve suyu ekle.', 'Kapağı kapalı, kısık ateşte 20 dakika pişir.'],
+    ['Dondurulmuş bezelye kullanırsan çözdürmeden ekleyebilirsin.'],
+    [262, 28.8, 21.8, 6.5, 7.5], 320],
+
+  ['tavuk-teriyaki-brokoli', 'Tavuk teriyaki ve brokoli', '🥦', 'mp', 3, 10, 15, 'kolay',
+    ['500 g tavuk göğsü|küp', '300 g brokoli|küçük parçalar', '3 yk soya sosu|az tuzlu', '1 tk bal', '1 tk zencefil|rendelenmiş', '2 adet sarımsak dişi', '1 tk mısır nişastası', '1 tk zeytinyağı', '1 tk susam'],
+    ['Soya sosu, bal, zencefil, sarımsak, nişasta ve 4 kaşık suyu karıştırıp sosu hazırla.', 'Tavukları zeytinyağında yüksek ateşte 6 dakika sotele.', 'Brokoliyi ve 3 kaşık suyu ekle, kapağı kapalı 4 dakika pişir.', 'Sosu ekle ve parlak bir hal alana kadar 2 dakika çevir; susamla servis et.'],
+    ['Haftalık hazırlık için pirinçle birlikte 3 kutuya böl.'],
+    [277, 42, 11.5, 6.8, 2.9], 250],
+
+  ['kremasiz-tavuklu-mantarli-makarna', 'Kremasız tavuklu mantarlı makarna', '🍝', 'od', 4, 10, 20, 'kolay',
+    ['300 g tavuk göğsü|küp', '200 g tam buğday makarna', '200 g mantar|dilimlenmiş', '200 ml yarım yağlı süt', '50 g lor peyniri', '1 adet sarımsak dişi', '1 tk zeytinyağı', '20 g parmesan|rendelenmiş', '1 tutam karabiber'],
+    ['Makarnayı paketteki süre kadar haşla ve süz.', 'Tavukları zeytinyağında 6 dakika pişir, mantar ve sarımsağı ekleyip 5 dakika daha sotele.', 'Süt ve lor peynirini blenderda çekip tavaya ekle; kaynatmadan 3 dakika ısıt.', 'Makarnayı ekle, parmesan ve karabiberle karıştırıp servis et.'],
+    ['Krema yerine süt ve lor kullanmak yağı üçte bire indirir.'],
+    [345, 30.4, 40.6, 7.2, 5.1], 270],
+
+  ['tavuklu-ispanakli-lavas-pizza', 'Tavuklu ıspanaklı lavaş pizza', '🍕', 'hz', 2, 5, 10, 'kolay',
+    ['2 adet tam buğday lavaş', '200 g tavuk göğsü|haşlanmış, didiklenmiş', '100 g ıspanak|doğranmış', '100 g domates|rendelenmiş', '60 g mozzarella|light', '1 tk kuru kekik', '1 tutam pul biber'],
+    ['Fırını 220 °C’ye ısıt.', 'Lavaşlara rendelenmiş domatesi sür, kekik serp.', 'Ispanak, tavuk ve mozzarellayı paylaştır.', 'Fırında kenarları kızarana kadar 8-10 dakika pişir.'],
+    ['Haşlanmış tavuk yoksa önceki akşamdan kalan ızgara tavuğu kullan.'],
+    [388, 37.1, 35.3, 10.2, 5.7], 250],
+
+  ['tavuklu-karnabahar-pilavi', 'Tavuklu karnabahar pilavı', '🍚', 'gs', 3, 10, 15, 'kolay',
+    ['400 g tavuk göğsü|küp', '500 g karnabahar|rendelenmiş', '1 adet soğan', '1 adet kırmızı biber|küp', '1 yk zeytinyağı', '1 tk zerdeçal', '1 tk kimyon', '1 tutam tuz'],
+    ['Karnabaharı rendeleyerek pirinç tanesi büyüklüğüne getir.', 'Tavukları zeytinyağında 6 dakika pişirip kenara al.', 'Aynı tavada soğan ve biberi 4 dakika kavur, karnabahar ve baharatları ekleyip 5 dakika çevir.', 'Tavukları geri ekle ve karıştırarak servis et.'],
+    ['Pirinç pilavına göre karbonhidrat yaklaşık beşte bire iner.'],
+    [276, 34.2, 15.6, 8.8, 5.5], 335],
+
+  ['fit-tavuk-iskender', 'Fit tavuk iskender', '🍽️', '', 3, 15, 20, 'orta',
+    ['500 g tavuk göğsü|ince şerit', '2 adet tam buğday lavaş|kare kesilmiş', '300 g domates|rendelenmiş', '1 yk domates salçası', '200 g yoğurt', '1 tk tereyağı', '1 tk zeytinyağı', '1 tk pul biber', '1 tutam tuz'],
+    ['Tavukları zeytinyağında yüksek ateşte suyunu çekene kadar 7 dakika sotele.', 'Domates ve salçayı ayrı bir tavada 8 dakika pişirip sos yap.', 'Lavaş parçalarını kuru tavada 2 dakika ısıt ve tabaklara diz.', 'Üzerine tavuk, domates sosu ve yoğurdu koy; tereyağında pul biberi kızdırıp gezdir.'],
+    ['Tereyağını sadece 1 tatlı kaşığı tutmak lezzeti korur, yağı azaltır.'],
+    [404, 44.7, 28.6, 11.4, 4.1], 325],
+
+  ['limonlu-tavuk-ve-nohut', 'Tek tepside limonlu tavuk ve nohut', '🍋', 'gs mp', 4, 10, 35, 'kolay',
+    ['600 g tavuk but|derisiz, kemiksiz', '400 g haşlanmış nohut', '1 adet kırmızı soğan|iri doğranmış', '1 adet limon|dilimlenmiş', '2 yk zeytinyağı', '1 tk kuru kekik', '1 tk tatlı toz biber', '1 tutam tuz'],
+    ['Fırını 210 °C’ye ısıt.', 'Tavuk, nohut ve soğanı zeytinyağı ve baharatlarla harmanla.', 'Tepsiye yay, aralara limon dilimlerini yerleştir.', '35 dakika, yarısında karıştırarak pişir.'],
+    ['Nohutlar fırında hafif çıtır olur; ertesi gün salataya da katabilirsin.'],
+    [422, 38.9, 31.4, 15.6, 8.4], 250],
+
+  ['fit-tavuk-cokertme', 'Fit tavuk çökertme', '🥔', 'gs', 3, 15, 30, 'orta',
+    ['400 g tavuk göğsü|ince şerit', '2 adet patates|kibrit doğranmış', '200 g yoğurt', '1 adet sarımsak dişi|ezilmiş', '1 yk zeytinyağı', '1 yk domates salçası', '1 tk pul biber', '1 tutam tuz'],
+    ['Patatesleri yarım kaşık zeytinyağıyla harmanla ve 220 °C fırında 25 dakika çıtır olana kadar pişir.', 'Tavukları kalan zeytinyağında 7 dakika sotele, salçayı ve 3 kaşık suyu ekleyip 2 dakika daha pişir.', 'Yoğurdu sarımsakla karıştır.', 'Tabağa önce patates, sonra yoğurt ve tavuğu koy; pul biber serpip servis et.'],
+    ['Kızartma yerine fırında patates kalorinin yarısını kurtarır.'],
+    [337, 35, 24.4, 10.4, 3], 275],
 ]);

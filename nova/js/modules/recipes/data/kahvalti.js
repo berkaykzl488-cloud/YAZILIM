@@ -126,4 +126,29 @@ export default build('kahvalti', [
     ['Loru, ıspanağı ve pul biberi karıştır.', 'Harcı lavaşın yarısına yay ve lavaşı katla.', 'Tavayı zeytinyağıyla hafifçe yağla, gözlemeyi her yüzü 3 dakika kızarana kadar pişir.', 'Dilimleyip sıcak servis et.'],
     null,
     [304, 16.5, 34, 11, 5], 230],
+
+  // --- Ek tarifler ---
+  ['yumurta-beyazli-sebzeli-omlet', 'Yumurta beyazlı sebzeli omlet', '🍳', 'vj gs', 1, 5, 7, 'kolay',
+    ['2 adet yumurta', '4 adet yumurta beyazı', '50 g ıspanak', '1/2 adet kırmızı biber|küp', '30 g beyaz peynir|az yağlı', '1 tk zeytinyağı', '1 tutam karabiber'],
+    ['Biber ve ıspanağı zeytinyağında 2 dakika sotele.', 'Yumurta ve beyazları çırpıp tavaya dök.', 'Peyniri serp, kısık ateşte kapağı kapalı 4 dakika pişir ve ikiye katla.'],
+    ['Yumurta beyazı eklemek kaloriyi az artırıp proteini ciddi yükseltir.'],
+    [348, 34.3, 8.6, 18.9, 2.8], 335],
+
+  ['yumurtali-tuzlu-yulaf', 'Yumurtalı tuzlu yulaf', '🥣', 'vj hz', 1, 2, 8, 'kolay',
+    ['1/2 su bardağı yulaf ezmesi', '250 ml su', '1 adet yumurta', '50 g ıspanak', '20 g beyaz peynir', '1 tutam pul biber', '1 tutam tuz'],
+    ['Yulafı su ve tuzla 4 dakika pişir.', 'Ispanağı ekle, 1 dakika karıştır.', 'Yumurtayı kır, karıştırarak 2 dakika pişir.', 'Peynir ve pul biberle servis et.'],
+    ['Tatlı yulaf sevmeyenler için doyurucu ve proteinli bir seçenek.'],
+    [297, 17.1, 33.6, 10.8, 5.9], 355],
+
+  ['lorlu-domatesli-tost', 'Lorlu domatesli tost', '🥪', 'vj hz od', 1, 3, 5, 'kolay',
+    ['2 adet tam buğday ekmeği', '60 g lor peyniri', '1 adet domates|halka', '20 g kaşar|light', '1 tutam kuru kekik'],
+    ['Ekmeklerin birine lor sür, domates ve kaşarı diz.', 'Kekik serp ve diğer ekmekle kapat.', 'Tost makinesinde 4-5 dakika kızart.'],
+    null,
+    [295, 21.2, 33, 8.8, 6.2], 245],
+
+  ['patatesli-ispanyol-omlet', 'Fırında patatesli İspanyol omleti', '🥔', 'vj gs', 2, 10, 25, 'orta',
+    ['4 adet yumurta', '1 adet patates|ince dilim', '1/2 adet soğan|ince doğranmış', '1 tk zeytinyağı', '50 ml yarım yağlı süt', '1 tutam tuz', '1 tutam karabiber'],
+    ['Patates ve soğanı zeytinyağıyla harmanlayıp küçük fırın kabında 200 °C’de 12 dakika pişir.', 'Yumurta, süt ve baharatları çırp, patateslerin üzerine dök.', 'Yumurta tutana kadar 12-13 dakika daha pişir.'],
+    ['Klasik tarifte patates bol yağda kızartılır; fırında pişirmek yağı onda bire indirir.'],
+    [252, 15.5, 19.2, 12.3, 2.5], 205],
 ]);

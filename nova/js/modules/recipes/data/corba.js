@@ -90,4 +90,17 @@ export default build('corba', [
     ['Soğanı zeytinyağında 3 dakika kavur, zencefili ekle.', 'Havuçları ve suyu ekleyip 20 dakika pişir.', 'Blenderdan geçir, hindistan cevizi sütünü ekle ve 2 dakika ısıt.'],
     null,
     [140, 1.9, 17.25, 7.2, 4.5], 330],
+
+  // --- Ek tarifler ---
+  ['kozlenmis-biber-corbasi', 'Közlenmiş kırmızı biber çorbası', '🫑', 'vg gs', 4, 10, 25, 'kolay',
+    ['4 adet közlenmiş kırmızı biber', '1 adet soğan', '1 adet patates|küp', '1 yk zeytinyağı', '800 ml su', '1 tk pul biber', '1 tutam tuz'],
+    ['Soğanı zeytinyağında 4 dakika kavur.', 'Biber, patates ve suyu ekle; patatesler yumuşayana kadar 20 dakika pişir.', 'Blenderdan geçir ve baharatla tatlandır.'],
+    ['Vegan değilse üzerine 1 kaşık süzme yoğurt koyabilirsin.'],
+    [113, 2.4, 17.3, 3.9, 4.1], 335],
+
+  ['tavuklu-kinoa-corbasi', 'Tavuklu kinoa çorbası', '🍲', 'gs', 4, 10, 30, 'kolay',
+    ['250 g tavuk göğsü', '1/2 su bardağı kinoa|yıkanmış', '1 adet havuç|küp', '1 adet soğan', '1 adet kabak|küp', '1200 ml su', '1 yk zeytinyağı', '1 adet limon|suyu', '10 g maydanoz', '1 tutam tuz'],
+    ['Tavuğu suda 15 dakika haşla, çıkarıp didikle.', 'Soğan ve havucu zeytinyağında 3 dakika kavur, tavuk suyunu ve kinoayı ekle.', '12 dakika pişir; kabak ve tavuğu ekleyip 5 dakika daha kaynat.', 'Limon ve maydanozla servis et.'],
+    null,
+    [217, 18.4, 21, 6.6, 3.3], 435],
 ]);

@@ -3,7 +3,8 @@
 // Satır biçimi:
 // [id, ad, emoji, etiketKodları, porsiyon, hazırlıkDk, pişirmeDk, zorluk,
 //  ['miktar birim malzeme|not', ...], ['adım', ...], ['ipucu', ...] | null,
-//  [kcal, protein, karbonhidrat, yağ, lif], porsiyonGramı]
+//  [kcal, protein, karbonhidrat, yağ, lif], porsiyonGramı, yanınaYakışır?, uyduğuKategoriler?]
+// Son iki alan yalnız soslar içindir: 'Izgara tavukla…', 'tavuk et salata'.
 
 export const UNITS = ['su bardağı', 'çay bardağı', 'tutam', 'adet', 'yk', 'tk', 'ml', 'g'];
 
@@ -17,6 +18,7 @@ export const TAG_CODES = {
   mp: 'meal prep',
   sz: 'şekersiz',
   od: 'öğrenci dostu',
+  so: 'sos',
 };
 export const TAG_ORDER = Object.values(TAG_CODES);
 
@@ -44,8 +46,9 @@ export function parseIngredient(str) {
 }
 
 /** Tag kodlarını ve beslenme değerlerinden türeyen etiketleri birleştirir */
-function buildTags(codes, ps, totalMin) {
+function buildTags(codes, ps, totalMin, cat) {
   const set = new Set();
+  if (cat === 'sos') set.add('sos');
   for (const c of String(codes || '').split(/\s+/).filter(Boolean)) {
     if (!TAG_CODES[c]) throw new Error('Bilinmeyen etiket kodu: ' + c);
     set.add(TAG_CODES[c]);
@@ -61,12 +64,12 @@ function buildTags(codes, ps, totalMin) {
 
 export function build(cat, rows) {
   return rows.map(r => {
-    const [id, name, emoji, codes, servings, prepMin, cookMin, difficulty, ings, steps, tips, nut, gramsPerServing] = r;
+    const [id, name, emoji, codes, servings, prepMin, cookMin, difficulty, ings, steps, tips, nut, gramsPerServing, pairs, goes] = r;
     const [kcal, p, c, f, fib] = nut;
     const perServing = { kcal, p, c, f, fib };
     const out = {
       id, name, cat, emoji,
-      tags: buildTags(codes, perServing, prepMin + cookMin),
+      tags: buildTags(codes, perServing, prepMin + cookMin, cat),
       servings, prepMin, cookMin, difficulty,
       ingredients: ings.map(parseIngredient),
       steps,
@@ -74,6 +77,8 @@ export function build(cat, rows) {
       gramsPerServing,
     };
     if (tips && tips.length) out.tips = tips;
+    if (pairs) out.pairs = pairs;
+    if (goes) out.goes = goes.split(/\s+/).filter(Boolean);
     return out;
   });
 }

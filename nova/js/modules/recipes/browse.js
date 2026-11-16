@@ -1,12 +1,13 @@
 // Tarif listesi: arama, kategori kartları, filtreler, sıralama, favoriler.
 import { h, icon, mount, fmt, sectionTitle, emptyState } from '../../core/ui.js';
 import { subscribe } from '../../core/store.js';
-import { CATS, CAT, allRecipes, matches, totalMin } from './data.js';
+import { CATS, CAT, allRecipes, matches, totalMin, norm } from './data.js';
 import { recipeCard, getFavs, getShopping, fullGrad } from './util.js';
 import { nav } from './nav.js';
 
 const FILTERS = [
   { id: 'protein', label: 'Yüksek protein', test: r => r.tags.includes('yüksek protein') },
+  { id: 'sauce', label: 'Soslar', test: r => r.cat === 'sos' },
   { id: 'lowcarb', label: 'Düşük karbonhidrat', test: r => r.tags.includes('düşük karbonhidrat') },
   { id: 'veg', label: 'Vejetaryen', test: r => r.tags.includes('vejetaryen') },
   { id: 'vegan', label: 'Vegan', test: r => r.tags.includes('vegan') },
@@ -41,7 +42,12 @@ function sorted(list) {
   if (st.sort === 'kcal') return l.sort((a, b) => a.perServing.kcal - b.perServing.kcal);
   if (st.sort === 'protein') return l.sort((a, b) => b.perServing.p - a.perServing.p);
   if (st.sort === 'time') return l.sort((a, b) => totalMin(a) - totalMin(b));
-  return st.cat ? l : recommended(l);
+  const out = st.cat ? l : recommended(l);
+  if (!st.q) return out;
+  // Aramada adında geçenler önce (ör. "sos" → önce soslar, sonra soya soslu yemekler)
+  const words = norm(st.q).split(/\s+/).filter(Boolean);
+  const inName = r => { const n = norm(r.name + ' ' + (CAT[r.cat]?.label || '')); return words.every(w => n.includes(w)); };
+  return [...out.filter(inName), ...out.filter(r => !inName(r))];
 }
 
 export function renderBrowse(el) {
@@ -59,7 +65,7 @@ export function renderBrowse(el) {
   };
   paintShopCount();
   const head = h('div', { class: 'rcp-head' },
-    h('div', { class: 'grow' }, h('h1', { class: 'hud-title' }, 'Fit Tarifler'), h('p', { class: 'hud-sub' }, `${all.length} sağlıklı tarif · çorbadan tatlıya`)),
+    h('div', { class: 'grow' }, h('h1', { class: 'hud-title' }, 'Fit Tarifler'), h('p', { class: 'hud-sub' }, `${all.filter(r => r.cat !== 'sos').length} sağlıklı tarif · ${all.filter(r => r.cat === 'sos').length} fit sos`)),
     h('a', { class: 'rcp-icon-btn', href: '#/recipes/shopping', 'aria-label': 'Alışveriş listesi' }, icon('list'), shopCount));
 
   const input = h('input', { class: 'input', type: 'search', placeholder: 'Tarif ya da malzeme ara', value: st.q, 'aria-label': 'Tarif ara', enterkeyhint: 'search' });
@@ -93,7 +99,7 @@ export function renderBrowse(el) {
       h('div', { class: 'rcp-cats' }, CATS.map(c => {
         const n = all.filter(r => r.cat === c.id).length;
         return h('button', { class: 'rcp-cat', type: 'button', style: { background: fullGrad(c.id) }, onClick: () => { st.cat = c.id; st.shown = PAGE; paint(); resHead.scrollIntoView({ block: 'start' }); } },
-          h('span', { class: 'rcp-cat-txt' }, h('b', null, c.label), h('small', null, n + ' tarif')),
+          h('span', { class: 'rcp-cat-txt' }, h('b', null, c.label), h('small', null, n + (c.id === 'sos' ? ' sos' : ' tarif'))),
           h('span', { class: 'rcp-cat-emoji', 'aria-hidden': 'true' }, c.emoji));
       })));
   }

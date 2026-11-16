@@ -72,4 +72,41 @@ export default build('balik', [
     ['Ton balığını yoğurt, mısır ve karabiberle karıştır.', 'Avokadoyu dilimle.', 'Lavaşa marulu yerleştir, ton karışımını ve avokadoyu ekle.', 'Sıkıca sarıp ortadan kes.'],
     null,
     [372, 29, 39.4, 11.3, 7], 230],
+
+  // --- Ek tarifler ---
+  ['kagitta-limonlu-levrek', 'Kağıtta limonlu levrek', '🐟', 'gs', 2, 10, 20, 'kolay',
+    ['400 g levrek|fileto', '1 adet limon|ince dilim', '1 adet kabak|ince dilim', '6 adet cherry domates', '1 yk zeytinyağı', '2 adet sarımsak dişi|dilim', '10 g dereotu', '1 tutam tuz'],
+    ['Fırını 200 °C’ye ısıt.', 'Pişirme kâğıdının ortasına kabakları, üzerine balığı yerleştir.', 'Domates, sarımsak, limon ve dereotunu ekle; zeytinyağı gezdirip tuzla.', 'Kâğıdı paket gibi kapat ve 18-20 dakika pişir.'],
+    ['Balık kendi buharında piştiği için çok sulu kalır.'],
+    [297, 39.3, 9, 11.4, 2.1], 345],
+
+  ['susamli-somon-tepsisi', 'Susamlı somon ve sebze tepsisi', '🍣', '', 2, 10, 18, 'kolay',
+    ['350 g somon|fileto', '300 g brokoli', '1 adet kırmızı biber|şerit', '1 yk soya sosu|az tuzlu', '1 tk zencefil|rendelenmiş', '1 tk susam', '1 tk zeytinyağı', '1/2 adet limon|suyu'],
+    ['Fırını 200 °C’ye ısıt.', 'Brokoli ve biberi zeytinyağıyla harmanlayıp tepsiye yay; 6 dakika pişir.', 'Somonu ortaya yerleştir, soya sosu, zencefil ve limonla fırçala.', 'Susamı serp ve 12 dakika daha pişir.'],
+    ['Somon omega-3 yağ asitleri bakımından zengindir; haftada 2 kez balık önerilir.'],
+    [475, 40.9, 16.2, 26.6, 5.8], 360],
+
+  ['sarimsakli-karides-kabak', 'Sarımsaklı karides ve kabak spagetti', '🍤', 'gs hz', 2, 10, 8, 'kolay',
+    ['400 g karides|ayıklanmış', '2 adet kabak|spiral', '3 adet sarımsak dişi|dilim', '1 yk zeytinyağı', '1 tk pul biber', '1/2 adet limon|suyu', '10 g maydanoz'],
+    ['Zeytinyağında sarımsak ve pul biberi 30 saniye çevir.', 'Karidesleri ekle, pembeleşene kadar 3 dakika pişir.', 'Kabak spagettiyi ekle ve 2 dakika karıştır.', 'Limon suyu ve maydanozla hemen servis et.'],
+    ['Karidesi fazla pişirme; lastik gibi olur.'],
+    [288, 43.7, 11.4, 8.7, 3.1], 410],
+
+  ['mezgitli-lavas-taco', 'Mezgitli lavaş taco', '🌮', 'hz', 2, 10, 8, 'kolay',
+    ['400 g mezgit|fileto', '2 adet tam buğday lavaş|ikiye kesilmiş', '100 g kırmızı lahana|ince kıyılmış', '100 g yoğurt', '1 adet lime|suyu', '1 tk kimyon', '1 tk tatlı toz biber', '1 tk zeytinyağı', '10 g kişniş'],
+    ['Balıkları kimyon, toz biber ve tuzla harmanla.', 'Zeytinyağında her yüzünü 3 dakika pişir ve çatalla parçala.', 'Lahanayı lime suyunun yarısıyla ovala.', 'Lavaş yarımlarına yoğurt sür, balık, lahana ve kişniş koy; kalan lime suyunu sık.'],
+    ['Mezgit çok yağsız ve ucuz bir protein kaynağıdır.'],
+    [408, 44.2, 38.4, 8, 5.6], 335],
+
+  ['firinda-alabalik-patates', 'Fırında alabalık ve patates', '🐟', 'gs', 3, 10, 30, 'kolay',
+    ['500 g alabalık|temizlenmiş, fileto', '2 adet patates|ince dilim', '1 adet limon', '1 yk zeytinyağı', '1 tk kuru kekik', '1 tutam tuz'],
+    ['Fırını 200 °C’ye ısıt.', 'Patatesleri zeytinyağının yarısı ve kekikle harmanla, tepsiye yay ve 15 dakika pişir.', 'Balıkları patateslerin üzerine yerleştir, kalan zeytinyağını sür ve limon dilimleri koy.', '15 dakika daha pişir.'],
+    ['Alabalık uygun fiyatlı ve omega-3 açısından zengin bir tatlı su balığıdır.'],
+    [380, 37.1, 20.8, 15.7, 2.8], 255],
+
+  ['firinda-cupra-pilaki', 'Fırında çupra pilaki', '🐠', 'gs', 4, 15, 35, 'orta',
+    ['600 g çupra|fileto', '2 adet patates|küp', '2 adet havuç|halka', '1 adet soğan|piyazlık', '2 adet domates|küp', '1 yk zeytinyağı', '1 adet limon|dilim', '10 g maydanoz', '100 ml su'],
+    ['Fırını 190 °C’ye ısıt.', 'Patates, havuç, soğan ve domatesi zeytinyağıyla harmanlayıp tepsiye yay; suyu ekle ve 20 dakika pişir.', 'Balıkları sebzelerin üzerine yerleştir, limon dilimleri koy.', '15 dakika daha pişir, maydanozla servis et.'],
+    ['Soğuk da yenir; ertesi gün öğle yemeği olarak taşınabilir.'],
+    [321, 33.2, 24.7, 10.5, 4.5], 355],
 ]);

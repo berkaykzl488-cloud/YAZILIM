@@ -78,4 +78,35 @@ export default build('sebze', [
     ['Fırını 220 °C’ye ısıt.', 'Karnabaharı zeytinyağı ve baharatlarla harmanla.', 'Tepsiye yayıp 30 dakika, kenarları kızarana kadar pişir.', 'Yoğurdu ezilmiş sarımsakla karıştırıp yanında servis et.'],
     null,
     [174, 9.5, 15.3, 8.7, 5.3], 330],
+
+  // --- Ek tarifler ---
+  ['lorlu-ispanakli-kabak-kayigi', 'Lorlu ıspanaklı kabak kayığı', '🥒', 'vj gs', 4, 15, 25, 'kolay',
+    ['4 adet kabak', '200 g lor peyniri', '100 g ıspanak|doğranmış', '1 adet yumurta', '30 g kaşar|light, rendelenmiş', '1 tk pul biber', '1 tutam tuz'],
+    ['Kabakları boyuna ikiye kes, içlerini oy.', 'Lor, ıspanak, yumurta, kabak içi ve baharatları karıştır.', 'Kabakları doldur, üzerine kaşar serp.', '200 °C fırında 25 dakika pişir.'],
+    null,
+    [139, 12.9, 10.9, 5.7, 3.2], 295],
+
+  ['zeytinyagli-bamya', 'Zeytinyağlı bamya', '🫛', 'vg gs', 4, 15, 30, 'orta',
+    ['500 g bamya|başları alınmış', '1 adet soğan', '2 adet domates|rendelenmiş', '1 yk zeytinyağı', '1 adet limon|suyu', '300 ml su', '1 tutam tuz'],
+    ['Bamyaları limon suyuyla ovup 10 dakika beklet; salyası azalır.', 'Soğanı zeytinyağında 4 dakika kavur, domatesi ekle.', 'Bamya ve suyu ekle, kapağı kapalı kısık ateşte 25 dakika pişir; karıştırmadan tencereyi salla.'],
+    ['Bamyayı karıştırmamak dağılmasını ve salyalanmasını önler.'],
+    [105, 3.4, 15.7, 3.8, 5.4], 270],
+
+  ['lorlu-mantar-dolmasi', 'Lorlu fırın mantar dolması', '🍄', 'vj gs', 3, 15, 15, 'kolay',
+    ['400 g mantar|iri, sapları alınmış', '150 g lor peyniri', '30 g kaşar|light, rendelenmiş', '10 g maydanoz', '1 adet sarımsak dişi', '1 tk zeytinyağı', '1 tutam tuz'],
+    ['Mantar saplarını ince doğra; lor, maydanoz, sarımsak ve tuzla karıştır.', 'Mantar başlarını zeytinyağıyla yağlanmış tepsiye diz ve harçla doldur.', 'Üzerine kaşar serp, 200 °C fırında 15 dakika pişir.'],
+    ['Ara öğün ya da akşam yemeğinin yanına protein katkısı olur.'],
+    [124, 12.5, 6.9, 6, 1.5], 170],
+
+  ['fit-ratatouille', 'Fit ratatouille', '🍆', 'vg gs mp', 4, 20, 40, 'orta',
+    ['1 adet patlıcan|ince halka', '2 adet kabak|ince halka', '1 adet kırmızı biber|ince dilim', '3 adet domates|ince halka', '300 g domates|rendelenmiş', '1 adet soğan', '2 adet sarımsak dişi', '1 yk zeytinyağı', '1 tk kuru kekik'],
+    ['Soğan, sarımsak ve rendelenmiş domatesi 8 dakika pişirip fırın kabına yay.', 'Patlıcan, kabak, biber ve domates halkalarını sırayla dik dik diz.', 'Zeytinyağı gezdir, kekik serp ve folyoyla kapat.', '190 °C fırında 30 dakika, folyoyu açıp 10 dakika daha pişir.'],
+    ['Ertesi gün daha lezzetli olur; yanına bulgur ya da ızgara tavuk ekle.'],
+    [138, 4.8, 21.4, 4.5, 7.2], 390],
+
+  ['zeytinyagli-kereviz', 'Portakallı zeytinyağlı kereviz', '🥕', 'vg gs', 4, 15, 35, 'orta',
+    ['1 adet kereviz|kök, küp', '2 adet havuç|küp', '1 adet patates|küp', '1 adet soğan', '2 yk zeytinyağı', '1 adet limon|suyu', '1 adet portakal|suyu', '300 ml su', '10 g dereotu'],
+    ['Kerevizleri kararmaması için limonlu suda beklet.', 'Soğanı zeytinyağında 3 dakika kavur, havuç ve patatesi ekle.', 'Kereviz, portakal suyu ve suyu ekle; kapağı kapalı kısık ateşte 30 dakika pişir.', 'Soğuyunca dereotuyla servis et.'],
+    null,
+    [186, 3.6, 28.9, 7.3, 5.5], 300],
 ]);

@@ -158,7 +158,17 @@ export function recipeCard(r, { onOpen, fav = false } = {}) {
     h('div', { class: 'rcp-card-body' },
       h('div', { class: 'rcp-card-name' }, r.name),
       h('div', { class: 'rcp-card-macro' }, icon('flame', { size: 13 }), h('b', null, fmt.n(r.perServing.kcal)), ' kcal', h('span', { class: 'rcp-dot' }), icon('clock', { size: 13 }), minText(totalMin(r))),
-      h('div', { class: 'rcp-card-meta' }, h('b', null, fmt.n(r.perServing.p) + ' g'), ' protein', h('span', { class: 'rcp-dot' }), diffLabel(r.difficulty))));
+      r.cat === 'sos'
+        ? h('div', { class: 'rcp-card-meta' }, 'Porsiyon ', h('b', null, r.gramsPerServing + ' g'), h('span', { class: 'rcp-dot' }), r.servings + ' kişilik')
+        : h('div', { class: 'rcp-card-meta' }, h('b', null, fmt.n(r.perServing.p) + ' g'), ' protein', h('span', { class: 'rcp-dot' }), diffLabel(r.difficulty))));
+}
+
+/** Dokunulabilir küçük bağlantı kartı (sos önerileri, yanına yakışanlar) */
+export function linkRow(r, sub) {
+  return h('a', { class: 'rcp-link-row', href: '#/recipes/' + r.id },
+    h('div', { class: 'rcp-row-tile', style: { background: tint(r.cat) } }, h('span', { 'aria-hidden': 'true' }, r.emoji)),
+    h('div', { class: 'li-main' }, h('div', { class: 'rcp-row-name' }, r.name), h('div', { class: 'li-sub' }, sub)),
+    h('span', { class: 'rcp-link-chev', 'aria-hidden': 'true' }, icon('right', { size: 18 })));
 }
 
 /** Liste satırı tarzı küçük kart (plan, favori satırı) */

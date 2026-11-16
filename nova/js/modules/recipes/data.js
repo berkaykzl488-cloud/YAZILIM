@@ -13,6 +13,7 @@ export const CATS = [
   { id: 'ara', label: 'Ara öğün', emoji: '🥜', grad: ['#d3a06d', '#94643c'] },
   { id: 'smoothie', label: 'Smoothie ve shake', emoji: '🥤', grad: ['#ff72a8', '#d23d78'] },
   { id: 'tatli', label: 'Fit tatlılar', emoji: '🍰', grad: ['#c472ff', '#8240d6'] },
+  { id: 'sos', label: 'Fit soslar', emoji: '🫙', grad: ['#f5b83d', '#c9561c'] },
 ];
 export const CAT = Object.fromEntries(CATS.map(c => [c.id, c]));
 
@@ -29,6 +30,7 @@ const FILES = {
   ara: () => import('./data/ara.js'),
   smoothie: () => import('./data/smoothie.js'),
   tatli: () => import('./data/tatli.js'),
+  sos: () => import('./data/sos.js'),
 };
 
 let all = null, byId = null, loading = null;

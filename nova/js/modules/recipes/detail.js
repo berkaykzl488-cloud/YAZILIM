@@ -1,7 +1,8 @@
 // Tarif detayı: büyük görsel alan, makro özeti, porsiyon ayarı, malzeme listesi, adımlar.
 import { h, icon, mount, fmt, toast, haptic } from '../../core/ui.js';
 import { CAT, totalMin } from './data.js';
-import { tint, diffLabel, minText, qtyText, isFav, toggleFav, session, portionsOf } from './util.js';
+import { tint, diffLabel, minText, qtyText, isFav, toggleFav, session, portionsOf, linkRow } from './util.js';
+import { saucesFor, recipesFor } from './pairing.js';
 import { portionStepper, openAddToMeal, openAddToShopping } from './sheets.js';
 import { nav } from './nav.js';
 
@@ -52,6 +53,22 @@ async function share(r) {
   }
 }
 
+/** Sos sayfasında "Yanına yakışır", tarif sayfasında "Yanına sos" bölümü */
+function pairingBlock(r) {
+  if (r.cat === 'sos') {
+    const list = recipesFor(r, 4);
+    return h('div', { class: 'panel rcp-pair' },
+      h('div', { class: 'panel-title' }, h('span', { 'aria-hidden': 'true' }, '🍽️'), 'Yanına yakışır'),
+      r.pairs && h('p', { class: 'rcp-pair-txt' }, r.pairs),
+      list.length ? h('div', { class: 'rcp-pair-list' }, list.map(x => linkRow(x, `${fmt.n(x.perServing.kcal)} kcal · ${fmt.n(x.perServing.p)} g protein`))) : null);
+  }
+  const list = saucesFor(r, 3);
+  if (list.length < 2) return null;
+  return h('section', { class: 'rcp-pair-sec', 'aria-label': 'Yanına sos' },
+    h('div', { class: 'rcp-sec-head' }, h('h2', null, 'Yanına sos'), h('span', { class: 'muted small' }, 'Şekersiz, az yağlı')),
+    h('div', { class: 'panel tight rcp-pair-list' }, list.map(s => linkRow(s, `${s.gramsPerServing} g · ${fmt.n(s.perServing.kcal)} kcal`))));
+}
+
 export function renderDetail(el, r) {
   const cat = CAT[r.cat];
   let portions = portionsOf(r);
@@ -95,7 +112,8 @@ export function renderDetail(el, r) {
 
   const stepper = portionStepper(portions, { max: 24, onChange: v => { portions = v; session.portions.set(r.id, v); paintIngs(); } });
 
-  el.append(
+  // Native append null'ı "null" metni olarak yazar; boş bölümleri ayıkla
+  el.append(...[
     h('div', { class: 'rcp-detail-top' }, nav.button('recipes', 'Geri'), h('div', { class: 'row gap-s' }, shareBtn, favBtn)),
     h('div', { class: 'rcp-hero', style: { background: tint(r.cat, 0.5) } },
       h('span', { class: 'rcp-hero-cat' }, cat.emoji, ' ', cat.label),
@@ -107,6 +125,7 @@ export function renderDetail(el, r) {
       h('div', null, h('div', { class: 'is-label' }, icon('user'), 'Porsiyon'), h('div', { class: 'is-value' }, String(r.servings)))),
     r.tags.length ? h('div', { class: 'rcp-tags' }, r.tags.map(t => h('span', { class: 'rcp-tag' }, t))) : null,
     macroBlock(r),
+    r.cat === 'sos' ? pairingBlock(r) : null,
     h('button', { type: 'button', class: 'btn primary lg block rcp-cta', onClick: () => { location.hash = `#/recipes/${r.id}/cook`; } }, icon('play'), 'Pişirmeye başla'),
     h('div', { class: 'grid-2 rcp-actions' },
       h('button', { type: 'button', class: 'btn', onClick: () => openAddToMeal(r, { portions: 1 }) }, icon('plus'), 'Öğüne ekle'),
@@ -123,5 +142,8 @@ export function renderDetail(el, r) {
       h('div', { class: 'panel-title' }, h('span', { 'aria-hidden': 'true' }, '💡'), 'İpuçları'),
       h('ul', null, r.tips.map(t => h('li', null, t)))) : null,
 
-    h('p', { class: 'tiny dim rcp-disclaimer' }, 'Besin değerleri kullanılan ürünlere göre değişebilen yaklaşık değerlerdir.'));
+    r.cat === 'sos' ? null : pairingBlock(r),
+
+    h('p', { class: 'tiny dim rcp-disclaimer' }, 'Besin değerleri kullanılan ürünlere göre değişebilen yaklaşık değerlerdir.'),
+  ].filter(Boolean));
 }

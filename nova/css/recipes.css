@@ -271,3 +271,21 @@ body.rcp-cooking .app-nav, body.rcp-cooking .app-header { visibility: hidden; }
 @media (max-width: 370px) { .rcp-plan-actions .btn, .rcp-actions .btn, .rcp-shop-actions .btn { font-size: 14.5px; gap: 6px; } }
 .rcp-timer-foot { display: flex; align-items: center; gap: 10px; min-height: 20px; }
 .rcp-timer-reset { min-height: 36px; font-size: 14px; color: var(--muted); }
+
+/* ---------- Sos eşleştirme ---------- */
+.rcp-pair { margin-top: 14px; }
+.rcp-pair .panel-title { margin-bottom: 6px; }
+.rcp-pair-txt { margin: 0 0 10px; font-size: 15px; line-height: 1.45; color: var(--muted); }
+.rcp-pair-list { display: flex; flex-direction: column; gap: 2px; }
+.rcp-pair-sec .panel { padding: 6px; }
+.rcp-link-row { display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 64px; padding: 6px 8px; border-radius: 16px; color: inherit; text-decoration: none; transition: background .15s; }
+.rcp-link-row:hover { background: rgba(255,255,255,.04); }
+.rcp-link-row:active { background: rgba(255,255,255,.07); transform: scale(.99); }
+.rcp-link-row + .rcp-link-row { border-top: 1px solid var(--line); border-top-left-radius: 0; border-top-right-radius: 0; }
+.rcp-link-row .rcp-row-tile { width: 50px; height: 50px; font-size: 28px; border-radius: 14px; }
+.rcp-link-row .li-main { min-width: 0; flex: 1; }
+.rcp-link-row .rcp-row-name { font-size: 15.5px; }
+.rcp-link-row .li-sub { font-size: 13.5px; margin-top: 2px; white-space: normal; }
+.rcp-link-chev { flex: none; color: var(--dim); display: grid; place-items: center; }
+/* Tek kalan son kategori kartı (Fit soslar) tam genişlik */
+.rcp-cats .rcp-cat:last-child:nth-child(odd) { grid-column: 1 / -1; min-height: 80px; }

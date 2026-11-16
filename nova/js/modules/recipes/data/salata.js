@@ -84,4 +84,29 @@ export default build('salata', [
     ['Domates, biber ve soğanı çok küçük doğra.', 'Maydanozu ince kıy.', 'Hepsini cevizle karıştır.', 'Zeytinyağı, nar ekşisi ve baharatlarla tatlandırıp servis et.'],
     null,
     [251, 4.9, 21.75, 16.8, 4], 260],
+
+  // --- Ek tarifler ---
+  ['tavuklu-avokadolu-salata', 'Tavuklu avokadolu salata', '🥑', 'gs', 2, 10, 12, 'kolay',
+    ['250 g tavuk göğsü', '1 adet avokado', '100 g marul', '6 adet cherry domates', '1/2 adet salatalık', '1 adet lime|suyu', '1 tk zeytinyağı', '1 tutam tuz'],
+    ['Tavuğu tuzlayıp ızgara tavada her yüzü 5-6 dakika pişir, dinlendirip dilimle.', 'Marul, domates, salatalık ve avokadoyu doğra.', 'Lime suyu ve zeytinyağıyla harmanla, tavuğu üzerine yerleştir.'],
+    null,
+    [317, 31.1, 12.6, 16.8, 6.5], 305],
+
+  ['ton-balikli-fasulye-salatasi', 'Ton balıklı fasulye salatası', '🐟', 'gs hz od', 2, 10, 0, 'kolay',
+    ['160 g ton balığı|suyu süzülmüş', '300 g haşlanmış beyaz fasulye', '1 adet kırmızı soğan|piyazlık', '20 g maydanoz', '6 adet cherry domates', '1 yk zeytinyağı', '1 adet limon|suyu'],
+    ['Soğanı ince piyazlık doğra.', 'Fasulye, ton balığı, domates ve maydanozu bir kasede birleştir.', 'Zeytinyağı ve limonla harmanla.'],
+    ['Konserve malzemelerle 10 dakikada hazır olan çok proteinli bir öğle yemeği.'],
+    [382, 34.9, 43.3, 8.4, 11.5], 370],
+
+  ['karidesli-avokado-salata', 'Karidesli avokado salata', '🍤', 'gs hz', 2, 10, 5, 'kolay',
+    ['300 g karides|ayıklanmış', '1 adet avokado', '100 g roka', '1/2 adet mango', '1 adet lime|suyu', '1 tk zeytinyağı', '1 tutam pul biber'],
+    ['Karidesleri yapışmaz tavada 3 dakika pişir.', 'Avokado ve mangoyu küp doğra.', 'Roka, karides, avokado ve mangoyu birleştir; lime suyu, zeytinyağı ve pul biberle harmanla.'],
+    null,
+    [323, 33.4, 19.3, 14.7, 7], 310],
+
+  ['akdeniz-bulgur-kasesi', 'Akdeniz bulgur kasesi', '🥗', 'vj mp', 4, 15, 15, 'kolay',
+    ['1 su bardağı bulgur|pilavlık', '2 su bardağı su', '200 g haşlanmış nohut', '1 adet salatalık', '2 adet domates', '60 g beyaz peynir|az yağlı', '10 adet zeytin', '20 g maydanoz', '1 yk zeytinyağı', '1 adet limon|suyu'],
+    ['Bulguru suyla kaynat, kısık ateşte 12 dakika pişir ve demlendir.', 'Sebzeleri küp doğra, maydanozu kıy.', 'Kaselere bulgur, nohut, sebzeler, peynir ve zeytini paylaştır.', 'Zeytinyağı ve limonla tatlandır.'],
+    ['Sosu ayrı taşırsan buzdolabında 3 gün dayanır.'],
+    [322, 13.4, 52.2, 8.6, 10.7], 295],
 ]);

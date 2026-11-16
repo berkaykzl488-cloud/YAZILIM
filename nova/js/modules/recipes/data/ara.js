@@ -78,4 +78,17 @@ export default build('ara', [
     ['Fırını 200 °C’ye ısıt.', 'Kabak dilimlerini kâğıt havluyla kurula.', 'Zeytinyağıyla harmanlayıp yağlı kâğıda tek kat diz, parmesan serp.', 'Fırında 25 dakika, kenarları kızarana kadar pişir.'],
     null,
     [98, 5.9, 6.5, 5.65, 2], 150],
+
+  // --- Ek tarifler ---
+  ['lorlu-hindi-fume-rulo', 'Lorlu hindi füme rulo', '🥓', 'gs hz', 2, 10, 0, 'kolay',
+    ['100 g hindi füme|ince dilim', '100 g lor peyniri', '1/2 adet salatalık|çubuk', '5 g dereotu', '1 tutam karabiber'],
+    ['Loru dereotu ve karabiberle karıştır.', 'Hindi dilimlerine lor sür, birer salatalık çubuğu koyup rulo yap.'],
+    ['Antrenman sonrası hızlı, yüksek proteinli bir atıştırmalık.'],
+    [108, 14.4, 4.9, 3.5, 0.3], 140],
+
+  ['firinda-baharatli-edamame', 'Fırında baharatlı edamame', '🫛', 'vg gs hz', 3, 2, 15, 'kolay',
+    ['300 g edamame|kabuklu, dondurulmuş', '1 tk zeytinyağı', '1 tk pul biber', '1/2 adet limon|suyu', '1 tutam tuz'],
+    ['Edamameyi zeytinyağı, pul biber ve tuzla harmanla.', '210 °C fırında 15 dakika pişir; limon sıkıp sıcak servis et.'],
+    null,
+    [138, 12, 9.9, 6.8, 5.5], 95],
 ]);

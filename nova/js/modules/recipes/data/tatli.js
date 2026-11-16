@@ -90,4 +90,17 @@ export default build('tatli', [
     ['Fırını 180 °C’ye ısıt, muffin kalıbına kâğıt kapsül yerleştir.', 'Yumurta, yoğurt, muz ve balı çırp.', 'Yulaf unu, protein tozu ve kabartma tozunu ekleyip karıştır; yaban mersinini ilave et.', 'Hamuru 8 kalıba paylaştır ve 22 dakika pişir.'],
     ['Kahvaltıda ya da antrenman öncesi pratik bir ara öğündür.'],
     [124, 7.4, 16.4, 3.15, 2], 85],
+
+  // --- Ek tarifler ---
+  ['orman-meyveli-protein-parfe', 'Orman meyveli protein parfe', '🫐', 'vj', 2, 10, 0, 'kolay',
+    ['300 g süzme yoğurt|az yağlı', '150 g orman meyvesi', '2 yk yulaf ezmesi', '1 yk chia tohumu', '1 tk bal'],
+    ['Yoğurdu balla karıştır.', 'Bardaklara sırayla yoğurt, meyve, yulaf ve chia katlarını diz.', 'En üste meyve koyup hemen ya da 1 saat soğutup servis et.'],
+    null,
+    [222, 17.6, 27.7, 5.6, 4.6], 245],
+
+  ['kakaolu-muzlu-lor-kremasi', 'Kakaolu muzlu lor kreması', '🍫', 'vj gs sz hz', 2, 5, 0, 'kolay',
+    ['250 g lor peyniri', '1 adet muz|olgun', '1 yk kakao', '2 adet hurma|çekirdeksiz', '1 tutam tarçın'],
+    ['Tüm malzemeleri blenderda pürüzsüz olana kadar çek.', 'Kaselere paylaştır ve 15 dakika buzdolabında beklet.'],
+    ['Şeker eklenmedi; tatlılık muz ve hurmadan gelir.'],
+    [206, 15.2, 25.8, 6, 3.4], 195],
 ]);

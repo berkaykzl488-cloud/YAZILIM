@@ -60,4 +60,23 @@ export default build('mealprep', [
     ['Fırını 210 °C’ye ısıt.', 'Patatesleri yağın yarısıyla harmanlayıp 15 dakika fırınla.', 'Hindi ve diğer sebzeleri kalan yağ ve baharatlarla karıştırıp tepsiye ekle.', '20 dakika daha pişir ve 4 kutuya paylaştır.'],
     null,
     [384, 41, 33.1, 9.7, 5.7], 420],
+
+  // --- Ek tarifler ---
+  ['tavuk-fajita-kutulari', 'Tavuk fajita kutuları', '🍱', 'gs', 5, 15, 30, 'kolay',
+    ['800 g tavuk göğsü|şerit', '2 adet kırmızı biber|şerit', '2 adet yeşil biber|şerit', '2 adet soğan|piyazlık', '1 su bardağı esmer pirinç', '2 su bardağı su', '400 g haşlanmış siyah fasulye', '1 yk zeytinyağı', '2 tk kimyon', '2 tk füme toz biber'],
+    ['Pirinci 2 su bardağı suyla 25 dakika pişir.', 'Tavuk, biber ve soğanı zeytinyağı ve baharatlarla harmanla.', 'İki tepsiye yay ve 220 °C fırında 20 dakika pişir.', '5 kutuya pirinç, fasulye ve fajita karışımını eşit paylaştır.'],
+    ['Buzdolabında 4 gün dayanır; sos olarak salsayı ayrı küçük kapta tut.'],
+    [504, 47.5, 57.1, 8.9, 11.5], 435],
+
+  ['dana-kiymali-tatli-patates-kutulari', 'Dana kıymalı tatlı patates kutuları', '🍠', 'gs', 5, 15, 30, 'kolay',
+    ['600 g dana kıyma|az yağlı', '3 adet tatlı patates|küp', '1 adet brokoli|küçük parçalar', '1 adet soğan', '1 yk zeytinyağı', '1 tk kimyon', '1 tk pul biber', '1 tutam tuz'],
+    ['Tatlı patatesleri zeytinyağıyla harmanlayıp 210 °C fırında 25 dakika pişir; son 10 dakika brokoliyi ekle.', 'Kıymayı soğan ve baharatlarla tavada 10 dakika kavur.', '5 kutuya patates, brokoli ve kıymayı paylaştır.'],
+    ['Buzdolabında 4 gün dayanır.'],
+    [377, 28.5, 31.8, 15.2, 6.3], 295],
+
+  ['mercimekli-kinoa-kutulari', 'Mercimekli kinoa ve fırın sebze kutuları', '🥙', 'vg gs', 5, 15, 30, 'kolay',
+    ['1 su bardağı yeşil mercimek', '1 su bardağı kinoa', '1200 ml su', '2 adet kabak|küp', '2 adet kırmızı biber|küp', '1 adet kırmızı soğan', '2 yk zeytinyağı', '1 tk kimyon', '1 adet limon|suyu'],
+    ['Mercimeği 700 ml suda 20 dakika, kinoayı 500 ml suda 12 dakika ayrı ayrı haşla.', 'Sebzeleri zeytinyağı ve kimyonla harmanlayıp 210 °C fırında 25 dakika pişir.', 'Hepsini karıştır, limon suyuyla tatlandır ve 5 kutuya böl.'],
+    ['Buzdolabında 4 gün dayanır; tahinli sosla çok iyi gider.'],
+    [354, 16.2, 55.3, 8.4, 9.3], 430],
 ]);

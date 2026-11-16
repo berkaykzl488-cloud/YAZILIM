@@ -84,4 +84,53 @@ export default build('et', [
     ['Fırını 220 °C’ye ısıt.', 'Kıyma, sebzeler, salça ve baharatları iyice yoğur.', 'Harcı lavaşlara ince bir tabaka halinde yay.', 'Fırında 8-10 dakika, kenarları kızarana kadar pişir.', 'Maydanoz ve limonla servis et.'],
     null,
     [342, 21.6, 36.5, 11.7, 5], 210],
+
+  // --- Ek tarifler ---
+  ['hindi-kiymali-kabak-dolmasi', 'Hindi kıymalı kabak dolması', '🫑', 'gs', 4, 20, 40, 'orta',
+    ['4 adet kabak', '300 g hindi kıyması', '1/2 su bardağı pirinç|yıkanmış', '1 adet soğan|rendelenmiş', '1 adet domates|rendelenmiş', '1 yk domates salçası', '1 tk zeytinyağı', '20 g maydanoz', '1 tk kuru nane', '300 ml su', '1 tutam tuz'],
+    ['Kabakların içini oyarak kayık ya da tüp haline getir.', 'Kıyma, pirinç, soğan, yarım domates, maydanoz, nane ve tuzu yoğur.', 'Kabakları harçla doldur ve tencereye dik yerleştir.', 'Kalan domates, salça, zeytinyağı ve suyu karıştırıp üzerine dök; kısık ateşte 40 dakika pişir.'],
+    ['Yanına sarımsaklı yoğurt çok yakışır.', 'Oyduğun kabak içini ertesi gün omlete katabilirsin.'],
+    [269, 20.4, 31, 8, 4.2], 425],
+
+  ['etli-taze-fasulye', 'Etli taze fasulye', '🫛', 'gs', 4, 15, 45, 'kolay',
+    ['300 g dana kuşbaşı|yağsız', '500 g taze fasulye', '1 adet soğan', '2 adet domates|rendelenmiş', '1 yk domates salçası', '1 yk zeytinyağı', '300 ml su', '1 tutam tuz'],
+    ['Eti zeytinyağında suyunu salıp çekene kadar 10 dakika kavur.', 'Soğanı ekle, 3 dakika daha kavur; salçayı ekleyip 1 dakika çevir.', 'Fasulye, domates ve suyu ekle.', 'Kapağı kapalı, kısık ateşte 30-35 dakika pişir.'],
+    ['Düdüklü tencerede süreyi yarıya indirebilirsin.'],
+    [209, 19.2, 15.1, 9.1, 4.9], 325],
+
+  ['hindi-sis-kozlenmis-sebze', 'Hindi şiş ve közlenmiş sebze', '🍢', 'gs', 4, 20, 15, 'orta',
+    ['600 g hindi göğsü|küp', '2 adet kırmızı biber|iri doğranmış', '1 adet kabak|halka', '1 adet kırmızı soğan|dilim', '100 g yoğurt', '1 yk zeytinyağı', '1 tk kimyon', '1 tk pul biber', '1 tutam tuz'],
+    ['Hindi küplerini yoğurt, zeytinyağı ve baharatlarla 30 dakika marine et.', 'Hindi ve sebzeleri sırayla şişlere diz.', 'Izgarada ya da 220 °C fırında 12-15 dakika, arada çevirerek pişir.'],
+    ['Hindi göğsü çok yağsızdır; marine etmek kurumasını önler.'],
+    [264, 38.3, 10.8, 7, 3], 295],
+
+  ['kiymali-patates-oturtma', 'Fırında kıymalı patates oturtma', '🥔', 'gs od', 4, 15, 40, 'kolay',
+    ['300 g dana kıyma|az yağlı', '3 adet patates|halka', '1 adet soğan', '2 adet sivri biber', '2 adet domates', '1 yk domates salçası', '1 tk zeytinyağı', '200 ml su', '1 tutam tuz'],
+    ['Patates halkalarını tepsiye diz, zeytinyağı sürüp 200 °C fırında 15 dakika ön pişir.', 'Kıymayı soğanla 8 dakika kavur, salça ve tuzu ekle.', 'Kıymayı patateslerin üzerine yay, domates ve biberleri diz.', 'Suyu dök, folyoyla kapatıp 20 dakika, folyoyu açıp 5 dakika daha pişir.'],
+    ['Patatesi kızartmadan fırında pişirmek yağı epey azaltır.'],
+    [270, 18.8, 28.5, 9, 4.5], 315],
+
+  ['dana-fajita-kasesi', 'Dana etli fajita kasesi', '🌮', 'gs', 4, 15, 30, 'orta',
+    ['400 g bonfile|şerit', '1 su bardağı esmer pirinç', '2 su bardağı su', '1 adet kırmızı biber|şerit', '1 adet yeşil biber|şerit', '1 adet soğan|piyazlık', '200 g haşlanmış siyah fasulye', '1 yk zeytinyağı', '1 tk kimyon', '1 tk füme toz biber', '1 adet lime|suyu'],
+    ['Pirinci 2 su bardağı suyla 25 dakika pişir.', 'Eti baharatlarla harmanla, zeytinyağında yüksek ateşte 4 dakika sotele ve kenara al.', 'Biber ve soğanı aynı tavada 4 dakika diri kalacak şekilde pişir.', 'Kaselere pirinç, fasulye, sebze ve et paylaştır; lime suyu sıkıp servis et.'],
+    ['Üzerine 2 kaşık salsa ya da guacamole ekleyebilirsin.'],
+    [440, 30.4, 53.6, 11.4, 8], 345],
+
+  ['hindi-kiymali-bolonez', 'Hindi kıymalı bolonez spagetti', '🍝', 'od mp', 4, 10, 30, 'kolay',
+    ['400 g hindi kıyması', '250 g tam buğday makarna', '400 g domates|rendelenmiş', '1 adet havuç|rendelenmiş', '1 adet soğan', '2 adet sarımsak dişi', '1 yk zeytinyağı', '1 yk domates salçası', '1 tk kuru kekik'],
+    ['Soğan ve havucu zeytinyağında 5 dakika kavur.', 'Kıymayı ve sarımsağı ekleyip 6 dakika pişir.', 'Salça, domates ve kekiği ekle, kısık ateşte 20 dakika pişir.', 'Bu arada makarnayı haşla ve sosla buluştur.'],
+    ['Sos dondurucuda 2 ay dayanır; çift hazırla.'],
+    [442, 30.2, 54.5, 13, 8.2], 340],
+
+  ['fit-tas-kebabi', 'Fit tas kebabı', '🍲', 'gs', 4, 15, 60, 'orta',
+    ['500 g dana kuşbaşı|yağsız', '2 adet soğan', '2 adet havuç|küp', '2 adet patates|küp', '1 yk domates salçası', '1 yk zeytinyağı', '500 ml su', '1 tk kuru kekik', '1 tutam tuz'],
+    ['Eti zeytinyağında suyunu salıp çekene kadar kavur.', 'Soğanı ekle, 4 dakika daha kavur; salçayı ekleyip 1 dakika çevir.', 'Suyu ekle, kapağı kapalı 40 dakika pişir.', 'Havuç ve patatesi ekle, 20 dakika daha pişir ve kekikle tatlandır.'],
+    ['Düdüklü tencerede eti 20 dakikada yumuşatabilirsin.'],
+    [327, 29.2, 24.6, 12.4, 4.3], 375],
+
+  ['marul-yaprakli-hindi-burger', 'Marul yapraklı hindi burger', '🍔', 'gs', 4, 15, 12, 'kolay',
+    ['500 g hindi kıyması', '1 adet soğan|rendelenmiş, suyu sıkılmış', '1 adet yumurta', '1 tk kimyon', '1 adet göbek marul', '2 adet domates|halka', '1 adet kırmızı soğan|halka', '1 tk hardal', '1 tutam tuz'],
+    ['Kıyma, soğan, yumurta, kimyon ve tuzu yoğurup 4 köfte yap.', 'Yapışmaz tavada ya da ızgarada her yüzünü 5-6 dakika pişir.', 'Marul yapraklarını ekmek gibi kullan; köfte, domates, soğan ve hardalla kapat.'],
+    ['Ekmek yerine marul karbonhidratı neredeyse sıfırlar; doymak istersen yanına fırın patates ekle.'],
+    [252, 28.6, 10.7, 11.3, 3], 295],
 ]);
