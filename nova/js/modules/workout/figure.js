@@ -208,7 +208,7 @@ export function compile(anim) {
   const frames = anim.frames.map(f => ({ ...f, P: bake(mergePose(anim.base, f.p, view)) }));
   const segs = [];
   const n = frames.length;
-  const same = JSON.stringify(frames[0].P) === JSON.stringify(frames[n - 1].P);
+  const same = anim.cut || JSON.stringify(frames[0].P) === JSON.stringify(frames[n - 1].P);
   frames.forEach((f, i) => {
     if (f.hold) segs.push({ a: i, b: i, len: f.hold, ph: f.ph ?? 0 });
     const j = (i + 1) % n;
@@ -342,7 +342,8 @@ const PROPS = {
     const inner = svg('circle', { r: r * 0.42, class: 'eq-ring' });
     const hub = svg('circle', { r: 2.4, class: 'eq-hub' });
     g.append(plate, inner, hub);
-    return { front: true, el: g, upd(J) { const p = c.at === 'back' ? add(add(J.sh, J.td, -4), [Math.cos(J.tE * RAD), Math.sin(J.tE * RAD)], -7) : J.a1.grip; [plate, inner, hub].forEach(e => { e.setAttribute('cx', f1(p[0])); e.setAttribute('cy', f1(p[1])); }); } };
+    return { front: true, el: g, upd(J) { const fr = [Math.cos(J.tE * RAD), Math.sin(J.tE * RAD)];
+      const p = c.at === 'back' ? add(add(J.sh, J.td, -4), fr, -7) : c.at === 'hip' ? add(add(J.hip, J.td, 6), fr, 13) : J.a1.grip; [plate, inner, hub].forEach(e => { e.setAttribute('cx', f1(p[0])); e.setAttribute('cy', f1(p[1])); }); } };
   },
   barF(c) { // ön görünüm: yatay bar + plakalar
     const g = svg('g', { class: 'eq' });
@@ -437,7 +438,8 @@ const PROPS = {
       g.append(svg('path', { d: `M${x - 60} ${y}L${x + 60} ${y}`, class: 'eq-barS' }));
       g.append(svg('path', { d: `M${x - 62} ${y - 4}L${x - 62} ${FLOOR}M${x + 62} ${y - 4}L${x + 62} ${FLOOR}`, class: 'eq-frame' }));
     } else {
-      g.append(svg('path', { d: `M${x} ${y}L${x + 36} ${y}M${x + 36} ${y - 6}L${x + 36} ${FLOOR}`, class: 'eq-frame' }));
+      const dx = c.dx ?? 36;
+      g.append(svg('path', { d: `M${x} ${y}L${x + dx} ${y}M${x + dx} ${y - 6}L${x + dx} ${FLOOR}`, class: 'eq-frame' }));
       g.append(svg('circle', { cx: x, cy: y, r: 3.2, class: 'eq-hub' }));
     }
     return { front: false, el: g };
@@ -563,6 +565,13 @@ const PROPS = {
       svg('circle', { cx: 26, cy: c.y, r: 4, class: 'eq-hub' }), svg('circle', { cx: 214, cy: c.y, r: 4, class: 'eq-hub' }), L, R);
     return { front: false, el: g, upd(J) { R.setAttribute('d', `M214 ${c.y}L${fp(J.a1.grip)}`); L.setAttribute('d', `M26 ${c.y}L${fp(J.a2.grip)}`); } };
   },
+  lever(c) { // makine kolu: sabit pivottan tutamağa
+    const g = svg('g', { class: 'eq' });
+    const arm = svg('path', { class: 'eq-frame' }), hd = svg('circle', { r: 3.2, class: 'eq-hub' });
+    g.append(arm, hd);
+    return { front: !!c.front, el: g, upd(J) { const p = J.a1.grip; arm.setAttribute('d', `M${c.px} ${c.py}L${fp(p)}`); hd.setAttribute('cx', f1(p[0])); hd.setAttribute('cy', f1(p[1])); } };
+  },
+  path(c) { return { front: !!c.front, el: svg('path', { d: c.d, class: c.cls || 'eq-frame' }) }; },
   wheel() {
     const g = svg('g', { class: 'eq' });
     const w = svg('circle', { r: 7, class: 'eq-plate' }), hb = svg('circle', { r: 2, class: 'eq-hub' });

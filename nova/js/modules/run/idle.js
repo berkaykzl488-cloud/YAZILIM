@@ -83,7 +83,7 @@ export function renderIdle(el) {
 
   // ---------- Başlat ----------
   const doStart = () => { tracker.start(type); };
-  const startBtn = h('button', { class: 'btn primary lg block rn-start', type: 'button', onClick: async () => {
+  const startBtn = h('button', { class: 'rn-start', type: 'button', 'aria-label': 'Kaydı başlat', onClick: async () => {
     const g = tracker.gps;
     if (g.status === 'denied') { toast('Konum izni olmadan rota kaydedilemez', { type: 'error' }); return; }
     if (g.status === 'unsupported') { toast('Bu cihazda GPS bulunmuyor', { type: 'error' }); return; }
@@ -94,7 +94,7 @@ export function renderIdle(el) {
       if (!ok) return;
     }
     doStart();
-  } }, icon('play', { size: 22 }), 'Başlat');
+  } }, icon('play', { size: 30 }), h('span', null, 'Başlat'));
 
   // ---------- Ayarlar ----------
   const paceBtn = h('button', { class: 'btn sm ghost rn-pacebtn', type: 'button', onClick: () => editTargetPace(type, paintPace) });
@@ -129,8 +129,9 @@ export function renderIdle(el) {
     const days = Array.from({ length: 7 }, (_, i) => addDays(ws, i));
     const data = days.map(k => ({ label: fmt.date(k, 'weekday'), value: runs.filter(r => runDay(r) === k).reduce((s, r) => s + r.distM, 0) / 1000, highlight: k === today }));
     const last = runs[0];
+    const strip = (ic, label, value) => h('div', null, h('div', { class: 'is-label' }, icon(ic), label), h('div', { class: 'is-value' }, value));
     mount(weekBox,
-      h('div', { class: 'panel' },
+      h('div', { class: 'panel hero rn-weekhero' },
         h('div', { class: 'row between' }, h('h2', { class: 'panel-title', style: 'margin:0' }, 'Bu hafta'),
           h('button', { class: 'btn sm ghost', type: 'button', onClick: async () => {
             const v = await promptNumber({ title: 'Haftalık hedef', label: 'Hedef mesafe', unit: 'km', value: goalKm, min: 1, max: 500, step: 1 });
@@ -138,10 +139,10 @@ export function renderIdle(el) {
           } }, 'Hedefi değiştir')),
         h('div', { class: 'rn-week-head' },
           h('span', { class: 'rn-week-km' }, km(wt.distM)), h('span', { class: 'rn-week-goal' }, `/ ${goalKm} km`)),
-        progressBar(wt.distM / 1000, goalKm, { color: 'var(--magenta)' }),
-        h('div', { class: 'grid-3 rn-week-stats' },
-          miniStat('Aktivite', String(wt.count)), miniStat('Süre', fmt.duration(wt.sec)), miniStat('Kalori', fmt.n(wt.kcal))),
-        barChart(data, { height: 96, format: v => fmt.n(v, 2) + ' km' })),
+        progressBar(wt.distM / 1000, goalKm),
+        h('div', { class: 'info-strip rn-week-strip' },
+          strip('run', 'Aktivite', String(wt.count)), strip('clock', 'Süre', fmt.duration(wt.sec)), strip('flame', 'Kalori', fmt.n(wt.kcal))),
+        barChart(data, { height: 90, format: v => fmt.n(v, 2) + ' km' })),
       last ? h('div', { class: 'panel click rn-last', role: 'button', tabindex: '0', 'aria-label': 'Son aktiviteyi aç: ' + last.title,
         onClick: () => go('run/detail/' + last.id), onKeydown: e => { if (e.key === 'Enter') go('run/detail/' + last.id); } },
         h('div', { class: 'rn-thumbbox' }, routeThumb(last.points, last.breaks, { w: 56, h: 56 })),
@@ -158,10 +159,10 @@ export function renderIdle(el) {
       subNav(''),
       typeWrap,
       h('div', { class: 'rn-idle-mapwrap' }, mapHost, gpsChip),
+      h('div', { class: 'rn-startwrap' }, startBtn),
       gpsHelp,
-      startBtn,
-      settings,
-      weekBox));
+      weekBox,
+      settings));
 
   map = new MapView(mapHost, { follow: true, live: true, zoom: 15, controls: true });
   map.setFollow(true);

@@ -155,15 +155,15 @@ function render(el) {
   const ring = heroRing({ size: 232, center: [h('div', { class: 'stp-today' }, 'Bugün'), numEl, goalEl, pctEl] });
   const kmEl = h('b'), kcalEl = h('b'), actEl = h('b');
   const remainEl = h('div', { class: 'stp-remain' });
-  const metric = (ic, valEl, unit, label, cls) => h('div', { class: 'stp-metric ' + cls },
-    icon(ic), h('div', null, h('div', { class: 'stp-metric-v' }, valEl, h('small', null, unit)), h('div', { class: 'stp-metric-l' }, label)));
-  const hero = h('section', { class: 'panel stp-hero' },
+  const metric = (ic, valEl, unit, label) => h('div', null,
+    h('div', { class: 'is-label' }, icon(ic), label), h('div', { class: 'is-value' }, valEl, h('small', { class: 'stp-unit' }, unit)));
+  const hero = h('section', { class: 'panel hero stp-hero' },
     h('div', { class: 'stp-hero-ring' }, ring.el),
     remainEl,
-    h('div', { class: 'stp-metrics' },
-      metric('map', kmEl, 'km', 'Mesafe', 'c1'),
-      metric('flame', kcalEl, 'kcal', 'Kalori', 'c2'),
-      metric('timer', actEl, 'dk', 'Aktif süre', 'c3')));
+    h('div', { class: 'info-strip stp-strip' },
+      metric('map', kmEl, 'km', 'Mesafe'),
+      metric('flame', kcalEl, 'kcal', 'Kalori'),
+      metric('timer', actEl, 'dk', 'Aktif')));
 
   let lastTotal = null, countRaf = 0;
   function paintHero() {
@@ -443,7 +443,7 @@ export default {
       unit: 'adım',
       sub: `${fmt.km(D.distanceM(e.total))} km · hedef ${fmt.n(goal)}`,
       progress: goal ? clamp(e.total / goal, 0, 1) : null,
-      color: e.total >= goal ? 'var(--lime)' : 'var(--cyan)',
+      color: e.total >= goal ? 'var(--lime)' : 'var(--accent)',
       icon: 'steps',
     };
   },

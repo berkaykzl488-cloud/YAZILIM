@@ -92,7 +92,7 @@ export function waveform({ height = 64, span = 4000 } = {}) {
     const w = canvas.clientWidth || 300, hh = height;
     if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(hh * dpr); }
     const g = canvas.getContext('2d');
-    if (!colors) colors = { line: cssVar('--line', 'rgba(255,255,255,.07)'), accent: cssVar('--cyan', '#4cc2ff'), mark: cssVar('--magenta', '#ff5c8a'), thr: cssVar('--lime', '#5fd68a') };
+    if (!colors) colors = { line: cssVar('--line', 'rgba(255,255,255,.07)'), accent: cssVar('--accent', cssVar('--cyan', '#ff7a1a')), mark: cssVar('--text', '#f5f5f7'), thr: cssVar('--lime', '#5fd68a') };
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, w, hh);
     // ızgara

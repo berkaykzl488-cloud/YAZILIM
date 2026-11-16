@@ -2,7 +2,7 @@
 import { h, icon, mount, fmt, modal, confirmDialog, toast, tabs, progressBar, barChart, ring, emptyState, backButton } from '../../core/ui.js';
 import { go } from '../../core/router.js';
 import {
-  tpl, get, mutate, removeHabit, stats, span, spanLabel, clockParts, pad2, fmtUnits, triggerLabel,
+  tpl, get, mutate, removeHabit, stats, span, spanLabel, clockParts, pad2, triggerLabel,
   BADGES_DAY, BADGES_MONEY, checkAchievements, removeCraving, DAY,
 } from './data.js';
 import { organViz } from './viz.js';
@@ -54,39 +54,41 @@ export function renderDetail(el, id) {
   }
 
   // ---------------------------------------------------- canlı bölüm
-  function hero(s) {
-    viz = organViz(t.organ, s.recovery, { size: 148 });
+  function clockHero() {
+    live.clock = ['d', 'h', 'm', 's'].map(() => h('b'));
+    live.saved = h('span');
+    live.units = h('span');
+    live.regain = h('span');
+    const cell = (ic, label, val, cls = '') => h('div', null, h('div', { class: 'is-label' }, icon(ic), label), h('div', { class: 'is-value ' + cls }, val));
+    const cells = [cell('coin', 'Biriken para', live.saved, 'c-lime')];
+    if (hb.unitName === 'dk') cells.push(cell('clock', 'Kazanılan süre', live.units));
+    else {
+      cells.push(cell(hb.icon, hb.type === 'smoking' ? 'İçilmeyen' : 'Kaçınılan', [live.units, h('small', { class: 'hb-unit' }, ' ' + hb.unitName)]));
+      if (hb.timePerUnit > 0) cells.push(cell('heart', t.timeKind === 'life' ? 'Kazanılan ömür' : 'Kazanılan süre', live.regain));
+    }
+    return h('section', { class: 'panel hero hb-hero' },
+      h('div', { class: 'hb-clk-title' }, h('span', { class: 'hb-live-dot' }), 'Temiz geçen süre'),
+      h('div', { class: 'hb-big', role: 'timer', 'aria-live': 'off' },
+        live.clock[0], h('span', { class: 'hb-big-u' }, 'gün')),
+      h('div', { class: 'hb-hms' },
+        live.clock[1], h('span', null, 'sa'), live.clock[2], h('span', null, 'dk'), live.clock[3], h('span', null, 'sn')),
+      h('div', { class: 'info-strip hb-strip' }, cells),
+      hb.type === 'smoking' && h('p', { class: 'hb-foot-note' }, 'Kazanılan ömür: içilmeyen her sigara için ≈ 11 dk (tahmini).'));
+  }
+
+  function recoveryPanel(s) {
+    viz = organViz(t.organ, s.recovery, { size: 132 });
     live.pct = h('b', { class: 'hb-pct-num' });
     live.nextTitle = h('div', { class: 'hb-next-title' });
     live.nextEta = h('div', { class: 'hb-next-eta' });
     live.nextBar = h('div', { class: 'hb-next-bar' });
-    live.clock = ['d', 'h', 'm', 's'].map(() => h('b'));
-    const seg = (i, label) => h('div', { class: 'hb-clk-seg' }, live.clock[i], h('span', null, label));
-    return h('section', { class: 'panel hb-hero' },
-      h('div', { class: 'hb-hero-top' },
-        viz.el,
-        h('div', { class: 'hb-hero-side' },
-          h('div', { class: 'hb-label' }, `${viz.label} iyileşmesi`),
-          h('div', { class: 'hb-pct' }, live.pct, h('span', null, '%')),
-          h('div', { class: 'hb-label', style: 'margin-top:8px' }, 'Sıradaki adım'),
-          live.nextTitle, live.nextBar, live.nextEta)),
-      h('div', { class: 'hb-label hb-clk-title' }, h('span', { class: 'hb-live-dot' }), 'Temiz geçen süre'),
-      h('div', { class: 'hb-clock', role: 'timer', 'aria-live': 'off' },
-        seg(0, 'gün'), seg(1, 'saat'), seg(2, 'dakika'), seg(3, 'saniye')));
-  }
-
-  function statCards() {
-    live.saved = h('div', { class: 'hb-stat-v c-lime' });
-    live.units = h('div', { class: 'hb-stat-v' });
-    live.regain = h('div', { class: 'hb-stat-v' });
-    const unitLabel = hb.type === 'smoking' ? 'İçilmeyen sigara' : hb.unitName === 'dk' ? 'Ekrandan kazanılan süre' : `Kaçınılan ${hb.unitName}`;
-    const regainLabel = t.timeKind === 'life' ? 'Kazanılan ömür (tahmini)' : 'Geri kazanılan zaman';
-    const cards = [
-      h('div', { class: 'hb-stat' }, h('span', { class: 'hb-stat-ic lime' }, icon('coin')), h('div', null, live.saved, h('div', { class: 'hb-stat-l' }, 'Biriktirilen para'))),
-      h('div', { class: 'hb-stat' }, h('span', { class: 'hb-stat-ic' }, icon(hb.icon)), h('div', null, live.units, h('div', { class: 'hb-stat-l' }, unitLabel))),
-    ];
-    if (hb.timePerUnit > 0 && hb.unitName !== 'dk') cards.push(h('div', { class: 'hb-stat' }, h('span', { class: 'hb-stat-ic violet' }, icon('clock')), h('div', null, live.regain, h('div', { class: 'hb-stat-l' }, regainLabel))));
-    return h('div', { class: 'hb-stats' + (cards.length === 3 ? ' three' : '') }, cards);
+    return h('section', { class: 'panel hb-recovery' },
+      viz.el,
+      h('div', { class: 'hb-hero-side' },
+        h('div', { class: 'hb-label' }, `${viz.label} iyileşmesi`),
+        h('div', { class: 'hb-pct' }, live.pct, h('span', null, '%')),
+        h('div', { class: 'hb-label', style: 'margin-top:10px' }, 'Sıradaki adım'),
+        live.nextTitle, live.nextBar, live.nextEta));
   }
 
   function tick() {
@@ -96,7 +98,8 @@ export function renderDetail(el, id) {
     live.clock[0].textContent = c.d; live.clock[1].textContent = pad2(c.h); live.clock[2].textContent = pad2(c.m); live.clock[3].textContent = pad2(c.s);
     live.pct.textContent = Math.floor(s.recovery * 100);
     live.saved.textContent = hb.costPerDay > 0 ? fmt.money(s.saved) : '—';
-    live.units.textContent = hb.unitName === 'dk' ? fmtUnits(hb, s.units) : fmt.n(Math.floor(s.units));
+    if (hb.unitName !== 'dk') { live.units.textContent = fmt.n(Math.floor(s.units)); }
+    if (hb.unitName === 'dk') live.units.textContent = span(s.units * 6e4);
     live.regain.textContent = span(s.regainMin * 6e4);
     if (s.next) {
       live.nextTitle.textContent = `${spanLabel(s.next.t)} · ${s.next.title}`;
@@ -257,8 +260,8 @@ export function renderDetail(el, id) {
         h('h1', { class: 'hb-title' }, hb.name),
         h('button', { class: 'btn ghost icon', 'aria-label': 'Diğer işlemler', onClick: moreMenu }, icon('more'))),
       hb.archived && h('div', { class: 'hb-note amber' }, icon('layers'), 'Bu alışkanlık arşivde. Menüden geri alabilirsin.'),
-      hero(s),
-      statCards(),
+      clockHero(),
+      recoveryPanel(s),
       h('a', { class: 'hb-sos', href: `#/habits/${id}/sos` },
         h('span', { class: 'hb-sos-orb' }, icon('wind')),
         h('span', { class: 'hb-sos-txt' }, h('b', null, 'İstek geldi'), h('span', null, 'Acil destek: nefes egzersizi ve 5 dakikalık geri sayım')),

@@ -38,7 +38,7 @@ function getTile(z, x, y, onLoad) {
 }
 const tilesOffline = () => netFail >= 4 && netOk === 0 || netFail >= 12;
 
-// Tempo renk skalası: yavaş (kırmızı) -> orta (turuncu) -> hızlı (yeşil). Renkler çekirdek CSS değişkenlerinden okunur.
+// Tempo renk skalası: yavaş (sarı) -> orta (turuncu vurgu) -> hızlı (kırmızı-pembe). Renkler çekirdek CSS değişkenlerinden okunur.
 function cssVar(name, fb) {
   try { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fb; } catch { return fb; }
 }
@@ -50,7 +50,7 @@ function hexRgb(hex) {
 }
 let STOPS = null;
 function stops() {
-  if (!STOPS) STOPS = [[0, cssVar('--red', '#ff5a5f')], [0.5, cssVar('--amber', '#ffb547')], [1, cssVar('--lime', '#5fd68a')]]
+  if (!STOPS) STOPS = [[0, cssVar('--amber', '#ffc04d')], [0.5, cssVar('--accent', '#ff7a1a')], [1, cssVar('--magenta', '#ff5277')]]
     .map(([t, c]) => [t, hexRgb(c) || [200, 200, 200]]);
   return STOPS;
 }
@@ -284,7 +284,7 @@ export class MapView {
     const toScreen = (x, y) => [x * ws - ox, y * ws - oy];
 
     // Zemin (CARTO koyu karo tonuna yakın)
-    ctx.fillStyle = '#16181c';
+    ctx.fillStyle = cssVar('--bg-2', '#141417');
     ctx.fillRect(0, 0, W, H);
 
     const drewTiles = this._drawTiles(ws, ox, oy);
@@ -375,7 +375,7 @@ export class MapView {
     ctx.restore();
 
     // Başlangıç: yeşil nokta
-    this._marker(S[0][0], S[0][1], cssVar('--lime', '#5fd68a'));
+    this._marker(S[0][0], S[0][1], cssVar('--lime', '#3fd17f'));
     // Bitiş: dama bayrağı (canlı modda gösterilmez)
     if (!this.o.live && n > 1) {
       const [ex, ey] = S[n - 1];
@@ -407,7 +407,7 @@ export class MapView {
     const { p, acc, heading, lat } = this.pos;
     const [x, y] = toScreen(p[0], p[1]);
     const mpp = metersPerPx(lat, ws);
-    const accent = hexRgb(cssVar('--cyan', '#4cc2ff')) || [76, 194, 255];
+    const accent = hexRgb(cssVar('--accent', '#ff7a1a')) || [255, 122, 26];
     const A = a => `rgba(${accent.join(',')},${a})`;
     ctx.save();
     if (acc) {
@@ -458,7 +458,7 @@ export function routeThumb(points, breaks = [], { w = 64, h: hh = 64, pad = 6 } 
     d += (d === '' || isBreak ? 'M' : 'L') + ((x - x0) * sc + offX).toFixed(1) + ' ' + ((y - y0) * sc + offY).toFixed(1);
     prevI = i;
   }
-  s.innerHTML = `<path d="${d}" fill="none" style="stroke:var(--cyan)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s.innerHTML = `<path d="${d}" fill="none" style="stroke:var(--accent)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>`;
   return s;
 }
 

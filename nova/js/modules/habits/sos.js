@@ -20,6 +20,7 @@ export function renderSos(el, id) {
 
   const prevOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
+  document.body.classList.add('hb-sos-open');
 
   const startedAt = Date.now();
   let pattern = lastPattern, phaseIdx = 0, phaseStart = performance.now(), cycles = 0, waveDone = false, finished = false;
@@ -154,5 +155,6 @@ export function renderSos(el, id) {
     clearInterval(t1); clearInterval(t2);
     document.body.style.overflow = prevOverflow;
     overlay.remove();
+    document.body.classList.remove('hb-sos-open');
   };
 }
