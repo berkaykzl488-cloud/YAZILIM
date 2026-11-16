@@ -1,6 +1,6 @@
-# NOVA//2300 spor uygulamasını GitHub Pages'e yayınlar.
+# NOVA Fit spor uygulamasını GitHub Pages'e yayınlar.
 # Bir kez: Ayarlar › Pages › Source = "GitHub Actions" seçilmeli.
-name: NOVA 2300 — Pages
+name: NOVA Fit — Pages
 
 on:
   push:
