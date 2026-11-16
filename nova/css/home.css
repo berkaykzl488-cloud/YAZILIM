@@ -1,42 +1,39 @@
-/* Merkez (dashboard) */
-.dash-hero-head { margin-bottom: 14px; }
-.dash-live { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime); animation: pulse 1.6s infinite; flex: none; }
+/* Ana sayfa */
+.dash-hero-head { margin-bottom: 16px; }
 .dash-onboard { display: block; text-decoration: none; color: inherit; }
-.dash-core-body { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: center; }
+.dash-core-body { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center; }
 .tri-ring-wrap { position: relative; flex: none; }
 .tri-ring-wrap svg { display: block; overflow: visible; }
 .tri-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; }
-.dash-score { font-family: var(--font-display); font-weight: 900; font-size: 44px; line-height: 1; color: var(--text); text-shadow: var(--glow-cyan); margin: 4px 0; }
-.dash-score small { font-size: 18px; color: var(--cyan); margin-left: 2px; }
-.dash-legends { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 170px; }
-.dash-legend { display: flex; align-items: center; gap: 10px; }
-.dash-legend > i { width: 4px; height: 34px; border-radius: 2px; flex: none; }
-.dash-legend-v { font-size: 19px; font-weight: 700; }
+.dash-score { font-weight: 800; font-size: 44px; line-height: 1; letter-spacing: -.03em; color: var(--text); margin: 4px 0; font-variant-numeric: tabular-nums; }
+.dash-score small { font-size: 20px; color: var(--muted); margin-left: 2px; font-weight: 600; }
+.dash-legends { display: flex; flex-direction: column; gap: 14px; flex: 1; min-width: 180px; }
+.dash-legend { display: flex; align-items: center; gap: 12px; }
+.dash-legend > i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.dash-legend-v { font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .dash-water { display: block; text-decoration: none; color: inherit; }
 .dash-quicks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.dash-quick { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px; min-height: 92px; text-decoration: none; color: var(--text);
-  font-size: 13px; font-weight: 600; text-align: center; border: 1px solid var(--line); background: var(--panel);
-  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); transition: transform .15s, background .2s; }
-.dash-quick:active { transform: scale(.96); }
-.dash-quick > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; border: 1px solid currentColor; }
-.dash-quick > span svg { width: 21px; height: 21px; }
-.dash-quick.q-mag > span { color: var(--magenta); box-shadow: 0 0 14px rgba(255,43,214,.3) inset; }
-.dash-quick.q-lime > span { color: var(--lime); box-shadow: 0 0 14px rgba(182,255,59,.25) inset; }
-.dash-quick.q-amb > span { color: var(--amber); box-shadow: 0 0 14px rgba(255,176,32,.25) inset; }
-.dash-quick.q-vio > span { color: var(--violet); box-shadow: 0 0 14px rgba(139,92,255,.3) inset; }
-.dash-tile { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: inherit; margin-bottom: 0; min-height: 138px; }
-.dash-tile .stat-label { margin-top: 6px; }
+.dash-quick { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 12px 4px; min-height: 92px; text-decoration: none; color: var(--text);
+  font-size: 13px; font-weight: 600; text-align: center; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); transition: transform .1s, background .15s; }
+.dash-quick:hover { background: var(--panel-hi); }
+.dash-quick:active { transform: scale(.97); }
+.dash-quick > span { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; }
+.dash-quick > span svg { width: 22px; height: 22px; }
+.dash-quick.q-mag > span { color: var(--magenta); background: rgba(255,92,138,.14); }
+.dash-quick.q-lime > span { color: var(--lime); background: rgba(95,214,138,.14); }
+.dash-quick.q-amb > span { color: var(--amber); background: rgba(255,181,71,.14); }
+.dash-quick.q-vio > span { color: var(--violet); background: rgba(166,140,255,.14); }
+.dash-tile { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: inherit; margin-bottom: 0; min-height: 140px; }
 .dash-tile .stat-value { font-size: 23px; }
-.dash-tile-ic { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 9px; opacity: .9; }
-.dash-tile-ic svg { width: 18px; height: 18px; }
-.dash-tile-sub { min-height: 18px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-tile-ic { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: rgba(255,255,255,.06); }
+.dash-tile-ic svg { width: 19px; height: 19px; }
+.dash-tile-sub { min-height: 20px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dash-tile .progress { margin-top: auto; }
 .dash-rank { display: block; text-decoration: none; color: inherit; }
-.dash-lv { width: 62px; height: 62px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-weight: 900; font-size: 24px; color: var(--magenta); text-shadow: var(--glow-magenta);
-  border: 1px solid var(--magenta); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: rgba(255,43,214,.08); line-height: 1; }
-.dash-lv small { font-size: 10px; letter-spacing: 0; font-family: var(--font-body); color: var(--muted); text-shadow: none; }
+.dash-lv { width: 60px; height: 60px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 24px; color: var(--amber); border-radius: 50%; background: rgba(255,181,71,.12); line-height: 1; }
+.dash-lv small { font-size: 10px; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
 @media (max-width: 370px) {
   .dash-quick { font-size: 12px; }
-  .dash-quick > span { width: 36px; height: 36px; }
+  .dash-quick > span { width: 38px; height: 38px; }
 }

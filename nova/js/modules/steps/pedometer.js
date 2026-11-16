@@ -11,7 +11,7 @@ export const CFG = {
   minIntervalMs: 250,   // en hızlı geçerli adım aralığı
   maxIntervalMs: 2000,  // en yavaş geçerli adım aralığı
   runLength: 5,         // sayıma başlamak için gereken ardışık düzenli adım
-  tolerance: 0.3,       // aralık düzenliliği (ortalamadan ±%30)
+  tolerance: 0.25,      // aralık düzenliliği (ortalamadan ±%25)
   ampSpread: 2.4,       // genlik tutarlılığı (ortalamanın 1/x … x katı)
   resetGapMs: 500,      // bu kadar veri gelmezse filtre sıfırlanır (sekme gizlendi vb.)
 };
@@ -30,7 +30,7 @@ export class StepDetector {
     this.lastT = null; this.lp = 0; this.base = 0; this.signal = 0;
     this.mode = 'valley'; this.pk = -Infinity; this.pkT = 0; this.vl = 0;
     this.run = [];
-    this.counting = false; this.lastStepT = null; this.fastHits = 0;
+    this.counting = false; this.lastStepT = null; this.fastHits = 0; this.badHits = 0;
   }
 
   get threshold() { return Math.max(this.cfg.minAmp, this.cfg.ampFactor * this.avgAmp); }
@@ -70,7 +70,7 @@ export class StepDetector {
   }
 
   _drop() {
-    this.counting = false; this.run = []; this.fastHits = 0;
+    this.counting = false; this.run = []; this.fastHits = 0; this.badHits = 0;
     this.avgAmp = this.avgAmp * 0.5 + 2.5 * 0.5; // eşiği yavaşça varsayılana döndür
   }
 
@@ -84,7 +84,14 @@ export class StepDetector {
         return;
       }
       if (d > c.maxIntervalMs) { this._drop(); this._search(t, amp); return; }
-      this.fastHits = 0;
+      // Kilitliyken de ritim ve genlik tutarlı olmalı; üst üste iki düzensiz tepe → kilit düşer
+      const irregular = (this.avgInt && (d < this.avgInt * 0.6 || d > this.avgInt * 1.65)) ||
+        amp > this.avgAmp * 2.6 || amp < this.avgAmp / 2.6;
+      if (irregular) {
+        if (++this.badHits >= 2) { this._drop(); this._search(t, amp); }
+        return;
+      }
+      this.fastHits = 0; this.badHits = 0;
       this.avgInt = this.avgInt ? this.avgInt * 0.8 + d * 0.2 : d;
       this.avgAmp = this.avgAmp * 0.85 + amp * 0.15;
       this.lastStepT = t;
@@ -118,7 +125,7 @@ export class StepDetector {
       const run = this.run;
       this.counting = true;
       this.lastStepT = t;
-      this.fastHits = 0;
+      this.fastHits = 0; this.badHits = 0;
       this.avgInt = (run[run.length - 1].t - run[0].t) / (run.length - 1);
       this.avgAmp = this.avgAmp * 0.4 + (run.reduce((a, r) => a + r.amp, 0) / run.length) * 0.6;
       this.run = [];

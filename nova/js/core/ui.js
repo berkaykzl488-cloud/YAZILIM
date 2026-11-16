@@ -171,7 +171,7 @@ export function promptNumber({ title, label = '', value = '', unit = '', min = 0
 
 // ---------- Görsel bileşenler ----------
 /** Dairesel ilerleme halkası. center: ortaya konacak Node/metin */
-export function ring({ value = 0, max = 100, size = 120, stroke = 10, color = 'var(--cyan)', track = 'rgba(255,255,255,.07)', center = null, glow = true } = {}) {
+export function ring({ value = 0, max = 100, size = 120, stroke = 10, color = 'var(--cyan)', track = 'rgba(255,255,255,.08)', center = null, glow = false } = {}) {
   const r = (size - stroke) / 2, c = 2 * Math.PI * r;
   const pct = max > 0 ? clamp(value / max, 0, 1) : 0;
   const val = svg('circle', { class: 'ring-val', cx: size / 2, cy: size / 2, r, fill: 'none', stroke: color, 'stroke-width': stroke,
@@ -179,7 +179,6 @@ export function ring({ value = 0, max = 100, size = 120, stroke = 10, color = 'v
     style: glow ? `filter: drop-shadow(0 0 6px ${color})` : null });
   const s = svg('svg', { width: size, height: size, viewBox: `0 0 ${size} ${size}` },
     svg('circle', { cx: size / 2, cy: size / 2, r, fill: 'none', stroke: track, 'stroke-width': stroke }),
-    svg('circle', { cx: size / 2, cy: size / 2, r: r - stroke, fill: 'none', stroke: 'rgba(0,240,255,.08)', 'stroke-width': 1, 'stroke-dasharray': '2 4' }),
     val);
   requestAnimationFrame(() => requestAnimationFrame(() => val.setAttribute('stroke-dashoffset', c * (1 - pct))));
   return h('div', { class: 'ring', style: { width: size + 'px', height: size + 'px' } }, s, h('div', { class: 'ring-center' }, center));
@@ -187,7 +186,7 @@ export function ring({ value = 0, max = 100, size = 120, stroke = 10, color = 'v
 
 export function progressBar(value, max, { color, thin = false } = {}) {
   const pct = max > 0 ? clamp(value / max, 0, 1) * 100 : 0;
-  const i = h('i', { style: { width: '0%', ...(color ? { background: color, boxShadow: `0 0 10px ${color}` } : {}) } });
+  const i = h('i', { style: { width: '0%', ...(color ? { background: color } : {}) } });
   requestAnimationFrame(() => requestAnimationFrame(() => { i.style.width = pct + '%'; }));
   return h('div', { class: 'progress' + (thin ? ' thin' : '') }, i);
 }
@@ -209,11 +208,20 @@ export function sparkline(values, { width = 120, height = 36, color = 'var(--cya
   const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
   return svg('svg', { width, height, viewBox: `0 0 ${width} ${height}`, class: 'sparkline' },
     fill ? svg('path', { d: `${d} L${width} ${height} L0 ${height} Z`, fill: color, opacity: .12 }) : null,
-    svg('path', { d, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', style: `filter: drop-shadow(0 0 4px ${color})` }));
+    svg('path', { d, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
 }
 
 export function emptyState(iconName, title, text, action = null) {
   return h('div', { class: 'empty' }, icon(iconName), h('h4', null, title), text && h('p', { class: 'small', style: 'margin:4px 0 12px' }, text), action);
+}
+
+/** Alt sayfalar için standart "Geri" düğmesi. path verilmezse tarayıcı geçmişinde geri gider. */
+export function backButton(path = null, label = 'Geri') {
+  return h('button', { class: 'back-btn', type: 'button', 'aria-label': label, onClick: () => {
+    if (path) location.hash = '#/' + path.replace(/^#?\/?/, '');
+    else if (history.length > 1) history.back();
+    else location.hash = '#/home';
+  } }, icon('left'), label);
 }
 
 export function sectionTitle(text, right = null) {

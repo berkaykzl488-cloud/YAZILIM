@@ -132,7 +132,7 @@ export function waveform({ height = 64, span = 4000 } = {}) {
     g.beginPath();
     pts.forEach((p, i) => { const x = xs(p[0]), y = ys(p[1]); i ? g.lineTo(x, y) : g.moveTo(x, y); });
     g.strokeStyle = '#00f0ff'; g.lineWidth = 2; g.shadowColor = '#00f0ff'; g.shadowBlur = 8; g.stroke(); g.shadowBlur = 0;
-    dirty = true; // zaman kaydığı için akmaya devam et
+    dirty = tEnd - pts[pts.length - 1][0] < span; // veri tazeyse akmaya devam et
   };
   raf = requestAnimationFrame(draw);
   const destroy = () => { alive = false; cancelAnimationFrame(raf); };

@@ -149,13 +149,13 @@ export default {
     el.append(
       pageHeader('Profil', 'Bilgilerin, hedeflerin ve ayarlar'),
 
-      h('div', { class: 'panel magenta prof-rank' },
+      h('div', { class: 'panel prof-rank' },
         h('div', { class: 'row' },
           h('div', { class: 'prof-avatar' }, (p.name || 'P').slice(0, 1).toUpperCase()),
           h('div', { class: 'grow' },
             h('div', { class: 'li-title' }, p.name || 'Adını profilde yazabilirsin'),
             h('div', { class: 'small', style: { color: lv.rank.color } }, `${lv.rank.name} · Seviye ${lv.level}`),
-            h('div', { class: 'mt' }, progressBar(lv.progress, 1, { color: 'var(--magenta)' })),
+            h('div', { class: 'mt' }, progressBar(lv.progress, 1, { color: 'var(--amber)' })),
             h('div', { class: 'small muted mt' }, `${fmt.n(lv.total)} puan · sonraki seviye: ${fmt.n(lv.next)} puan`)),
           h('button', { class: 'btn ghost icon sm', 'aria-label': 'Seviyeleri gör', onClick: showRanks }, icon('trophy')))),
 

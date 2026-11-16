@@ -36,24 +36,19 @@ function tripleRing(rings, size = 210, centerNode) {
     const id = 'rg' + i;
     defs.appendChild(svg('linearGradient', { id, x1: 0, y1: 0, x2: 1, y2: 1 },
       svg('stop', { offset: 0, 'stop-color': r.c1 }), svg('stop', { offset: 1, 'stop-color': r.c2 })));
-    g.appendChild(svg('circle', { cx: c, cy: c, r: rad, fill: 'none', stroke: r.c1, 'stroke-opacity': .12, 'stroke-width': stroke }));
+    g.appendChild(svg('circle', { cx: c, cy: c, r: rad, fill: 'none', stroke: r.c1, 'stroke-opacity': .16, 'stroke-width': stroke }));
     const arc = svg('circle', { cx: c, cy: c, r: rad, fill: 'none', stroke: `url(#${id})`, 'stroke-width': stroke, 'stroke-linecap': 'round',
       'stroke-dasharray': circ, 'stroke-dashoffset': circ, transform: `rotate(-90 ${c} ${c})`,
-      style: `filter: drop-shadow(0 0 6px ${r.c1}); transition: stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1) ${i * 0.15}s` });
+      style: `transition: stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1) ${i * 0.12}s` });
     g.appendChild(arc);
     requestAnimationFrame(() => requestAnimationFrame(() => arc.setAttribute('stroke-dashoffset', circ * (1 - clamp(r.p, 0, 1)))));
   });
-  // dış tik halkası
-  for (let i = 0; i < 60; i++) {
-    const a = (i / 60) * Math.PI * 2, r1 = c - 1, r2 = c - (i % 5 ? 3 : 6);
-    g.appendChild(svg('line', { x1: c + Math.cos(a) * r1, y1: c + Math.sin(a) * r1, x2: c + Math.cos(a) * r2, y2: c + Math.sin(a) * r2, stroke: 'rgba(0,240,255,.35)', 'stroke-width': 1 }));
-  }
   return h('div', { class: 'tri-ring-wrap', style: { width: size + 'px', height: size + 'px' } }, g, h('div', { class: 'tri-center' }, centerNode));
 }
 
 function legendItem(color, label, value, sub) {
   return h('div', { class: 'dash-legend' },
-    h('i', { style: { background: color, boxShadow: `0 0 8px ${color}` } }),
+    h('i', { style: { background: color } }),
     h('div', { class: 'grow' }, h('div', { class: 'small muted' }, label), h('div', { class: 'display dash-legend-v' }, value, sub && h('span', { class: 'stat-unit' }, sub))));
 }
 
@@ -117,20 +112,20 @@ export default {
           h('h1', { class: 'hud-title', style: 'margin-top:4px' }, p.name ? `${greeting()}, ${p.name}` : greeting()),
           h('div', { class: 'small muted' }, 'Bugünkü özetin aşağıda.')),
 
-        !p.onboarded && h('a', { class: 'panel magenta click dash-onboard', href: '#/profile' },
-          h('div', { class: 'row' }, h('span', { class: 'li-icon', style: 'color:var(--magenta)' }, icon('cpu')),
+        !p.onboarded && h('a', { class: 'panel click dash-onboard', href: '#/profile' },
+          h('div', { class: 'row' }, h('span', { class: 'li-icon' }, icon('user')),
             h('div', { class: 'grow' }, h('div', { class: 'li-title' }, 'Profilini tamamla'),
               h('div', { class: 'li-sub' }, 'Boy, kilo ve hedefini gir; günlük kalori hedefin sana göre hesaplansın')),
             icon('right', { size: 20 }))),
 
         // ---- Ana halka ----
-        h('div', { class: 'panel scan dash-core' },
+        h('div', { class: 'panel dash-core' },
           h('div', { class: 'panel-title' }, icon('target', { size: 16 }), 'Bugün'),
           h('div', { class: 'dash-core-body' },
             tripleRing([
-              { p: pSteps, c1: '#00f0ff', c2: '#3b8bff' },
-              { p: pFood, c1: '#ffb020', c2: '#ff6a00' },
-              { p: pActive, c1: '#ff2bd6', c2: '#8b5cff' },
+              { p: pSteps, c1: '#4cc2ff', c2: '#5b8cff' },
+              { p: pFood, c1: '#ffb547', c2: '#ff8a3d' },
+              { p: pActive, c1: '#ff5c8a', c2: '#ff7a6b' },
             ], 200, h('div', null,
               h('div', { class: 'small muted' }, 'Günlük skor'),
               h('div', { class: 'dash-score' }, String(score), h('small', null, '%')),
@@ -163,7 +158,7 @@ export default {
           quick('Koşu başlat', 'run', 'run', 'q-mag'),
           quick('Antrenman', 'dumbbell', 'workout', 'q-lime'),
           quick('Öğün ekle', 'food', 'nutrition', 'q-amb'),
-          quick('Alışkanlık', 'shield', 'habits', 'q-vio')),
+          quick('Fit tarifler', 'list', 'recipes', 'q-vio')),
 
         // ---- Modüller ----
         sectionTitle('Bugünün özeti'),
@@ -185,7 +180,7 @@ export default {
             h('div', { class: 'grow' },
               h('div', { class: 'li-title', style: { color: lv.rank.color } }, lv.rank.name),
               h('div', { class: 'li-sub' }, `${fmt.n(lv.total)} puan · sonraki seviyeye ${fmt.n(lv.next - lv.total)} puan`),
-              h('div', { class: 'mt' }, progressBar(lv.progress, 1, { color: 'var(--magenta)' })))),
+              h('div', { class: 'mt' }, progressBar(lv.progress, 1, { color: 'var(--amber)' })))),
           (getXP().log || []).slice(0, 3).length ? h('div', { class: 'list mt' }, getXP().log.slice(0, 3).map(x =>
             h('div', { class: 'list-item', style: 'padding:6px 2px' }, h('span', { class: 'grow small' }, x.reason || 'Puan'), h('span', { class: 'mono small c-magenta' }, '+' + x.amount)))) : null),
       );
