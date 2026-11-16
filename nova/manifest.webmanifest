@@ -1,6 +1,6 @@
 {
-  "name": "NOVA 2300 — Biyo-Performans Sistemi",
-  "short_name": "NOVA 2300",
+  "name": "NOVA Fit — Spor ve Sağlık Takibi",
+  "short_name": "NOVA Fit",
   "description": "Adım, koşu (GPS), ev/salon antrenmanı, beslenme ve zararlı alışkanlık takibi.",
   "lang": "tr",
   "start_url": "./#/home",

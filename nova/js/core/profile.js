@@ -17,7 +17,7 @@ export const GOALS = [
 ];
 
 const DEFAULTS = {
-  name: 'Pilot',
+  name: '',
   sex: 'male',          // 'male' | 'female'
   age: 28,
   heightCm: 178,

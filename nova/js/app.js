@@ -1,4 +1,4 @@
-// NOVA//2300 — uygulama kabuğu
+// NOVA Fit — uygulama kabuğu
 import { h, icon, mount } from './core/ui.js';
 import * as router from './core/router.js';
 import { subscribe } from './core/store.js';
@@ -21,20 +21,20 @@ function loadCss(id) {
 }
 
 function buildShell() {
-  const levelChip = h('a', { class: 'hdr-level', href: '#/profile' });
+  const levelChip = h('a', { class: 'hdr-level', href: '#/profile', 'aria-label': 'Seviyen' });
   const paintLevel = () => {
     const l = levelInfo();
-    mount(levelChip, icon('sparkle', { size: 14 }), `LV ${l.level}`);
+    mount(levelChip, icon('star', { size: 14 }), `Seviye ${l.level}`);
   };
   paintLevel();
   subscribe('xp', paintLevel);
 
   const clock = h('span', { class: 'hdr-clock' });
-  const tick = () => { clock.textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) + ' · ' + (2300 + (new Date().getFullYear() - 2026)) + '.SİSTEM'; };
+  const tick = () => { clock.textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); };
   tick(); setInterval(tick, 15000);
 
   const header = h('header', { class: 'app-header' },
-    h('a', { class: 'app-logo', href: '#/home' }, 'NOVA', h('span', null, '//'), '2300'),
+    h('a', { class: 'app-logo', href: '#/home', 'aria-label': 'Ana sayfa' }, 'NOVA', h('span', null, ' FIT')),
     h('span', { class: 'spacer' }),
     clock,
     levelChip,

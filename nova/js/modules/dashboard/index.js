@@ -14,7 +14,7 @@ const call = (id, fn, ...args) => {
 
 function greeting() {
   const hr = new Date().getHours();
-  if (hr < 5) return 'Gece vardiyası';
+  if (hr < 5) return 'İyi geceler';
   if (hr < 12) return 'Günaydın';
   if (hr < 18) return 'İyi günler';
   return 'İyi akşamlar';
@@ -54,7 +54,7 @@ function tripleRing(rings, size = 210, centerNode) {
 function legendItem(color, label, value, sub) {
   return h('div', { class: 'dash-legend' },
     h('i', { style: { background: color, boxShadow: `0 0 8px ${color}` } }),
-    h('div', { class: 'grow' }, h('div', { class: 'tiny muted' }, label.toUpperCase()), h('div', { class: 'display dash-legend-v' }, value, sub && h('span', { class: 'stat-unit' }, sub))));
+    h('div', { class: 'grow' }, h('div', { class: 'small muted' }, label), h('div', { class: 'display dash-legend-v' }, value, sub && h('span', { class: 'stat-unit' }, sub))));
 }
 
 function moduleTile(id, key) {
@@ -66,7 +66,7 @@ function moduleTile(id, key) {
     h('div', { class: 'row between' },
       h('span', { class: 'dash-tile-ic', style: { color } }, icon(s?.icon || m.icon)),
       s?.progress != null && h('span', { class: 'mono tiny', style: { color } }, Math.round(clamp(s.progress, 0, 9.99) * 100) + '%')),
-    h('div', { class: 'stat-label mt' }, s?.label || m.title),
+    h('div', { class: 'stat-label', style: 'margin-top:8px' }, s?.label || m.title),
     s ? h('div', { class: 'stat-value' }, s.value ?? '–', s.unit && h('span', { class: 'stat-unit' }, s.unit))
       : h('div', { class: 'stat-value dim' }, '—'),
     h('div', { class: 'small muted dash-tile-sub' }, s?.sub || (s ? '' : 'Henüz veri yok')),
@@ -113,43 +113,43 @@ export default {
       el.replaceChildren(
         // ---- Karşılama ----
         h('div', { class: 'dash-hero-head' },
-          h('div', { class: 'tiny muted mono' }, fmt.date(key, 'full').toUpperCase()),
-          h('h1', { class: 'hud-title', style: 'margin-top:4px' }, `${greeting()}, ${p.name}`),
-          h('div', { class: 'row gap-s small muted' }, h('span', { class: 'dash-live' }), 'Biyometrik akış aktif · tüm sistemler çevrimiçi')),
+          h('div', { class: 'small muted' }, fmt.date(key, 'full')),
+          h('h1', { class: 'hud-title', style: 'margin-top:4px' }, p.name ? `${greeting()}, ${p.name}` : greeting()),
+          h('div', { class: 'small muted' }, 'Bugünkü özetin aşağıda.')),
 
         !p.onboarded && h('a', { class: 'panel magenta click dash-onboard', href: '#/profile' },
           h('div', { class: 'row' }, h('span', { class: 'li-icon', style: 'color:var(--magenta)' }, icon('cpu')),
-            h('div', { class: 'grow' }, h('div', { class: 'li-title' }, 'Biyo-profilini kalibre et'),
-              h('div', { class: 'li-sub' }, 'Boy, kilo ve hedefini gir; kalori ve makrolar sana göre hesaplansın')),
+            h('div', { class: 'grow' }, h('div', { class: 'li-title' }, 'Profilini tamamla'),
+              h('div', { class: 'li-sub' }, 'Boy, kilo ve hedefini gir; günlük kalori hedefin sana göre hesaplansın')),
             icon('right', { size: 20 }))),
 
         // ---- Ana halka ----
         h('div', { class: 'panel scan dash-core' },
-          h('div', { class: 'panel-title' }, icon('target', { size: 14 }), 'GÜNLÜK ÇEKİRDEK'),
+          h('div', { class: 'panel-title' }, icon('target', { size: 16 }), 'Bugün'),
           h('div', { class: 'dash-core-body' },
             tripleRing([
               { p: pSteps, c1: '#00f0ff', c2: '#3b8bff' },
               { p: pFood, c1: '#ffb020', c2: '#ff6a00' },
               { p: pActive, c1: '#ff2bd6', c2: '#8b5cff' },
             ], 200, h('div', null,
-              h('div', { class: 'tiny muted' }, 'BİYO-SENKRON'),
+              h('div', { class: 'small muted' }, 'Günlük skor'),
               h('div', { class: 'dash-score' }, String(score), h('small', null, '%')),
-              h('div', { class: 'tiny c-cyan mono' }, score >= 80 ? 'OPTİMAL' : score >= 50 ? 'STABİL' : 'ŞARJ GEREKLİ'))),
+              h('div', { class: 'small c-cyan' }, score >= 80 ? 'Harika gidiyorsun' : score >= 50 ? 'İyi gidiyor' : score > 0 ? 'Biraz daha hareket' : 'Güne başla'))),
             h('div', { class: 'dash-legends' },
               legendItem('var(--cyan)', 'Adım', fmt.n(steps), `/ ${fmt.n(p.stepGoal)}`),
-              legendItem('var(--amber)', 'Alınan', fmt.n(intake.kcal), `/ ${fmt.n(target)} kcal`),
-              legendItem('var(--magenta)', 'Aktif yakım', fmt.n(active), `/ ${ACTIVE_KCAL_GOAL} kcal`)))),
+              legendItem('var(--amber)', 'Yenilen kalori', fmt.n(intake.kcal), `/ ${fmt.n(target)} kcal`),
+              legendItem('var(--magenta)', 'Hareketle yakılan', fmt.n(active), `/ ${ACTIVE_KCAL_GOAL} kcal`)))),
 
         // ---- Enerji dengesi ----
         h('div', { class: 'grid-3' },
-          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Alınan'), h('div', { class: 'stat-value c-amber' }, fmt.n(intake.kcal)), h('div', { class: 'tiny muted' }, 'kcal')),
-          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Harcanan'), h('div', { class: 'stat-value c-magenta' }, fmt.n(totalBurn)), h('div', { class: 'tiny muted' }, `BMR ${fmt.n(base)} + ${fmt.n(active)}`)),
-          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Net'), h('div', { class: 'stat-value ' + (net > 0 ? 'c-red' : 'c-lime') }, (net > 0 ? '+' : '') + fmt.n(net)), h('div', { class: 'tiny muted' }, net > 0 ? 'fazla' : 'açık'))),
+          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Yenilen'), h('div', { class: 'stat-value c-amber' }, fmt.n(intake.kcal)), h('div', { class: 'tiny muted' }, 'kcal')),
+          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Harcanan'), h('div', { class: 'stat-value c-magenta' }, fmt.n(totalBurn)), h('div', { class: 'tiny muted' }, 'kcal')),
+          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Fark'), h('div', { class: 'stat-value ' + (net > 0 ? 'c-red' : 'c-lime') }, (net > 0 ? '+' : '') + fmt.n(net)), h('div', { class: 'tiny muted' }, net > 0 ? 'kcal fazla' : 'kcal açık'))),
 
         // ---- Su + makro şeridi ----
         h('a', { class: 'panel tight click dash-water', href: '#/nutrition' },
           h('div', { class: 'row between' },
-            h('div', { class: 'row gap-s' }, h('span', { class: 'c-cyan' }, icon('water', { size: 18 })), h('span', { class: 'stat-label' }, 'Hidrasyon')),
+            h('div', { class: 'row gap-s' }, h('span', { class: 'c-cyan' }, icon('water', { size: 18 })), h('span', { class: 'stat-label' }, 'Su')),
             h('span', { class: 'mono small' }, `${fmt.n((intake.waterMl || 0) / 1000, 2)} / ${fmt.n(water / 1000, 1)} L`)),
           h('div', { class: 'mt' }, progressBar(intake.waterMl || 0, water, { color: 'var(--cyan)' })),
           h('div', { class: 'grid-3 mt small' },
@@ -158,19 +158,19 @@ export default {
             h('div', null, h('span', { class: 'muted' }, 'Yağ '), h('b', { class: 'mono' }, fmt.n(intake.fat) + 'g')))),
 
         // ---- Hızlı komutlar ----
-        sectionTitle('Hızlı komut'),
+        sectionTitle('Hızlı başlat'),
         h('div', { class: 'dash-quicks' },
           quick('Koşu başlat', 'run', 'run', 'q-mag'),
           quick('Antrenman', 'dumbbell', 'workout', 'q-lime'),
           quick('Öğün ekle', 'food', 'nutrition', 'q-amb'),
-          quick('Kriz modu', 'shield', 'habits', 'q-vio')),
+          quick('Alışkanlık', 'shield', 'habits', 'q-vio')),
 
         // ---- Modüller ----
-        sectionTitle('Sistem modülleri'),
+        sectionTitle('Bugünün özeti'),
         h('div', { class: 'grid-2' }, TILE_MODULES.map(id => moduleTile(id, key))),
 
         // ---- Haftalık ----
-        sectionTitle('7 günlük adım izi', h('a', { class: 'tiny', href: '#/steps' }, 'TÜMÜ')),
+        sectionTitle('Son 7 gün adım', h('a', { class: 'small', href: '#/steps' }, 'Tümünü gör')),
         h('div', { class: 'panel' },
           barChart(hist.map(d => ({ label: fmt.date(d.date, 'weekday'), value: d.steps, highlight: d.date === key })), { height: 110 }),
           h('div', { class: 'row between mt small muted' },
@@ -178,16 +178,16 @@ export default {
             h('span', null, 'Toplam ', h('b', { class: 'mono' }, fmt.n(hist.reduce((s, d) => s + d.steps, 0)))))),
 
         // ---- Seviye ----
-        sectionTitle('Rütbe'),
+        sectionTitle('Seviyen'),
         h('a', { class: 'panel click dash-rank', href: '#/profile' },
           h('div', { class: 'row' },
-            h('div', { class: 'dash-lv' }, h('small', null, 'LV'), String(lv.level)),
+            h('div', { class: 'dash-lv' }, h('small', null, 'Seviye'), String(lv.level)),
             h('div', { class: 'grow' },
               h('div', { class: 'li-title', style: { color: lv.rank.color } }, lv.rank.name),
-              h('div', { class: 'li-sub mono' }, `${fmt.n(lv.total)} XP · sonraki seviye ${fmt.n(lv.next - lv.total)} XP`),
+              h('div', { class: 'li-sub' }, `${fmt.n(lv.total)} puan · sonraki seviyeye ${fmt.n(lv.next - lv.total)} puan`),
               h('div', { class: 'mt' }, progressBar(lv.progress, 1, { color: 'var(--magenta)' })))),
           (getXP().log || []).slice(0, 3).length ? h('div', { class: 'list mt' }, getXP().log.slice(0, 3).map(x =>
-            h('div', { class: 'list-item', style: 'padding:6px 2px' }, h('span', { class: 'grow small' }, x.reason || 'XP'), h('span', { class: 'mono small c-magenta' }, '+' + x.amount)))) : null),
+            h('div', { class: 'list-item', style: 'padding:6px 2px' }, h('span', { class: 'grow small' }, x.reason || 'Puan'), h('span', { class: 'mono small c-magenta' }, '+' + x.amount)))) : null),
       );
     };
 

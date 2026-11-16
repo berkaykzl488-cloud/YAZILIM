@@ -3,13 +3,13 @@ import { load, save } from './store.js';
 import { toast } from './ui.js';
 
 export const RANKS = [
-  { level: 1, name: 'Çaylak Kadet', color: 'var(--muted)' },
-  { level: 3, name: 'Yörünge Pilotu', color: 'var(--cyan)' },
-  { level: 6, name: 'Nebula Koşucusu', color: 'var(--blue)' },
-  { level: 10, name: 'Kuantum Savaşçı', color: 'var(--violet)' },
-  { level: 15, name: 'Yıldız Komutanı', color: 'var(--magenta)' },
-  { level: 22, name: 'Galaktik Titan', color: 'var(--amber)' },
-  { level: 30, name: 'Kozmik Efsane', color: 'var(--lime)' },
+  { level: 1, name: 'Yeni Başlayan', color: 'var(--muted)' },
+  { level: 3, name: 'Acemi', color: 'var(--cyan)' },
+  { level: 6, name: 'Düzenli', color: 'var(--blue)' },
+  { level: 10, name: 'Kararlı', color: 'var(--violet)' },
+  { level: 15, name: 'Güçlü', color: 'var(--magenta)' },
+  { level: 22, name: 'Usta', color: 'var(--amber)' },
+  { level: 30, name: 'Efsane', color: 'var(--lime)' },
 ];
 
 const xpForLevel = lvl => Math.round(100 * Math.pow(lvl - 1, 1.6)); // seviyeye ulaşmak için toplam XP
@@ -39,7 +39,7 @@ export function awardXP(amount, reason = '', { once = null, silent = false } = {
   st.log = [{ ts: Date.now(), amount: Math.round(amount), reason }, ...(st.log || [])].slice(0, 200);
   save('xp', st);
   const after = levelInfo(st.total);
-  if (!silent) toast(`+${Math.round(amount)} XP · ${reason}`, { type: 'xp' });
-  if (after.level > before) setTimeout(() => toast(`SEVİYE ${after.level} · ${after.rank.name}`, { type: 'xp', ms: 4000 }), 600);
+  if (!silent) toast(`+${Math.round(amount)} puan · ${reason}`, { type: 'xp' });
+  if (after.level > before) setTimeout(() => toast(`Tebrikler! Seviye ${after.level} oldun: ${after.rank.name}`, { type: 'xp', ms: 4000 }), 600);
   return true;
 }

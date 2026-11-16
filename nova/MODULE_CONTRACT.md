@@ -45,4 +45,4 @@ Modüller birbirine `import { getModule } from '../../core/router.js'` ile çal�
 
 Değişkenler: `--cyan --magenta --lime --amber --red --violet --blue --text --muted --dim --panel --line --line-strong --font-display --font-body --font-mono --glow-cyan --glow-magenta`.
 
-Tüm arayüz metni **Türkçe**. Tema: 2300 yılı — holografik HUD, neon, cam paneller. Yapay zekâ/robot teması değil; ileri teknoloji biyometrik kokpit.
+Tüm arayüz metni **sade, günümüz Türkçesi** (bilimkurgu terimleri yok: “biyo”, “protokol”, “sistem”, “kalibre” vb. kullanılmaz). Görsel stil: neon, cam paneller, ileri teknoloji hissi. Mobil UI/UX standartları: ≥44px dokunma alanı, ≥15px gövde metni, net birincil eylem, boş durumlarda yönlendirme, silmeden önce onay, kayıttan sonra bildirim, alt sayfalarda görünür “Geri”.
