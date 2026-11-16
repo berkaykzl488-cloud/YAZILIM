@@ -129,7 +129,7 @@ export function tokScore(q, t) {
     const maxD = q.length >= 7 ? 2 : 1;
     let d = osa(q, t, maxD);
     if (d > maxD && t.length > q.length) d = Math.min(osa(q, t.slice(0, q.length), maxD), osa(q, t.slice(0, q.length + 1), maxD));
-    if (d <= maxD) return 42 - d * 8;
+    if (d <= maxD) return 42 - d * 8 + (t.length >= q.length ? 3 : 0);
   }
   return 0;
 }
@@ -138,7 +138,7 @@ export function tokScore(q, t) {
 export function indexItem(item) {
   const nameN = norm(item.name);
   const all = norm(`${item.name} ${item.brand || ''} ${item.keys || ''}`);
-  return { item, nameN, toks: [...new Set(all.split(' ').filter(Boolean))], brandN: norm(item.brand || '') };
+  return { item, nameN, nameLen: nameN.split(' ').length, toks: [...new Set(all.split(' ').filter(Boolean))], brandN: norm(item.brand || '') };
 }
 
 /** Dizinde arama: tüm sorgu kelimeleri bir yerde eşleşmeli */
@@ -156,16 +156,18 @@ export function searchIndex(index, query, { limit = 60, boost = null } = {}) {
       total += best;
     }
     if (!ok) continue;
+    if (e.nameN === qn) total += 40;
     if (e.nameN.startsWith(qn)) total += 30;
     else if (e.nameN.includes(qn)) total += 10;
     if (e.brandN && qt.length === 1 && e.brandN === qn) total += 5;
     if (!e.item.brand) total += 3;
-    total -= e.toks.length * 0.8;
+    total -= e.nameLen * 1.5;
     if (boost) total += boost(e.item) || 0;
     res.push({ item: e.item, score: total });
   }
   res.sort((a, b) => b.score - a.score);
-  return res.slice(0, limit).map(r => r.item);
+  const cut = res.length ? res[0].score * 0.4 : 0;
+  return res.filter(r => r.score >= cut).slice(0, limit).map(r => r.item);
 }
 
 /** Atwater tahmini (iki yöntem): standart ve lif düzeltmeli */
