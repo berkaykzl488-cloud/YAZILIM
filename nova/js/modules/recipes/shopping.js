@@ -2,7 +2,7 @@
 import { h, icon, mount, toast, confirmDialog, emptyState, haptic } from '../../core/ui.js';
 import { subscribe } from '../../core/store.js';
 import { parseIngredient } from './data/_build.js';
-import { getShopping, saveShopping, addToShopping, qtyText, aisleOf, AISLES } from './util.js';
+import { getShopping, saveShopping, addToShopping, qtyText, aisleOf, AISLES, toastAction } from './util.js';
 import { nav } from './nav.js';
 
 /** "2 adet limon" ya da yalnızca "limon" */
@@ -42,8 +42,9 @@ export function renderShopping(el) {
           h('span', { class: 'rcp-shop-name' }, it.qty != null && h('b', null, qtyText(it.qty, it.unit) + ' '), it.name),
           it.recipes?.length ? h('span', { class: 'rcp-shop-from' }, it.recipes.join(', ')) : null)),
       h('button', { type: 'button', class: 'rcp-shop-del', 'aria-label': it.name + ' sil', onClick: () => {
+        const before = getShopping();
         setItems(l => l.filter(x => x.id !== it.id));
-        toast(`${it.name} silindi`, { ms: 1800 });
+        toastAction(`${it.name} silindi`, 'Geri al', () => saveShopping(before), 'info');
       } }, icon('x', { size: 18 })));
   }
 

@@ -264,7 +264,7 @@ input[type=range] { width: 100%; accent-color: var(--cyan); }
 
 /* ---------- Boş durum ---------- */
 .empty { text-align: center; padding: 28px 12px; color: var(--muted); }
-.empty svg { width: 44px; height: 44px; color: var(--dim); margin-bottom: 8px; }
+.empty > svg { width: 44px; height: 44px; color: var(--dim); margin-bottom: 8px; }
 .empty h4 { margin: 4px 0; color: var(--text); font-size: 18px; font-weight: 700; }
 
 /* ---------- Modal / alt sayfa ---------- */
