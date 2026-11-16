@@ -81,6 +81,7 @@ export function renderLive() {
     top, stats, h('div', { class: 'rn-live-mapwrap' }, mapHost, layoutBtn, flash), controls, lockLayer);
   document.body.appendChild(root);
   document.documentElement.classList.add('rn-noscroll');
+  document.body.classList.add('run-live');
 
   const map = new MapView(mapHost, { follow: true, live: true, zoom: 16, controls: true });
   map.setFollow(true);
@@ -163,6 +164,7 @@ export function renderLive() {
     map.destroy();
     root.remove();
     document.documentElement.classList.remove('rn-noscroll');
+    document.body.classList.remove('run-live');
     void locked;
   };
 }

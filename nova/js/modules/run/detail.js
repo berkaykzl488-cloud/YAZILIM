@@ -71,9 +71,9 @@ export function renderDetail(el, id) {
       const lo = valid[Math.floor(valid.length * 0.05)] * 0.85, hi = valid[Math.floor(valid.length * 0.95)] * 1.15;
       const avgPace = run.movingSec / (run.distM / 1000);
       paceChart = T.speedMode
-        ? areaChart(series.xs, series.speed.map(v => v * 3.6), { color: 'var(--cyan)', fmtY: v => fmt.n(v, 0) + ' km/sa', avg: run.distM / run.movingSec * 3.6, avgLabel: 'ort.' })
+        ? areaChart(series.xs, series.speed.map(v => v * 3.6), { color: 'var(--accent)', fmtY: v => fmt.n(v, 0) + ' km/sa', avg: run.distM / run.movingSec * 3.6, avgLabel: 'ort.' })
         : areaChart(series.xs, series.pace.map(p => (Number.isFinite(p) ? Math.min(hi, Math.max(lo, p)) : NaN)),
-          { color: 'var(--cyan)', invert: true, fmtY: v => fmt.pace(v), avg: avgPace, avgLabel: 'ort.' });
+          { color: 'var(--accent)', invert: true, fmtY: v => fmt.pace(v), avg: avgPace, avgLabel: 'ort.' });
     }
     if (series.elev) elevChart = areaChart(series.xs, series.elev, { color: 'var(--lime)', fmtY: v => fmt.n(v, 0) + ' m' });
   }

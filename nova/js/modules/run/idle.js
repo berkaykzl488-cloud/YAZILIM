@@ -186,7 +186,6 @@ function labeled(toggleEl, label) {
   toggleEl.querySelector('input')?.setAttribute('aria-label', label);
   return toggleEl;
 }
-const miniStat = (label, value) => h('div', { class: 'rn-mini' }, h('div', { class: 'rn-mini-v' }, value), h('div', { class: 'rn-mini-l' }, label));
 
 /** Hedef tempo (ya da bisiklette hedef hız) diyaloğu */
 function editTargetPace(type, after) {

@@ -87,13 +87,14 @@ export function renderWizard(el, { type = null, editId = null } = {}) {
       type: 'button', class: 'chip', onClick: () => { st.quitAt = Date.now() - off; when.value = toLocalInput(st.quitAt); },
     }, l)));
 
+    const heroIc = h('span', { class: 'hb-tpl-ic lg' }, icon(st.icon));
     // Özel: ikon seçimi
     let iconWrap = null;
     if (t.custom) {
       iconWrap = h('div', { class: 'hb-iconpick', role: 'radiogroup', 'aria-label': 'Simge' });
       const drawIcons = () => mount(iconWrap, CUSTOM_ICONS.map(n => h('button', {
         type: 'button', class: 'hb-iconbtn' + (st.icon === n ? ' on' : ''), 'aria-label': 'Simge: ' + n, role: 'radio', 'aria-checked': String(st.icon === n),
-        onClick: () => { st.icon = n; drawIcons(); },
+        onClick: () => { st.icon = n; drawIcons(); mount(heroIc, icon(n)); },
       }, icon(n))));
       drawIcons();
     }
@@ -124,14 +125,18 @@ export function renderWizard(el, { type = null, editId = null } = {}) {
     drawCost();
 
     const unitsLabel = h('span', { class: 'hb-label' });
-    const paintUnitsLabel = () => { unitsLabel.textContent = st.unitName === 'dk' ? 'Günde kaç dakika?' : `Günde kaç ${st.unitName || 'kez'}?`; };
+    const unitSuffix = h('span', { class: 'muted' });
+    const paintUnitsLabel = () => {
+      unitsLabel.textContent = st.unitName === 'dk' ? 'Günde kaç dakika?' : `Günde kaç ${st.unitName || 'kez'}?`;
+      unitSuffix.textContent = st.unitName === 'dk' ? 'dakika / gün' : `${st.unitName} / gün`;
+    };
     paintUnitsLabel();
 
     const nameInput = h('input', { class: 'input', type: 'text', value: st.name, maxlength: 40, placeholder: t.custom ? 'Örn. Gazlı içecek' : t.name,
       onInput: e => { st.name = e.target.value; } });
 
     return [
-      h('div', { class: 'hb-wiz-hero' }, h('span', { class: 'hb-tpl-ic lg' }, icon(st.icon)),
+      h('div', { class: 'hb-wiz-hero' }, heroIc,
         h('div', null, h('h1', { class: 'hb-h1' }, existing ? 'Bilgileri düzenle' : (t.custom ? 'Kendi alışkanlığın' : t.name)),
           t.hint && h('p', { class: 'muted hb-p', style: 'margin:0' }, t.hint))),
       h('div', { class: 'panel' },
@@ -139,13 +144,13 @@ export function renderWizard(el, { type = null, editId = null } = {}) {
         iconWrap && h('div', { class: 'field' }, h('span', { class: 'hb-label' }, 'Simge'), iconWrap),
         t.custom && h('label', { class: 'field' }, h('span', { class: 'hb-label' }, 'Birim (ne sayıyorsun?)'),
           h('input', { class: 'input', type: 'text', value: st.unitName, maxlength: 16, placeholder: 'kez, bardak, adet…',
-            onInput: e => { st.unitName = e.target.value.trim() || 'kez'; paintUnitsLabel(); } })),
+            onInput: e => { st.unitName = e.target.value.trim() || 'kez'; paintUnitsLabel(); if (st.costMode === 'unit') drawCost(); } })),
         h('div', { class: 'field' }, h('span', { class: 'hb-label' }, 'Ne zaman bıraktın?'), when, quickChips,
           h('span', { class: 'muted small' }, 'Geçmiş bir tarih seçebilirsin. Sayaç o andan itibaren başlar.'))),
       h('div', { class: 'panel' },
         h('div', { class: 'field' }, unitsLabel,
           h('div', { class: 'row' }, stepper(st.unitsPerDay, { min: 0, max: 2000, step: t.step || 1, onChange: v => { st.unitsPerDay = v; paintCost(); } }),
-            h('span', { class: 'muted' }, st.unitName === 'dk' ? 'dakika / gün' : `${st.unitName} / gün`))),
+            unitSuffix)),
         (t.timeKind === 'time' && !t.fixedTime) && h('label', { class: 'field' },
           h('span', { class: 'hb-label' }, `Her seferinde ne kadar süre gidiyor? (dk)`),
           numInput(st.timePerUnit, v => { st.timePerUnit = v; }, { label: 'Süre (dakika)' })),

@@ -292,3 +292,4 @@
 .hb-sosv-foot .btn { max-width: 528px; margin: 0 auto; }
 
 body.hb-sos-open .app-nav { display: none; }
+@media (max-width: 370px) { .hb-strip .is-label svg { display: none; } }

@@ -269,8 +269,11 @@ export function stepper(value, { min = 0, max = 9999, step = 1, onChange } = {})
 
 /** Basit metin/şablon sayısı animasyonu */
 export function countUp(el, to, { ms = 900, dec = 0 } = {}) {
+  // Aynı eleman için yeni bir animasyon başlarsa eskisi iptal olur
+  const token = (el._countToken = (el._countToken || 0) + 1);
   const start = performance.now();
   const step = t => {
+    if (el._countToken !== token) return;
     const p = clamp((t - start) / ms, 0, 1), e = 1 - Math.pow(1 - p, 3);
     el.textContent = fmt.n(to * e, dec);
     if (p < 1) requestAnimationFrame(step);

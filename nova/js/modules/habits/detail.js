@@ -61,10 +61,10 @@ export function renderDetail(el, id) {
     live.regain = h('span');
     const cell = (ic, label, val, cls = '') => h('div', null, h('div', { class: 'is-label' }, icon(ic), label), h('div', { class: 'is-value ' + cls }, val));
     const cells = [cell('coin', 'Biriken para', live.saved, 'c-lime')];
-    if (hb.unitName === 'dk') cells.push(cell('clock', 'Kazanılan süre', live.units));
+    if (hb.unitName === 'dk') cells.push(cell('clock', 'Zaman kazancı', live.units));
     else {
       cells.push(cell(hb.icon, hb.type === 'smoking' ? 'İçilmeyen' : 'Kaçınılan', [live.units, h('small', { class: 'hb-unit' }, ' ' + hb.unitName)]));
-      if (hb.timePerUnit > 0) cells.push(cell('heart', t.timeKind === 'life' ? 'Kazanılan ömür' : 'Kazanılan süre', live.regain));
+      if (hb.timePerUnit > 0) cells.push(cell('heart', t.timeKind === 'life' ? 'Ömür kazancı' : 'Zaman kazancı', live.regain));
     }
     return h('section', { class: 'panel hero hb-hero' },
       h('div', { class: 'hb-clk-title' }, h('span', { class: 'hb-live-dot' }), 'Temiz geçen süre'),
@@ -73,7 +73,7 @@ export function renderDetail(el, id) {
       h('div', { class: 'hb-hms' },
         live.clock[1], h('span', null, 'sa'), live.clock[2], h('span', null, 'dk'), live.clock[3], h('span', null, 'sn')),
       h('div', { class: 'info-strip hb-strip' }, cells),
-      hb.type === 'smoking' && h('p', { class: 'hb-foot-note' }, 'Kazanılan ömür: içilmeyen her sigara için ≈ 11 dk (tahmini).'));
+      hb.type === 'smoking' && h('p', { class: 'hb-foot-note' }, 'Ömür kazancı: içilmeyen her sigara ≈ 11 dk (tahmini).'));
   }
 
   function recoveryPanel(s) {
