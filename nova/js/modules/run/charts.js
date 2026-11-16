@@ -21,15 +21,15 @@ export function areaChart(xs, ys, { color = 'var(--cyan)', height = 140, fmtY = 
   const base = invert ? 0 : H;
   const area = `${line} L${X(valid[valid.length - 1][0]).toFixed(1)} ${base} L${X(valid[0][0]).toFixed(1)} ${base} Z`;
   const gid = 'ag' + Math.random().toString(36).slice(2, 8);
-  const grid = [0.25, 0.5, 0.75].map(f => svg('line', { x1: 0, x2: W, y1: H * f, y2: H * f, stroke: 'rgba(0,240,255,.08)', 'vector-effect': 'non-scaling-stroke' }));
+  const grid = [0.25, 0.5, 0.75].map(f => svg('line', { x1: 0, x2: W, y1: H * f, y2: H * f, stroke: 'rgba(255,255,255,.06)', 'vector-effect': 'non-scaling-stroke' }));
   const s = svg('svg', { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'none', class: 'rn-chart-svg', 'aria-hidden': 'true' },
     svg('defs', {}, svg('linearGradient', { id: gid, x1: 0, y1: invert ? 1 : 0, x2: 0, y2: invert ? 0 : 1 },
-      svg('stop', { offset: 0, 'stop-color': color, 'stop-opacity': 0.45 }),
-      svg('stop', { offset: 1, 'stop-color': color, 'stop-opacity': 0 }))),
+      svg('stop', { offset: 0, style: `stop-color:${color};stop-opacity:.35` }),
+      svg('stop', { offset: 1, style: `stop-color:${color};stop-opacity:0` }))),
     grid,
     svg('path', { d: area, fill: `url(#${gid})` }),
     avg != null && Number.isFinite(avg) ? svg('line', { x1: 0, x2: W, y1: Y(avg), y2: Y(avg), stroke: 'rgba(255,255,255,.45)', 'stroke-dasharray': '4 4', 'vector-effect': 'non-scaling-stroke' }) : null,
-    svg('path', { d: line, fill: 'none', stroke: color, 'stroke-width': 2, 'vector-effect': 'non-scaling-stroke', 'stroke-linejoin': 'round', style: `filter: drop-shadow(0 0 4px ${color})` }));
+    svg('path', { d: line, fill: 'none', 'stroke-width': 2, 'vector-effect': 'non-scaling-stroke', 'stroke-linejoin': 'round', style: `stroke:${color}` }));
   const top = invert ? mn + padY : mx - padY, bot = invert ? mx - padY : mn + padY;
   return h('div', { class: 'rn-chart', style: { height: height + 'px' } },
     h('div', { class: 'rn-chart-y' }, h('span', null, fmtY(top)), h('span', null, fmtY(bot))),

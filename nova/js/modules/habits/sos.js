@@ -1,5 +1,5 @@
 // Acil destek (SOS): nefes egzersizi, 5 dakikalık geri sayım, dikkat dağıtma görevleri ve kişisel nedenler
-import { h, svg, icon, mount, haptic, toast } from '../../core/ui.js';
+import { h, svg, icon, mount, haptic, toast, backButton } from '../../core/ui.js';
 import { go } from '../../core/router.js';
 import { awardXP } from '../../core/xp.js';
 import { get, DISTRACTIONS, pad2 } from './data.js';
@@ -110,10 +110,10 @@ export function renderSos(el, id) {
     h('div', { class: 'hb-sosv-bg' }),
     h('div', { class: 'hb-sosv-inner' },
       h('div', { class: 'hb-topbar' },
-        h('a', { class: 'btn ghost sm hb-back', href: `#/habits/${id}`, 'aria-label': 'Kapat ve geri dön' }, icon('left'), 'Geri'),
+        backButton(`habits/${id}`),
         h('div', { class: 'hb-topbar-title' }, h('span', { class: 'hb-sos-dot' }), 'Acil destek'),
         cycleEl),
-      h('p', { class: 'hb-sos-lead' }, `${hb.name} isteği geldi. Birlikte atlatalım: küreyle birlikte nefes al.`),
+      h('p', { class: 'hb-sos-lead' }, `${hb.name} isteği geldi. Birlikte atlatalım: dairenin ritmine göre nefes al.`),
       modeBox,
       orbWrap,
       wavePanel,

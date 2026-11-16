@@ -1,5 +1,5 @@
 // Adım Sayar — telefon sensörüyle canlı adım sayımı, elle giriş, günlük liste, grafikler, seriler.
-import { h, icon, mount, fmt, toast, modal, confirmDialog, promptNumber, tabs, toggle, sectionTitle, pageHeader, emptyState, countUp, haptic, clamp } from '../../core/ui.js';
+import { h, icon, mount, fmt, toast, modal, confirmDialog, promptNumber, tabs, toggle, sectionTitle, pageHeader, emptyState, haptic, clamp } from '../../core/ui.js';
 import { subscribe, todayKey, addDays, lastNDays, parseKey } from '../../core/store.js';
 import { getProfile, saveProfile } from '../../core/profile.js';
 import { refresh } from '../../core/router.js';
@@ -77,8 +77,8 @@ function openDayEditor(date = todayKey(), { pickDate = false } = {}) {
     const e = D.getEntry(cur);
     totalInp.value = e.total || '';
     mount(breakdown,
-      h('div', null, h('span', null, 'Telefonun saydığı'), h('b', null, fmt.n(e.sensor))),
-      h('div', null, h('span', null, 'Elle düzeltme'), h('b', null, (e.manual > 0 ? '+' : '') + fmt.n(e.manual))),
+      h('div', null, h('span', null, 'Telefon sayımı'), h('b', null, fmt.n(e.sensor))),
+      h('div', null, h('span', null, 'Düzeltme'), h('b', null, (e.manual > 0 ? '+' : '') + fmt.n(e.manual))),
       h('div', null, h('span', null, 'Toplam'), h('b', { class: 'c-cyan' }, fmt.n(e.total))));
   };
   dateInp.addEventListener('change', () => {
@@ -130,7 +130,7 @@ function sensorStatus() {
       : { cls: 'ready', text: 'Hazır', sub: 'Yürümeye başla. Ritmi yakalamak için ilk birkaç adım beklenir, sonra hepsi sayılır.' };
     case 'starting': return { cls: 'wait', text: 'Başlatılıyor…', sub: 'Hareket sensörüne bağlanılıyor.' };
     case 'needs-permission': return { cls: 'wait', text: 'İzin gerekli', sub: 'Adım sayımına devam etmek için düğmeye dokun ve hareket erişimine izin ver.' };
-    case 'denied': return { cls: 'err', text: 'İzin verilmedi', sub: 'Ayarlar › Safari › Hareket ve Yönelim Erişimi\'ni açıp tekrar dene.' };
+    case 'denied': return { cls: 'err', text: 'İzin verilmedi', sub: 'Tarayıcı ayarlarından bu site için hareket sensörü iznini açıp tekrar dene. iPhone\'da: Ayarlar › Safari › Hareket ve Yönelim Erişimi.' };
     case 'nosensor': return { cls: 'err', text: 'Hareket verisi gelmiyor', sub: 'Bu cihaz hareket sensörü sunmuyor olabilir (bilgisayar vb.). Adımlarını elle girebilirsin.' };
     case 'unsupported': return { cls: 'err', text: 'Desteklenmiyor', sub: 'Bu tarayıcı hareket sensörüne erişemiyor. Adımlarını elle girebilirsin.' };
     case 'insecure': return { cls: 'err', text: 'Güvenli bağlantı gerekli', sub: 'Sensör yalnızca HTTPS adresinde çalışır.' };
@@ -158,18 +158,27 @@ function render(el) {
   const metric = (ic, valEl, unit, label, cls) => h('div', { class: 'stp-metric ' + cls },
     icon(ic), h('div', null, h('div', { class: 'stp-metric-v' }, valEl, h('small', null, unit)), h('div', { class: 'stp-metric-l' }, label)));
   const hero = h('section', { class: 'panel stp-hero' },
-    h('div', { class: 'stp-hero-ring' }, h('div', { class: 'stp-ripple' }), ring.el),
+    h('div', { class: 'stp-hero-ring' }, ring.el),
     remainEl,
     h('div', { class: 'stp-metrics' },
       metric('map', kmEl, 'km', 'Mesafe', 'c1'),
       metric('flame', kcalEl, 'kcal', 'Kalori', 'c2'),
       metric('timer', actEl, 'dk', 'Aktif süre', 'c3')));
 
-  let lastTotal = null;
+  let lastTotal = null, countRaf = 0;
   function paintHero() {
     const e = D.getEntry(today, all), goal = D.goalFor(today, all);
     ring.update(e.total, goal);
-    if (lastTotal == null) countUp(numEl, e.total, { ms: 900 }); else numEl.textContent = fmt.n(e.total);
+    cancelAnimationFrame(countRaf);
+    if (lastTotal == null && e.total > 0) {
+      const t0 = performance.now(), to = e.total;
+      const stepFn = now => {
+        const p = clamp((now - t0) / 900, 0, 1);
+        numEl.textContent = fmt.n(Math.round(to * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) countRaf = requestAnimationFrame(stepFn);
+      };
+      countRaf = requestAnimationFrame(stepFn);
+    } else numEl.textContent = fmt.n(e.total);
     if (lastTotal != null && lastTotal < goal && e.total >= goal) celebrate();
     lastTotal = e.total;
     goalEl.textContent = '/ ' + fmt.n(goal) + ' adım';
@@ -179,8 +188,10 @@ function render(el) {
     actEl.textContent = fmt.n(D.activeMinutes(e));
     const left = goal - e.total;
     mount(remainEl, left > 0
-      ? [h('span', null, 'Hedefe '), h('b', null, fmt.n(left) + ' adım'), h('span', null, ` kaldı · yaklaşık ${fmt.n(Math.max(1, Math.round(left / 100)))} dk yürüyüş`)]
-      : [icon('trophy', { size: 18 }), h('b', { class: 'c-lime' }, 'Bugünkü hedefe ulaştın!'), left < 0 ? h('span', null, ` +${fmt.n(-left)} fazla`) : null]);
+      ? [h('div', { class: 'stp-remain-main' }, 'Hedefe ', h('b', null, fmt.n(left) + ' adım'), ' kaldı'),
+        h('div', { class: 'stp-remain-sub' }, `Yaklaşık ${fmt.n(Math.max(1, Math.round(left / 100)))} dakikalık yürüyüş`)]
+      : [h('div', { class: 'stp-remain-main' }, icon('trophy', { size: 18 }), h('b', { class: 'c-lime' }, 'Bugünkü hedefe ulaştın!')),
+        h('div', { class: 'stp-remain-sub' }, left < 0 ? `Hedefin ${fmt.n(-left)} adım üstündesin` : 'Tam isabet')]);
     remainEl.classList.toggle('done', left <= 0);
   }
   function celebrate() {
@@ -313,7 +324,7 @@ function render(el) {
     if (selDay >= 0) {
       const k = keys[selDay], v = vals[selDay];
       mount(trendCap, h('b', null, fmt.date(k)), ` · ${fmt.n(v)} adım · ${fmt.km(D.distanceM(v))} km`, hits[selDay] ? h('span', { class: 'c-lime' }, ' · hedef tuttu') : null);
-    } else mount(trendCap, h('span', { class: 'muted' }, 'Ayrıntı için bir çubuğa dokun. Kesik çizgi hedefini, mor çizgi ortalamanı gösterir.'));
+    } else mount(trendCap, h('span', { class: 'muted' }, 'Günün ayrıntısı için bir çubuğa dokun.'));
   }
 
   // --- Seriler ve rekorlar ---
@@ -363,11 +374,10 @@ function render(el) {
 
   mount(el,
     pageHeader('Adım Sayar', fmt.date(today), goalBtn),
-    hero, sensor,
+    hero, sensor, info,
     sectionTitle('Geçmiş'), trend, hourly,
     sectionTitle('Seriler ve rekorlar'), recBox,
-    sectionTitle('Günlük liste', h('span', { class: 'stp-st-hint' }, 'Düzenlemek için dokun')), h('section', { class: 'panel tight stp-list' }, listBox),
-    info);
+    sectionTitle('Günlük liste', h('span', { class: 'stp-st-hint' }, 'Düzenlemek için dokun')), h('section', { class: 'panel tight stp-list' }, listBox));
 
   // --- İlk boyama ---
   paintGoalBtn(); paintHero(); paintSensor(); paintHourly(); buildTrend(); paintRecords(); paintList();
@@ -385,7 +395,7 @@ function render(el) {
       if (!hourlyTimer) hourlyTimer = setTimeout(() => { hourlyTimer = 0; paintHourly(); }, 1200);
     }
   }));
-  off.push(() => clearTimeout(hourlyTimer));
+  off.push(() => clearTimeout(hourlyTimer), () => cancelAnimationFrame(countRaf));
   off.push(pedometer.onSignal((s, thr, t) => wave.push(s, thr, t)));
 
   let repaintTimer = 0;

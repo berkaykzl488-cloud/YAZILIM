@@ -21,7 +21,7 @@ export function cravingDialog(hb, { resisted = null, sos = false, title = 'İste
   let intensity = 6;
   let res = resisted ?? true;
   const num = h('div', { class: 'hb-int-num' });
-  const paint = () => { num.textContent = intensity; num.style.color = intensityColor(intensity); num.style.textShadow = `0 0 18px ${intensityColor(intensity)}`; };
+  const paint = () => { num.textContent = intensity; num.style.color = intensityColor(intensity); };
   paint();
   const range = h('input', { type: 'range', min: 1, max: 10, step: 1, value: intensity, class: 'hb-range', 'aria-label': 'İsteğin şiddeti (1–10)',
     onInput: e => { intensity = +e.target.value; paint(); } });
@@ -93,7 +93,7 @@ export function relapseDialog(hb, { onDone } = {}) {
     body,
     actions: [
       { label: 'Vazgeç', class: 'ghost' },
-      { label: 'Yeniden başlat', class: 'primary', icon: 'refresh', onClick: () => {
+      { label: 'Yeniden başlat', class: 'primary', onClick: () => {
         const ts = fromLocalInput(when.value) ?? Date.now();
         if (ts > Date.now() + 60e3) { toast('Gelecekte bir zaman seçilemez', { type: 'error' }); return false; }
         recordRelapse(hb.id, { ts, note: note.value });

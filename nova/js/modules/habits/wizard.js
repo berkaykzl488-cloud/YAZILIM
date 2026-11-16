@@ -41,11 +41,10 @@ export function renderWizard(el, { type = null, editId = null } = {}) {
   };
 
   function header() {
-    const titles = { 1: 'Neyi bırakıyorsun?', 2: 'Bilgiler', 3: 'Neden bırakıyorsun?' };
     return h('div', { class: 'hb-topbar' },
-      h('button', { class: 'btn ghost sm hb-back', onClick: back, 'aria-label': 'Geri' }, icon('left'), 'Geri'),
+      h('button', { class: 'back-btn', type: 'button', onClick: back, 'aria-label': 'Geri' }, icon('left'), 'Geri'),
       h('div', { class: 'grow' }),
-      h('span', { class: 'hb-stepnum' }, `Adım ${step} / ${total}`)) ;
+      h('span', { class: 'hb-stepnum' }, `Adım ${step} / ${total}`));
   }
 
   function stepDots() {
@@ -122,6 +121,7 @@ export function renderWizard(el, { type = null, editId = null } = {}) {
       mount(costBox, seg, fields, costOut);
       paintCost();
     };
+    drawCost();
 
     const unitsLabel = h('span', { class: 'hb-label' });
     const paintUnitsLabel = () => { unitsLabel.textContent = st.unitName === 'dk' ? 'Günde kaç dakika?' : `Günde kaç ${st.unitName || 'kez'}?`; };

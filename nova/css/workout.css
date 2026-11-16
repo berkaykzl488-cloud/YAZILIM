@@ -1,0 +1,39 @@
+/* Antrenman modülü */
+.fig-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fig .body { fill: #e4e8ef; stroke: var(--panel); stroke-width: 1.1; stroke-linejoin: round; }
+.fig .face { fill: #e4e8ef; }
+.fig .limb.far .body { fill: #8a93a2; }
+.fig .limb.far .face { fill: #8a93a2; }
+.fig .mus { fill: var(--magenta); }
+.fig .mus-s { opacity: .45; }
+.fig .limb.far .mus { opacity: .5; }
+.fig .limb.far .mus-s { opacity: .25; }
+.fig-floor { stroke: rgba(255,255,255,.16); stroke-width: 1.5; stroke-linecap: round; }
+.fig-shadow { fill: rgba(0,0,0,.35); }
+.eq-plate { fill: #3b414c; stroke: #a3abb8; stroke-width: 1.4; }
+.eq-ring { fill: none; stroke: #6c7482; stroke-width: 1.2; }
+.eq-hub, .eq-roll { fill: #a3abb8; }
+.eq-bar, .eq-barS { stroke: #a3abb8; stroke-width: 2.4; stroke-linecap: round; fill: none; }
+.eq-plateF { stroke: #4a515d; stroke-linecap: round; fill: none; }
+.eq-head { fill: #5d6573; stroke: #a3abb8; stroke-width: 1; }
+.eq-far { opacity: .55; }
+.eq-handle { fill: none; stroke: #a3abb8; stroke-width: 2.2; stroke-linecap: round; }
+.eq-pad { stroke: #59616e; stroke-width: 6; stroke-linecap: round; fill: none; }
+.eq-frame { stroke: #464d58; stroke-width: 2.6; stroke-linecap: round; fill: none; }
+.eq-box { fill: #2c323b; stroke: #59616e; stroke-width: 1.4; }
+.eq-wall { stroke: #3a414b; stroke-width: 4; }
+.eq-mat { fill: #2a3d4a; }
+.eq-stack { fill: #3b414c; stroke: #59616e; }
+.eq-cable { stroke: #8b94a3; stroke-width: 1.1; fill: none; }
+.eq-band { stroke: var(--amber); stroke-width: 2.2; stroke-linecap: round; fill: none; opacity: .9; }
+.eq-rope { stroke: var(--amber); stroke-width: 1.6; fill: none; stroke-linecap: round; }
+.eq-seat { fill: #59616e; }
+.mm-body { fill: #2a2f38; stroke: #3a404b; stroke-width: 1; }
+.mm-m { fill: #3a404b; }
+.mm-p { fill: var(--magenta); }
+.mm-s { fill: var(--magenta); opacity: .42; }
+.mm-line { stroke: #2a2f38; stroke-width: 1.2; fill: none; }
+.mm-lbl { fill: var(--muted); font-size: 11px; font-weight: 600; }
+.lab-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.lab-big .lab-grid { grid-template-columns: repeat(2, 1fr); }
+.lab-grid .fig-host { background: var(--panel); border-radius: 8px; }

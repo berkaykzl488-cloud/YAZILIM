@@ -1,5 +1,5 @@
 // Alışkanlık detay ekranı: canlı sayaç, iyileşme görseli, sağlık zaman çizelgesi, istekler, rozetler, nedenler
-import { h, icon, mount, fmt, modal, confirmDialog, toast, tabs, progressBar, barChart, ring, emptyState } from '../../core/ui.js';
+import { h, icon, mount, fmt, modal, confirmDialog, toast, tabs, progressBar, barChart, ring, emptyState, backButton } from '../../core/ui.js';
 import { go } from '../../core/router.js';
 import {
   tpl, get, mutate, removeHabit, stats, span, spanLabel, clockParts, pad2, fmtUnits, triggerLabel,
@@ -9,11 +9,12 @@ import { organViz } from './viz.js';
 import { cravingDialog, relapseDialog } from './dialogs.js';
 
 let lastTab = 'health';
+let showAll = false;
 
 export function renderDetail(el, id) {
   let hb = get(id);
   if (!hb) {
-    mount(el, h('div', { class: 'hb-topbar' }, h('a', { class: 'btn ghost sm hb-back', href: '#/habits' }, icon('left'), 'Geri')),
+    mount(el, backButton('habits'),
       h('div', { class: 'panel' }, emptyState('alert', 'Kayıt bulunamadı', 'Bu alışkanlık silinmiş olabilir.',
         h('a', { class: 'btn primary', href: '#/habits' }, 'Listeye dön'))));
     return () => {};
@@ -71,14 +72,14 @@ export function renderDetail(el, id) {
           live.nextTitle, live.nextBar, live.nextEta)),
       h('div', { class: 'hb-label hb-clk-title' }, h('span', { class: 'hb-live-dot' }), 'Temiz geçen süre'),
       h('div', { class: 'hb-clock', role: 'timer', 'aria-live': 'off' },
-        seg(0, 'gün'), h('i', null, ':'), seg(1, 'saat'), h('i', null, ':'), seg(2, 'dakika'), h('i', null, ':'), seg(3, 'saniye')));
+        seg(0, 'gün'), seg(1, 'saat'), seg(2, 'dakika'), seg(3, 'saniye')));
   }
 
   function statCards() {
     live.saved = h('div', { class: 'hb-stat-v c-lime' });
     live.units = h('div', { class: 'hb-stat-v' });
     live.regain = h('div', { class: 'hb-stat-v' });
-    const unitLabel = hb.type === 'smoking' ? 'İçilmeyen sigara' : hb.unitName === 'dk' ? 'Ekrandan kazanılan' : `Kaçınılan (${hb.unitName})`;
+    const unitLabel = hb.type === 'smoking' ? 'İçilmeyen sigara' : hb.unitName === 'dk' ? 'Ekrandan kazanılan süre' : `Kaçınılan ${hb.unitName}`;
     const regainLabel = t.timeKind === 'life' ? 'Kazanılan ömür (tahmini)' : 'Geri kazanılan zaman';
     const cards = [
       h('div', { class: 'hb-stat' }, h('span', { class: 'hb-stat-ic lime' }, icon('coin')), h('div', null, live.saved, h('div', { class: 'hb-stat-l' }, 'Biriktirilen para'))),
@@ -95,7 +96,7 @@ export function renderDetail(el, id) {
     live.clock[0].textContent = c.d; live.clock[1].textContent = pad2(c.h); live.clock[2].textContent = pad2(c.m); live.clock[3].textContent = pad2(c.s);
     live.pct.textContent = Math.floor(s.recovery * 100);
     live.saved.textContent = hb.costPerDay > 0 ? fmt.money(s.saved) : '—';
-    live.units.textContent = fmtUnits(hb, s.units);
+    live.units.textContent = hb.unitName === 'dk' ? fmtUnits(hb, s.units) : fmt.n(Math.floor(s.units));
     live.regain.textContent = span(s.regainMin * 6e4);
     if (s.next) {
       live.nextTitle.textContent = `${spanLabel(s.next.t)} · ${s.next.title}`;
@@ -131,7 +132,7 @@ export function renderDetail(el, id) {
               state === 'cur' && h('span', { class: 'hb-tl-tag' }, `%${Math.floor(s.nextProgress * 100)}`)),
             h('div', { class: 'hb-tl-title' }, m.title),
             h('p', { class: 'hb-tl-desc' }, m.desc),
-            state === 'cur' && h('div', null, progressBar(s.nextProgress, 1, { color: 'var(--violet)' }), h('div', { class: 'muted small', style: 'margin-top:6px' }, `${span(m.t - s.ms)} kaldı`))));
+            state === 'cur' && h('div', null, progressBar(s.nextProgress, 1), h('div', { class: 'muted small', style: 'margin-top:6px' }, `${span(m.t - s.ms)} kaldı`))));
       })),
       h('p', { class: 'hb-disclaimer' }, icon('info'), h('span', null,
         'Bu bilgiler genel bilgidir, tıbbi tavsiye değildir. Süreler kişiden kişiye değişir.',
@@ -161,7 +162,7 @@ export function renderDetail(el, id) {
     return [
       addBtn,
       h('div', { class: 'panel hb-insight mt' },
-        ring({ value: ratio * 100, max: 100, size: 96, stroke: 9, color: 'var(--lime)',
+        ring({ value: ratio * 100, max: 100, size: 96, stroke: 9, color: 'var(--lime)', glow: false, track: 'rgba(255,255,255,.08)',
           center: h('div', null, h('div', { class: 'hb-ring-v' }, `%${Math.round(ratio * 100)}`), h('div', { class: 'hb-ring-l' }, 'atlatıldı')) }),
         h('div', { class: 'hb-insight-grid' },
           h('div', null, h('b', null, String(cr.length)), h('span', null, 'toplam istek')),
@@ -180,7 +181,7 @@ export function renderDetail(el, id) {
           : h('p', { class: 'muted small', style: 'margin:0' }, 'İstek kaydederken tetikleyici seçersen burada görünür.')),
       h('div', { class: 'panel' },
         h('div', { class: 'hb-panel-h' }, 'Son istekler'),
-        h('div', { class: 'list' }, cr.slice(0, 20).map(c => h('div', { class: 'list-item hb-cr-item' },
+        h('div', { class: 'list' }, cr.slice(0, showAll ? 200 : 6).map(c => h('div', { class: 'list-item hb-cr-item' },
           h('span', { class: 'hb-cr-int', style: { '--c': c.intensity >= 8 ? 'var(--red)' : c.intensity >= 5 ? 'var(--amber)' : 'var(--lime)' } }, String(c.intensity)),
           h('div', { class: 'li-main' },
             h('div', { class: 'li-title' }, c.trigger ? triggerLabel(c.trigger) : 'İstek', c.sos && h('span', { class: 'badge magenta', style: 'margin-left:8px' }, 'Acil destek')),
@@ -189,7 +190,9 @@ export function renderDetail(el, id) {
           h('button', { class: 'btn ghost icon sm', 'aria-label': 'İsteği sil', onClick: async () => {
             if (!await confirmDialog('Bu istek kaydı silinsin mi?', { title: 'Kaydı sil', okLabel: 'Sil', danger: true })) return;
             removeCraving(id, c.id); toast('Kayıt silindi', { type: 'success' }); refresh();
-          } }, icon('trash')))))),
+          } }, icon('trash'))))),
+        cr.length > 6 && h('button', { class: 'btn ghost block sm mt', onClick: () => { showAll = !showAll; drawTab(); } },
+          showAll ? 'Daha az göster' : `Tümünü göster (${cr.length})`)),
       relapseHistory(),
     ];
   }
@@ -248,9 +251,10 @@ export function renderDetail(el, id) {
     const s = stats(hb);
     live = {};
     mount(el,
-      h('div', { class: 'hb-topbar' },
-        h('a', { class: 'btn ghost sm hb-back', href: '#/habits', 'aria-label': 'Geri: alışkanlık listesi' }, icon('left'), 'Geri'),
-        h('div', { class: 'hb-topbar-title' }, h('span', { class: 'hb-ic-sm' }, icon(hb.icon)), h('span', null, hb.name)),
+      backButton('habits'),
+      h('div', { class: 'hb-titlerow' },
+        h('span', { class: 'hb-ic-sm' }, icon(hb.icon)),
+        h('h1', { class: 'hb-title' }, hb.name),
         h('button', { class: 'btn ghost icon', 'aria-label': 'Diğer işlemler', onClick: moreMenu }, icon('more'))),
       hb.archived && h('div', { class: 'hb-note amber' }, icon('layers'), 'Bu alışkanlık arşivde. Menüden geri alabilirsin.'),
       hero(s),
@@ -261,7 +265,7 @@ export function renderDetail(el, id) {
         icon('right')),
       h('div', { class: 'hb-actions' },
         h('button', { class: 'btn ghost', onClick: () => cravingDialog(hb, { onSaved: () => { lastTab = 'cravings'; refresh(); } }) }, icon('plus'), 'İstek kaydet'),
-        h('button', { class: 'btn ghost hb-btn-relapse', onClick: () => relapseDialog(hb, { onDone: refresh }) }, icon('refresh'), 'Kaydım')),
+        h('button', { class: 'btn ghost hb-btn-relapse', onClick: () => relapseDialog(hb, { onDone: () => { refresh(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }) }, icon('refresh'), 'Kaydım')),
       h('div', { class: 'hb-streaks' },
         h('div', null, h('b', null, span(s.ms, 1)), h('span', null, 'Şu anki seri')),
         h('div', null, h('b', null, span(s.best, 1)), h('span', null, 'En iyi seri')),

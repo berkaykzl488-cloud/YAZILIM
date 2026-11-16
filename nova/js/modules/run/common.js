@@ -1,7 +1,8 @@
 // Koşu modülü — ortak arayüz parçaları: ikonlar, alt sekmeler, geri başlığı, bekle-bas düğmesi.
-import { h, svg, icon, fmt } from '../../core/ui.js';
+import { h, svg, icon, fmt, backButton } from '../../core/ui.js';
 import { go } from '../../core/router.js';
 import { typeOf } from './data.js';
+import { paceText, paceUnit } from './data.js';
 
 const EXTRA = {
   bike: '<circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5 9 9h6l3.5 7.5M9 9l3 7.5h-6.5M12.5 5.5H15l1 3.5"/>',
@@ -44,10 +45,10 @@ export function subNav(active) {
 /** Alt sayfa başlığı: görünür "Geri" düğmesi + başlık */
 export function backHeader(title, sub = '', { to = 'run/history', right = null } = {}) {
   return h('div', { class: 'rn-backhead' },
-    h('button', { class: 'btn ghost rn-back', type: 'button', onClick: () => (history.length > 1 && document.referrer !== '' ? history.back() : go(to)) },
-      icon('left', { size: 18 }), 'Geri'),
-    h('div', { class: 'grow rn-backhead-main' }, h('h1', { class: 'rn-h1' }, title), sub && h('p', { class: 'rn-sub' }, sub)),
-    right);
+    backButton(to),
+    h('div', { class: 'row between', style: 'align-items:flex-start' },
+      h('div', { class: 'grow' }, h('h1', { class: 'hud-title rn-title' }, title), sub && h('p', { class: 'hud-sub rn-sub' }, sub)),
+      right));
 }
 
 /**
@@ -112,3 +113,28 @@ export function metric(label, value, unit = '', cls = '') {
 }
 
 export const fmtDuration = sec => fmt.duration(sec);
+
+/** Km bölümleri tablosu; en hızlı tam km vurgulanır */
+export function splitsTable(splits, type) {
+  if (!splits?.length) return h('p', { class: 'muted small', style: 'margin:0' }, 'Bölüm oluşması için en az 1 km gerekir.');
+  const secPerKm = sp => sp.sec / (sp.distM / 1000);
+  const full = splits.filter(sp => !sp.partial);
+  const best = full.length ? full.reduce((a, b) => (secPerKm(b) < secPerKm(a) ? b : a)) : null;
+  const vals = splits.map(secPerKm);
+  const fastest = Math.min(...vals), slowest = Math.max(...vals);
+  const T = typeOf(type);
+  return h('div', { class: 'rn-splits', role: 'table', 'aria-label': 'Kilometre bölümleri' },
+    h('div', { class: 'rn-split rn-split-head', role: 'row' },
+      h('span', { role: 'columnheader' }, 'Km'), h('span', { role: 'columnheader' }, T.speedMode ? 'Hız' : 'Tempo'),
+      h('span', { role: 'columnheader', 'aria-hidden': 'true' }), h('span', { role: 'columnheader' }, 'Yükseklik')),
+    splits.map(sp => {
+      const v = secPerKm(sp);
+      const w = slowest > fastest ? 35 + 65 * (slowest - v) / (slowest - fastest) : 100;
+      const isBest = best && sp === best && full.length > 1;
+      return h('div', { class: 'rn-split' + (isBest ? ' best' : ''), role: 'row' },
+        h('span', { class: 'rn-split-n', role: 'cell' }, sp.partial ? fmt.n(sp.distM / 1000, 2) : String(sp.n)),
+        h('span', { class: 'rn-split-pace', role: 'cell' }, paceText(type, sp.distM, sp.sec), h('small', null, ' ' + paceUnit(type))),
+        h('span', { class: 'rn-split-bar', role: 'cell' }, h('i', { style: { width: w + '%' } }), isBest ? h('b', null, 'En iyi') : null),
+        h('span', { class: 'rn-split-elev', role: 'cell' }, sp.elev == null ? '–' : (sp.elev > 0 ? '+' : '') + sp.elev + ' m'));
+    }));
+}

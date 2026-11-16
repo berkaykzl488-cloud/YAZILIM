@@ -263,7 +263,7 @@ export function clockParts(ms) {
   return { d: Math.floor(s / 86400), h: Math.floor((s % 86400) / 3600), m: Math.floor((s % 3600) / 60), s: s % 60 };
 }
 export const pad2 = n => String(n).padStart(2, '0');
-export const compactClock = ms => { const c = clockParts(ms); return `${c.d}g ${pad2(c.h)}:${pad2(c.m)}:${pad2(c.s)}`; };
+export const compactClock = ms => { const c = clockParts(ms); return `${c.d} gün ${pad2(c.h)}:${pad2(c.m)}:${pad2(c.s)}`; };
 
 export function fmtUnits(hb, n) {
   if (hb.unitName === 'dk') return span(n * MIN);

@@ -3,6 +3,7 @@ import { h, icon, mount } from './core/ui.js';
 import * as router from './core/router.js';
 import { subscribe } from './core/store.js';
 import { levelInfo } from './core/xp.js';
+import { getProfile } from './core/profile.js';
 
 import dashboard from './modules/dashboard/index.js';
 import steps from './modules/steps/index.js';
@@ -30,20 +31,29 @@ function buildShell() {
   paintLevel();
   subscribe('xp', paintLevel);
 
-  const clock = h('span', { class: 'hdr-clock' });
-  const tick = () => { clock.textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); };
-  tick(); setInterval(tick, 15000);
+  // Sol: avatar + selamlama (profilde ad yoksa uygulama adı)
+  const who = h('a', { class: 'hdr-who', href: '#/profile', 'aria-label': 'Profil' });
+  const paintWho = () => {
+    const p = getProfile();
+    const hr = new Date().getHours();
+    const greet = hr < 5 ? 'İyi geceler' : hr < 12 ? 'Günaydın' : hr < 18 ? 'İyi günler' : 'İyi akşamlar';
+    mount(who,
+      h('span', { class: 'avatar' }, p.name ? p.name.slice(0, 1).toLocaleUpperCase('tr-TR') : icon('user', { size: 20 })),
+      h('span', { class: 'hdr-who-txt' }, h('small', null, greet), h('b', null, p.name || 'NOVA Fit')));
+  };
+  paintWho();
+  subscribe('profile', paintWho);
 
   const header = h('header', { class: 'app-header' },
-    h('a', { class: 'app-logo', href: '#/home', 'aria-label': 'Ana sayfa' }, 'NOVA', h('span', null, ' FIT')),
+    who,
     h('span', { class: 'spacer' }),
-    clock,
     levelChip,
-    h('a', { class: 'hdr-icon', href: '#/profile', 'aria-label': 'Profil' }, icon('user', { size: 18 })));
+    h('a', { class: 'hdr-icon', href: '#/recipes', 'aria-label': 'Fit tarifler' }, icon('list', { size: 19 })));
 
-  const nav = h('nav', { class: 'app-nav', 'aria-label': 'Ana gezinme' }, NAV.map(id => {
+  const nav = h('nav', { class: 'app-nav', 'aria-label': 'Ana menü' }, NAV.map(id => {
     const m = MODULES.find(x => x.id === id);
-    return h('a', { class: 'nav-item', href: '#/' + id, dataset: { id } }, icon(m.icon), h('span', { class: 'nav-label' }, m.navLabel || m.title));
+    const label = m.navLabel || m.title;
+    return h('a', { class: 'nav-item', href: '#/' + id, dataset: { id }, 'aria-label': label, title: label }, icon(m.icon), h('span', { class: 'nav-label' }, label));
   }));
 
   const view = h('main', { id: 'view' });
@@ -61,7 +71,7 @@ async function boot() {
     try { await m.init?.(); } catch (e) { console.error('init hatası', m.id, e); }
   }
   router.start(view, id => {
-    nav.querySelectorAll('.nav-item').forEach(a => a.classList.toggle('active', a.dataset.id === id));
+    nav.querySelectorAll('.nav-item').forEach(a => { const on = a.dataset.id === id; a.classList.toggle('active', on); on ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'); });
   });
   setTimeout(() => document.getElementById('boot')?.classList.add('done'), 450);
 

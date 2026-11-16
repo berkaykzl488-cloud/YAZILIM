@@ -1,6 +1,6 @@
-// Koşu modülü — kütüphanesiz canvas harita: Web-Mercator karoları (CARTO koyu), camgöbeği renk tonu,
-// tempoya göre renklenen parlak rota, başlangıç/bitiş işaretleri, nabız atan konum, sürükle/yakınlaştır, takip modu.
-// Karolar yüklenemezse (çevrimdışı) çizilmiş ızgara zemin kullanılır; rota her durumda görünür.
+// Koşu modülü — kütüphanesiz canvas harita: Web-Mercator karoları (CARTO koyu), tempoya göre renklenen rota,
+// başlangıç/bitiş işaretleri, konum noktası + doğruluk dairesi, sürükle/kıstır/çift dokun yakınlaştır, takip modu.
+// Karolar yüklenemezse (çevrimdışı) sade koyu zemin + ince ızgara çizilir; rota her durumda görünür.
 import { h, icon, clamp } from '../../core/ui.js';
 import { project, unproject, metersPerPx, cumDist, movingTimes, rollingSpeeds, boundsOf } from './geo.js';
 
@@ -38,19 +38,34 @@ function getTile(z, x, y, onLoad) {
 }
 const tilesOffline = () => netFail >= 4 && netOk === 0 || netFail >= 12;
 
-// Tempo renk skalası: yavaş (macenta) -> orta (camgöbeği) -> hızlı (limon)
-const STOPS = [[0, [255, 43, 214]], [0.35, [139, 92, 255]], [0.6, [0, 240, 255]], [1, [182, 255, 59]]];
+// Tempo renk skalası: yavaş (kırmızı) -> orta (turuncu) -> hızlı (yeşil). Renkler çekirdek CSS değişkenlerinden okunur.
+function cssVar(name, fb) {
+  try { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fb; } catch { return fb; }
+}
+function hexRgb(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+let STOPS = null;
+function stops() {
+  if (!STOPS) STOPS = [[0, cssVar('--red', '#ff5a5f')], [0.5, cssVar('--amber', '#ffb547')], [1, cssVar('--lime', '#5fd68a')]]
+    .map(([t, c]) => [t, hexRgb(c) || [200, 200, 200]]);
+  return STOPS;
+}
 function rampColor(t) {
+  const S = stops();
   t = clamp(t, 0, 1);
-  for (let i = 1; i < STOPS.length; i++) {
-    if (t <= STOPS[i][0]) {
-      const [t0, c0] = STOPS[i - 1], [t1, c1] = STOPS[i], f = (t - t0) / (t1 - t0);
+  for (let i = 1; i < S.length; i++) {
+    if (t <= S[i][0]) {
+      const [t0, c0] = S[i - 1], [t1, c1] = S[i], f = (t - t0) / (t1 - t0);
       return `rgb(${c0.map((c, j) => Math.round(c + (c1[j] - c) * f)).join(',')})`;
     }
   }
-  return 'rgb(182,255,59)';
+  return `rgb(${S[S.length - 1][1].join(',')})`;
 }
-export const PACE_GRADIENT_CSS = `linear-gradient(90deg, ${STOPS.map(([t, c]) => `rgb(${c.join(',')}) ${t * 100}%`).join(', ')})`;
+export const paceGradientCss = () => `linear-gradient(90deg, ${stops().map(([t, c]) => `rgb(${c.join(',')}) ${t * 100}%`).join(', ')})`;
 const BUCKETS = 10;
 
 export class MapView {
@@ -72,7 +87,7 @@ export class MapView {
 
     this.canvas = h('canvas', { class: 'rn-map-canvas', 'aria-label': 'Rota haritası', role: 'img' });
     this.ctx = this.canvas.getContext('2d');
-    this.offlineBadge = h('div', { class: 'rn-map-offline hide' }, icon('globe', { size: 14 }), 'Harita yüklenemedi · ızgara gösteriliyor');
+    this.offlineBadge = h('div', { class: 'rn-map-offline hide' }, 'Harita görüntüsü yüklenemedi (internet yok)');
     this.recenterBtn = h('button', { class: 'rn-map-btn rn-map-recenter hide', type: 'button', 'aria-label': 'Konumuma ortala',
       onClick: () => this.setFollow(true) }, icon('target', { size: 20 }), h('span', null, 'Ortala'));
     const controls = this.o.controls ? h('div', { class: 'rn-map-ctrls' },
@@ -257,9 +272,7 @@ export class MapView {
   _loop(now) {
     if (this.destroyed) return;
     if (this.anim) { if (!this.anim(now)) { this.anim = null; this._animKind = null; } this.dirty = true; }
-    // Canlı modda nabız animasyonu ~30 fps ile sınırlı (pil dostu)
-    const livePulse = this.o.live && this.pos && now - (this._lastDraw || 0) > 33;
-    if (this.dirty || livePulse) { this.dirty = false; this._lastDraw = now; this.draw(now); }
+    if (this.dirty) { this.dirty = false; this.draw(now); }
     this.raf = requestAnimationFrame(this._loop);
   }
 
@@ -270,23 +283,15 @@ export class MapView {
     const ox = this.cx * ws - W / 2, oy = this.cy * ws - H / 2;
     const toScreen = (x, y) => [x * ws - ox, y * ws - oy];
 
-    // Zemin
-    const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#020812'); bg.addColorStop(1, '#040616');
-    ctx.fillStyle = bg;
+    // Zemin (CARTO koyu karo tonuna yakın)
+    ctx.fillStyle = '#16181c';
     ctx.fillRect(0, 0, W, H);
 
     const drewTiles = this._drawTiles(ws, ox, oy);
-    this._drawGrid(ws, ox, oy, drewTiles);
-
-    // Kenar kararması
-    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
-    vg.addColorStop(0, 'rgba(2,4,10,0)'); vg.addColorStop(1, 'rgba(2,4,10,.6)');
-    ctx.fillStyle = vg;
-    ctx.fillRect(0, 0, W, H);
+    if (!drewTiles) this._drawGrid(ws, ox, oy);
 
     if (this.route) this._drawRoute(toScreen);
-    if (this.pos) this._drawPos(toScreen, ws, now);
+    if (this.pos) this._drawPos(toScreen, ws);
 
     this.offlineBadge.classList.toggle('hide', !tilesOffline());
   }
@@ -321,49 +326,21 @@ export class MapView {
         }
       }
     }
-    if (any) {
-      // Camgöbeği renk tonu: rengi değiştir, hafif aydınlat
-      ctx.save();
-      ctx.globalCompositeOperation = 'color';
-      ctx.fillStyle = '#00cfff';
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = 'rgba(0, 60, 90, .22)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.restore();
-    }
     return any;
   }
 
-  _drawGrid(ws, ox, oy, overTiles) {
+  _drawGrid(ws, ox, oy) {
     const { ctx, W, H } = this;
-    // ~56-112 px aralıklı dünya hizalı ızgara
-    let k = Math.ceil(Math.log2(ws / 112));
+    // Karo yokken yön duygusu için dünya hizalı ince ızgara (~56-112 px)
+    const k = Math.ceil(Math.log2(ws / 112));
     const step = ws / 2 ** k;
-    const a = overTiles ? 0.05 : 0.09, A = overTiles ? 0.1 : 0.2;
     const startX = Math.floor(ox / step), startY = Math.floor(oy / step);
     ctx.lineWidth = 1;
-    for (let i = startX; i * step - ox <= W; i++) {
-      const x = Math.round(i * step - ox) + 0.5;
-      ctx.strokeStyle = `rgba(0,240,255,${i % 4 === 0 ? A : a})`;
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-    }
-    for (let j = startY; j * step - oy <= H; j++) {
-      const y = Math.round(j * step - oy) + 0.5;
-      ctx.strokeStyle = `rgba(0,240,255,${j % 4 === 0 ? A : a})`;
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    }
-    if (!overTiles) {
-      // Kesişim noktaları
-      ctx.fillStyle = 'rgba(0,240,255,.35)';
-      for (let i = startX; i * step - ox <= W; i++) {
-        if (i % 4) continue;
-        for (let j = startY; j * step - oy <= H; j++) {
-          if (j % 4) continue;
-          ctx.fillRect(Math.round(i * step - ox) - 1, Math.round(j * step - oy) - 1, 3, 3);
-        }
-      }
-    }
+    ctx.beginPath();
+    for (let i = startX; i * step - ox <= W; i++) { const x = Math.round(i * step - ox) + 0.5; ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let j = startY; j * step - oy <= H; j++) { const y = Math.round(j * step - oy) + 0.5; ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.strokeStyle = 'rgba(255,255,255,.05)';
+    ctx.stroke();
   }
 
   _drawRoute(toScreen) {
@@ -379,17 +356,13 @@ export class MapView {
     };
     ctx.save();
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    // Parlama katmanları
+    // Koyu kenarlık: her zeminde okunabilirlik
     path();
-    ctx.strokeStyle = 'rgba(0,240,255,.10)'; ctx.lineWidth = 16; ctx.stroke();
-    ctx.strokeStyle = 'rgba(0,240,255,.18)'; ctx.lineWidth = 9; ctx.stroke();
-    ctx.strokeStyle = 'rgba(2,6,16,.85)'; ctx.lineWidth = 6; ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 7.5; ctx.stroke();
     // Tempoya göre renkli çizgi (renk kovalarına göre toplu çizim)
-    ctx.lineWidth = 4;
-    ctx.shadowBlur = 8;
+    ctx.lineWidth = 4.5;
     for (let b = 0; b < BUCKETS; b++) {
-      const col = rampColor(b / (BUCKETS - 1));
-      ctx.strokeStyle = col; ctx.shadowColor = col;
+      ctx.strokeStyle = rampColor(b / (BUCKETS - 1));
       ctx.beginPath();
       let has = false;
       for (let i = 1; i < n; i++) {
@@ -399,88 +372,67 @@ export class MapView {
       }
       if (has) ctx.stroke();
     }
-    ctx.shadowBlur = 0;
-    // İnce beyaz çekirdek
-    path();
-    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1; ctx.stroke();
     ctx.restore();
 
-    // Başlangıç
-    const [sx, sy] = S[0];
-    this._marker(sx, sy, '#b6ff3b', 'B');
-    // Bitiş (canlı modda gösterilmez)
+    // Başlangıç: yeşil nokta
+    this._marker(S[0][0], S[0][1], cssVar('--lime', '#5fd68a'));
+    // Bitiş: dama bayrağı (canlı modda gösterilmez)
     if (!this.o.live && n > 1) {
       const [ex, ey] = S[n - 1];
       ctx.save();
       ctx.translate(ex, ey);
-      ctx.shadowColor = '#ff2bd6'; ctx.shadowBlur = 14;
-      ctx.fillStyle = '#0a0414'; ctx.strokeStyle = '#ff2bd6'; ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.shadowBlur = 0;
-      // Dama deseni
-      ctx.beginPath(); ctx.arc(0, 0, 6.5, 0, Math.PI * 2); ctx.clip();
-      for (let i = -2; i < 2; i++) for (let j = -2; j < 2; j++) {
-        ctx.fillStyle = (i + j) & 1 ? '#ff2bd6' : '#ffffff';
-        ctx.fillRect(i * 3.25, j * 3.25, 3.25, 3.25);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.clip();
+      for (let i = -3; i < 3; i++) for (let j = -3; j < 3; j++) {
+        ctx.fillStyle = (i + j) & 1 ? '#111' : '#fff';
+        ctx.fillRect(i * 2.5, j * 2.5, 2.5, 2.5);
       }
       ctx.restore();
     }
   }
 
-  _marker(x, y, color, label) {
+  _marker(x, y, color) {
     const { ctx } = this;
     ctx.save();
-    ctx.shadowColor = color; ctx.shadowBlur = 14;
-    ctx.fillStyle = '#04100a'; ctx.strokeStyle = color; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = color;
-    ctx.font = '700 11px Rajdhani, system-ui, sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(label, x, y + 0.5);
+    ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
-  _drawPos(toScreen, ws, now) {
+  _drawPos(toScreen, ws) {
     const { ctx } = this;
     const { p, acc, heading, lat } = this.pos;
     const [x, y] = toScreen(p[0], p[1]);
     const mpp = metersPerPx(lat, ws);
+    const accent = hexRgb(cssVar('--cyan', '#4cc2ff')) || [76, 194, 255];
+    const A = a => `rgba(${accent.join(',')},${a})`;
     ctx.save();
-    // Doğruluk dairesi
     if (acc) {
-      const r = clamp(acc / mpp, 0, 400);
-      if (r > 12) {
-        ctx.fillStyle = 'rgba(0,240,255,.08)'; ctx.strokeStyle = 'rgba(0,240,255,.35)'; ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
+      const r = clamp(acc / mpp, 0, 600);
+      if (r > 11) {
+        ctx.fillStyle = A(0.12); ctx.strokeStyle = A(0.4); ctx.lineWidth = 1;
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.setLineDash([]);
       }
     }
-    // Yön konisi
     if (heading != null && Number.isFinite(heading)) {
       const a = (heading - 90) * Math.PI / 180;
-      const g = ctx.createRadialGradient(x, y, 4, x, y, 44);
-      g.addColorStop(0, 'rgba(0,240,255,.55)'); g.addColorStop(1, 'rgba(0,240,255,0)');
+      const g = ctx.createRadialGradient(x, y, 6, x, y, 40);
+      g.addColorStop(0, A(0.45)); g.addColorStop(1, A(0));
       ctx.fillStyle = g;
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, 44, a - 0.45, a + 0.45); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, 40, a - 0.5, a + 0.5); ctx.closePath(); ctx.fill();
     }
-    // Nabız halkası
-    if (this.o.live) {
-      const ph = (now % 1800) / 1800;
-      ctx.strokeStyle = `rgba(0,240,255,${0.6 * (1 - ph)})`; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(x, y, 9 + ph * 26, 0, Math.PI * 2); ctx.stroke();
-    }
-    ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 16;
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.beginPath(); ctx.arc(x, y + 1, 10, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#00d8ff';
-    ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 9.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = A(1);
+    ctx.beginPath(); ctx.arc(x, y, 6.5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 }
-
 /** Liste küçük resmi: rotanın SVG çizimi (karo yok) */
 export function routeThumb(points, breaks = [], { w = 64, h: hh = 64, pad = 6 } = {}) {
   const NS = 'http://www.w3.org/2000/svg';
@@ -506,10 +458,7 @@ export function routeThumb(points, breaks = [], { w = 64, h: hh = 64, pad = 6 } 
     d += (d === '' || isBreak ? 'M' : 'L') + ((x - x0) * sc + offX).toFixed(1) + ' ' + ((y - y0) * sc + offY).toFixed(1);
     prevI = i;
   }
-  const gid = 'rg' + Math.random().toString(36).slice(2, 8);
-  s.innerHTML = `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b6ff3b"/><stop offset=".5" stop-color="#00f0ff"/><stop offset="1" stop-color="#ff2bd6"/></linearGradient></defs>` +
-    `<path d="${d}" fill="none" stroke="rgba(0,240,255,.25)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="${d}" fill="none" stroke="url(#${gid})" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s.innerHTML = `<path d="${d}" fill="none" style="stroke:var(--cyan)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>`;
   return s;
 }
 

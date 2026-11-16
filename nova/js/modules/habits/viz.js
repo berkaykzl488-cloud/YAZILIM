@@ -1,4 +1,4 @@
-// İyileşme görseli: organ silüeti, ilerledikçe ışıklı sıvıyla dolar.
+// İyileşme görseli: sade organ çizimi, iyileştikçe alttan yeşil renkle dolar.
 import { svg, h, uid, clamp } from '../../core/ui.js';
 
 const LUNG_L = 'M90 64 C78 58 60 68 50 90 C38 116 33 144 36 166 C38 180 50 186 62 181 C76 175 88 168 91 156 Z';
@@ -6,7 +6,7 @@ const LUNG_R = 'M110 64 C122 58 140 68 150 90 C162 116 167 144 164 166 C162 180 
 
 const SHAPES = {
   lungs: {
-    label: 'Akciğer', y0: 16, y1: 186,
+    label: 'Akciğer', y0: 60, y1: 186,
     parts: [['path', { d: LUNG_L }], ['path', { d: LUNG_R }], ['rect', { x: 94, y: 16, width: 12, height: 60, rx: 6 }]],
     detail: ['M100 70 L100 86 M100 86 L86 98 L72 118 M86 98 L80 134 M72 118 L58 140 M72 118 L70 156',
       'M100 86 L114 98 L128 118 M114 98 L120 134 M128 118 L142 140 M128 118 L130 156',
@@ -49,27 +49,13 @@ export function organViz(kind = 'brain', progress = 0, { size = 150 } = {}) {
   for (let x = -200; x < 400; x += 50) wave += ` Q${x + 12.5} -6 ${x + 25} 0 T${x + 50} 0`;
   wave += ' L400 260 L-200 260 Z';
   const level = svg('g', { class: 'hbv-level' },
-    svg('path', { class: 'hbv-wave2', d: wave, fill: `url(#${id}-g)`, opacity: .45 }),
-    svg('path', { class: 'hbv-wave', d: wave, fill: `url(#${id}-g)` }));
-  const particles = Array.from({ length: 7 }, (_, i) => svg('circle', {
-    class: 'hbv-p', cx: 50 + ((i * 37) % 100), cy: 190, r: 1.2 + (i % 3) * .6,
-    style: `animation-delay:${(i * .7).toFixed(1)}s;animation-duration:${(3.4 + (i % 4) * .7).toFixed(1)}s`,
-  }));
+    svg('path', { class: 'hbv-wave2', d: wave }),
+    svg('path', { class: 'hbv-wave', d: wave }));
 
   const s = svg('svg', { class: 'hbv-svg', viewBox: '0 0 200 200', width: size, height: size, role: 'img', 'aria-label': `${sh.label} iyileşme görseli` },
-    svg('defs', null,
-      svg('clipPath', { id: id + '-c' }, mk({})),
-      svg('linearGradient', { id: id + '-g', x1: 0, y1: 1, x2: 0, y2: 0 },
-        svg('stop', { offset: '0', 'stop-color': '#8b5cff' }), svg('stop', { offset: '.6', 'stop-color': '#3b8bff' }), svg('stop', { offset: '1', 'stop-color': '#00f0ff' })),
-      svg('pattern', { id: id + '-p', width: 8, height: 8, patternUnits: 'userSpaceOnUse' },
-        svg('path', { d: 'M8 0H0V8', fill: 'none', stroke: 'rgba(0,240,255,.35)', 'stroke-width': .5 }))),
-    svg('g', { class: 'hbv-outline' }, mk({})),
+    svg('defs', {}, svg('clipPath', { id: id + '-c' }, mk({}))),
     svg('g', { class: 'hbv-base' }, mk({})),
-    svg('g', { 'clip-path': `url(#${id}-c)` },
-      svg('rect', { x: 0, y: 0, width: 200, height: 200, fill: `url(#${id}-p)` }),
-      level,
-      particles,
-      svg('rect', { class: 'hbv-scan', x: 0, y: 0, width: 200, height: 26, fill: `url(#${id}-g)`, opacity: .18 })),
+    svg('g', { 'clip-path': `url(#${id}-c)` }, level),
     svg('g', { class: 'hbv-detail' }, sh.detail.map(d => svg('path', { d }))));
 
   const set = p => {
@@ -79,7 +65,7 @@ export function organViz(kind = 'brain', progress = 0, { size = 150 } = {}) {
   };
   level.style.transform = `translateY(${sh.y1 + 8}px)`;
   requestAnimationFrame(() => requestAnimationFrame(() => set(progress)));
-  const el = h('div', { class: 'hbv', style: { width: size + 'px', height: size + 'px' } }, s, h('div', { class: 'hbv-ring' }));
+  const el = h('div', { class: 'hbv', style: { width: size + 'px', height: size + 'px' } }, s);
   return { el, set, label: sh.label };
 }
 

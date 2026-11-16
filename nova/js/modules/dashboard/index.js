@@ -59,8 +59,8 @@ function moduleTile(id, key) {
   const color = s?.color || 'var(--cyan)';
   return h('a', { class: 'panel tight click dash-tile', href: '#/' + id, style: { '--tile-c': color } },
     h('div', { class: 'row between' },
-      h('span', { class: 'dash-tile-ic', style: { color } }, icon(s?.icon || m.icon)),
-      s?.progress != null && h('span', { class: 'mono tiny', style: { color } }, Math.round(clamp(s.progress, 0, 9.99) * 100) + '%')),
+      h('span', { class: 'dash-tile-ic', style: { color, background: `color-mix(in srgb, ${color} 16%, transparent)` } }, icon(s?.icon || m.icon)),
+      s?.progress != null && h('span', { class: 'dash-tile-pct' }, Math.round(clamp(s.progress, 0, 9.99) * 100) + '%')),
     h('div', { class: 'stat-label', style: 'margin-top:8px' }, s?.label || m.title),
     s ? h('div', { class: 'stat-value' }, s.value ?? '–', s.unit && h('span', { class: 'stat-unit' }, s.unit))
       : h('div', { class: 'stat-value dim' }, '—'),
@@ -68,9 +68,6 @@ function moduleTile(id, key) {
     s?.progress != null && progressBar(s.progress, 1, { color, thin: true }));
 }
 
-function quick(label, ic, path, cls = '') {
-  return h('a', { class: 'dash-quick ' + cls, href: '#/' + path }, h('span', null, icon(ic)), label);
-}
 
 export default {
   id: 'home',
@@ -82,6 +79,7 @@ export default {
   render(el) {
     const key = todayKey();
     const p = getProfile();
+    let filter = 'all';
 
     const draw = () => {
       const steps = Number(call('steps', 'stepsFor', key)) || 0;
@@ -105,84 +103,101 @@ export default {
       const days = lastNDays(7);
       const hist = call('steps', 'history', 7) || days.map(d => ({ date: d, steps: Number(call('steps', 'stepsFor', d)) || 0 }));
 
+      const chip = (label, ic, path) => h('a', { class: 'dash-pill', href: '#/' + path }, icon(ic, { size: 16 }), label);
+      const groups = { all: TILE_MODULES, activity: ['steps', 'run', 'workout'], food: ['nutrition'], habit: ['habits'] };
+      const tileGrid = h('div', { class: 'grid-2' });
+      const paintTiles = g => tileGrid.replaceChildren(...groups[g].map(id => moduleTile(id, key)).filter(Boolean));
+      paintTiles(filter);
+      const filterChips = h('div', { class: 'chips' }, [['all', 'Tümü'], ['activity', 'Aktivite'], ['food', 'Beslenme'], ['habit', 'Alışkanlık']].map(([id, label]) =>
+        h('button', { class: 'chip' + (id === filter ? ' active' : ''), type: 'button', 'aria-pressed': String(id === filter), onClick: e => {
+          filter = id;
+          filterChips.querySelectorAll('.chip').forEach(c => { const on = c === e.currentTarget; c.classList.toggle('active', on); c.setAttribute('aria-pressed', String(on)); });
+          paintTiles(id);
+        } }, label)));
+
       el.replaceChildren(
-        // ---- Karşılama ----
         h('div', { class: 'dash-hero-head' },
-          h('div', { class: 'small muted' }, fmt.date(key, 'full')),
-          h('h1', { class: 'hud-title', style: 'margin-top:4px' }, p.name ? `${greeting()}, ${p.name}` : greeting()),
-          h('div', { class: 'small muted' }, 'Bugünkü özetin aşağıda.')),
+          h('h1', { class: 'hud-title' }, 'Bugün'),
+          h('div', { class: 'small muted' }, fmt.date(key, 'full'))),
 
         !p.onboarded && h('a', { class: 'panel click dash-onboard', href: '#/profile' },
           h('div', { class: 'row' }, h('span', { class: 'li-icon' }, icon('user')),
             h('div', { class: 'grow' }, h('div', { class: 'li-title' }, 'Profilini tamamla'),
-              h('div', { class: 'li-sub' }, 'Boy, kilo ve hedefini gir; günlük kalori hedefin sana göre hesaplansın')),
+              h('div', { class: 'li-sub' }, 'Boy, kilo ve hedefini gir; kalori hedefin sana göre hesaplansın')),
             icon('right', { size: 20 }))),
 
-        // ---- Ana halka ----
-        h('div', { class: 'panel dash-core' },
-          h('div', { class: 'panel-title' }, icon('target', { size: 16 }), 'Bugün'),
+        // ---- Öne çıkan kart ----
+        h('div', { class: 'panel hero dash-core' },
+          h('div', { class: 'info-strip' },
+            h('div', null, h('div', { class: 'is-label' }, icon('steps'), 'Adım'), h('div', { class: 'is-value' }, fmt.n(steps))),
+            h('div', null, h('div', { class: 'is-label' }, icon('flame'), 'Kalori'), h('div', { class: 'is-value' }, fmt.n(intake.kcal))),
+            h('div', null, h('div', { class: 'is-label' }, icon('water'), 'Su'), h('div', { class: 'is-value' }, fmt.n((intake.waterMl || 0) / 1000, 1) + ' L'))),
           h('div', { class: 'dash-core-body' },
             tripleRing([
-              { p: pSteps, c1: '#4cc2ff', c2: '#5b8cff' },
-              { p: pFood, c1: '#ffb547', c2: '#ff8a3d' },
-              { p: pActive, c1: '#ff5c8a', c2: '#ff7a6b' },
-            ], 200, h('div', null,
+              { p: pSteps, c1: '#ff7a1a', c2: '#ffa64d' },
+              { p: pFood, c1: '#4ea8ff', c2: '#7cc0ff' },
+              { p: pActive, c1: '#3fd17f', c2: '#7be3a8' },
+            ], 196, h('div', null,
               h('div', { class: 'small muted' }, 'Günlük skor'),
               h('div', { class: 'dash-score' }, String(score), h('small', null, '%')),
-              h('div', { class: 'small c-cyan' }, score >= 80 ? 'Harika gidiyorsun' : score >= 50 ? 'İyi gidiyor' : score > 0 ? 'Biraz daha hareket' : 'Güne başla'))),
+              h('div', { class: 'small', style: 'color:var(--accent);font-weight:600' }, score >= 80 ? 'Harika gidiyorsun' : score >= 50 ? 'İyi gidiyor' : score > 0 ? 'Biraz daha hareket' : 'Güne başla'))),
             h('div', { class: 'dash-legends' },
-              legendItem('var(--cyan)', 'Adım', fmt.n(steps), `/ ${fmt.n(p.stepGoal)}`),
-              legendItem('var(--amber)', 'Yenilen kalori', fmt.n(intake.kcal), `/ ${fmt.n(target)} kcal`),
-              legendItem('var(--magenta)', 'Hareketle yakılan', fmt.n(active), `/ ${ACTIVE_KCAL_GOAL} kcal`)))),
+              legendItem('#ff7a1a', 'Adım', fmt.n(steps), `/ ${fmt.n(p.stepGoal)}`),
+              legendItem('#4ea8ff', 'Yenilen kalori', fmt.n(intake.kcal), `/ ${fmt.n(target)} kcal`),
+              legendItem('#3fd17f', 'Hareketle yakılan', fmt.n(active), `/ ${ACTIVE_KCAL_GOAL} kcal`))),
+          h('div', { class: 'dash-pills' },
+            chip('Koşu', 'run', 'run'), chip('Antrenman', 'dumbbell', 'workout'), chip('Öğün', 'food', 'nutrition'), chip('Tarif', 'list', 'recipes'))),
 
         // ---- Enerji dengesi ----
-        h('div', { class: 'grid-3' },
-          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Yenilen'), h('div', { class: 'stat-value c-amber' }, fmt.n(intake.kcal)), h('div', { class: 'tiny muted' }, 'kcal')),
-          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Harcanan'), h('div', { class: 'stat-value c-magenta' }, fmt.n(totalBurn)), h('div', { class: 'tiny muted' }, 'kcal')),
-          h('div', { class: 'panel tight center' }, h('div', { class: 'stat-label' }, 'Fark'), h('div', { class: 'stat-value ' + (net > 0 ? 'c-red' : 'c-lime') }, (net > 0 ? '+' : '') + fmt.n(net)), h('div', { class: 'tiny muted' }, net > 0 ? 'kcal fazla' : 'kcal açık'))),
-
-        // ---- Su + makro şeridi ----
-        h('a', { class: 'panel tight click dash-water', href: '#/nutrition' },
+        h('div', { class: 'panel dash-energy' },
           h('div', { class: 'row between' },
-            h('div', { class: 'row gap-s' }, h('span', { class: 'c-cyan' }, icon('water', { size: 18 })), h('span', { class: 'stat-label' }, 'Su')),
-            h('span', { class: 'mono small' }, `${fmt.n((intake.waterMl || 0) / 1000, 2)} / ${fmt.n(water / 1000, 1)} L`)),
-          h('div', { class: 'mt' }, progressBar(intake.waterMl || 0, water, { color: 'var(--cyan)' })),
-          h('div', { class: 'grid-3 mt small' },
-            h('div', null, h('span', { class: 'muted' }, 'Protein '), h('b', { class: 'mono' }, fmt.n(intake.protein) + 'g')),
-            h('div', null, h('span', { class: 'muted' }, 'Karb '), h('b', { class: 'mono' }, fmt.n(intake.carbs) + 'g')),
-            h('div', null, h('span', { class: 'muted' }, 'Yağ '), h('b', { class: 'mono' }, fmt.n(intake.fat) + 'g')))),
+            h('div', { class: 'panel-title', style: 'margin:0' }, 'Kalori dengesi'),
+            h('span', { class: 'badge ' + (net > 0 ? 'red' : 'lime') }, net > 0 ? 'Fazla' : 'Açık')),
+          h('div', { class: 'dash-energy-row' },
+            h('div', null, h('div', { class: 'stat-label' }, 'Yenilen'), h('div', { class: 'dash-big' }, fmt.n(intake.kcal))),
+            h('span', { class: 'dash-op' }, '−'),
+            h('div', null, h('div', { class: 'stat-label' }, 'Harcanan'), h('div', { class: 'dash-big' }, fmt.n(totalBurn))),
+            h('span', { class: 'dash-op' }, '='),
+            h('div', null, h('div', { class: 'stat-label' }, 'Fark'), h('div', { class: 'dash-big ' + (net > 0 ? 'c-red' : 'c-lime') }, (net > 0 ? '+' : '') + fmt.n(net)))),
+          h('div', { class: 'small muted' }, `Harcanan = dinlenirken ${fmt.n(base)} + hareketle ${fmt.n(active)} kcal`),
+          h('div', { class: 'divider' }),
+          h('div', { class: 'grid-3 small' },
+            h('div', null, h('div', { class: 'muted' }, 'Protein'), h('b', { class: 'mono' }, fmt.n(intake.protein) + ' g')),
+            h('div', null, h('div', { class: 'muted' }, 'Karbonhidrat'), h('b', { class: 'mono' }, fmt.n(intake.carbs) + ' g')),
+            h('div', null, h('div', { class: 'muted' }, 'Yağ'), h('b', { class: 'mono' }, fmt.n(intake.fat) + ' g')))),
 
-        // ---- Hızlı komutlar ----
-        sectionTitle('Hızlı başlat'),
-        h('div', { class: 'dash-quicks' },
-          quick('Koşu başlat', 'run', 'run', 'q-mag'),
-          quick('Antrenman', 'dumbbell', 'workout', 'q-lime'),
-          quick('Öğün ekle', 'food', 'nutrition', 'q-amb'),
-          quick('Fit tarifler', 'list', 'recipes', 'q-vio')),
+        // ---- Bölümler ----
+        sectionTitle('Bölümler'),
+        filterChips,
+        tileGrid,
 
-        // ---- Modüller ----
-        sectionTitle('Bugünün özeti'),
-        h('div', { class: 'grid-2' }, TILE_MODULES.map(id => moduleTile(id, key))),
+        // ---- Tarif kartı ----
+        h('a', { class: 'dash-recipe', href: '#/recipes' },
+          h('div', { class: 'grow' },
+            h('div', { class: 'dash-recipe-t' }, 'Fit tarifler'),
+            h('div', { class: 'dash-recipe-s' }, 'Kahvaltıdan tatlıya sağlıklı, yüksek proteinli tarifler'),
+            h('span', { class: 'dash-recipe-b' }, 'Tariflere bak', icon('right', { size: 16 }))),
+          h('span', { class: 'dash-recipe-e', 'aria-hidden': 'true' }, '🥗')),
 
         // ---- Haftalık ----
         sectionTitle('Son 7 gün adım', h('a', { class: 'small', href: '#/steps' }, 'Tümünü gör')),
         h('div', { class: 'panel' },
           barChart(hist.map(d => ({ label: fmt.date(d.date, 'weekday'), value: d.steps, highlight: d.date === key })), { height: 110 }),
           h('div', { class: 'row between mt small muted' },
-            h('span', null, 'Ortalama ', h('b', { class: 'mono c-cyan' }, fmt.n(hist.reduce((s, d) => s + d.steps, 0) / Math.max(1, hist.length)))),
-            h('span', null, 'Toplam ', h('b', { class: 'mono' }, fmt.n(hist.reduce((s, d) => s + d.steps, 0)))))),
+            h('span', null, 'Ortalama ', h('b', { class: 'mono', style: 'color:var(--text)' }, fmt.n(hist.reduce((s, d) => s + d.steps, 0) / Math.max(1, hist.length)))),
+            h('span', null, 'Toplam ', h('b', { class: 'mono', style: 'color:var(--text)' }, fmt.n(hist.reduce((s, d) => s + d.steps, 0)))))),
 
         // ---- Seviye ----
         sectionTitle('Seviyen'),
-        h('a', { class: 'panel click dash-rank', href: '#/profile' },
+        h('a', { class: 'panel hero violet click dash-rank', href: '#/profile' },
           h('div', { class: 'row' },
             h('div', { class: 'dash-lv' }, h('small', null, 'Seviye'), String(lv.level)),
             h('div', { class: 'grow' },
-              h('div', { class: 'li-title', style: { color: lv.rank.color } }, lv.rank.name),
+              h('div', { class: 'li-title' }, lv.rank.name),
               h('div', { class: 'li-sub' }, `${fmt.n(lv.total)} puan · sonraki seviyeye ${fmt.n(lv.next - lv.total)} puan`),
-              h('div', { class: 'mt' }, progressBar(lv.progress, 1, { color: 'var(--amber)' })))),
+              h('div', { class: 'mt' }, progressBar(lv.progress, 1, { color: 'var(--violet)' })))),
           (getXP().log || []).slice(0, 3).length ? h('div', { class: 'list mt' }, getXP().log.slice(0, 3).map(x =>
-            h('div', { class: 'list-item', style: 'padding:6px 2px' }, h('span', { class: 'grow small' }, x.reason || 'Puan'), h('span', { class: 'mono small c-magenta' }, '+' + x.amount)))) : null),
+            h('div', { class: 'list-item', style: 'padding:6px 2px;min-height:0' }, h('span', { class: 'grow small' }, x.reason || 'Puan'), h('span', { class: 'mono small c-amber' }, '+' + x.amount)))) : null),
       );
     };
 

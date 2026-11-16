@@ -14,6 +14,9 @@ export const CFG = {
   tolerance: 0.25,      // aralık düzenliliği (ortalamadan ±%25)
   ampSpread: 2.4,       // genlik tutarlılığı (ortalamanın 1/x … x katı)
   resetGapMs: 500,      // bu kadar veri gelmezse filtre sıfırlanır (sekme gizlendi vb.)
+  gridMs: 20,           // periyodiklik testi için yeniden örnekleme adımı (50 Hz)
+  lockPeriodicity: 0.5, // kilitlenmek için gereken öz-ilinti (yürüyüş ritmik, sallama değil)
+  keepPeriodicity: 0.3, // kilitliyken bunun altı düzensiz sayılır
 };
 
 export class StepDetector {
@@ -31,6 +34,27 @@ export class StepDetector {
     this.mode = 'valley'; this.pk = -Infinity; this.pkT = 0; this.vl = 0;
     this.run = [];
     this.counting = false; this.lastStepT = null; this.fastHits = 0; this.badHits = 0;
+    this.buf = []; this.gridT = null;
+  }
+
+  /** Filtrelenmiş sinyalin, verilen aralık (ve iki katı: çift adım) gecikmesindeki en yüksek normalize öz-ilintisi. */
+  periodicity(intervalMs) {
+    const c = this.cfg, b = this.buf;
+    let best = -1, tried = false;
+    for (const mult of [1, 2]) {
+      const L0 = Math.round((intervalMs * mult) / c.gridMs);
+      const lo = Math.max(2, Math.floor(L0 * 0.85)), hi = Math.ceil(L0 * 1.15);
+      for (let L = lo; L <= hi; L++) {
+        const W = Math.min(b.length - L, Math.max(L, 50));
+        if (W < 25) continue;
+        tried = true;
+        let xy = 0, xx = 0, yy = 0;
+        for (let i = b.length - W; i < b.length; i++) { const x = b[i], y = b[i - L]; xy += x * y; xx += x * x; yy += y * y; }
+        const r = xx > 0 && yy > 0 ? xy / Math.sqrt(xx * yy) : 0;
+        if (r > best) best = r;
+      }
+    }
+    return tried ? best : 1; // yeterli veri yoksa engelleme
   }
 
   get threshold() { return Math.max(this.cfg.minAmp, this.cfg.ampFactor * this.avgAmp); }
@@ -43,7 +67,7 @@ export class StepDetector {
     if (!Number.isFinite(mag) || !Number.isFinite(t)) return;
     if (this.lastT == null || t - this.lastT > c.resetGapMs || t < this.lastT) {
       const keepCounting = this.counting && this.lastStepT != null && t - this.lastStepT < c.maxIntervalMs;
-      this.lp = mag; this.base = mag; this.lastT = t; this.signal = 0;
+      this.lp = mag; this.base = mag; this.lastT = t; this.signal = 0; this.buf = []; this.gridT = null;
       this.mode = 'valley'; this.vl = 0; this.pk = -Infinity;
       if (!keepCounting) { this.counting = false; this.run = []; }
       return;
@@ -54,6 +78,9 @@ export class StepDetector {
     this.base += (this.lp - this.base) * (dt / (c.baseTauMs + dt));
     const s = this.lp - this.base;
     this.signal = s;
+    if (this.gridT == null) this.gridT = t;
+    while (this.gridT <= t) { this.buf.push(s); this.gridT += c.gridMs; }
+    if (this.buf.length > 320) this.buf.splice(0, this.buf.length - 300);
 
     const thr = this.threshold, hyst = Math.max(0.12, thr * 0.22);
     if (this.mode === 'peak') {
@@ -86,7 +113,8 @@ export class StepDetector {
       if (d > c.maxIntervalMs) { this._drop(); this._search(t, amp); return; }
       // Kilitliyken de ritim ve genlik tutarlı olmalı; üst üste iki düzensiz tepe → kilit düşer
       const irregular = (this.avgInt && (d < this.avgInt * 0.6 || d > this.avgInt * 1.65)) ||
-        amp > this.avgAmp * 2.6 || amp < this.avgAmp / 2.6;
+        amp > this.avgAmp * 2.6 || amp < this.avgAmp / 2.6 ||
+        this.periodicity(this.avgInt || d) < c.keepPeriodicity;
       if (irregular) {
         if (++this.badHits >= 2) { this._drop(); this._search(t, amp); }
         return;
@@ -123,6 +151,8 @@ export class StepDetector {
     this.run.push(cur);
     if (this.run.length >= c.runLength) {
       const run = this.run;
+      const meanInt = (run[run.length - 1].t - run[0].t) / (run.length - 1);
+      if (this.periodicity(meanInt) < c.lockPeriodicity) { this.run = run.slice(-(c.runLength - 1)); return; }
       this.counting = true;
       this.lastStepT = t;
       this.fastHits = 0; this.badHits = 0;
@@ -199,26 +229,23 @@ export const pedometer = {
   async start({ gesture = false } = {}) {
     if (typeof window === 'undefined' || !('DeviceMotionEvent' in window)) { setState('unsupported'); return false; }
     if (!window.isSecureContext) { setState('insecure'); return false; }
-    if (needsPermissionApi()) {
-      if (!gesture) {
-        // İzin daha önce verildiyse olaylar gelir ve durum kendiliğinden 'active' olur.
-        attach();
-        if (!gotData) setState('needs-permission');
-        return false;
-      }
-      try {
-        const r = await window.DeviceMotionEvent.requestPermission();
-        if (r !== 'granted') { detach(); setState('denied'); return false; }
-      } catch {
-        setState('needs-permission'); return false;
-      }
-    }
+    // Dinleyiciyi her durumda bağla: veri gelirse durum kendiliğinden 'active' olur.
     attach();
-    if (state !== 'active') {
-      setState('starting');
-      clearTimeout(noDataTimer);
-      noDataTimer = setTimeout(() => { if (!gotData && attached) setState('nosensor'); }, 3000);
+    if (gotData) { setState('active'); return true; }
+    let perm = 'granted';
+    if (needsPermissionApi()) {
+      // iOS Safari ve yeni Chrome sürümleri izin API'si sunar; izin isteği kullanıcı dokunuşu gerektirir.
+      if (gesture) {
+        try { perm = await window.DeviceMotionEvent.requestPermission(); } catch { perm = 'prompt'; }
+      } else perm = 'prompt';
     }
+    if (gotData) return true;
+    if (perm === 'denied') { setState('denied'); return false; }
+    setState('starting');
+    clearTimeout(noDataTimer);
+    noDataTimer = setTimeout(() => {
+      if (!gotData && attached) setState(perm === 'granted' || gesture ? 'nosensor' : 'needs-permission');
+    }, perm === 'granted' || gesture ? 3000 : 1500);
     return true;
   },
 
