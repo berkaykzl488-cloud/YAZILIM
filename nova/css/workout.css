@@ -4,7 +4,7 @@
 .fig .face { fill: #e4e8ef; }
 .fig .limb.far .body { fill: #8a93a2; }
 .fig .limb.far .face { fill: #8a93a2; }
-.fig .mus { fill: var(--magenta); }
+.fig .mus { fill: var(--accent); }
 .fig .mus-s { opacity: .45; }
 .fig .limb.far .mus { opacity: .5; }
 .fig .limb.far .mus-s { opacity: .25; }
@@ -30,8 +30,8 @@
 .eq-seat { fill: #59616e; }
 .mm-body { fill: #2a2f38; stroke: #3a404b; stroke-width: 1; }
 .mm-m { fill: #3a404b; }
-.mm-p { fill: var(--magenta); }
-.mm-s { fill: var(--magenta); opacity: .42; }
+.mm-p { fill: var(--accent); }
+.mm-s { fill: var(--accent); opacity: .42; }
 .mm-line { stroke: #2a2f38; stroke-width: 1.2; fill: none; }
 .mm-lbl { fill: var(--muted); font-size: 11px; font-weight: 600; }
 .lab-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }

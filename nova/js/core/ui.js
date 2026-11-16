@@ -35,7 +35,7 @@ function append(el, children) {
 /** SVG elemanı üretir: svg('circle', {cx:5, cy:5, r:3}) */
 export function svg(tag, attrs = {}, ...children) {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for (const [k, v] of Object.entries(attrs)) if (v != null) el.setAttribute(k, v);
+  for (const [k, v] of Object.entries(attrs || {})) if (v != null) el.setAttribute(k, v);
   for (const c of children.flat(Infinity)) if (c != null) el.appendChild(c instanceof Node ? c : document.createTextNode(String(c)));
   return el;
 }
