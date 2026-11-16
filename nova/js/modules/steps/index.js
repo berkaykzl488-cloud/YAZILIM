@@ -42,7 +42,7 @@ function openGoalEditor() {
       h('div', { class: 'grow center' }, val, h('div', { class: 'muted small' }, 'adım / gün')),
       h('button', { type: 'button', class: 'btn ghost icon', 'aria-label': '500 adım artır', onClick: () => set(goal + 500) }, icon('plus'))),
     chips,
-    h('p', { class: 'stp-note' }, 'Yetişkinler için günde 7.000–10.000 adım iyi bir başlangıçtır. Hedefe ulaştığın her gün +50 XP kazanırsın.'));
+    h('p', { class: 'stp-note' }, 'Yetişkinler için günde 7.000–10.000 adım iyi bir başlangıçtır. Hedefe ulaştığın her gün +50 puan kazanırsın.'));
   paint();
   modal({
     title: 'Günlük adım hedefi', body,
