@@ -27,7 +27,7 @@ function scaleBar(bands, value, { min, max, fmtTick = v => fmt.n(v) }) {
   let from = min;
   const segs = bands.map(b => {
     const to = Math.min(b.to, max);
-    const s = h('div', { class: 'bd-seg', style: { flex: `${Math.max(0, to - from)} 1 0px`, background: b.color } }, h('span', null, b.label));
+    const s = h('div', { class: 'bd-seg', style: { flex: `${(Math.max(0, to - from) / (max - min)) * 100} 1 0px`, background: b.color } }, h('span', null, b.label));
     from = to;
     return s;
   });
@@ -94,7 +94,7 @@ function changeCard(entries) {
   const firstDate = entries[0]?.date;
   return h('div', { class: 'panel bd-change' },
     h('div', { class: 'panel-title' }, icon('chart'), 'Değişim',
-      firstDate && rows.length ? h('span', { class: 'small muted', style: 'font-weight:500;margin-left:auto' }, `${fmt.date(firstDate, 'short')}'dan bu yana`) : null),
+      firstDate && rows.length ? h('span', { class: 'small muted', style: 'font-weight:500;margin-left:auto' }, `İlk ölçüm: ${fmt.date(firstDate, 'short')}`) : null),
     rows.length
       ? h('div', { class: 'bd-diff-row' }, rows.map(({ m, c }) =>
         h('button', { class: 'bd-diff ' + deltaClass(m.id, c.sinceFirst.cm), onClick: () => pick(m.id) },
