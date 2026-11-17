@@ -1,0 +1,38 @@
+# NOVA Fit spor uygulamasını GitHub Pages'e yayınlar.
+# Bir kez: Ayarlar › Pages › Source = "GitHub Actions" seçilmeli.
+name: NOVA Fit — Pages
+
+on:
+  push:
+    paths: ['nova/**', '.github/workflows/nova-pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: nova-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sözdizimi denetimi
+        run: find nova -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Çevrimdışı dosya listesi ve önbellek sürümü
+        run: |
+          node nova/tools/precache.mjs
+          sed -i "s/const VERSION = 'nova-v[^']*'/const VERSION = 'nova-${GITHUB_SHA::8}'/" nova/sw.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: nova
+      - id: deployment
+        uses: actions/deploy-pages@v4
