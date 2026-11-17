@@ -31,7 +31,9 @@
 .rem-trow-t { font-size: 16px; font-weight: 600; color: var(--text); }
 .rem-trow-s { font-size: 14px; color: var(--muted); }
 .rem-field { margin-bottom: 12px; min-width: 0; }
-.rem-field .input { font-variant-numeric: tabular-nums; font-size: 17px; }
+.rem-field .input { font-variant-numeric: tabular-nums; font-size: 16px; padding: 10px 12px; }
+/* Anahtarların dokunma alanını 44px'e büyüt */
+.rem-trow .toggle::before, .rem-meal .toggle::before, .rem-tg .toggle::before { content: ''; position: absolute; inset: -8px -6px; }
 .rem-quiet .rem-quiet-times { margin-top: 4px; }
 .rem-quiet.off .rem-quiet-times { opacity: .45; }
 .rem-quiet .rem-trow { margin-bottom: 6px; }
@@ -42,7 +44,7 @@
 .rem-days .chip { min-height: 46px; padding: 0; justify-content: center; font-size: 14px; }
 .rem-meal { display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--line); }
 .rem-meal:last-of-type { border-bottom: none; }
-.rem-time-sm { width: 116px; min-height: 46px; flex: none; font-variant-numeric: tabular-nums; font-size: 17px; }
+.rem-time-sm { width: 118px; min-height: 46px; flex: none; padding: 10px 10px; font-variant-numeric: tabular-nums; font-size: 16px; }
 .rem-time-sm:disabled { opacity: .4; }
 .rem-preview-box { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: var(--radius-s); background: var(--accent-soft); color: var(--text); }
 .rem-preview-box svg { flex: none; margin-top: 3px; color: var(--accent); }
@@ -60,8 +62,7 @@
 .rem-banner.out { animation: rem-out .25s forwards; }
 .rem-banner-t { font-size: 16px; font-weight: 700; }
 .rem-banner-b { font-size: 15px; color: var(--muted); line-height: 1.35; }
-.rem-banner-act { display: flex; align-items: center; gap: 6px; flex: none; }
-.rem-banner-act .btn.sm { min-height: 44px; }
-.rem-banner-act .btn.icon.sm { width: 44px; }
+.rem-banner-act { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.rem-banner-act .btn.sm { min-height: 44px; flex: 1; }
 @keyframes rem-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
 @keyframes rem-out { to { opacity: 0; transform: translateY(-10px); } }

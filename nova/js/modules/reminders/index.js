@@ -11,10 +11,10 @@ function showBanner(msg) {
   const close = () => { b.classList.add('out'); setTimeout(() => b.remove(), 250); };
   const b = h('div', { class: 'rem-banner', role: 'alert' },
     h('span', { class: 'li-icon' }, icon(msg.icon || 'clock')),
-    h('div', { class: 'grow' }, h('div', { class: 'rem-banner-t' }, msg.title), h('div', { class: 'rem-banner-b' }, msg.body)),
-    h('div', { class: 'rem-banner-act' },
-      msg.route && msg.route !== 'reminders' ? h('button', { class: 'btn primary sm', type: 'button', onClick: () => { close(); location.hash = '#/' + msg.route; } }, 'Aç') : null,
-      h('button', { class: 'btn ghost icon sm', type: 'button', 'aria-label': 'Kapat', onClick: close }, icon('x'))));
+    h('div', { class: 'grow' }, h('div', { class: 'rem-banner-t' }, msg.title), h('div', { class: 'rem-banner-b' }, msg.body),
+      h('div', { class: 'rem-banner-act' },
+        msg.route && msg.route !== 'reminders' ? h('button', { class: 'btn primary sm', type: 'button', onClick: () => { close(); location.hash = '#/' + msg.route; } }, 'Aç') : null,
+        h('button', { class: 'btn ghost sm', type: 'button', onClick: close }, 'Kapat'))));
   bannerWrap.appendChild(b);
   while (bannerWrap.children.length > 3) bannerWrap.firstChild.remove();
   setTimeout(close, 15000);
@@ -50,6 +50,7 @@ function editSheet(type) {
   const t = R.typeById(type);
   const s = R.getSettings();
   const d = structuredClone(s[type]);
+  d.on = true; // kartı açıp ayarlamak, hatırlatıcıyı kullanmak istemek demek; kapatmak için anahtar sayfada duruyor
   const body = h('div', { class: 'rem-sheet' });
   const preview = h('p', { class: 'rem-preview' });
   const paintPreview = () => {
@@ -231,7 +232,7 @@ function logCard() {
 
 function infoCard() {
   return h('div', { class: 'panel rem-info' },
-    h('div', { class: 'panel-title' }, icon('info'), 'Nasıl çalışır?'),
+    h('div', { class: 'panel-title' }, icon('info', { size: 18 }), 'Nasıl çalışır?'),
     h('ul', { class: 'rem-ul' },
       h('li', null, 'Web sürümünde hatırlatmalar, uygulama açıkken ya da kısa süre önce arka plana alındıysa çalışır. Telefon uygulamayı tamamen kapatırsa bildirim gelmeyebilir.'),
       h('li', null, 'Kaçırdığın bir hatırlatma, 30 dakika içinde uygulamayı açarsan bir kez gösterilir.'),
