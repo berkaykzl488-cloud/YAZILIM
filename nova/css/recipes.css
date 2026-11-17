@@ -375,7 +375,7 @@ body.rcp-cooking .app-nav, body.rcp-cooking .app-header { visibility: hidden; }
 .rcp-wk-psearch { margin-bottom: 8px; }
 .rcp-wk-psearch .input { min-height: 46px; }
 .rcp-wk-picker { display: flex; flex-direction: column; max-height: 52vh; overflow-y: auto; margin: 0 -4px; }
-.rcp-wk-pick { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 4px; border: none; border-bottom: 1px solid var(--line); background: none;
+.rcp-wk-pick { flex: none; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 4px; border: none; border-bottom: 1px solid var(--line); background: none;
   color: var(--text); text-align: left; cursor: pointer; }
 .rcp-wk-pick:last-child { border-bottom: none; }
 .rcp-wk-pick:active { background: rgba(255,255,255,.05); }
@@ -395,3 +395,4 @@ body.rcp-cooking .app-nav, body.rcp-cooking .app-header { visibility: hidden; }
 .rcp-wk-shopgrp .rcp-aisle-head { margin: 6px 2px 2px; font-size: 14px; }
 .rcp-wk-from { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rcp-wk-shoplist .rcp-pick-txt { min-width: 0; flex: 1; }
+.rcp-wk-shoplist .rcp-pick, .rcp-wk-shopgrp { flex: none; }
