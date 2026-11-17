@@ -1,6 +1,6 @@
 // NOVA Fit servis çalışanı: uygulama dosyalarını önbelleğe alır, çevrimdışı çalışır.
 // Sürümü artırınca eski önbellek temizlenir.
-const VERSION = 'nova-v1';
+const VERSION = 'nova-v2';
 const SHELL = ['./', './index.html', './css/core.css', './js/app.js', './manifest.webmanifest', './icons/icon.svg'];
 
 // Kurulumda tüm uygulama dosyalarını (precache.json listesi) önbelleğe al: ilk açılıştan sonra tamamen çevrimdışı çalışır
@@ -55,4 +55,21 @@ self.addEventListener('fetch', e => {
     );
   }
   // Diğerleri (ör. Open Food Facts API) doğrudan ağa gider.
+});
+
+// Bildirime dokununca ilgili sayfayı aç (açık bir pencere varsa ona odaklan)
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const target = new URL(e.notification.data?.url || './#/home', self.registration.scope).href;
+  e.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const w of wins) {
+      if (w.url.startsWith(self.registration.scope)) {
+        await w.focus();
+        if ('navigate' in w) { try { await w.navigate(target); } catch { /* aynı kaynak değilse yoksay */ } }
+        return;
+      }
+    }
+    await self.clients.openWindow(target);
+  })());
 });
