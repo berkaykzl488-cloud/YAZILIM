@@ -179,6 +179,13 @@ export default {
             h('span', { class: 'dash-recipe-b' }, 'Tariflere bak', icon('right', { size: 16 }))),
           h('span', { class: 'dash-recipe-e', 'aria-hidden': 'true' }, '🥗')),
 
+        // ---- Araçlar ----
+        sectionTitle('Araçlar'),
+        h('div', { class: 'dash-tools' }, [
+          ['report', 'chart', 'Haftalık rapor'], ['body', 'scale', 'Ölçüler'],
+          ['recipes/week', 'calendar', 'Haftalık menü'], ['reminders', 'clock', 'Hatırlatıcı'],
+        ].map(([path, ic, label]) => h('a', { class: 'dash-tool', href: '#/' + path }, h('span', null, icon(ic)), label))),
+
         // ---- Haftalık ----
         sectionTitle('Son 7 gün adım', h('a', { class: 'small', href: '#/steps' }, 'Tümünü gör')),
         h('div', { class: 'panel' },

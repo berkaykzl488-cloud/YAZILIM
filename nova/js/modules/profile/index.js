@@ -170,6 +170,17 @@ export default {
         h('div', { class: 'panel tight', style: 'background:rgba(0,0,0,.25)' }, h('div', { class: 'panel-title' }, icon('target', { size: 16 }), 'Sana göre hesaplanan hedefler'), calc),
         h('button', { class: 'btn primary block mt', onClick: save }, icon('check'), 'Kaydet')),
 
+      sectionTitle('Araçlar'),
+      h('div', { class: 'panel tight list' }, [
+        ['report', 'chart', 'Haftalık rapor', 'Haftanın özeti ve paylaşılabilir görsel'],
+        ['body', 'scale', 'Vücut ölçüleri', 'Bel, göğüs, kol ölçüleri ve ilerleme fotoğrafları'],
+        ['reminders', 'clock', 'Hatırlatıcılar', 'Su, antrenman, öğün ve adım bildirimleri'],
+        ['recipes/week', 'calendar', 'Haftalık yemek planı', '7 günlük menü ve alışveriş listesi'],
+      ].map(([path, ic, title, sub]) => h('a', { class: 'list-item click', href: '#/' + path, style: 'text-decoration:none;color:inherit' },
+        h('span', { class: 'li-icon' }, icon(ic)),
+        h('div', { class: 'li-main' }, h('div', { class: 'li-title' }, title), h('div', { class: 'li-sub' }, sub)),
+        icon('right', { size: 18 })))),
+
       sectionTitle('Kilo takibi', h('button', { class: 'btn sm', onClick: logWeight }, icon('plus'), 'Kilo gir')),
       h('div', { class: 'panel' },
         weights.length

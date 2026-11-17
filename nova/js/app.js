@@ -13,8 +13,11 @@ import nutrition from './modules/nutrition/index.js';
 import habits from './modules/habits/index.js';
 import profile from './modules/profile/index.js';
 import recipes from './modules/recipes/index.js';
+import reminders from './modules/reminders/index.js';
+import report from './modules/report/index.js';
+import body from './modules/body/index.js';
 
-const MODULES = [dashboard, steps, run, workout, nutrition, habits, recipes, profile];
+const MODULES = [dashboard, steps, run, workout, nutrition, habits, recipes, reminders, report, body, profile];
 const NAV = ['home', 'steps', 'run', 'workout', 'nutrition', 'habits'];
 
 function loadCss(id) {
