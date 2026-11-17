@@ -1,5 +1,5 @@
 // Fit Tarifler — sağlıklı, sporcu dostu tarif koleksiyonu.
-// Rotalar: #/recipes, #/recipes/<id>, #/recipes/<id>/cook, #/recipes/shopping, #/recipes/plan
+// Rotalar: #/recipes, #/recipes/<id>, #/recipes/<id>/cook, #/recipes/shopping, #/recipes/plan, #/recipes/week
 import { h, emptyState, backButton } from '../../core/ui.js';
 import { loadAll, getRecipe } from './data.js';
 import { nav } from './nav.js';
@@ -22,6 +22,7 @@ export default {
 
     if (a === 'shopping') return (await import('./shopping.js')).renderShopping(el);
     if (a === 'plan') return (await import('./plan.js')).renderPlan(el);
+    if (a === 'week') return (await import('./week.js')).renderWeek(el);
     if (a) {
       const r = getRecipe(a);
       if (!r) {

@@ -171,6 +171,14 @@ export function linkRow(r, sub) {
     h('span', { class: 'rcp-link-chev', 'aria-hidden': 'true' }, icon('right', { size: 18 })));
 }
 
+/** Haftalık plan sayfasına giden kart (tarifler ana sayfası, günlük menü) */
+export function weekLinkCard(title = 'Haftalık yemek planı', sub = '7 günlük menü ve tek dokunuşla alışveriş listesi') {
+  return h('a', { class: 'panel click rcp-week-link', href: '#/recipes/week' },
+    h('span', { class: 'rcp-week-link-ic', 'aria-hidden': 'true' }, icon('calendar')),
+    h('div', { class: 'li-main' }, h('div', { class: 'rcp-row-name' }, title), h('div', { class: 'li-sub' }, sub)),
+    h('span', { class: 'rcp-link-chev', 'aria-hidden': 'true' }, icon('right', { size: 18 })));
+}
+
 /** Liste satırı tarzı küçük kart (plan, favori satırı) */
 export function recipeRow(r, sub, end = null, onClick = null) {
   return h('div', { class: 'rcp-row' + (onClick ? ' click' : ''), onClick },

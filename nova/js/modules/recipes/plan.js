@@ -1,74 +1,11 @@
-// Günlük menü önerisi: kalori hedefine yakın, proteini yüksek 4 öğün.
+// Günlük menü önerisi: kalori hedefine yakın, proteini yüksek 4 öğün. Puanlama engine.js'de (haftalık planla ortak).
 import { h, icon, mount, fmt, progressBar, haptic, emptyState } from '../../core/ui.js';
 import { load, save, todayKey } from '../../core/store.js';
 import { calorieTarget, macroTargets } from '../../core/profile.js';
-import { allRecipes, getRecipe, totalMin } from './data.js';
-import { MEALS, addToDiary, toastAction, goDiary, scaledNutrition, portionText, recipeRow } from './util.js';
+import { getRecipe } from './data.js';
+import { SLOTS, SLOT_PORTIONS, OPTS, pools, totals, score, bestPortions } from './engine.js';
+import { MEALS, addToDiary, toastAction, goDiary, scaledNutrition, portionText, recipeRow, weekLinkCard } from './util.js';
 import { nav } from './nav.js';
-
-const SLOT_CATS = {
-  breakfast: ['kahvalti'],
-  lunch: ['salata', 'mealprep', 'tavuk', 'baklagil', 'balik', 'et'],
-  dinner: ['tavuk', 'et', 'balik', 'baklagil', 'sebze', 'mealprep'],
-  snack: ['ara', 'smoothie', 'tatli'],
-};
-const SLOT_PORTIONS = { breakfast: [1, 1.5, 2], lunch: [1, 1.5, 2], dinner: [1, 1.5, 2], snack: [1, 2] };
-const SLOTS = ['breakfast', 'lunch', 'dinner', 'snack'];
-
-const OPTS = [
-  { id: 'veg', label: 'Vejetaryen', test: r => r.tags.includes('vejetaryen') },
-  { id: 'vegan', label: 'Vegan', test: r => r.tags.includes('vegan') },
-  { id: 'gf', label: 'Glutensiz', test: r => r.tags.includes('glutensiz') },
-  { id: 'quick', label: '30 dk altı', test: r => totalMin(r) <= 30 },
-  { id: 'student', label: 'Öğrenci dostu', test: r => r.tags.includes('öğrenci dostu') || totalMin(r) <= 20 },
-];
-
-function pools(opts) {
-  const tests = OPTS.filter(o => opts.includes(o.id)).map(o => o.test);
-  const ok = r => tests.every(t => t(r));
-  const out = {};
-  for (const s of SLOTS) {
-    out[s] = allRecipes().filter(r => SLOT_CATS[s].includes(r.cat) && ok(r));
-    // Kahvaltıda seçenek azsa smoothie'lerle tamamla
-    if (s === 'breakfast' && out[s].length < 4) out[s].push(...allRecipes().filter(r => r.cat === 'smoothie' && ok(r)));
-  }
-  return out;
-}
-
-function totals(items) {
-  const t = { kcal: 0, p: 0, c: 0, f: 0 };
-  for (const it of items) {
-    const r = getRecipe(it.id);
-    if (!r) continue;
-    const n = scaledNutrition(r, it.portions);
-    t.kcal += n.kcal; t.p += n.p; t.c += n.c; t.f += n.f;
-  }
-  return t;
-}
-
-function score(t, target) {
-  const kErr = Math.abs(t.kcal - target.kcal) / target.kcal;
-  const pShort = Math.max(0, target.protein - t.p) / target.protein;
-  const pOver = Math.max(0, t.p - target.protein * 1.3) / target.protein;
-  const fOver = Math.max(0, t.f - target.fat * 1.3) / target.fat;
-  return kErr * 3 + pShort * 2.2 + pOver * 0.6 + fOver * 0.6;
-}
-
-/** En iyi porsiyon kombinasyonunu bulur */
-function bestPortions(recipes, target) {
-  let best = null;
-  const rec = (i, acc) => {
-    if (i === SLOTS.length) {
-      const items = SLOTS.map((s, k) => ({ slot: s, id: recipes[k].id, portions: acc[k] }));
-      const sc = score(totals(items), target);
-      if (!best || sc < best.sc) best = { sc, items };
-      return;
-    }
-    for (const p of SLOT_PORTIONS[SLOTS[i]]) rec(i + 1, [...acc, p]);
-  };
-  rec(0, []);
-  return best;
-}
 
 const pick = a => a[Math.floor(Math.random() * a.length)];
 
@@ -199,6 +136,7 @@ export function renderPlan(el) {
     optChips,
     mealsEl,
     actions,
+    weekLinkCard('Bütün haftayı planla', '7 günlük menü, toplu hazırlık ve haftanın alışveriş listesi'),
     h('p', { class: 'tiny dim rcp-disclaimer' }, 'Öneriler porsiyonları hedefine göre ayarlar; tarife dokunarak ayrıntıları görebilirsin.'));
   paint();
 }

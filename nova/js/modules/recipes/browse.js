@@ -2,7 +2,7 @@
 import { h, icon, mount, fmt, sectionTitle, emptyState } from '../../core/ui.js';
 import { subscribe } from '../../core/store.js';
 import { CATS, CAT, allRecipes, matches, totalMin, norm } from './data.js';
-import { recipeCard, getFavs, getShopping, fullGrad } from './util.js';
+import { recipeCard, getFavs, getShopping, fullGrad, weekLinkCard } from './util.js';
 import { nav } from './nav.js';
 
 const FILTERS = [
@@ -84,6 +84,7 @@ export function renderBrowse(el) {
     if (!isDefault()) { intro.replaceChildren(); return; }
     const favs = getFavs().map(id => all.find(r => r.id === id)).filter(Boolean);
     mount(intro,
+      h('div', { class: 'rcp-plan-cards' },
       h('a', { class: 'panel hero rcp-plan-hero', href: '#/recipes/plan' },
         h('div', { class: 'grow' },
           h('div', { class: 'rcp-hero-kicker' }, 'Bugün ne yesem?'),
@@ -91,6 +92,7 @@ export function renderBrowse(el) {
           h('div', { class: 'rcp-hero-sub' }, 'Kalori ve protein hedefine uygun 4 öğün önerelim.'),
           h('span', { class: 'btn primary sm rcp-hero-btn' }, icon('sparkle'), 'Menü öner')),
         h('div', { class: 'rcp-hero-emoji', 'aria-hidden': 'true' }, '🥗')),
+      weekLinkCard()),
       favs.length ? [
         sectionTitle('Favorilerin', h('span', { class: 'muted small' }, favs.length + ' tarif')),
         h('div', { class: 'rcp-hscroll' }, favs.map(r => recipeCard(r, { fav: true, onOpen: openCard }))),

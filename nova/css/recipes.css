@@ -289,3 +289,109 @@ body.rcp-cooking .app-nav, body.rcp-cooking .app-header { visibility: hidden; }
 .rcp-link-chev { flex: none; color: var(--dim); display: grid; place-items: center; }
 /* Tek kalan son kategori kartı (Fit soslar) tam genişlik */
 .rcp-cats .rcp-cat:last-child:nth-child(odd) { grid-column: 1 / -1; min-height: 80px; }
+
+/* ---------- Haftalık plan ---------- */
+.rcp-plan-cards { display: grid; gap: 0; }
+@media (min-width: 620px) { .rcp-plan-cards { grid-template-columns: 1.4fr 1fr; gap: 12px; } .rcp-plan-cards > .panel { margin-bottom: 12px; } }
+.rcp-week-link { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 14px 14px 14px 16px; color: var(--text); text-decoration: none; }
+.rcp-week-link .li-main { flex: 1; min-width: 0; }
+.rcp-week-link .li-sub { white-space: normal; font-size: 13.5px; margin-top: 2px; }
+.rcp-week-link-ic { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.rcp-week-link-ic svg { width: 22px; height: 22px; }
+
+.rcp-wk-range { margin-bottom: 12px; }
+.rcp-wk-tabs { margin-bottom: 14px; }
+.rcp-wk-setup .rcp-hero-sub { margin-bottom: 10px; line-height: 1.45; }
+.rcp-wk-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; }
+.rcp-wk-points li { display: flex; align-items: center; gap: 8px; }
+.rcp-wk-points svg { width: 16px; height: 16px; color: var(--lime); flex: none; stroke-width: 3; }
+.rcp-wk-create { margin-top: 16px; }
+
+.rcp-wk-prep { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; margin-top: 4px; border-radius: var(--radius-s);
+  background: var(--panel); border: 1px solid var(--line); cursor: pointer; }
+.rcp-wk-prep .li-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rcp-wk-prep .li-sub { white-space: normal; font-size: 13.5px; }
+.rcp-wk-prep-ic { font-size: 26px; flex: none; }
+.rcp-wk-prep-t { font-size: 15.5px; font-weight: 600; }
+.rcp-wk-prep .toggle { flex: none; }
+
+.rcp-wk-strip { margin-bottom: 12px; }
+.rcp-wk-strip > div { padding: 10px 8px; }
+.rcp-wk-strip .is-value { font-size: 16px; }
+.rcp-wk-issues ul { margin: 0 0 6px; padding-left: 18px; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+.rcp-wk-issues .panel-title { margin-bottom: 8px; }
+.rcp-wk-issues p { margin: 0; }
+
+.rcp-wk-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-bottom: 12px; }
+.rcp-wk-day { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 64px; padding: 6px 0 10px;
+  border-radius: 16px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; transition: background .15s, transform .1s; }
+.rcp-wk-day:active { transform: scale(.95); }
+.rcp-wk-day-w { font-size: 12px; font-weight: 600; color: var(--muted); }
+.rcp-wk-day-n { font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.rcp-wk-day-dot { position: absolute; bottom: 7px; width: 6px; height: 6px; border-radius: 50%; }
+.rcp-wk-day-dot.ok { background: var(--lime); }
+.rcp-wk-day-dot.warn { background: var(--amber); }
+.rcp-wk-day.past:not(.active) { opacity: .55; }
+.rcp-wk-day.today:not(.active) { border-color: var(--accent); }
+.rcp-wk-day.today:not(.active) .rcp-wk-day-w { color: var(--accent); }
+.rcp-wk-day.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.rcp-wk-day.active .rcp-wk-day-w { color: var(--on-accent); opacity: .8; }
+.rcp-wk-day.active .rcp-wk-day-dot { background: var(--on-accent); opacity: .6; }
+
+.rcp-wk-meal-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.rcp-wk-meal-head .rcp-plan-slot { margin: 0 4px 0 2px; }
+.rcp-wk-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.rcp-wk-badge.prep { background: rgba(140,123,255,.16); color: #b9afff; }
+.rcp-wk-badge.lock { background: var(--accent-soft); color: var(--accent); }
+.rcp-wk-meal .rcp-row { gap: 10px; }
+.rcp-wk-meal .rcp-row .li-main { flex: 1; min-width: 0; }
+.rcp-wk-meal .rcp-row-tile { width: 50px; height: 50px; font-size: 28px; border-radius: 14px; }
+.rcp-wk-meal .rcp-row-name { font-size: 15.5px; }
+.rcp-wk-meal.locked { border-color: rgba(255,122,26,.35); }
+.rcp-wk-lock.on { color: var(--accent); background: var(--accent-soft); border-color: rgba(255,122,26,.35); }
+.rcp-wk-lock.on svg { fill: none; }
+.rcp-wk-meal-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.rcp-wk-pstep .rcp-pstep-val { min-width: 88px; font-size: 14px; }
+.rcp-wk-pstep .rcp-pstep-btn { width: 38px; height: 38px; }
+.rcp-wk-cook { min-height: 44px; padding: 0 14px; font-size: 14.5px; gap: 6px; flex: none; }
+.rcp-wk-cook svg { width: 16px; height: 16px; color: var(--accent); }
+.rcp-wk-prepnote { margin: 8px 2px 0; line-height: 1.4; }
+@media (max-width: 370px) {
+  .rcp-wk-xs-hide { display: none; }
+  .rcp-wk-pstep .rcp-pstep-val { min-width: 74px; }
+  .rcp-wk-days { gap: 4px; }
+  .rcp-wk-day-n { font-size: 17px; }
+}
+
+.rcp-wk-diary { margin-top: 14px; }
+.rcp-wk-diary-note { margin: 6px 4px 0; text-align: center; }
+.rcp-wk-sec { margin-top: 26px; }
+.rcp-wk-actions { display: flex; flex-direction: column; gap: 10px; }
+.rcp-wk-del { margin: 16px auto 0; color: var(--muted); }
+.rcp-wk-del svg { width: 18px; height: 18px; }
+.rcp-wk-sec + .rcp-wk-actions + div .rcp-plan-optlabel { margin-top: 22px; }
+
+/* Öğün seçici */
+.rcp-wk-psearch { margin-bottom: 8px; }
+.rcp-wk-psearch .input { min-height: 46px; }
+.rcp-wk-picker { display: flex; flex-direction: column; max-height: 52vh; overflow-y: auto; margin: 0 -4px; }
+.rcp-wk-pick { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 4px; border: none; border-bottom: 1px solid var(--line); background: none;
+  color: var(--text); text-align: left; cursor: pointer; }
+.rcp-wk-pick:last-child { border-bottom: none; }
+.rcp-wk-pick:active { background: rgba(255,255,255,.05); }
+.rcp-wk-pick .rcp-row-tile { width: 46px; height: 46px; font-size: 26px; border-radius: 13px; }
+.rcp-wk-pick .li-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rcp-wk-pick .rcp-row-name { font-size: 15px; }
+.rcp-wk-pick .li-sub { white-space: normal; font-size: 13px; margin-top: 2px; }
+.rcp-wk-fit { flex: none; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.rcp-wk-fit.ok { color: var(--lime); background: rgba(63,209,127,.14); }
+.rcp-wk-fit.warn { color: var(--amber); background: rgba(255,192,77,.12); }
+
+/* Alışveriş önizleme */
+.rcp-wk-opts { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 10px; }
+.rcp-wk-opt { min-height: 56px; margin: 0; }
+.rcp-wk-shoplist { max-height: 42vh; }
+.rcp-wk-shopgrp + .rcp-wk-shopgrp { margin-top: 10px; }
+.rcp-wk-shopgrp .rcp-aisle-head { margin: 6px 2px 2px; font-size: 14px; }
+.rcp-wk-from { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rcp-wk-shoplist .rcp-pick-txt { min-width: 0; flex: 1; }

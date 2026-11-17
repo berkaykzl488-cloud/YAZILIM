@@ -29,7 +29,7 @@ for (const f of FILES) {
     for (const k of req) if (r[k] == null) errors.push(`${where}: eksik alan ${k}`);
     if (!/^[a-z0-9-]+$/.test(r.id)) errors.push(`${where}: id yalnız küçük ASCII harf, rakam ve tire içermeli`);
     if (ids.has(r.id)) errors.push(`${where}: tekrar eden id`);
-    if (['shopping', 'plan'].includes(r.id)) errors.push(`${where}: ayrılmış id`);
+    if (['shopping', 'plan', 'week'].includes(r.id)) errors.push(`${where}: ayrılmış id`);
     ids.add(r.id);
     const nk = r.name.toLocaleLowerCase('tr');
     if (seenNames.has(nk)) errors.push(`${where}: tekrar eden ad`);
