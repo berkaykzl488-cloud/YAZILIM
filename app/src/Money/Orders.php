@@ -357,6 +357,7 @@ final class Orders
         }
         self::set($db, $o, $set);
         self::refCheck($db, $buyer, $total);
+        \YP\Growth\Events::orderCompleted($db, $o, $buyer); // P5: çekiliş bileti + davet işareti
         self::event($db, $o['id'], $actorId, 'Sipariş onaylandı. Satıcıya ' . Rules::tl($net) . ' aktarıldı, ' . Rules::tl($fee) . ' komisyon kesildi. Alıcı ' . Rules::num($pts) . ' puan kazandı.');
         Notify::send($db, $o['seller_id'], 'Sipariş #' . $no . ' onaylandı, ' . Rules::tl($net) . ' bakiyenize geçti.', self::link($o), 'confirmed', ['no' => $no, 'tutar' => Rules::tl($net)]);
         Notify::send($db, $o['buyer_id'], '#' . $no . ' siparişiniz tamamlandı. Teşekkür ederiz!', self::link($o), 'completed', ['no' => $no, 'ilan' => $o['title']]);

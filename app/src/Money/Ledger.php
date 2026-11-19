@@ -211,6 +211,9 @@ final class Ledger
                 $err[] = 'Cüzdan satırı yok u' . $u;
             }
         }
+        if ($db->tableExists('ads') && ($x = \YP\Growth\Ads::escrowCheck($db))) {
+            $err[] = $x; // P5: ESCROW:ADS = onay bekleyen ücretli reklamlar
+        }
         if ($db->tableExists('orders')) {
             $open = (int)$db->val("SELECT COALESCE(SUM(total),0) FROM {orders} WHERE status IN ('odendi','teslim','itiraz')");
             $esc = self::balance($db, 'ESCROW:ORD');
