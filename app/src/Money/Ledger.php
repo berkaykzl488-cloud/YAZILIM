@@ -225,6 +225,14 @@ final class Ledger
                 $err[] = 'Çekim bekleyen uyuşmuyor: bekleyen talepler ' . $pend . ', PAYABLE:WD ' . $pay;
             }
         }
+        if ($db->tableExists('ex_orders')) {
+            // P4 borsa: havuz = siparişlerin ödenen − teslimle çıkan toplamı (kapanmışlarda fark 0)
+            $open = (int)$db->val('SELECT COALESCE(SUM(total-released),0) FROM {ex_orders}');
+            $esc = self::balance($db, 'ESCROW:EX');
+            if ($open !== $esc) {
+                $err[] = 'Borsa havuzu uyuşmuyor: siparişler ' . $open . ', ESCROW:EX ' . $esc;
+            }
+        }
         return ['ok' => !$err, 'errors' => array_slice($err, 0, 50)];
     }
 }

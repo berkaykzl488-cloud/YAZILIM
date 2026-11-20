@@ -113,7 +113,8 @@ fi
 api "$J_X" GET boot ""
 chk "ilk istek: withdrawals, doc_sequences, accounting_jobs + TC sütunları" '[ "$CODE" = 200 ] && [ -n "$(sq "SELECT name FROM sqlite_master WHERE name='\''yp_withdrawals'\''")" ] && [ -n "$(sq "SELECT name FROM sqlite_master WHERE name='\''yp_doc_sequences'\''")" ] && [ -n "$(sq "SELECT name FROM sqlite_master WHERE name='\''yp_accounting_jobs'\''")" ] && sq "PRAGMA table_info(yp_users)" >/dev/null && [ "$(sq "SELECT COUNT(*) FROM pragma_table_info('\''yp_users'\'') WHERE name='\''tc_state'\''")" = 1 ]'
 chk "veri korundu: üyeler, yüklemeler, defter, cüzdanlar" '[ "$(sq "SELECT COUNT(*) FROM yp_users")" = "$N_U0" ] && [ "$(sq "SELECT COUNT(*) FROM yp_deposits")" = "$N_D0" ] && [ "$(sq "SELECT COUNT(*) FROM yp_journal")" = "$N_J0" ] && [ "$(wal $UB)" = "100000/0" ] && [ "$(wal $UC)" = "0/50000" ]'
-chk "göç 0004 kayıtlı, sürüm 0.5.0-p3" '[ -n "$(sq "SELECT version FROM yp_schema_migrations WHERE version='\''m:0004_integrations_import'\''")" ] && grep -q "0.5.0-p3" "$RUN/app/bootstrap.php"'
+VER=$(sed -n "s/.*YP_APP_VERSION', '\([^']*\)'.*/\1/p" "$REPO/app/bootstrap.php")
+chk "göç 0004 kayıtlı, sürüm $VER (çalışma ağacı)" '[ -n "$(sq "SELECT version FROM yp_schema_migrations WHERE version='\''m:0004_integrations_import'\''")" ] && [ -n "$VER" ] && grep -q "'\''$VER'\''" "$RUN/app/bootstrap.php"'
 if [ "$UPGRADE" = 1 ]; then
   chk "eski PayTR ayarı Entegrasyonlar'a aktarıldı (şifreli), boot'ta kart açık" '[ "$(sq "SELECT secret FROM yp_settings WHERE k='\''paytr'\''")" = 1 ] && [ "$(j ".data.gws[] | select(.id==\"paytr\") | .on")" = true ]'
 fi

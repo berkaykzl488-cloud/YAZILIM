@@ -36,7 +36,8 @@ const out = sh('php', [path.join(REPO, 'tools/build.php'), '--prod', '--zip', '-
 const CODE = (out.match(/KURULUM KODU: ([A-Z0-9]+)/) || [])[1];
 const ZIP = fs.readdirSync(BUILD).find(f => /^yangpazar-site-.*\.zip$/.test(f));
 const UZIP = fs.readdirSync(BUILD).find(f => /^yangpazar-guncelleme-.*\.zip$/.test(f));
-ok('derleme: kurulum zip\'i, kurulum kodu ve güncelleme zip\'i (0.5.0-p3)', !!CODE && !!ZIP && /0\.5\.0-p3/.test(UZIP || ''), out);
+const VER = (fs.readFileSync(path.join(REPO, 'app/bootstrap.php'), 'utf8').match(/YP_APP_VERSION', '([^']+)'/) || [])[1];
+ok('derleme: kurulum zip\'i, kurulum kodu ve güncelleme zip\'i (' + VER + ')', !!CODE && !!ZIP && !!VER && (UZIP || '').includes('-' + VER + '.zip'), out);
 const ulist = zipList(path.join(BUILD, UZIP));
 ok('güncelleme zip\'i: P3 ön yüz ve rotaları var; storage/, test kancası, demo yok',
   ['assets/js/prod/97p3-wd.js', 'assets/js/prod/98p3-actions.js', 'app/routes/70_withdraw.php', 'app/routes/75_accounting.php', 'app/routes/80_integrations.php', 'app/schema/40_withdraw.php', 'api/paytr_bildirim.php'].every(f => ulist.includes(f))

@@ -20,7 +20,7 @@ define('YP_ROOT', dirname(__DIR__));
 if (!defined('YP_STORAGE')) {
     define('YP_STORAGE', YP_ROOT . '/storage');
 }
-define('YP_APP_VERSION', '0.5.0-p3');
+define('YP_APP_VERSION', '0.6.0');
 
 require_once YP_ROOT . '/api/_lib.php';
 
