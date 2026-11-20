@@ -36,7 +36,7 @@ final class Seo
     const CAT_SLUGS = ['yang' => 'yang', 'won' => 'yang', 'item' => 'item', 'karakter' => 'karakter', 'ep' => 'ep', 'hepsi' => 'hepsi'];
     /** Canlı sitede henüz "Yakında" olan sayfalar (ön yüzdeki P_SOON_R, src/js/prod/97-p0b-views.js): noindex, site haritasında yok.
      *  Bölüm açıldığında buradan da çıkarın. */
-    const SOON = ['borsa', 'metin2-ep', 'cekilis', 'reklam-ver', 'ortaklik', 'yang-fiyatlari'];
+    const SOON = ['borsa', 'metin2-ep', 'ortaklik', 'yang-fiyatlari'];
     /** Özel sayfalar (ön yüzdeki PRIV_R): noindex, robots.txt'de kapalı */
     const PRIV_RX = '/^(hesabim|yonetim|mesajlar|bildirimler|siparis-|ilan-ver$|ara$|davet-|widget-)/';
     /** Bilinen tek parça rotalar; bunlar ve server/ilan/sayfa/rehber/üye dışındaki her adres gerçek 404 döner */

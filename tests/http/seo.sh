@@ -125,6 +125,7 @@ page "/guvenli"
 chk "/guvenli: başlık ve canonical" '[ "$CODE" = 200 ] && title | grep -q "^Güvenli Alışveriş" && [ "$(canon)" = "$B/guvenli" ]'
 page "/borsa"
 chk "/borsa (yakında): 200 + noindex" '[ "$CODE" = 200 ] && [ "$(robots)" = "noindex, follow" ] && [ -z "$(canon)" ]'
+for p in cekilis reklam-ver; do page "/$p"; chk "/$p (P5 canlı): başlık, canonical, indekslenir" '[ "$CODE" = 200 ] && [ "$(canon)" = "$B/$p" ] && [ "$(robots)" != "noindex, follow" ] && [ -n "$(title)" ]'; done
 for p in hesabim ilan-ver mesajlar bildirimler siparis-S100001 ara; do page "/$p"; chk "/$p: özel → 200 + noindex, içerik yok" '[ "$CODE" = 200 ] && [ "$(robots)" = "noindex, follow" ] && echo "$BODY" | grep -q "<main id=\"app\"></main>"'; done
 page "/ara?q=ejder"
 chk "/ara?q= (SearchAction hedefi): 200" '[ "$CODE" = 200 ]'
@@ -147,7 +148,7 @@ echo "=== 7. site haritası ve robots.txt ==="
 OUT=$(curl -s "$B/sitemap.xml")
 chk "sitemap: bölüm, server, kategori, ilan (temiz adres)" 'echo "$OUT" | grep -q "<loc>$B/</loc>" && echo "$OUT" | grep -q "<loc>$B/metin2-pvp</loc>" && echo "$OUT" | grep -q "<loc>$B/metin2-tr</loc>" && echo "$OUT" | grep -q "<loc>$B/metin2-pvp/$PVS</loc>" && echo "$OUT" | grep -q "<loc>$B/metin2-pvp/$PVS/karakter</loc>" && echo "$OUT" | grep -q "<loc>$B$KP</loc>" && echo "$OUT" | grep -q "<loc>$B$WP</loc>" && echo "$OUT" | grep -q "<loc>$B/sayfa/kvkk</loc>"'
 chk "sitemap: lastmod her adreste" '[ "$(echo "$OUT" | grep -c "<url>")" = "$(echo "$OUT" | grep -c "<lastmod>20[0-9][0-9]-[01][0-9]-[0-3][0-9]</lastmod>")" ]'
-chk "sitemap: özel, yakında, eski biçim, ?p= ve boş kategori yok" '! echo "$OUT" | grep -Eq "/(hesabim|yonetim|mesajlar|bildirimler|siparis-|ilan-ver|ara|borsa|cekilis|reklam-ver|metin2-ep|server|ilan)(/|<|-)" && ! echo "$OUT" | grep -q "?p=" && ! echo "$OUT" | grep -q "/$PVS/item</loc>"'
+chk "sitemap: özel, yakında, eski biçim, ?p= ve boş kategori yok" '! echo "$OUT" | grep -Eq "/(hesabim|yonetim|mesajlar|bildirimler|siparis-|ilan-ver|ara|borsa|metin2-ep|server|ilan)(/|<|-)" && ! echo "$OUT" | grep -q "?p=" && ! echo "$OUT" | grep -q "/$PVS/item</loc>"'
 OUT=$(curl -s "$B/robots.txt")
 chk "robots.txt: özel yollar (temiz + ?p=) kapalı, sitemap satırı" 'echo "$OUT" | grep -q "^Disallow: /hesabim$" && echo "$OUT" | grep -q "^Disallow: /\*?p=hesabim$" && echo "$OUT" | grep -q "^Disallow: /yonetim$" && echo "$OUT" | grep -q "^Sitemap: $B/sitemap.xml$"'
 

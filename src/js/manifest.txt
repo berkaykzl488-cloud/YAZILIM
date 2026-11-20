@@ -40,4 +40,6 @@ prod/97p2-money.js
 prod/98p2-actions.js
 prod/97p3-wd.js
 prod/98p3-actions.js
+prod/97p5-growth.js
+prod/98p5-actions.js
 99z-start.js
