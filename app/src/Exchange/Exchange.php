@@ -787,6 +787,7 @@ final class Exchange
             if ($pts) {
                 $db->insert('points_log', ['user_id' => (int)$buyer['id'], 'delta' => $pts, 'reason' => 'borsa', 'ref' => $no, 't' => yp_now_ms()]);
             }
+            \YP\Growth\Events::spent($db, (int)$buyer['id'], (int)$r['val'], 'borsa'); // çekiliş bileti (P5), teslim edilen değer kadar
         }
         foreach (array_unique($r['wipe']) as $ofId) {
             self::wipeOfferIfDone($db, $ofId);

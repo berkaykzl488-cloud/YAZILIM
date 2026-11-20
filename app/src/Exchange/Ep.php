@@ -418,6 +418,7 @@ final class Ep
             $db->insert('points_log', ['user_id' => (int)$u['id'], 'delta' => $pts, 'reason' => 'ep', 'ref' => $no, 't' => $now]);
         }
         Orders::refCheck($db, $buyer, $price);
+        \YP\Growth\Events::spent($db, (int)$u['id'], $price, 'epstore'); // çekiliş bileti (P5)
         Notify::send($db, $u['id'], Rules::num($shown) . ' EP kodunuz teslim edildi. Kod: Hesabım › EP kodlarım', '#hesabim', 'ep_code', ['ep' => Rules::num($shown), 'no' => $no]);
         return $db->one('SELECT * FROM {ep_orders} WHERE id=?', [$oid]);
     }
