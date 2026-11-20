@@ -122,7 +122,7 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await nav(C, 'borsa', 900);
     ok('Yang Borsası: "Yakında" değil, pazar listede, rota borsa', await rt(C) === 'borsa' && !(await txt(C, '#app')).includes('Yakında') && (await txt(C, '#ex_sel')).includes(SVN) && (await txt(C, '#app .expc')).includes(SVN));
     await C.click('#app [data-act=ex-dir][data-d=sat]'); await C.waitForSelector('form[data-form=exoffer]');
-    await C.fill('#ex_qty', '30'); await C.fill('#ex_price', '9'); await C.fill('#exf_f1', 'cem_hesap'); await C.fill('#exf_f2', PW); await C.fill('#exf_f3', 'CemKarakter');
+    await C.fill('#ex_qty', '20'); await C.fill('#ex_price', '9'); await C.fill('#exf_f1', 'cem_hesap'); await C.fill('#exf_f2', PW); await C.fill('#exf_f3', 'CemKarakter');
     await C.selectOption('#exf_f6', 'Hemen'); await C.check('#ex_ok');
     await shot(C, '03-satici-siteye-sat');
     await C.click('form[data-form=exoffer] button.exgo');
@@ -139,7 +139,7 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     const f2 = await pcall(M, 'POST', 'admin/balance', { user: 'Alici_Bora', amount: 100, w: false, note: 'Kart yüklemesi (test)' });
     ok('B: 300 çekilebilir + 100 alışveriş', !f1.err && !f2.err && wal('Alici_Bora') === '30000/10000');
     await Bp.evaluate(() => apiReboot(true)); await nav(Bp, 'borsa', 900);
-    ok('satış sırası: satıcı maskeli (Sa***), stok 30', (await txt(Bp, '#app')).includes('30 adet') && await Bp.evaluate(() => S.exOffers.every(o => String(o.u).startsWith('xs'))));
+    ok('satış sırası: satıcı maskeli (Sa***), stok 20', (await txt(Bp, '#app')).includes('20 adet') && await Bp.evaluate(() => S.exOffers.every(o => String(o.u).startsWith('xs'))));
     await Bp.fill('#ex_qty', '20'); await Bp.dispatchEvent('#ex_qty', 'input'); await Bp.fill('#exb_b1', 'BoraKarakter');
     ok('tutar özeti: 20 × 12,50 = 250', (await txt(Bp, '#ex_tot')).replace(/\s/g, '').includes('250,00'));
     await shot(Bp, '05-alici-siteden-al');
@@ -153,7 +153,7 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await modalGone(O); await O.waitForSelector('#hdr [data-act=logout], #hdr .ubtn, #hdr a[href="#yonetim"]', { timeout: 8000 }).catch(() => {});
     await adm(O, 'yonetim/borsa/siparisler', 1200); await O.waitForSelector('.admwrap');
     ok('operatör: Borsa siparişleri listesinde #B1001, alıcı adı soyadı', (await txt(O, '.apage')).includes('B1001') && (await txt(O, '.apage')).includes('Bora Alıcı'));
-    ok('nav rozeti: 1 açık borsa siparişi', await until(O, () => [...document.querySelectorAll('.asb a, .anav a, nav a')].some(a => /Borsa/.test(a.textContent) && /\b1\b/.test(a.textContent)), null, 6000));
+    ok('nav rozeti: 1 açık borsa siparişi', await until(O, () => { const a = document.querySelector('.asb a[data-t=borsa] .nb'); return !!a && a.textContent.trim() === '1'; }, null, 6000));
     await shot(O, '07-operator-siparisler');
     await O.click('.apage [data-act=ex-open][data-id=B1001]');
     await O.waitForSelector('.exd'); await O.waitForTimeout(500);
@@ -171,12 +171,14 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     ok('gizle: şifre bellekten silindi', await until(O, pw => !document.querySelector('.exd').textContent.includes(pw) && !JSON.stringify(S).includes(pw), PW));
     await O.fill('.exd #excall_msg', 'Teslimat için hazırız, Mavi bayrağa gelin.'); await O.click('form[data-form=excall] button');
     ok('alıcı çağrıldı', await toast(O, 'bildirim ve SMS'));
-    await O.fill('#exdq', '8'); await O.click('form[data-form=exst] button.btn-ok');
-    ok('kısmi teslim 8/20 → Kısmen teslim edildi, C\'ye 72 TL', await toast(O, 'Kısmi teslim') && sq('SELECT status FROM yp_ex_orders WHERE id=1') === 'kismen' && sq(`SELECT cash FROM yp_wallets WHERE user_id=${uid('Satici_Cem')}`) === '7200');
-    await O.waitForSelector('#exdq'); await O.fill('#exdq', '20'); await O.click('form[data-form=exst] button.btn-ok');
-    ok('tam teslim → Tamamlandı; satıcıya 180 TL, borsa kârı 70 TL, havuz 0', await toast(O, 'Sipariş tamamlandı') && sq('SELECT status FROM yp_ex_orders WHERE id=1') === 'tamam' && sq(`SELECT cash FROM yp_wallets WHERE user_id=${uid('Satici_Cem')}`) === '18000'
+    /* teslim formu: yoklama/yeniden yükleme formu yeniden çizebilir → doldur + gönder, yanıt gelmezse bir kez daha */
+    const dlv = async (q, re) => { for (let i = 0; i < 3; i++) { await O.waitForSelector('#exdq'); await O.fill('#exdq', q); await O.click('form[data-form=exst] button.btn-ok'); if (await toast(O, re, 4000)) return true; } return false; };
+    const tk = await dlv('8', 'Kısmi teslim');
+    ok('kısmi teslim 8/20 → Kısmen teslim edildi, C\'ye 72 TL', tk && await until(O, () => /Kısmen teslim/.test(document.querySelector('.apage').textContent)) && sq('SELECT status FROM yp_ex_orders WHERE id=1') === 'kismen' && sq(`SELECT cash FROM yp_wallets WHERE user_id=${uid('Satici_Cem')}`) === '7200',
+      tk + ' ' + sq('SELECT status||delivered FROM yp_ex_orders WHERE id=1') + ' ' + sq(`SELECT cash FROM yp_wallets WHERE user_id=${uid('Satici_Cem')}`) + ' ' + await O.evaluate(() => [...document.querySelectorAll('#toasts .toast')].map(t => t.textContent).join('|')));
+    ok('tam teslim → Tamamlandı; satıcıya 180 TL, borsa kârı 70 TL, havuz 0', await dlv('20', 'Sipariş tamamlandı') && sq('SELECT status FROM yp_ex_orders WHERE id=1') === 'tamam' && sq(`SELECT cash FROM yp_wallets WHERE user_id=${uid('Satici_Cem')}`) === '18000'
       && sq("SELECT COALESCE(SUM(p.amount),0) FROM yp_postings p JOIN yp_accounts a ON a.id=p.account_id WHERE a.code='REV:borsa'") === '7000' && sq("SELECT COALESCE(SUM(p.amount),0) FROM yp_postings p JOIN yp_accounts a ON a.id=p.account_id WHERE a.code='ESCROW:EX'") === '0');
-    ok('bittikten sonra gizli bilgiler silindi', sq('SELECT COUNT(*) FROM yp_ex_offer_fields WHERE value_enc IS NOT NULL') === '0');
+    ok('bittikten sonra gizli bilgiler silindi (tamamı satılan emir + sipariş)', sq('SELECT COUNT(*) FROM yp_ex_offer_fields WHERE value_enc IS NOT NULL') === '0');
     await until(O, () => /Tamamlandı/.test(document.querySelector('.apage').textContent));
     await shot(O, '09-operator-tamamlandi');
 

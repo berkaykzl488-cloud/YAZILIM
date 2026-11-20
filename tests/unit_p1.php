@@ -404,7 +404,8 @@ section('seo', function () {
         && strpos($hh['html'], '"@type":"SearchAction"') !== false && strpos($hh['html'], '/ara?q={search_term_string}') !== false && $hh['canonical'] === 'https://test.yangpazar.com/');
     ok('statik sayfa (metin2-pvp)', Seo::head($db, '/metin2-pvp')['title'] === 'Metin2 PVP Serverlar · Item, Yang ve EP İlanları | Yang Test');
     ok('özel sayfa (hesabim) noindex', Seo::head($db, '/hesabim')['robots'] === 'noindex, follow');
-    ok('yakında sayfası (borsa) noindex', Seo::head($db, '/borsa')['robots'] === 'noindex, follow' && Seo::head($db, '/borsa')['status'] === 200);
+    ok('yakında sayfası (cekilis) noindex; borsa (P4) dizine eklenir', Seo::head($db, '/cekilis')['robots'] === 'noindex, follow' && Seo::head($db, '/cekilis')['status'] === 200
+        && Seo::head($db, '/borsa')['robots'] !== 'noindex, follow' && Seo::head($db, '/borsa')['status'] === 200);
     $body = Seo::body($db, Seo::head($db, '/metin2-tr/ruby-turkiye-charon'));
     ok('önceden oluşturulmuş içerik: H1, konum çubuğu, kategori ve ilan bağlantıları', strpos($body, '<h1>Ruby Türkiye Charon') !== false && strpos($body, 'href="/metin2-tr"') !== false
         && strpos($body, 'href="/metin2-tr/ruby-turkiye-charon/won"') !== false && strpos($body, 'href="' . $LP . '"') !== false && strpos($body, '&lt;script&gt;') !== false, $body);
@@ -414,7 +415,7 @@ section('seo', function () {
     ok('sitemap: bölüm, server, server/kategori, aktif ilan; bekleyen yok', strpos($xml, '<loc>https://test.yangpazar.com/metin2-tr/ruby-turkiye-charon</loc>') !== false
         && strpos($xml, '<loc>https://test.yangpazar.com/metin2-pvp</loc>') !== false
         && strpos($xml, '/metin2-tr/ruby-turkiye-charon/won</loc>') !== false && strpos($xml, $LP . '</loc>') !== false && strpos($xml, '-l' . $pend['id'] . '<') === false);
-    ok('sitemap: özel, yakında, eski biçim ve boş kategori yok', !preg_match('#/(hesabim|yonetim|borsa|ilan-ver|server/)#', $xml) && strpos($xml, '/ruby-turkiye-charon/karakter<') === false && strpos($xml, '/ep</loc>') === false);
+    ok('sitemap: özel, yakında, eski biçim ve boş kategori yok', !preg_match('#/(hesabim|yonetim|cekilis|ilan-ver|server/)#', $xml) && strpos($xml, '/borsa</loc>') !== false && strpos($xml, '/ruby-turkiye-charon/karakter<') === false && strpos($xml, '/ep</loc>') === false);
     Settings::set('seo', array_replace(Settings::get('seo', $db), ['clean' => false]), null, $db);
     ok('temiz adres anahtarı kapalı → p kipi, sitemap ?p=', Seo::head($db, '/')['mode'] === 'p' && strpos(Seo::sitemapXml($db), '<loc>https://test.yangpazar.com/?p=metin2-tr</loc>') !== false);
     Settings::set('seo', array_replace(Settings::get('seo', $db), ['clean' => true]), null, $db);
