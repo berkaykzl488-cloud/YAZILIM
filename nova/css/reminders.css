@@ -1,0 +1,68 @@
+/* Hatırlatıcılar modülü — tüm sınıflar rem- önekli. Düzenleme sayfası ve bildirim kartı body'ye eklendiği için kapsamsızdır. */
+
+.rem-p { font-size: 15px; color: var(--muted); margin: 10px 0 14px; }
+.rem-hint { font-size: 14px; color: var(--muted); margin: 4px 0 14px; }
+.rem-label { font-size: 14px; font-weight: 600; color: var(--muted); margin: 6px 0 8px; }
+.rem-btns { display: flex; flex-direction: column; gap: 10px; }
+
+/* ---------- Sıradaki ---------- */
+.rem-hero-l { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.rem-hero-l svg { color: var(--accent); }
+.rem-hero-v { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; margin: 6px 0 2px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.rem-hero-v.dim { font-size: 22px; color: var(--muted); }
+.rem-hero-s { font-size: 15px; color: var(--muted); margin-bottom: 14px; }
+
+/* ---------- İzin ---------- */
+.rem-perm .li-icon { width: 44px; height: 44px; }
+.rem-perm-badge { margin-top: 4px; font-size: 13px; }
+
+/* ---------- Liste ---------- */
+.rem-list { padding-top: 4px; padding-bottom: 4px; }
+.rem-item { padding: 12px 4px; min-height: 68px; border-radius: 12px; }
+.rem-item:focus-visible { outline-offset: -2px; }
+.rem-item .li-icon { color: var(--muted); background: rgba(255,255,255,.05); transition: .2s; }
+.rem-item.on .li-icon { color: var(--accent); background: var(--accent-soft); }
+.rem-sum { font-size: 14px; color: var(--muted); line-height: 1.35; overflow-wrap: anywhere; }
+.rem-item.on .rem-sum { color: var(--text); opacity: .82; }
+.rem-tg { flex: none; min-width: 56px; min-height: 48px; display: flex; align-items: center; justify-content: flex-end; }
+
+/* ---------- Satırlar ---------- */
+.rem-trow, .rem-srow { display: flex; align-items: center; gap: 12px; min-height: 52px; margin-bottom: 10px; }
+.rem-trow-t { font-size: 16px; font-weight: 600; color: var(--text); }
+.rem-trow-s { font-size: 14px; color: var(--muted); }
+.rem-field { margin-bottom: 12px; min-width: 0; }
+.rem-field .input { font-variant-numeric: tabular-nums; font-size: 16px; padding: 10px 12px; }
+/* Anahtarların dokunma alanını 44px'e büyüt */
+.rem-trow .toggle::before, .rem-meal .toggle::before, .rem-tg .toggle::before { content: ''; position: absolute; inset: -8px -6px; }
+.rem-quiet .rem-quiet-times { margin-top: 4px; }
+.rem-quiet.off .rem-quiet-times { opacity: .45; }
+.rem-quiet .rem-trow { margin-bottom: 6px; }
+
+/* ---------- Düzenleme sayfası ---------- */
+.rem-sheet { padding-bottom: 2px; }
+.rem-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-bottom: 14px; }
+.rem-days .chip { min-height: 46px; padding: 0; justify-content: center; font-size: 14px; }
+.rem-meal { display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--line); }
+.rem-meal:last-of-type { border-bottom: none; }
+.rem-time-sm { width: 118px; min-height: 46px; flex: none; padding: 10px 10px; font-variant-numeric: tabular-nums; font-size: 16px; }
+.rem-time-sm:disabled { opacity: .4; }
+.rem-preview-box { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: var(--radius-s); background: var(--accent-soft); color: var(--text); }
+.rem-preview-box svg { flex: none; margin-top: 3px; color: var(--accent); }
+.rem-preview { margin: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+
+/* ---------- Bilgi / geçmiş ---------- */
+.rem-ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: var(--muted); }
+.rem-log .li-sub { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.rem-log-t { font-size: 14px; color: var(--muted); align-self: flex-start; padding-top: 2px; }
+
+/* ---------- Uygulama içi bildirim kartı ---------- */
+.rem-banner-wrap { position: fixed; top: calc(var(--header-h) + var(--safe-t) + 8px); left: 0; right: 0; z-index: 210; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 12px; pointer-events: none; }
+.rem-banner { pointer-events: auto; width: 100%; max-width: 460px; display: flex; align-items: flex-start; gap: 12px; padding: 12px 10px 12px 12px;
+  background: #26262b; border: 1px solid rgba(255,122,26,.35); border-radius: 18px; box-shadow: var(--shadow); animation: rem-in .25s ease-out; }
+.rem-banner.out { animation: rem-out .25s forwards; }
+.rem-banner-t { font-size: 16px; font-weight: 700; }
+.rem-banner-b { font-size: 15px; color: var(--muted); line-height: 1.35; }
+.rem-banner-act { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.rem-banner-act .btn.sm { min-height: 44px; flex: 1; }
+@keyframes rem-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes rem-out { to { opacity: 0; transform: translateY(-10px); } }
