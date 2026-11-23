@@ -264,7 +264,11 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     for (const r of ['home', 'metin2-tr', 'hesabim', 'bildirimler', 'borsa', 'guvenli', 'rehber']) { await go(P, r); await P.waitForTimeout(150); const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push(r + ':' + w); }
     await go(P, 'hesabim'); for (const t of ['profil', 'banka']) { await P.click(`#app [data-act=tab][data-t=${t}]`); await P.waitForTimeout(100); const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push('hesabim/' + t + ':' + w); }
     await P.click('#app button[data-act=logout]'); await toast(P, 'Çıkış yapıldı');
-    await P.click('#hdr [data-act=register]'); { const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push('uye-ol:' + w); } await shot(P, 'uye-ol-390');
+    { const vis = await P.isVisible('#cats>.wrap'); await P.click('#hdr .mburger'); await P.waitForTimeout(300);
+      const open = await P.evaluate(() => document.querySelector('#mnav').classList.contains('open'));
+      const links = await P.$$eval('#mnav .mn-i', a => a.map(x => x.textContent.trim()));
+      ok('390 px: kategori şeridi gizli, ☰ çekmeceyi açar (kategoriler + giriş/kayıt)', !vis && open && links.includes('Yang Borsası') && await P.isVisible('#mnav [data-act=register]'), JSON.stringify({ vis, open, links })); }
+    await P.click('#mnav [data-act=register]'); { const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push('uye-ol:' + w); } await shot(P, 'uye-ol-390');
     await P.click('#modal [data-act=close]');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim', 'yonetim/calisan/liste', 'yonetim/calisan/ekle', 'yonetim/uye/uyeler', 'yonetim/sms/eposta', 'yonetim/sms/kayitlar']) { await go(P, r); await P.waitForTimeout(300); const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push(r + ':' + w); }
