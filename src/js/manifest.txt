@@ -14,6 +14,7 @@ prod/06-adapter.js
 demo/migrate.js
 41-covers.js
 42-views-member.js
+43-mnav.js
 50-exchange.js
 60-admin-shell.js
 61-admin-tabs.js

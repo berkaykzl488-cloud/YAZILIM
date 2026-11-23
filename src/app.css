@@ -1795,3 +1795,68 @@ body.svopen,body.adm-menu{overflow:hidden}
   .ent-files{columns:1}
   .entc .asave{flex-wrap:wrap}
 }
+
+/* ===== mobil menü: ☰ + soldan açılan çekmece (43-mnav.js) ===== */
+.mburger{display:none}
+.mnav{display:none}
+@media (max-width:760px){
+ .mburger{display:inline-grid;place-items:center;order:0;flex:0 0 auto}
+ .mburger svg{width:20px;height:20px}
+ .cats{border-bottom:0}
+ .cats>.wrap{display:none}
+ .mnav{display:block}
+ .mn-ov{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .2s}
+ .mn-d{position:fixed;top:0;bottom:0;left:0;z-index:91;width:min(86vw,340px);display:flex;flex-direction:column;background:var(--surface);color:var(--fg);border-right:1px solid var(--line);box-shadow:8px 0 32px rgba(0,0,0,.35);transform:translateX(-102%);transition:transform .24s ease;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden}
+ .mnav.open .mn-ov{opacity:1;pointer-events:auto}
+ .mnav.open .mn-d{transform:none;visibility:visible}
+ body.mnav-open{overflow:hidden}
+ .mn-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+ .mn-brand{flex:1 1 auto;min-width:0;font-size:19px;gap:7px;color:var(--fg)}
+ .mn-brand svg{width:24px;height:24px;flex:0 0 auto}
+ .mn-brand span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .mn-h .icob{width:38px;height:38px;flex:0 0 auto}
+ .mn-s{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:8px 10px 14px}
+ .mn-sec{font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:14px 10px 6px}
+ .mn-i{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:12px;font-weight:600;font-size:15.5px;color:var(--fg);min-height:48px}
+ .mn-i:hover,.mn-i:focus-visible{background:var(--surface2,rgba(127,127,127,.1))}
+ .mn-i.on{background:var(--surface2,rgba(127,127,127,.12));color:var(--accent)}
+ .mn-i.hot{color:var(--accent)}
+ .mn-ic{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--bg2,rgba(127,127,127,.12));flex:0 0 auto}
+ .mn-ic svg{width:19px;height:19px}
+ .mn-b{margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bad,#e5484d);color:#fff;font-style:normal;font-size:12px;font-weight:700;display:grid;place-items:center}
+ .mn-who{display:flex;align-items:center;gap:12px;padding:12px 10px;margin:4px 0;border:1px solid var(--line);border-radius:14px;color:var(--fg)}
+ .mn-who b{display:block;font-size:15px}
+ .mn-who small{color:var(--muted);font-size:12.5px}
+ .mn-f{display:grid;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+ .mn-f .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;font-size:15px}
+ .mn-f .btn svg{width:18px;height:18px}
+}
+@media (prefers-reduced-motion:reduce){.mn-ov,.mn-d{transition:none}}
+body.adm-mode .mburger{display:none!important}
+/* çekmece #cats içinde: kategori şeridi kurallarını ez */
+#mnav a{padding:0;border-bottom:0;white-space:normal}
+#mnav a.mn-i{padding:8px 10px;color:var(--fg)}
+#mnav a.mn-i.hot{color:var(--accent)}
+#mnav a.mn-i.on{color:var(--accent);border-bottom:0}
+#mnav a.mn-who{padding:12px 10px;color:var(--fg);border:1px solid var(--line)}
+#mnav .mn-h .mn-brand{order:0;flex:1 1 auto}
+#mnav .mn-h .icob{order:1}
+#mnav .mn-h .mn-x{order:2}
+/* mobil üst bölüm sadeleşti: kategoriler, tema, İlan Ver ve Üye Ol çekmecede */
+@media (max-width:640px){
+ .hdr .mburger{order:0;width:38px;height:38px}
+ .hdr .brand{order:1;flex:1 1 0;min-width:0}
+ .hdr .brand>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .hdr .icob.thm,.hdr .hilan,.hdr [data-act=register]{display:none}
+ body:not(.adm-mode) .hdr .hpanel{display:none}
+ .hdr .btn-ghost[data-act=login]{order:5;height:38px;padding:0 14px;font-size:14px}
+ .hdr .search{order:6;flex:1 1 0;min-width:0;height:40px}
+ .hdr .balwrap{order:7}
+ .hdr .bal{height:40px}
+}
+#mnav .mn-brand,#mnav .mn-brand span{color:var(--fg)}
+#mnav .mn-h .icob{background:transparent;color:var(--fg);border:1px solid var(--line)}
+#mnav .mn-f .btn-ghost{color:var(--fg);border-color:var(--line);background:transparent}
+@media (max-width:640px){
+ .hdr .search{flex:1 1 200px}
+}
