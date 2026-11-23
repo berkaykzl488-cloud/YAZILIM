@@ -151,7 +151,7 @@ return function (Router $r) {
         }
         if ($row['purpose'] === 'enable') {
             $db->exec('UPDATE {users} SET tfa=? WHERE id=?', [$row['channel'], (int)$u['id']]);
-            Notify::send($db, $u['id'], '2 adımlı doğrulama açıldı (' . ($row['channel'] === 'sms' ? 'SMS' : 'e-posta') . ').', '#hesabim');
+            Notify::send($db, $u['id'], '2 adımlı doğrulama açıldı (' . ($row['channel'] === 'sms' ? 'WhatsApp' : 'e-posta') . ').', '#hesabim');
             Audit::log($db, $u['id'], 'tfa_enable', 'user', $u['id'], ['ch' => $row['channel']]);
             $msg = '2 adımlı doğrulama açıldı.';
         } else {

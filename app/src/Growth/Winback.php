@@ -16,9 +16,10 @@ use YP\Settings;
 use YP\Text;
 
 /**
- * Geri kazanım kampanyası (winback, [uye]): hareketsiz üyelere site bildirimi, e-posta ve/veya SMS; isteğe bağlı kupon ve
+ * Geri kazanım kampanyası (winback, [uye]): hareketsiz üyelere site bildirimi, e-posta ve/veya WhatsApp (iç kanal adı 'sms';
+ * yalnız Meta'da ayrı bir PAZARLAMA şablonu ayarlıysa — bildirim/Utility şablonu kampanya için kullanılamaz); isteğe bağlı kupon ve
  * hediye bakiye (hediye için ayrıca [bakiye] gerekir, kredi = yalnız alışveriş).
- *   - E-posta/SMS outbox'a düşük öncelikle (8) yazılır ve HEMEN gönderilmez: cron tik başına saatlik_sınır/12, son 60 dakikada
+ *   - E-posta/WhatsApp outbox'a düşük öncelikle (8) yazılır ve HEMEN gönderilmez: cron tik başına saatlik_sınır/12, son 60 dakikada
  *     saatlik sınırı aşmadan gönderir (Outbox::tick). Böylece toplu kampanya OTP ve sipariş iletilerinin önüne geçmez.
  *   - Üyenin kampanya iletisi tercihi (mkt_optout) uygulanır: kapattığı kanaldan gönderilmez (site bildirimi yine düşer).
  */
@@ -85,7 +86,7 @@ final class Winback
         $sms = !empty($in['sms']) && $in['sms'] !== 'false';
         $ntf = !isset($in['ntf']) || (!empty($in['ntf']) && $in['ntf'] !== 'false');
         if (!$mail && !$sms && !$ntf) {
-            throw HttpError::validation(['ch' => 'En az bir kanal seçin (bildirim, e-posta ya da SMS).']);
+            throw HttpError::validation(['ch' => 'En az bir kanal seçin (bildirim, e-posta ya da WhatsApp).']);
         }
         $gift = isset($in['gift']) && $in['gift'] !== '' && $in['gift'] !== null ? Text::kurus($in['gift']) : 0;
         if ($gift === null || $gift < 0 || $gift > 100000) {
@@ -101,10 +102,13 @@ final class Winback
         $mailCfg = Settings::get('mail', $db);
         $smsCfg = Settings::get('sms', $db);
         if ($mail && empty($mailCfg['on'])) {
-            throw HttpError::validation(['mail' => 'E-posta gönderimi kapalı (Yönetim › E-posta & SMS).']);
+            throw HttpError::validation(['mail' => 'E-posta gönderimi kapalı (Yönetim › E-posta & WhatsApp).']);
         }
         if ($sms && empty($smsCfg['on'])) {
-            throw HttpError::validation(['sms' => 'SMS gönderimi kapalı (Yönetim › E-posta & SMS).']);
+            throw HttpError::validation(['sms' => 'WhatsApp gönderimi kapalı (Yönetim › E-posta & WhatsApp).']);
+        }
+        if ($sms && !\YP\Sms\Sms::canSend($smsCfg, 'winback')) {
+            throw HttpError::validation(['sms' => 'Kampanya iletisi WhatsApp\'tan yalnız Meta\'da onaylı bir pazarlama şablonuyla gönderilebilir (Yönetim › E-posta & WhatsApp › WhatsApp › Kampanya şablonu). Şimdilik e-posta seçin.']);
         }
         // seçilenler hâlâ hareketsiz üye mi?
         $ok = [];

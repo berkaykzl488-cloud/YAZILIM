@@ -6,7 +6,7 @@ if (!defined('YP_APP')) { http_response_code(404); exit; }
 use YP\Sms\Sms;
 
 /**
- * Giden e-posta/SMS kuyruğu (outbox tablosu).
+ * Giden e-posta / WhatsApp kuyruğu (outbox tablosu; WhatsApp'ın iç kanal adı 'sms').
  * - Doğrulama kodları (priority 0) istek anında hemen gönderilir ve saatlik bütçeye takılmaz.
  * - Diğerleri cron ile gönderilir: tik başına en fazla saatlik_sınır/12 ve son 60 dakikada saatlik sınırı aşmadan.
  * - Hata: 5 denemeye kadar artan bekleme (1, 2, 4, 8 dk), sonra 'failed'.
@@ -79,13 +79,14 @@ final class Outbox
                 $r = $mailer->send($row['to_addr'], $row['subject'], $row['body']);
             } else {
                 $p = $sms ?: Sms::fromSettings(Settings::get('sms', $db));
-                $to = Sms::normalize($row['to_addr']);
+                $to = Sms::e164($row['to_addr']);
                 if (!$p) {
-                    $r = ['ok' => false, 'error' => 'SMS sağlayıcısı ayarlanmamış.', 'retry' => true, 'id' => null, 'provider' => null];
+                    $r = ['ok' => false, 'error' => 'WhatsApp ayarlanmamış (Yönetim › E-posta & WhatsApp › WhatsApp).', 'retry' => true, 'id' => null, 'provider' => null];
                 } elseif ($to === '') {
                     $r = ['ok' => false, 'error' => 'Telefon numarası geçersiz.', 'retry' => false, 'id' => null, 'provider' => $p->name()];
                 } else {
-                    $r = $p->send($to, $row['body']);
+                    $site = Settings::get('site', $db);
+                    $r = $p->send($to, $row['body'], ['ev' => (string)$row['ev'], 'site' => isset($site['siteName']) ? (string)$site['siteName'] : '']);
                     $r['provider'] = $p->name();
                 }
             }

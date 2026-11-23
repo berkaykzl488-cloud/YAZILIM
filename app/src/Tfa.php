@@ -4,13 +4,15 @@ namespace YP;
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 use YP\Http\HttpError;
+use YP\Sms\Sms;
 
 /**
  * 2 adımlı doğrulama (isteğe bağlı; her kullanıcı kendisi açar — sahibin kararı, PLAN §9).
  * 6 haneli kod, 3 dakika geçerli, en fazla 5 hatalı deneme. Kod veritabanında HMAC(pepper) olarak tutulur.
  * Gönderim sınırı: kanal başına 60 saniyede 1, kullanıcı başına saatte 5.
  * Kod doğru girilince tarayıcıya imzalı YPT çerezi yazılır; süre (site.tfaTrustMin, varsayılan 180 dk) dolana
- * kadar aynı tarayıcıdan girişte yeniden kod gönderilmez (SMS/e-posta tasarrufu).
+ * kadar aynı tarayıcıdan girişte yeniden kod gönderilmez (WhatsApp / e-posta tasarrufu).
+ * Kanallar: 'mail' (e-posta) ve 'sms' (iç ad; kod WhatsApp kimlik doğrulama şablonuyla gider).
  */
 final class Tfa
 {
@@ -29,15 +31,14 @@ final class Tfa
         return $ch === 'sms' ? Text::maskTel($u['tel']) : Text::maskMail($u['email']);
     }
 
-    /** Kanal kullanılabilir mi? (adres var + SMS açık) */
+    /** Kanal kullanılabilir mi? (adres var + WhatsApp açık ve kod şablonu ayarlı) */
     public static function channelOk(Db $db, array $u, $ch)
     {
         if ($ch === 'mail') {
             return (string)$u['email'] !== '';
         }
         if ($ch === 'sms') {
-            $s = Settings::get('sms', $db);
-            return (string)$u['tel'] !== '' && !empty($s['on']);
+            return (string)$u['tel'] !== '' && Sms::canSend(Settings::get('sms', $db), 'tfa');
         }
         return false;
     }
@@ -50,12 +51,14 @@ final class Tfa
             'Bir saat içinde çok fazla kod istendi. Lütfen daha sonra tekrar deneyin.');
     }
 
-    private static function info(array $row, array $u)
+    private static function info(array $row, array $u, ?Db $db = null)
     {
+        $other = $row['channel'] === 'sms' ? 'mail' : 'sms';
         $wait = max(0, self::RESEND_SEC - (int)floor((yp_now_ms() - (int)$row['sent_at']) / 1000));
         return ['id' => (int)$row['id'], 'ch' => $row['channel'], 'dest' => self::dest($u, $row['channel']),
                 'wait' => $wait, 'exp' => (int)$row['expires_at'], 'purpose' => $row['purpose'],
-                'alt' => (string)$u['tel'] !== '' && (string)$u['email'] !== '' && $row['purpose'] !== 'enable'];
+                // diğer kanala geçiş düğmesi: yalnız o kanal da kullanılabiliyorsa (WhatsApp kapalıyken gösterilmez)
+                'alt' => $row['purpose'] !== 'enable' && (string)$u['tel'] !== '' && (string)$u['email'] !== '' && self::channelOk($db ?: Db::main(), $u, $other)];
     }
 
     private static function newCode()
@@ -71,9 +74,9 @@ final class Tfa
         }
         if (!self::channelOk($db, $u, $ch)) {
             if ($purpose === 'login' && $ch === 'sms' && self::channelOk($db, $u, 'mail')) {
-                $ch = 'mail'; // SMS kapalıysa girişte e-postaya düş
+                $ch = 'mail'; // WhatsApp kapalıysa girişte e-postaya düş
             } else {
-                throw new HttpError(422, $ch === 'sms' ? 'SMS ile doğrulama şu an kullanılamıyor.' : 'Önce profilinize e-posta ekleyin.', 'tfa_channel');
+                throw new HttpError(422, $ch === 'sms' ? 'WhatsApp ile doğrulama şu an kullanılamıyor.' : 'Önce profilinize e-posta ekleyin.', 'tfa_channel');
             }
         }
         self::limit($u['id'], $ch);
@@ -90,7 +93,7 @@ final class Tfa
         });
         Notify::otp($db, $u, $ch, $code);
         Audit::log($db, $u['id'], 'tfa_send', 'user', $u['id'], ['purpose' => $purpose, 'ch' => $ch]);
-        return self::info($row, $u);
+        return self::info($row, $u, $db);
     }
 
     private static function open(Db $db, $cid, $uid, array $purposes)
@@ -113,7 +116,7 @@ final class Tfa
             }
             $ch = $ch === 'sms' ? 'mail' : 'sms';
             if (!self::channelOk($db, $u, $ch)) {
-                throw new HttpError(422, $ch === 'sms' ? 'SMS ile doğrulama şu an kullanılamıyor.' : 'Hesabınızda e-posta adresi yok.', 'tfa_channel');
+                throw new HttpError(422, $ch === 'sms' ? 'WhatsApp ile doğrulama şu an kullanılamıyor.' : 'Hesabınızda e-posta adresi yok.', 'tfa_channel');
             }
         }
         self::limit($u['id'], $ch);
@@ -123,7 +126,7 @@ final class Tfa
             [$ch, self::hashCode($row['id'], $code), $now + self::TTL_MS, $now, (int)$row['id']]);
         Notify::otp($db, $u, $ch, $code);
         Audit::log($db, $u['id'], $switch ? 'tfa_switch' : 'tfa_resend', 'user', $u['id'], ['ch' => $ch]);
-        return self::info($db->one('SELECT * FROM {auth_challenges} WHERE id=?', [(int)$row['id']]), $u);
+        return self::info($db->one('SELECT * FROM {auth_challenges} WHERE id=?', [(int)$row['id']]), $u, $db);
     }
 
     /** Kodu doğrular; başarılıysa doğrulama satırını döndürür (tek kullanımlık). */

@@ -1,6 +1,8 @@
 <?php
 /**
  * src/js içindeki PERMS / PERM_GROUPS / ADM_ACT / ADM_FORM / ADM_CHG tablolarından app/src/PermMap.php üretir.
+ * Etiketler: src/js/prod/98w-whatsapp.js içindeki PERMS_PROD (yalnız canlıda geçerli etiketler, ör. "E-posta & WhatsApp")
+ * PERMS'in üzerine yazılır; anahtarlar değişmez (sunucu canlı pakettir).
  * Kullanım:
  *   php tools/gen-permmap.php          # yazar
  *   php tools/gen-permmap.php --check  # güncel mi? (değilse çıkış 1)
@@ -57,6 +59,16 @@ $perms = parsePairs(objBody($js, 'PERMS_ '));
 if (preg_match('/const PERMS = Object\.assign\(\{\},PERMS_,\{(.*?)\}\);/su', $js, $m)) {
     $perms = array_merge($perms, parsePairs($m[1]));
 }
+$prodJs = @file_get_contents($root . '/src/js/prod/98w-whatsapp.js');
+if ($prodJs !== false && strpos($prodJs, 'const PERMS_PROD') !== false) {
+    foreach (parsePairs(objBody($prodJs, 'PERMS_PROD')) as $k => $v) {
+        if (!isset($perms[$k])) {
+            fwrite(STDERR, "PERMS_PROD: bilinmeyen yetki anahtarı: $k\n");
+            exit(2);
+        }
+        $perms[$k] = $v;
+    }
+}
 $groups = [];
 if (preg_match('/const PERM_GROUPS=\[(.*?)\];/su', $js, $m)) {
     preg_match_all("/\\['([^']+)',\\[([^\\]]*)\\]\\]/u", $m[1], $gm, PREG_SET_ORDER);
@@ -106,8 +118,9 @@ function ex($v, $ind = '    ')
 }
 
 $php = "<?php\nnamespace YP;\n\nif (!defined('YP_APP')) { http_response_code(404); exit; }\n\n"
-     . "/**\n * OTOMATİK ÜRETİLDİ — elle düzenlemeyin. Kaynak: src/js/40-views-public.js (PERMS, PERM_GROUPS) ve\n"
-     . " * src/js/99-wiring.js (ADM_ACT / ADM_FORM / ADM_CHG). Yeniden üretmek: php tools/gen-permmap.php\n"
+     . "/**\n * OTOMATİK ÜRETİLDİ — elle düzenlemeyin. Kaynak: src/js/40-views-public.js (PERMS, PERM_GROUPS),\n"
+     . " * src/js/prod/98w-whatsapp.js (PERMS_PROD: canlı etiketleri) ve src/js/99-wiring.js (ADM_ACT / ADM_FORM / ADM_CHG).\n"
+     . " * Yeniden üretmek: php tools/gen-permmap.php\n"
      . " * Bir değer dizi ise yetkilerden HERHANGİ BİRİ yeterlidir.\n */\nfinal class PermMap\n{\n"
      . '    const PERMS = ' . ex($perms) . ";\n\n"
      . '    const GROUPS = ' . ex($groups) . ";\n\n"

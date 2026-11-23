@@ -46,8 +46,8 @@ use YP\PermMap;
 use YP\RateLimit;
 use YP\Schema;
 use YP\Settings;
-use YP\Sms\NetGsm;
 use YP\Sms\Sms;
+use YP\Sms\WhatsApp;
 use YP\Store;
 use YP\Text;
 use YP\Tfa;
@@ -144,9 +144,9 @@ class FakeSms implements YP\Sms\Provider
         return 'fakesms';
     }
 
-    public function send($to, $text)
+    public function send($to, $text, array $meta = [])
     {
-        $this->sent[] = [$to, $text];
+        $this->sent[] = [$to, $text, $meta];
         return ['ok' => true, 'id' => 'S' . count($this->sent), 'error' => '', 'retry' => false];
     }
 }
@@ -533,22 +533,25 @@ section('tfa', function () {
     ok('süresi dolan kod → tfa_expired', throws(function () use ($db, $t3, $u) {
         Tfa::verify($db, $t3['id'], $u['id'], '123456', ['login']);
     })->errCode === 'tfa_expired');
-    // SMS kapalıyken girişte e-postaya düşer; aç/kapat'ta hata
+    // WhatsApp (iç kanal 'sms') kapalıyken girişte e-postaya düşer; aç/kapat'ta hata
     RateLimit::reset('tfa_m:' . $u['id'] . ':mail');
     $t4 = Tfa::start($db, $u, 'login', 'sms');
-    ok('SMS kapalı: giriş kodu e-postaya düşer', $t4['ch'] === 'mail');
-    ok('SMS kapalı: SMS ile açma 422', throws(function () use ($db, $u) {
+    ok('WhatsApp kapalı: giriş kodu e-postaya düşer', $t4['ch'] === 'mail');
+    ok('WhatsApp kapalı: diğer kanala geçiş düğmesi gösterilmez (alt=false)', $t4['alt'] === false);
+    $e = throws(function () use ($db, $u) {
         Tfa::start($db, $u, 'enable', 'sms');
-    })->errCode === 'tfa_channel');
-    // kanal değiştirme (SMS açık)
+    });
+    ok('WhatsApp kapalı: WhatsApp ile açma 422 (Türkçe)', $e && $e->errCode === 'tfa_channel' && $e->getMessage() === 'WhatsApp ile doğrulama şu an kullanılamıyor.');
+    // kanal değiştirme (WhatsApp açık)
     $fs = new FakeSms();
     Sms::$factory = function () use ($fs) {
         return $fs;
     };
-    Settings::set('sms', array_merge(Settings::get('sms'), ['on' => true, 'user' => 'u', 'pass' => 'p', 'header' => 'YANGPAZAR']));
+    Settings::set('sms', array_merge(Settings::get('sms'), ['on' => true, 'wa_phone_id' => '106540352242922', 'wa_token' => 'EAAG-test']));
     RateLimit::reset('tfa_h:' . $u['id']);
     $t5 = Tfa::resend($db, $u, $t4['id'], ['login'], true);
-    ok('kanal değiştir → SMS, numaraya 10 hane', $t5['ch'] === 'sms' && $fs->sent[0][0] === '5551112233' && preg_match('/\d{6}/', $fs->sent[0][1]));
+    ok('kanal değiştir → WhatsApp, numara E.164 (90…), ev=tfa', $t5['ch'] === 'sms' && $fs->sent[0][0] === '905551112233' && preg_match('/\d{6}/', $fs->sent[0][1]) && $fs->sent[0][2]['ev'] === 'tfa');
+    ok('WhatsApp açık: e-postaya geri geçiş düğmesi var', $t5['alt'] === true);
     ok('açma doğrulamasında kanal değişmez', throws(function () use ($db, $u) {
         RateLimit::reset('tfa_m:' . $u['id'] . ':mail');
         $t = Tfa::start($db, $u, 'enable', 'mail');
@@ -688,19 +691,11 @@ section('smtp', function () {
 });
 
 section('sms', function () {
-    $calls = [];
-    $n = new NetGsm('8503000000', 'sifre', 'YANGPAZAR', fakeHttp($calls, [[200, '{"code":"00","jobid":"17377215342605050417149344","description":"queued"}'], [200, '{"code":"30"}']]));
-    $r = $n->send('5551112233', 'yangpazar doğrulama kodunuz: 123456');
-    ok('NetGSM: başarılı, jobid', $r['ok'] && $r['id'] === '17377215342605050417149344');
-    $o = $calls[0]['o'];
-    ok('NetGSM: REST v2 URL, Basic, gövde', $calls[0]['url'] === 'https://api.netgsm.com.tr/sms/rest/v2/send'
-        && in_array('Authorization: Basic ' . base64_encode('8503000000:sifre'), $o['headers'], true)
-        && $o['json']['msgheader'] === 'YANGPAZAR' && $o['json']['messages'][0]['no'] === '5551112233' && $o['json']['encoding'] === 'TR');
-    $r = $n->send('5551112233', 'kod');
-    ok('NetGSM 30 → Türkçe hata', !$r['ok'] && strpos($r['error'], 'kullanıcı adı') !== false && !$r['retry']);
+    // telefon kanalı = WhatsApp (ayrıntılı testler: tests/unit_wa.php)
     ok('numara biçimi', Sms::normalize('0555 111 22 33') === '5551112233' && Sms::normalize('+90 555 111 2233') === '5551112233' && Sms::normalize('0212 111 22 33') === '');
-    ok('fromSettings: eksik bilgi → yok', Sms::fromSettings(['provider' => 'netgsm', 'user' => 'u', 'pass' => '', 'header' => 'H']) === null);
-    ok('fromSettings: NetGSM', Sms::fromSettings(['provider' => 'netgsm', 'user' => 'u', 'pass' => 'p', 'header' => 'H']) instanceof NetGsm);
+    ok('fromSettings: eksik bilgi → yok', Sms::fromSettings(['provider' => 'whatsapp', 'wa_phone_id' => '123456', 'wa_token' => '']) === null);
+    ok('fromSettings: WhatsApp', Sms::fromSettings(['provider' => 'whatsapp', 'wa_phone_id' => '123456', 'wa_token' => 'EAAG']) instanceof WhatsApp);
+    ok('sağlayıcı listesinde yalnız WhatsApp (NetGSM yok)', array_keys(Sms::providers()) === ['whatsapp'] && !class_exists('YP\\Sms\\NetGsm'));
 });
 
 section('outbox', function () {
@@ -745,7 +740,7 @@ section('outbox', function () {
     $id2 = Outbox::queue($db2, 'mail', null, 'a@b.co', 'x', 's', 'b');
     Outbox::tick($db2, $mb);
     ok('kalıcı hata → hemen failed', $db2->val('SELECT status FROM {outbox} WHERE id=?', [$id2]) === 'failed');
-    // SMS bütçesi ayrı
+    // WhatsApp (iç kanal 'sms') bütçesi ayrı
     $db3 = freshDb();
     $fs = new FakeSms();
     Settings::set('sms', array_merge(Settings::get('sms'), ['hourly' => 12]));
@@ -754,11 +749,11 @@ section('outbox', function () {
     }
     Outbox::queue($db3, 'sms', null, '0212 111 22 33', 'x', '', 'sabit hat');
     $s = Outbox::tick($db3, null, $fs);
-    ok('SMS: saatlik 12 → tik başına 1', $s['sms'] === 1 && count($fs->sent) === 1 && $fs->sent[0][0] === '5551112230');
+    ok('WhatsApp: saatlik 12 → tik başına 1, numara 90…', $s['sms'] === 1 && count($fs->sent) === 1 && $fs->sent[0][0] === '905551112230');
     for ($i = 0; $i < 4; $i++) {
         Outbox::tick($db3, null, $fs);
     }
-    ok('SMS: geçersiz numara kalıcı hata', $db3->val("SELECT status FROM {outbox} WHERE to_addr='0212 111 22 33'") === 'failed');
+    ok('WhatsApp: geçersiz numara kalıcı hata', $db3->val("SELECT status FROM {outbox} WHERE to_addr='0212 111 22 33'") === 'failed');
 });
 
 section('notify', function () {
@@ -856,6 +851,7 @@ section('store', function () {
 require __DIR__ . '/unit_p1.php';
 require __DIR__ . '/unit_p2.php';
 require __DIR__ . '/unit_p3.php';
+require __DIR__ . '/unit_wa.php';
 
 echo "\nSONUÇ (birim): $PASS geçti, $FAIL kaldı\n";
 exit($FAIL ? 1 : 0);

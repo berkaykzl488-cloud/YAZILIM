@@ -5,7 +5,9 @@ if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 /**
  * Bildirim şablonları (ön yüzdeki MAILSUB / MAILBODY / SMSDEF ile aynı metinler; P0b'de gerekenler).
- * Sahip, şablonları P6'da Yönetim › E-posta & SMS › Mesaj şablonları'ndan değiştirebilecek (settings.tpl).
+ * Sahip, şablonları P6'da Yönetim › E-posta & WhatsApp › Mesaj şablonları'ndan değiştirebilecek (settings.tpl).
+ * SMS = telefon kanalı (WhatsApp) metinleri: doğrulama kodunda yalnız kod Meta'daki kimlik doğrulama şablonuna geçer;
+ * diğerleri WhatsApp bildirim şablonunun {{1}} değişkenine yazılır (baştaki "{site}:" şablonda olduğu için atılır).
  */
 final class Templates
 {
@@ -31,7 +33,7 @@ final class Templates
     ];
     const SMS = [
         'tfa'  => '{site} doğrulama kodunuz: {kod}. Kodu kimseyle paylaşmayın.',
-        'test' => '{site} deneme SMS mesajı.',
+        'test' => '{site} WhatsApp deneme mesajı. Deneme kodu: {kod}',
         'withdraw_req' => '{site}: Çekim talebiniz alındı. IBAN\'ınıza net {tutar} gönderilecek.',
         'withdraw'     => '{site}: {tutar} çekim talebiniz IBAN\'ınıza gönderildi.',
         'withdraw_no'  => '{site}: Çekim talebiniz reddedildi, {tutar} bakiyenize iade edildi.',

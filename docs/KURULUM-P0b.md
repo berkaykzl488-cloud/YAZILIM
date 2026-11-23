@@ -119,7 +119,9 @@ Doğrulama kodları bu sınırı beklemeden hemen gider.
 Verdiğiniz karar gereği zorunlu değil: her kullanıcı **Hesabım** sayfasından kendisi açar. Brevo ayarı bittikten sonra
 yönetici hesabınızda **e-posta ile 2 adımlı doğrulamayı** açmanızı öneririz.
 
-SMS ile doğrulama NetGSM'e hazırlandı ama henüz gerçek NetGSM hesabıyla denenmedi. NetGSM bilgileri girilene kadar SMS seçeneği kapalı kalır.
+0.6.1'den itibaren SMS (NetGSM) yok: doğrulama kodları **WhatsApp**'tan gider (Meta WhatsApp Business Cloud API).
+Kurulum **Yönetim › E-posta & WhatsApp › WhatsApp** sayfasındaki adım adım kutudadır; dosya düzenlenmez. WhatsApp bilgileri
+girilip açılana kadar "WhatsApp ile kod" seçeneği kapalı kalır ve daha önce SMS'i seçmiş üyelerin giriş kodu e-postaya gider.
 
 ## 9. Bu sürümde neler çalışıyor
 

@@ -3,12 +3,15 @@ namespace YP;
 
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
+use YP\Sms\Sms;
+
 /**
- * notify(): üyeye site içi bildirim yazar; olay (ev) için e-posta/SMS açıksa outbox'a ekler (ön yüzdeki notify()).
+ * notify(): üyeye site içi bildirim yazar; olay (ev) için e-posta / WhatsApp açıksa outbox'a ekler (ön yüzdeki notify()).
+ * WhatsApp'ın iç kanal adı 'sms'; bildirimler yalnız WhatsApp bildirim (Utility) şablonu ayarlıysa telefona gider.
  */
 final class Notify
 {
-    /** Ayarda açıkça kapatılmadıkça e-posta/SMS ile de gönderilen olaylar (para çekme ve kimlik — P3) */
+    /** Ayarda açıkça kapatılmadıkça e-posta / WhatsApp ile de gönderilen olaylar (para çekme ve kimlik — P3) */
     const DEFAULT_ON = ['withdraw_req', 'withdraw', 'withdraw_no', 'tc_ok', 'tc_ask'];
 
     private static function evOn(array $cfg, $ev)
@@ -35,7 +38,7 @@ final class Notify
                     Outbox::queue($db, 'mail', $u['id'], $u['email'], $ev, $s, $b);
                 }
                 $sms = Settings::get('sms', $db);
-                if (!empty($sms['on']) && self::evOn($sms, $ev) && $u['tel']) {
+                if (Sms::canSend($sms, $ev) && self::evOn($sms, $ev) && $u['tel']) {
                     Outbox::queue($db, 'sms', $u['id'], $u['tel'], $ev, '', Templates::sms($ev, $v));
                 }
             }
@@ -48,7 +51,12 @@ final class Notify
     {
         $v = Templates::vars($user, ['kod' => $code]);
         if ($channel === 'sms') {
-            $id = Outbox::queue($db, 'sms', $user['id'], $user['tel'], 'tfa', '', Templates::sms('tfa', $v), Outbox::PRIO_OTP);
+            // WhatsApp kimlik doğrulama şablonu kodu iletiden okur; özel şablonda {kod} unutulduysa kodu ekle
+            $body = Templates::sms('tfa', $v);
+            if (strpos($body, (string)$code) === false) {
+                $body .= ' ' . $code;
+            }
+            $id = Outbox::queue($db, 'sms', $user['id'], $user['tel'], 'tfa', '', $body, Outbox::PRIO_OTP);
         } else {
             list($s, $b) = Templates::mail('tfa', $v);
             $id = Outbox::queue($db, 'mail', $user['id'], $user['email'], 'tfa', $s, $b, Outbox::PRIO_OTP);

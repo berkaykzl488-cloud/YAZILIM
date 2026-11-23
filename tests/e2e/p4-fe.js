@@ -170,7 +170,7 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await O.click('.exd [data-act=reveal]');
     ok('gizle: şifre bellekten silindi', await until(O, pw => !document.querySelector('.exd').textContent.includes(pw) && !JSON.stringify(S).includes(pw), PW));
     await O.fill('.exd #excall_msg', 'Teslimat için hazırız, Mavi bayrağa gelin.'); await O.click('form[data-form=excall] button');
-    ok('alıcı çağrıldı', await toast(O, 'bildirim ve SMS'));
+    ok('alıcı çağrıldı', await toast(O, /Alıcıya bildirim/));
     /* teslim formu: yoklama/yeniden yükleme formu yeniden çizebilir → doldur + gönder, yanıt gelmezse bir kez daha */
     const dlv = async (q, re) => { for (let i = 0; i < 3; i++) { await O.waitForSelector('#exdq'); await O.fill('#exdq', q); await O.click('form[data-form=exst] button.btn-ok'); if (await toast(O, re, 4000)) return true; } return false; };
     const tk = await dlv('8', 'Kısmi teslim');

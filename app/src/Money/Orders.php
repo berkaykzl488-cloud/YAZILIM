@@ -192,7 +192,7 @@ final class Orders
         if ($n !== 1) {
             throw new HttpError(409, 'Bu ilan artık satışta değil.', 'sold_out');
         }
-        self::event($db, $id, $buyer['id'], 'Ödeme alındı, tutar güvenli havuza aktarıldı. Satıcıya bildirim ve SMS gönderildi.');
+        self::event($db, $id, $buyer['id'], 'Ödeme alındı, tutar güvenli havuza aktarıldı. Satıcıya bildirim gönderildi.');
         if ($ch !== '' || $place !== '') {
             self::event($db, $id, $buyer['id'], 'Teslimat: ' . self::delivTxt($o));
         }
@@ -302,7 +302,7 @@ final class Orders
         self::attachProofs($db, $o, 'dvid', $vid);
         self::set($db, $o, ['status' => 'teslim', 'delivered_at' => $now, 'warned_at' => null]);
         self::event($db, $o['id'], $u['id'], 'Satıcı teslim ettiğini bildirdi: ' . count($pre) . ' teslimat öncesi, ' . count($post) . ' teslimat sonrası görsel'
-            . ($vid ? ' ve teslimat videosu' : '') . ' yükledi (yalnızca yönetim görür). Alıcıya bildirim ve SMS gönderildi.');
+            . ($vid ? ' ve teslimat videosu' : '') . ' yükledi (yalnızca yönetim görür). Alıcıya bildirim gönderildi.');
         $note = isset($in['note']) && is_scalar($in['note']) ? trim((string)$in['note']) : '';
         if ($note !== '') {
             self::chat($db, $o, $u, $note, false);

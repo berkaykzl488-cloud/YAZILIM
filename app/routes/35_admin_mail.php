@@ -1,7 +1,11 @@
 <?php
 /**
- * E-posta & SMS ayarları (P6'dan öne çekildi: 2FA için gerekli). Yetki: [sms]. Gizli alanlar maskeli döner;
- * boş ya da maskeli gönderilen gizli alan mevcut değeri KORUR (api/ayarlar.php ile aynı kural).
+ * E-posta & WhatsApp ayarları (P6'dan öne çekildi: 2FA için gerekli). Yetki: [sms] (iç anahtar; ekranda "E-posta & WhatsApp").
+ * Gizli alanlar maskeli döner; boş ya da maskeli gönderilen gizli alan mevcut değeri KORUR (api/ayarlar.php ile aynı kural).
+ * WhatsApp = WhatsApp Business Cloud API (Meta); iç kanal / ayar adı "sms" olarak kaldı (users.tfa, outbox.channel).
+ *   PUT  admin/settings/sms   WhatsApp ayarları (wa_phone_id, wa_token, şablon adları …)
+ *   POST admin/sms/check      bağlantı testi (Meta'dan numara ve doğrulanmış işletme adı)
+ *   POST admin/sms/test       deneme: doğrulama kodu şablonu sahte kod 123456 ile
  */
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
@@ -17,6 +21,7 @@ use YP\Outbox;
 use YP\RateLimit;
 use YP\Settings;
 use YP\Sms\Sms;
+use YP\Sms\WhatsApp;
 use YP\Templates;
 use YP\V;
 
@@ -25,10 +30,10 @@ return function (Router $r) {
         return ['auth' => 'staff', 'perm' => $perm];
     };
     $secretMail = ['brevo_key', 'mailjet_key', 'mailjet_secret', 'smtp_pass'];
-    $secretSms = ['pass'];
+    $secretSms = ['wa_token'];
     $mask = function (array $s, array $secret) {
         foreach ($secret as $k) {
-            $s[$k] = isset($s[$k]) && $s[$k] !== '' ? ($k === 'smtp_pass' || $k === 'pass' ? '••••' : yp_mask_secret($s[$k])) : '';
+            $s[$k] = isset($s[$k]) && $s[$k] !== '' ? ($k === 'smtp_pass' ? '••••' : yp_mask_secret($s[$k])) : '';
         }
         return $s;
     };
@@ -56,7 +61,7 @@ return function (Router $r) {
         $last = $db->one("SELECT status, last_error, provider, sent_at, created_at FROM {outbox} WHERE channel='mail' ORDER BY id DESC LIMIT 1");
         return ['data' => [
             'mail' => $mask(Settings::get('mail', $db), $secretMail),
-            'sms' => $mask(Settings::get('sms', $db), $secretSms),
+            'sms' => $mask(array_diff_key(Settings::get('sms', $db), ['header' => 1, 'user' => 1, 'pass' => 1]), $secretSms),
             'providers' => ['mail' => Mailer::providers(), 'sms' => Sms::providers()],
             'tfaTrustMin' => \YP\Tfa::trustMinutes($db),
             'stats' => [
@@ -106,13 +111,29 @@ return function (Router $r) {
 
     $r->put('admin/settings/sms', function (Req $q, Db $db) use ($mask, $keep, $secretSms, $evs) {
         $in = $q->body();
+        foreach (['wa_otp_tpl', 'wa_note_tpl', 'wa_mkt_tpl'] as $k) {
+            if (isset($in[$k]) && is_string($in[$k])) {
+                $in[$k] = strtolower(trim($in[$k]));
+            }
+        }
         $v = new V($in);
         $old = Settings::get('sms', $db);
         $new = $old;
+        $tplRx = '/^[a-z0-9_]{1,512}$/';
+        $tplMsg = 'Şablon adı yalnız küçük harf, rakam ve alt çizgi (_) içerebilir (ör. yangpazar_kod).';
+        $langRx = '/^[a-z]{2,3}(_[A-Z]{2,4})?$/';
+        $langMsg = 'Dil kodu tr, en veya en_US gibi olmalı.';
         $new['on'] = $v->bool('on', !empty($old['on']));
-        $new['provider'] = $v->oneOf('provider', array_keys(Sms::providers()), $old['provider']);
-        $new['header'] = $v->has('header') ? $v->str('header', 0, 11, '/^[A-Za-z0-9 .\-]*$/', 'SMS başlığı en fazla 11 karakter (harf/rakam).') : $old['header'];
-        $new['user'] = $v->has('user') ? $v->str('user', 0, 60) : $old['user'];
+        $new['provider'] = 'whatsapp';
+        $new['wa_phone_id'] = $v->has('wa_phone_id') ? $v->str('wa_phone_id', 0, 30, '/^\d{5,30}$/', 'Telefon numarası kimliği yalnız rakamlardan oluşur (Meta › WhatsApp › API Kurulumu).') : $old['wa_phone_id'];
+        $new['wa_waba_id'] = $v->has('wa_waba_id') ? $v->str('wa_waba_id', 0, 30, '/^\d{5,30}$/', 'WhatsApp işletme hesabı kimliği yalnız rakamlardan oluşur.') : $old['wa_waba_id'];
+        $new['wa_otp_tpl'] = $v->has('wa_otp_tpl') ? $v->str('wa_otp_tpl', 1, 512, $tplRx, $tplMsg) : $old['wa_otp_tpl'];
+        $new['wa_otp_lang'] = $v->has('wa_otp_lang') ? $v->str('wa_otp_lang', 2, 10, $langRx, $langMsg) : $old['wa_otp_lang'];
+        $new['wa_note_on'] = $v->bool('wa_note_on', !empty($old['wa_note_on']));
+        $new['wa_note_tpl'] = $v->has('wa_note_tpl') ? $v->str('wa_note_tpl', 0, 512, $tplRx, $tplMsg) : $old['wa_note_tpl'];
+        $new['wa_note_lang'] = $v->has('wa_note_lang') ? $v->str('wa_note_lang', 2, 10, $langRx, $langMsg) : $old['wa_note_lang'];
+        $new['wa_mkt_tpl'] = $v->has('wa_mkt_tpl') ? $v->str('wa_mkt_tpl', 0, 512, $tplRx, $tplMsg) : $old['wa_mkt_tpl'];
+        $new['wa_mkt_lang'] = $v->has('wa_mkt_lang') ? $v->str('wa_mkt_lang', 2, 10, $langRx, $langMsg) : $old['wa_mkt_lang'];
         $new['hourly'] = $v->int('hourly', 1, 100000, (int)$old['hourly']);
         $up = $v->has('userPrice') ? yp_money($in['userPrice']) : (float)$old['userPrice'];
         if ($up === null || $up < 0) {
@@ -122,18 +143,40 @@ return function (Router $r) {
         if ($v->has('ev')) {
             $new['ev'] = $evs($in['ev']);
         }
-        if (isset($in['pass']) && (!is_string($in['pass']) || strlen($in['pass']) > 200)) {
-            $v->err('pass', 'Geçersiz değer.');
+        if (isset($in['wa_token']) && (!is_string($in['wa_token']) || strlen($in['wa_token']) > 1000 || preg_match('/\s/', trim($in['wa_token'])))) {
+            $v->err('wa_token', 'Erişim anahtarı geçersiz (boşluk içermemeli).');
         }
         $v->done();
-        $new = $keep($old, array_merge($new, array_intersect_key($in, ['pass' => 1])), $secretSms);
-        if ($new['on'] && (!$new['user'] || !$new['pass'] || !$new['header'])) {
-            throw HttpError::validation(['user' => 'SMS gönderimini açmak için kullanıcı adı, şifre ve başlık gerekli.']);
+        if (isset($in['wa_token']) && is_string($in['wa_token'])) {
+            $in['wa_token'] = trim($in['wa_token']);
+        }
+        $new = $keep($old, array_merge($new, array_intersect_key($in, ['wa_token' => 1])), $secretSms);
+        unset($new['header'], $new['user'], $new['pass']); // eski NetGSM alanları
+        if ($new['on'] && ($new['wa_phone_id'] === '' || $new['wa_token'] === '' || $new['wa_otp_tpl'] === '')) {
+            throw HttpError::validation(['wa_phone_id' => 'WhatsApp\'ı açmak için Telefon numarası kimliği, erişim anahtarı ve doğrulama kodu şablonunun adı gerekli.']);
+        }
+        if ($new['wa_note_on'] && $new['wa_note_tpl'] === '') {
+            throw HttpError::validation(['wa_note_tpl' => 'Bildirimleri WhatsApp\'tan göndermek için Meta\'da onaylı bildirim şablonunun adını yazın.']);
         }
         Settings::set('sms', $new, Auth::$user['id'], $db);
-        Audit::log($db, Auth::$user['id'], 'settings_sms', 'settings', 'sms', ['provider' => $new['provider'], 'on' => $new['on']]);
-        return ['msg' => 'SMS ayarları kaydedildi.', 'data' => ['sms' => $mask($new, $secretSms)]];
+        Audit::log($db, Auth::$user['id'], 'settings_sms', 'settings', 'sms', ['provider' => 'whatsapp', 'on' => $new['on'], 'note' => $new['wa_note_on']]);
+        return ['msg' => 'WhatsApp ayarları kaydedildi.', 'data' => ['sms' => $mask($new, $secretSms)]];
     }, $S('ui:form:smsset'));
+
+    // WhatsApp bağlantı testi: Meta'dan numaranın görünen adı ve doğrulanmış işletme adı
+    $r->post('admin/sms/check', function (Req $q, Db $db) {
+        RateLimit::enforce('wacheck:' . Auth::$user['id'], 10, 600);
+        $s = Settings::get('sms', $db);
+        if (!WhatsApp::configured($s)) {
+            throw new HttpError(422, 'Önce Telefon numarası kimliğini ve erişim anahtarını yazıp kaydedin.', 'not_configured');
+        }
+        $p = Sms::fromSettings($s);
+        $res = $p instanceof WhatsApp ? $p->check() : ['ok' => false, 'name' => '', 'number' => '', 'quality' => '', 'error' => 'WhatsApp ayarlanmamış.'];
+        Audit::log($db, Auth::$user['id'], 'sms_check', 'settings', 'sms', ['ok' => $res['ok']]);
+        return $res['ok']
+            ? ['msg' => 'Bağlantı başarılı: ' . ($res['name'] !== '' ? $res['name'] . ' · ' : '') . $res['number'], 'data' => $res]
+            : ['msg' => 'Bağlantı kurulamadı: ' . $res['error'], 'data' => $res];
+    }, $S('sms'));
 
     // Giriş doğrulaması: kod girildikten sonra aynı tarayıcıda kaç dakika tekrar sorulmasın (0 = her girişte)
     $r->put('admin/settings/tfa', function (Req $q, Db $db) {
@@ -165,20 +208,25 @@ return function (Router $r) {
                    : ['msg' => 'Deneme e-postası gönderilemedi: ' . $row['last_error'], 'data' => ['sent' => false, 'error' => $row['last_error']]];
     }, $S('ui:form:mailtest'));
 
+    // Deneme: doğrulama kodu şablonu, sahte kod 123456 (Meta'da şablonun onaylı olduğunu da doğrular)
     $r->post('admin/sms/test', function (Req $q, Db $db) {
         RateLimit::enforce('smstest:' . Auth::$user['id'], 5, 600);
         $v = new V($q->body());
         $to = $v->tel('to');
         $v->done();
-        $id = Outbox::queue($db, 'sms', null, $to, 'test', '', Templates::sms('test', Templates::vars(null)), Outbox::PRIO_OTP);
+        $body = Templates::sms('test', Templates::vars(null, ['kod' => '123456']));
+        if (strpos($body, '123456') === false) {
+            $body .= ' 123456';
+        }
+        $id = Outbox::queue($db, 'sms', null, $to, 'test', '', $body, Outbox::PRIO_OTP);
         $ok = Outbox::sendNow($db, $id);
-        $row = $db->one('SELECT status, last_error, provider FROM {outbox} WHERE id=?', [$id]);
+        $row = $db->one('SELECT status, last_error, provider, provider_id FROM {outbox} WHERE id=?', [$id]);
         Audit::log($db, Auth::$user['id'], 'sms_test', 'outbox', $id, ['ok' => $ok]);
-        return $ok ? ['msg' => 'Deneme SMS\'i gönderildi.', 'data' => ['sent' => true]]
-                   : ['msg' => 'Deneme SMS\'i gönderilemedi: ' . $row['last_error'], 'data' => ['sent' => false, 'error' => $row['last_error']]];
+        return $ok ? ['msg' => 'Deneme WhatsApp mesajı gönderildi (kod 123456). Telefonunuzu kontrol edin.', 'data' => ['sent' => true, 'id' => $row['provider_id']]]
+                   : ['msg' => 'Deneme WhatsApp mesajı gönderilemedi: ' . $row['last_error'], 'data' => ['sent' => false, 'error' => $row['last_error']]];
     }, $S('ui:form:smstest'));
 
-    // Gönderim kayıtları (S.mailLog / S.smsLog). Doğrulama kodları maskelenir.
+    // Gönderim kayıtları (S.mailLog / S.smsLog = WhatsApp). Doğrulama kodları maskelenir.
     $r->get('admin/outbox', function (Req $q, Db $db) {
         $ch = $q->q('ch') === 'sms' ? 'sms' : 'mail';
         $rows = $db->all('SELECT o.*, u.name AS uname FROM {outbox} o LEFT JOIN {users} u ON u.id=o.user_id WHERE o.channel=? ORDER BY o.id DESC LIMIT 100', [$ch]);

@@ -4,8 +4,9 @@ namespace YP;
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 /**
- * OTOMATİK ÜRETİLDİ — elle düzenlemeyin. Kaynak: src/js/40-views-public.js (PERMS, PERM_GROUPS) ve
- * src/js/99-wiring.js (ADM_ACT / ADM_FORM / ADM_CHG). Yeniden üretmek: php tools/gen-permmap.php
+ * OTOMATİK ÜRETİLDİ — elle düzenlemeyin. Kaynak: src/js/40-views-public.js (PERMS, PERM_GROUPS),
+ * src/js/prod/98w-whatsapp.js (PERMS_PROD: canlı etiketleri) ve src/js/99-wiring.js (ADM_ACT / ADM_FORM / ADM_CHG).
+ * Yeniden üretmek: php tools/gen-permmap.php
  * Bir değer dizi ise yetkilerden HERHANGİ BİRİ yeterlidir.
  */
 final class PermMap
@@ -22,10 +23,10 @@ final class PermMap
         'kampanya' => 'Çekiliş ve kuponlar',
         'server' => 'Serverlar',
         'ilan' => 'İlanlar',
-        'uye' => 'Üyeler & bakiye görüntüleme, SMS',
+        'uye' => 'Üyeler & bakiye görüntüleme, WhatsApp',
         'mesaj' => 'Engellenen mesajlar',
         'destek' => 'Canlı destek',
-        'sms' => 'E-posta & SMS',
+        'sms' => 'E-posta & WhatsApp',
         'calisan' => 'Çalışanlar ve yetkiler',
         'ayar' => 'Site ayarları',
         'seo' => 'SEO & pazarlama (SEO, reklam takibi, backlink, rehber)',

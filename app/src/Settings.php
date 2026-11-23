@@ -4,7 +4,7 @@ namespace YP;
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 /**
- * settings tablosu: k → JSON. Gizli anahtarlar (mail, sms) bütünüyle yp_encrypt ile şifrelenir.
+ * settings tablosu: k → JSON. Gizli anahtarlar (mail, sms = WhatsApp) bütünüyle yp_encrypt ile şifrelenir.
  */
 final class Settings
 {
@@ -42,9 +42,13 @@ final class Settings
                 'smtp_host' => '', 'smtp_port' => 587, 'smtp_sec' => 'tls', 'smtp_user' => '', 'smtp_pass' => '',
                 'ev' => ['welcome' => true, 'pass' => true],
             ],
+            // Telefon kanalı (iç ad "sms"): WhatsApp Business Cloud API (Meta). Ayrıntı: app/src/Sms/WhatsApp.php
             'sms' => [
-                'on' => false, 'provider' => 'netgsm', 'header' => '', 'user' => '', 'pass' => '', 'hourly' => 60, 'userPrice' => 0,
-                'ev' => [],
+                'on' => false, 'provider' => 'whatsapp', 'wa_phone_id' => '', 'wa_waba_id' => '', 'wa_token' => '',
+                'wa_otp_tpl' => 'yangpazar_kod', 'wa_otp_lang' => 'tr',
+                'wa_note_on' => false, 'wa_note_tpl' => 'yangpazar_bildirim', 'wa_note_lang' => 'tr',
+                'wa_mkt_tpl' => '', 'wa_mkt_lang' => 'tr',
+                'hourly' => 60, 'userPrice' => 0, 'ev' => [],
             ],
             'demo_mode' => 0,
         ];
@@ -97,7 +101,7 @@ final class Settings
         $sms = self::get('sms', $db);
         $out = $s;
         $out['mailOn'] = !empty($mail['on']);
-        $out['smsOn'] = !empty($sms['on']);
+        $out['smsOn'] = \YP\Sms\Sms::canSend($sms, 'tfa'); // WhatsApp ile doğrulama kodu gönderilebilir mi (iç ad sms)
         $out['demoMode'] = (bool)self::get('demo_mode', $db);
         // P3: para çekme ücreti ve kesinti oranı (üyeye yalnız "İşlem ücreti" ve "Vergi kesintisi" olarak gösterilir)
         $out['wdFee'] = self::get('wdFee', $db);

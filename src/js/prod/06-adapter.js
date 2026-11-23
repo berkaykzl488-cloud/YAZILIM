@@ -22,7 +22,7 @@ function ypEmptyS(){ return {v:3,seq:1,cur:null,
   dopings:{vitrin:{name:'Vitrin',desc:'Kendi serverının vitrininde ve ana sayfada',p:49,pd:7,max:30},acil:{name:'Acil Satılık',desc:'Kırmızı ACİL etiketi',p:29,pd:4.5,max:30},renk:{name:'Renkli Arka Plan',desc:'Listede dikkat çeken zemin',p:19,pd:3,max:30}},
   gws:[],banks:[],deps:[],coupons:[],raffles:[],rfree:{},spins:{},rev:{commission:0,ads:0,doping:0,ep:0,borsa:0,sms:0},revLog:[],
   servers:[],users:[],listings:[],orders:[],ads:[],wd:[],tx:[],tickets:[],lno:1,exchange:[],exFields:[],exRules:'',exOrders:[],bounties:[],dms:[],flagged:[],notifs:[],
-  sms:{on:false,provider:'netgsm',header:'',user:'',pass:'',userPrice:0,ev:{},tpl:{}},smsLog:[],exFieldsBuy:[],backlinks:[],partnerApps:[],posts:[],paytr:{},
+  sms:{on:false,provider:'whatsapp',header:'',user:'',pass:'',userPrice:0,ev:{},tpl:{}},smsLog:[],exFieldsBuy:[],backlinks:[],partnerApps:[],posts:[],paytr:{},
   support:{mode:'closed',hours:{},ai:false,canned:[]},tkSeq:1,exOffers:[],ofSeq:0,covers:{},vip:JSON.parse(JSON.stringify(VIP0)),epProducts:[],epOrders:[],epSeq:0,
   slides:[],winback:[],ledger:[],mailLog:[],cryptoNets:[],mail:{on:false,ev:{},tpl:{}}}; }
 /* Çok dosyalı derlemede 42-views-member.js'in setTimeout(tcHashFill) çağrısı, tanımı içeren 71-modals.js yüklenmeden çalışabilir.

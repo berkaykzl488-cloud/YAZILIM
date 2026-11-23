@@ -1,7 +1,7 @@
 <?php
 /**
  * Yönetim › Entegrasyonlar (P3): sahip API bağlantılarını yalnız panelden kurar; hiçbir dosya düzenlenmez.
- *   GET  admin/integrations                 [muhasebe|odeme]  servisler (maskeli), PayTR bildirim adresi, ETBİS, e-posta/SMS durumu
+ *   GET  admin/integrations                 [muhasebe|odeme]  servisler (maskeli), PayTR bildirim adresi, ETBİS, e-posta/WhatsApp durumu
  *   PUT  admin/integrations/{svc}           paytr [odeme] · parasut, bizimhesap [muhasebe] — {values:{…}, clear?:[alan]}
  *                                           boş ya da maskeli gizli alan eski değeri korur
  *   POST admin/integrations/{svc}/test      "Bağlantıyı test et"
@@ -50,7 +50,8 @@ return function (Router $r) {
         $mail = Settings::get('mail', $db);
         $sms = Settings::get('sms', $db);
         $out['mail'] = ['on' => !empty($mail['on']), 'provider' => (string)$mail['provider'], 'canEdit' => Perm::has($u, 'sms')];
-        $out['sms'] = ['on' => !empty($sms['on']), 'provider' => (string)$sms['provider']];
+        // telefon kanalı (iç ad sms) = WhatsApp Business Cloud API
+        $out['sms'] = ['on' => !empty($sms['on']), 'provider' => 'whatsapp', 'configured' => \YP\Sms\WhatsApp::configured($sms), 'canEdit' => Perm::has($u, 'sms')];
         $out['paytr'] = ['configured' => Paytr::configured(), 'testMode' => (bool)Paytr::testMode()];
         return $out;
     };

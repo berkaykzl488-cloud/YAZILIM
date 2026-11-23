@@ -21,7 +21,7 @@ const p1AdmLoad = (k, path, fn, ttl) => need(k, () => call('GET', path, null, { 
 const p1AdmSrv = () => { const c = API.cache['adm:servers']; return c && c.v && Array.isArray(c.v.servers) ? c.v.servers : []; };
 const P1_SORT = [['yeni', 'En yeni'], ['ucuz', 'En ucuz'], ['pahali', 'En pahalı'], ['eski', 'En eski']];
 const P1_SOON = {
-  sms: 'Üyeye SMS ile ulaşma çok yakında açılıyor.'
+  sms: 'Üyeye WhatsApp ile ulaşma çok yakında açılıyor.'
 };
 
 /* ---- ilan listesi dilimi: need('L:<yol>?<sorgu>') → {ids, next, path, qs, lim}; "Daha fazla" aynı nesneye ekler ---- */
@@ -155,6 +155,8 @@ vServer = function (id, cat) {
     if (mine && l.status === 'kaldirildi') h = h.replace(/<button class="btn btn-bad btn-sm" data-act="unlist"[^>]*>[^<]*<\/button>/, '');
     h = h.replace(`<div class="seller">${av(u)}<div><b>${esc(u.name)}</b>`, `<div class="seller">${av(u)}<div><a href="#uye-${esc(u.id)}" class="p1seller"><b>${esc(u.name)}</b></a>`);
     h = h.replace(`<a href="#mesajlar-${u.id}">${esc(u.name)}</a>`, `<a href="#uye-${esc(u.id)}">${esc(u.name)}</a>`);
+    // ücretli "SMS ile ulaş" canlıda yok (0.6.1: SMS kaldırıldı; WhatsApp ile üyeden üyeye ileti Meta şablon kuralına uymaz)
+    h = h.replace(/<button class="btn btn-sm" data-act="sms-user"[^>]*>[^<]*<\/button>/, '');
     return h; }; }
 
 /* satıcı profili: herkese açık bilgiler + aktif ilanları ("Daha fazla") */

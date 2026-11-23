@@ -58,7 +58,7 @@ return function (Router $r) {
             $set['email'] = $email;
         }
         if (isset($set['tel']) && $set['tel'] === '' && $u['tfa'] === 'sms') {
-            throw HttpError::validation(['tel' => 'SMS ile 2 adımlı doğrulama açıkken telefon silinemez.']);
+            throw HttpError::validation(['tel' => 'WhatsApp ile 2 adımlı doğrulama açıkken telefon silinemez.']);
         }
         if ($newPass !== null) {
             $set['pass_hash'] = Auth::hash($newPass);

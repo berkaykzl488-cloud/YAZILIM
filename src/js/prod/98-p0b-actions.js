@@ -37,7 +37,7 @@ pF('profile',async(f)=>{ const u=me(); if(!u) return; const b={tel:v_('pf_tel').
   const np=v_('pf_pass'); if(np) b.password=np; const cur=v_('pf_cur'); if(cur) b.current_password=cur;
   await call('PUT','me/profile',b,{key:formKey(f)}); render(); });
 pA('tfa-save',async()=>{ const u=me(); const v=(document.querySelector('input[name=tfa]:checked')||{}).value||''; if(v===(u.tfa||'')) return toast('Değişiklik yok.');
-  if(v==='sms'&&!u.tel) return toast('Önce profilinize telefon ekleyin.',true); if(v==='mail'&&!u.email) return toast('Önce profilinize e-posta ekleyin.',true);
+  if(v==='sms'&&!u.tel) return toast('WhatsApp ile kod için önce profilinize cep telefonunuzu ekleyin.',true); if(v==='sms'&&!API.smsOn) return toast('WhatsApp ile doğrulama şu an kullanılamıyor.',true); if(v==='mail'&&!u.email) return toast('Önce profilinize e-posta ekleyin.',true);
   const j=await call('POST','me/tfa',{tfa:v},{silent:true}); pTfa(Object.assign({purpose:v?'enable':'disable'},j.tfa)); });
 pF('ibanadd',async(f)=>{ await call('POST','me/ibans',{bank:v_('ia_b'),name:v_('ia_n').trim(),iban:v_('ia_i').replace(/\s/g,'').toUpperCase()},{key:formKey(f)}); render(); });
 pA('iban-del',async(d)=>{ await call('DELETE','me/ibans/'+encodeURIComponent(d.id)); render(); });
@@ -61,19 +61,23 @@ pA('staff-del',async(d)=>{ await call('DELETE','admin/staff/'+encodeURIComponent
 ACT['user-open']=(d)=>{ if(!can('uye')) return toast('Bu işlem için yetkiniz yok.',true); mUser(d.id); };
 pA('u-ver',async(d)=>{ const j=await call('POST','admin/users/'+encodeURIComponent(d.id)+'/verify'); apiUpsertUser(j.data.user); closeModal(); render(); });
 pA('u-ban',async(d)=>{ const j=await call('POST','admin/users/'+encodeURIComponent(d.id)+'/ban'); apiUpsertUser(j.data.user); needDrop('adm:today'); closeModal(); render(); });
-/* ---- Yönetim: e-posta & SMS ---- */
+/* ---- Yönetim: e-posta & WhatsApp (iç ad sms) ---- */
 CHG.pmprov=(el)=>{ const f=el.closest('form'); if(!f) return; f.querySelectorAll('[data-prov]').forEach(g=>{ g.hidden=g.dataset.prov!==el.value; }); };
 const pIfSet = (b,k,id) => { const v=v_(id); if(v!=='') b[k]=v; };
 pF('mailset',async(f)=>{ const b={on:$('#ml_on').checked,provider:v_('ml_pv'),fromName:v_('ml_fn').trim(),from:v_('ml_fr').trim(),hourly:+v_('ml_hr')||80,fallback:$('#ml_fb').checked,
     smtp_host:v_('ml_h').trim(),smtp_port:+v_('ml_p')||587,smtp_sec:v_('ml_sc'),smtp_user:v_('ml_u').trim()};
   pIfSet(b,'brevo_key','ml_bk'); pIfSet(b,'mailjet_key','ml_mk'); pIfSet(b,'mailjet_secret','ml_ms'); pIfSet(b,'smtp_pass','ml_pw');
   await call('PUT','admin/settings/mail',b,{key:formKey(f)}); needDrop('adm:mail'); admDirtyClear(); render(); });
-pF('smsset',async(f)=>{ const b={on:$('#sm_on').checked,provider:v_('sm_p')||'netgsm',header:v_('sm_h').trim(),user:v_('sm_u').trim(),hourly:+v_('sm_hr')||60}; pIfSet(b,'pass','sm_pw');
-  await call('PUT','admin/settings/sms',b,{key:formKey(f)}); needDrop('adm:mail'); admDirtyClear(); render(); });
+pF('smsset',async(f)=>{ const b={on:$('#sm_on').checked,provider:'whatsapp',hourly:+v_('sm_hr')||60,wa_phone_id:v_('sm_pid').replace(/\s/g,''),wa_waba_id:v_('sm_waba').replace(/\s/g,''),
+    wa_otp_tpl:v_('sm_ot').trim(),wa_otp_lang:v_('sm_ol').trim()||'tr',wa_note_on:$('#sm_non').checked,wa_note_tpl:v_('sm_nt').trim(),wa_note_lang:v_('sm_nl').trim()||'tr',wa_mkt_tpl:v_('sm_mt').trim(),wa_mkt_lang:v_('sm_ml').trim()||'tr'};
+  pIfSet(b,'wa_token','sm_tok');
+  const j=await call('PUT','admin/settings/sms',b,{key:formKey(f)}); P_WACHK=null; if(j&&j.data&&j.data.sms) API.smsOn=!!j.data.sms.on; needDrop('adm:mail'); admDirtyClear(); render(); });
+ADM_ACT['wa-check']='sms';
+pA('wa-check',async()=>{ const j=await call('POST','admin/sms/check',{},{silent:true}); P_WACHK=j.data||null; toast(j.msg,!(j.data&&j.data.ok)); render(); });
 pF('tfatrust',async(f)=>{ const n=Math.round(+v_('tt_min')); if(!(n>=0&&n<=43200)){ toast('0 ile 43200 dakika arasında bir sayı yazın.',true); return; }
   await call('PUT','admin/settings/tfa',{trustMin:n},{key:formKey(f)}); needDrop('adm:mail'); render(); });
 pF('mailtest',async()=>{ const j=await call('POST','admin/mail/test',{to:v_('mt_to').trim()},{silent:true}); toast(j.msg,!(j.data&&j.data.sent)); needDrop('adm:outbox','adm:mail'); });
-pF('smstest',async()=>{ const j=await call('POST','admin/sms/test',{to:v_('st_to').trim()},{silent:true}); toast(j.msg,!(j.data&&j.data.sent)); needDrop('adm:outbox','adm:mail'); });
+pF('smstest',async()=>{ const j=await call('POST','admin/sms/test',{to:v_('st_to').trim()},{silent:true}); toast(j.msg,!(j.data&&j.data.sent)); needDrop('adm:outbox','adm:mail'); }); // WhatsApp deneme (kod 123456)
 ACT['p-outbox']=()=>{ needDrop('adm:outbox'); render(); };
 ACT['p-reload']=()=>location.reload();
 /* demo hesap değiştirme ve demo sıfırlama canlı sitede yok */

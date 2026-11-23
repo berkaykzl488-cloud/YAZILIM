@@ -228,7 +228,7 @@ chk "kod girilmeden oturum yok → 401" '[ "$CODE" = 401 ]'
 api "$J_A" POST auth/tfa/resend "{\"id\":$TID}" -H "X-CSRF-Token: $CS_A"
 chk "60 sn dolmadan yeniden gönder → 429" '[ "$CODE" = 429 ] && [ "$(j .code)" = rate_limit ] && echo "$HDRS" | grep -qi "^retry-after:"'
 api "$J_A" POST auth/tfa/switch "{\"id\":$TID}" -H "X-CSRF-Token: $CS_A"
-chk "SMS kapalıyken kanal değiştir → 422 Türkçe" '[ "$CODE" = 422 ] && [ "$(j .code)" = tfa_channel ]'
+chk "WhatsApp kapalıyken kanal değiştir → 422 Türkçe" '[ "$CODE" = 422 ] && [ "$(j .code)" = tfa_channel ] && [ "$(j .error)" = "WhatsApp ile doğrulama şu an kullanılamıyor." ]'
 api "$J_B" POST auth/tfa/verify "{\"id\":$TID,\"code\":\"123456\"}" -H "X-CSRF-Token: $CS_B"
 chk "başka oturum A'nın girişini doğrulayamaz" '[ "$CODE" = 400 ] && [ "$(j .code)" = tfa_gone ]'
 CODE6=$(otp_for deniz@ornek.com)
@@ -249,7 +249,7 @@ J_T="$RUN/t.jar"; CS_T=$(csrf_of "$J_T")
 api "$J_T" POST auth/login '{"login":"Deniz_TR","password":"Yeni-Sifre-123"}' -H "X-CSRF-Token: $CS_T"
 chk "başka tarayıcı → yine kod istenir" '[ "$CODE" = 200 ] && [ "$(j .tfa.purpose)" = login ] && [ "$(j .data.me)" = null ]'
 J_T="$RUN/t2.jar"; : > "$J_T"
-printf '127.0.0.1\tFALSE\t/\tFALSE\t0\tYPT\t%s\n' "$(awk '$6=="YPT"{print $7}' "$J_A" | sed 's/.$/0/')" >> "$J_T"
+printf '127.0.0.1\tFALSE\t/\tFALSE\t0\tYPT\t%s\n' "$(awk '$6=="YPT"{print $7}' "$J_A" | sed 's/0$/X/;t;s/.$/0/')" >> "$J_T"
 CS_T=$(csrf_of "$J_T")
 rl_reset
 api "$J_T" POST auth/login '{"login":"Deniz_TR","password":"Yeni-Sifre-123"}' -H "X-CSRF-Token: $CS_T"
@@ -263,7 +263,7 @@ chk "2FA kapatma (kodla)" '[ "$CODE" = 200 ] && [ "$(j .patch.me.tfa)" = "" ]'
 api "$J_A" POST me/tfa '{"tfa":""}' -H "X-CSRF-Token: $CS_A"
 chk "değişiklik yok → 400" '[ "$CODE" = 400 ] && [ "$(j .error)" = "Değişiklik yok." ]'
 api "$J_A" POST me/tfa '{"tfa":"sms"}' -H "X-CSRF-Token: $CS_A"
-chk "SMS kapalıyken SMS 2FA → 422" '[ "$CODE" = 422 ]'
+chk "WhatsApp kapalıyken WhatsApp 2FA → 422 Türkçe" '[ "$CODE" = 422 ] && [ "$(j .error)" = "WhatsApp ile doğrulama şu an kullanılamıyor." ]'
 
 echo "=== 5. Hız sınırları ==="
 rl_reset
@@ -331,14 +331,15 @@ MATRIX=(
   "GET admin/search?q=den -"
   "GET admin/settings/mail -"
   "PUT admin/settings/mail {\"fromName\":\"x\"}"
-  "PUT admin/settings/sms {\"header\":\"X\"}"
+  "PUT admin/settings/sms {\"hourly\":50}"
   "POST admin/mail/test {\"to\":\"t@ornek.com\"}"
   "POST admin/sms/test {\"to\":\"05551112233\"}"
+  "POST admin/sms/check -"
   "GET admin/outbox -"
 )
 # beklenen: anonim, üye(A), S2 (yalnız ara), S1 (uye+calisan)
-EXP_S2=(403 403 403 403 200 403 403 403 200 200 403 403 403 403 403 403)
-EXP_S1=(200 SKIP SKIP 403 200 200 200 200 200 403 403 403 403 403 403 403)
+EXP_S2=(403 403 403 403 200 403 403 403 200 200 403 403 403 403 403 403 403)
+EXP_S1=(200 SKIP SKIP 403 200 200 200 200 200 403 403 403 403 403 403 403 403)
 for i in "${!MATRIX[@]}"; do
   read -r M P D <<< "${MATRIX[$i]}"; [ "$D" = "-" ] && D=""
   api "$J_X" "$M" "$P" "$D" -H "X-CSRF-Token: x"
@@ -411,7 +412,7 @@ chk "mevcut üyeyi çalışan yap" '[ "$CODE" = 200 ] && [ "$(j .data.user.staff
 api "$J_B" GET poll ""
 chk "çalışan yapılan üye yeniden giriş yapmalı (session_ver)" '[ "$CODE" = 401 ]'
 
-echo "=== 8. E-posta/SMS ayarları, cron, eski API ==="
+echo "=== 8. E-posta / WhatsApp ayarları, cron, eski API ==="
 api "$J_ADM" PUT admin/settings/mail '{"on":true,"provider":"brevo","from":"noreply@yangpazar.com","fromName":"Yang Test","brevo_key":"xkeysib-GIZLIANAHTAR-123456","hourly":120}' -H "X-CSRF-Token: $CS_ADM"
 chk "mail ayarı kaydedildi, anahtar maskeli" '[ "$CODE" = 200 ] && [ "$(j .data.mail.brevo_key)" = "••••••56" ] && ! echo "$BODY" | grep -q GIZLIANAHTAR'
 api "$J_ADM" PUT admin/settings/mail '{"brevo_key":"••••••56","fromName":"Yang"}' -H "X-CSRF-Token: $CS_ADM"
@@ -420,8 +421,10 @@ chk "maskeli değer gönderilince anahtar korunur" '[ "$(j .data.mail.brevo_key)
 chk "veritabanında Brevo anahtarı düz metin değil" '! grep -a -q GIZLIANAHTAR "$RUN/storage/test.sqlite" "$RUN"/storage/*.sqlite-wal 2>/dev/null'
 api "$J_ADM" PUT admin/settings/mail '{"on":true,"from":"gecersiz"}' -H "X-CSRF-Token: $CS_ADM"
 chk "geçersiz gönderen → 422" '[ "$CODE" = 422 ]'
-api "$J_ADM" PUT admin/settings/sms '{"on":true,"user":"8503000000"}' -H "X-CSRF-Token: $CS_ADM"
-chk "SMS açmak için şifre/başlık gerekli → 422" '[ "$CODE" = 422 ]'
+api "$J_ADM" PUT admin/settings/sms '{"on":true,"wa_phone_id":"106540352242922"}' -H "X-CSRF-Token: $CS_ADM"
+chk "WhatsApp açmak için erişim anahtarı gerekli → 422 (Türkçe)" '[ "$CODE" = 422 ] && echo "$BODY" | grep -q "erişim anahtarı"'
+api "$J_ADM" GET admin/settings/mail ""
+chk "WhatsApp ayarı: sağlayıcı yalnız WhatsApp, NetGSM yok, kapalı" '[ "$(j .data.sms.provider)" = whatsapp ] && [ "$(j ".data.providers.sms | keys | join(\",\")")" = whatsapp ] && [ "$(j .data.sms.on)" = false ] && ! echo "$BODY" | grep -qi netgsm'
 api "$J_ADM" PUT admin/settings/mail '{"on":false,"provider":"","fallback":false}' -H "X-CSRF-Token: $CS_ADM"
 api "$J_ADM" POST admin/mail/test '{"to":"yok@ornek.com"}' -H "X-CSRF-Token: $CS_ADM"
 chk "sağlayıcı yok + yedek kapalı → gönderilemedi, sendmail kullanılmadı" '[ "$CODE" = 200 ] && [ "$(j .data.sent)" = false ] && ! grep -qs "yok@ornek.com" "$RUN/sendmail.log"'

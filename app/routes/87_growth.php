@@ -229,7 +229,7 @@ return function (Router $r) {
         $days = in_array($days, [14, 30, 60, 90, 180], true) ? $days : 30;
         $wb = \YP\Settings::get('winback', $db);
         return ['data' => ['days' => $days, 'users' => Winback::inactive($db, $days), 'history' => Winback::history($db),
-            'msg' => is_array($wb) && isset($wb['msg']) ? $wb['msg'] : '', 'mailOn' => !empty(\YP\Settings::get('mail', $db)['on']), 'smsOn' => !empty(\YP\Settings::get('sms', $db)['on']),
+            'msg' => is_array($wb) && isset($wb['msg']) ? $wb['msg'] : '', 'mailOn' => !empty(\YP\Settings::get('mail', $db)['on']), 'smsOn' => \YP\Sms\Sms::canSend(\YP\Settings::get('sms', $db), 'winback'),
             'canGift' => \YP\Perm::has(Auth::$user, 'bakiye')]];
     }, ['auth' => 'staff', 'perm' => 'uye', 'csrf' => false]);
 
@@ -241,7 +241,7 @@ return function (Router $r) {
             $x = Winback::send($db, $staff, $in);
             $parts = [$x['n'] . ' üyeye gönderildi'];
             if ($x['mail'] || $x['sms']) {
-                $parts[] = ($x['mail'] ? $x['mail'] . ' e-posta' : '') . ($x['mail'] && $x['sms'] ? ', ' : '') . ($x['sms'] ? $x['sms'] . ' SMS' : '') . ' sıraya alındı (saatlik sınırla)';
+                $parts[] = ($x['mail'] ? $x['mail'] . ' e-posta' : '') . ($x['mail'] && $x['sms'] ? ', ' : '') . ($x['sms'] ? $x['sms'] . ' WhatsApp' : '') . ' sıraya alındı (saatlik sınırla)';
             }
             if ($x['skipped']) {
                 $parts[] = $x['skipped'] . ' ileti üyenin tercihi nedeniyle gönderilmedi';

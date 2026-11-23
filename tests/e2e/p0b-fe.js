@@ -217,11 +217,11 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     await go(M, 'yonetim/sms/kayitlar'); await M.waitForSelector('.apage table'); await M.waitForTimeout(300);
     const logT = await tc(M, '.apage');
     ok('gönderim kayıtları: deneme e-postası listede, doğrulama kodları gizli', logT.includes('sahip@ornek.com') && !/\b\d{6}\b/.test(logT.split('E-posta kayıtları')[1].replace(/\d{2}\.\d{2}|\d{2}:\d{2}/g, '')) && logT.includes('••••••'));
-    // SMS ayarları
-    await go(M, 'yonetim/sms/sms'); await M.waitForSelector('form[data-form=smsset]');
-    await M.fill('#sm_h', 'YANGPAZAR'); await M.fill('#sm_u', '8501234567'); await M.fill('#sm_pw', 'sms-gizli-sifre');
-    await M.click('form[data-form=smsset] .asave button'); ok('SMS: ayarlar kaydedildi', await toast(M, 'SMS ayarları kaydedildi'));
-    await M.waitForTimeout(300); ok('SMS: şifre geri gönderilmez', !(await M.content()).includes('sms-gizli-sifre'));
+    // WhatsApp ayarları (0.6.1: SMS/NetGSM kaldırıldı; ayrıntılı testler tests/e2e/wa-fe.js)
+    await go(M, 'yonetim/sms/whatsapp'); await M.waitForSelector('form[data-form=smsset]');
+    await M.fill('#sm_pid', '106540352242922'); await M.fill('#sm_tok', 'EAAGwhatsappGIZLIanahtar123');
+    await M.click('form[data-form=smsset] .asave button'); ok('WhatsApp: ayarlar kaydedildi', await toast(M, 'WhatsApp ayarları kaydedildi'));
+    await M.waitForTimeout(300); ok('WhatsApp: erişim anahtarı geri gönderilmez', !(await M.content()).includes('whatsappGIZLI') && !/NetGSM/i.test(await txt(M, '.apage')));
 
     /* ---------- 13. çalışan girişi: yalnız yetkili bölümler ---------- */
     const T = await mk('calisan');
@@ -229,7 +229,7 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     await go(T, 'yonetim'); await T.waitForSelector('.asb-nav');
     const nav = await txt(T, '.asb-nav');
     ok('çalışan: menüde Bugün ve Üyeler var', nav.includes('Bugün') && nav.includes('Üyeler'));
-    ok('çalışan: yetkisiz bölümler menüde yok', !/Çalışanlar|E-posta & SMS|Ödemeler|Para çekme|Site ayarları/.test(nav), nav);
+    ok('çalışan: yetkisiz bölümler menüde yok', !/Çalışanlar|E-posta & (SMS|WhatsApp)|Ödemeler|Para çekme|Site ayarları/.test(nav), nav);
     await go(T, 'yonetim/calisan'); await T.waitForTimeout(400);
     ok('çalışan: yetkisiz bölüm adresi açılmaz', !(await txt(T, '.apage')).includes('Çalışan ekle') && !/calisan/.test(await T.evaluate(() => location.hash)));
     const st403 = await T.evaluate(async () => (await fetch('api/v1/admin/staff', { credentials: 'same-origin' })).status);

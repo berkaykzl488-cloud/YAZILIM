@@ -77,11 +77,11 @@ final class Mailer
             return ['ok' => false, 'id' => null, 'error' => 'Alıcı e-posta adresi geçersiz.', 'retry' => false, 'provider' => null];
         }
         if (!Mime::validAddr($this->from)) {
-            return ['ok' => false, 'id' => null, 'error' => 'Gönderen e-posta adresi ayarlanmamış (Yönetim › E-posta & SMS).', 'retry' => true, 'provider' => null];
+            return ['ok' => false, 'id' => null, 'error' => 'Gönderen e-posta adresi ayarlanmamış (Yönetim › E-posta & WhatsApp).', 'retry' => true, 'provider' => null];
         }
         $m = ['to' => $to, 'toName' => $toName, 'from' => $this->from, 'fromName' => $this->fromName,
               'subject' => (string)$subject, 'text' => (string)$text, 'html' => $html];
-        $err = 'E-posta sağlayıcısı ayarlanmamış (Yönetim › E-posta & SMS).';
+        $err = 'E-posta sağlayıcısı ayarlanmamış (Yönetim › E-posta & WhatsApp).';
         $retry = true;
         if ($this->primary) {
             $r = $this->primary->send($m);

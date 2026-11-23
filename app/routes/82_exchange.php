@@ -19,7 +19,7 @@
  * Ayarlar [borsa_ayar]:
  *   GET  admin/ex/settings · PUT|POST admin/ex/markets · DELETE admin/ex/markets/{id}
  *   PUT|POST admin/ex/fields/{set} (set: buy|sell) · DELETE admin/ex/fields/{set}/{key} · POST admin/ex/fields/{set}/{key}/up
- *   PUT  admin/ex/notify {mail:{borsa,call,…}, sms:{…}}  borsa / EP e-posta ve SMS bildirimleri
+ *   PUT  admin/ex/notify {mail:{borsa,call,…}, sms:{…}}  borsa / EP e-posta ve WhatsApp (iç ad sms) bildirimleri
  */
 if (!defined('YP_APP')) { http_response_code(404); exit; }
 
@@ -343,7 +343,7 @@ return function (Router $r) {
     $r->post('admin/ex/orders/{id}/call', function (Req $q, Db $db) use ($op) {
         return $op($q, $db, function (Db $db, $me, $o, $in) {
             Exchange::call($db, $me, $o, isset($in['msg']) ? $in['msg'] : '');
-            return 'Alıcıya bildirim ve SMS gönderildi.';
+            return \YP\Sms\Sms::canSend(Settings::get('sms', $db), 'call') ? 'Alıcıya bildirim ve WhatsApp mesajı gönderildi.' : 'Alıcıya bildirim gönderildi.';
         });
     }, $S('borsa'));
     $r->post('admin/ex/orders/{id}/info', function (Req $q, Db $db) use ($op) {
@@ -412,7 +412,7 @@ return function (Router $r) {
             'stock' => (object)$stock,
             'notify' => ['mail' => ['borsa' => $ev($mail, 'borsa', false), 'call' => $ev($mail, 'call', false), 'ep_code' => $ev($mail, 'ep_code', false), 'borsa_off' => $ev($mail, 'borsa_off', false)],
                 'sms' => ['borsa' => $ev($sms, 'borsa', false), 'call' => $ev($sms, 'call', false), 'ep_code' => $ev($sms, 'ep_code', false), 'borsa_off' => $ev($sms, 'borsa_off', false)],
-                'mailOn' => !empty($mail['on']), 'smsOn' => !empty($sms['on'])]], $fieldsOut($db));
+                'mailOn' => !empty($mail['on']), 'smsOn' => \YP\Sms\Sms::canSend($sms, 'call')]], $fieldsOut($db));
     };
     $r->get('admin/ex/settings', function (Req $q, Db $db) use ($settingsOut) {
         return ['data' => $settingsOut($db)];
