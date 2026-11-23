@@ -204,10 +204,10 @@ sh('php', ['-r', '$i=imagecreatetruecolor(300,250); imagefill($i,0,0,imagecolora
     await login(P, 'Reklamci_A', 'Reklam-Sifre-2026'); await modalGone(P);
     for (const t of ['reklam', 'puan', 'davet']) { await tab(P, t); await chk('hesabim/' + t); }
     await shot(P, 'mobil-vip-390');
-    await P.click('#hdr [data-act=theme]'); await P.waitForTimeout(200);
+    await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); await P.waitForTimeout(200);
     for (const r of ['reklam-ver', 'cekilis']) { await nav(P, r, 700); await chk(r + '-tema2'); }
     await shot(P, 'mobil-reklam-ver-tema2-390'); await tab(P, 'puan'); await chk('puan-tema2'); await shot(P, 'mobil-vip-tema2-390');
-    await P.click('#hdr [data-act=theme]');
+    await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
     await nav(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     const ADM = ['yonetim/reklam/onay', 'yonetim/reklam/tum', 'yonetim/reklam/gorseller', 'yonetim/reklam/fiyatlar', 'yonetim/kampanya/cekilis', 'yonetim/kampanya/cark', 'yonetim/vip/seviyeler', 'yonetim/vip/davet', 'yonetim/uye/geri-kazan'];

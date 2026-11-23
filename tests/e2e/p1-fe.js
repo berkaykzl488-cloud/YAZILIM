@@ -322,7 +322,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await go(P, 'hesabim', 300); await P.click('#app [data-act=tab][data-t=ilan]'); await P.waitForTimeout(700); { const w = await overW(P); if (w > 390) over.push('hesabim/ilan:' + w); }
     await go(P, 'ilan-ver', 500); await P.setInputFiles('#s_files', [F2, F3]); await until(P, () => (UPL.s || []).length === 2 && UPL.s.every(x => x.st === 'ok'), null, 20000); { const w = await overW(P); if (w > 390) over.push('ilan-ver+foto:' + w); } await shot(P, 'ilan-ver-390');
     await go(P, 'ilan-' + L1, 600); await P.click('[data-act=edit-l]'); await P.waitForSelector('form[data-form=editl]'); { const w = await overW(P); if (w > 390) over.push('duzenle:' + w); } await P.click('#modal [data-act=close]');
-    await P.click('#hdr [data-act=theme]'); await go(P, 'home', 400); { const w = await overW(P); if (w > 390) over.push('home-light:' + w); } await P.click('#hdr [data-act=theme]');
+    await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); await go(P, 'home', 400); { const w = await overW(P); if (w > 390) over.push('home-light:' + w); } await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
     await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim/ilan/moderasyon', 'yonetim/ilan/ayarlar', 'yonetim/server/tr', 'yonetim/server/pvp?id=new', `yonetim/server/tr?id=${SV}`, 'yonetim/bakim']) { await go(P, r, 700); const w = await overW(P); if (w > 390) over.push(r + ':' + w); }

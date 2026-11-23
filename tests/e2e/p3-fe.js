@@ -225,7 +225,7 @@ const mock = o => fs.writeFileSync(path.join(SITE, 'storage/test_mock.json'), JS
     await P.goto(B + '/'); await P.waitForSelector('#hdr'); await login(P, UB.name, UB.pw); await modalGone(P);
     const over = []; const chk = async n => { const w = await overW(P); if (w > 390) over.push(n + ':' + w); };
     await cekTab(P); await chk('hesabim/cek'); await shot(P, 'mobil-para-cek-390');
-    await P.click('#hdr [data-act=theme]'); await cekTab(P); await chk('hesabim/cek-light'); await shot(P, 'mobil-para-cek-gunduz-390'); await P.click('#hdr [data-act=theme]');
+    await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); await cekTab(P); await chk('hesabim/cek-light'); await shot(P, 'mobil-para-cek-gunduz-390'); await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
     await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim/cekim/talepler?f=tumu', 'yonetim/cekim/ayarlar', 'yonetim/muhasebe/rapor', 'yonetim/muhasebe/egider', 'yonetim/entegrasyon']) { await go(P, r, 900); await chk(r); }

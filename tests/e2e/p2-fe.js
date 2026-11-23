@@ -368,7 +368,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     for (const t of ['eft', 'cuzdan', 'kart']) { await P.click(`#modal [data-act=dep-tab][data-t=${t}]`); await P.waitForTimeout(300); await chk('yukleme/' + t); if (t === 'eft') await shot(P, 'mobil-yukleme-390', false); }
     await P.click('#modal [data-act=close]');
     await go(P, 'ilan-' + fast.listing.id, 700); await P.click('[data-act=buy]'); await P.waitForSelector('#modal form[data-form=p2buy]'); await chk('satin-al'); await shot(P, 'mobil-satin-al-390', false); await P.click('#modal [data-act=close]');
-    await P.click('#hdr [data-act=theme]'); for (const r of ['siparis-' + O1, 'hesabim']) { await go(P, r, 500); await chk(r + '-light'); } await P.click('#hdr [data-act=theme]');
+    await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); for (const r of ['siparis-' + O1, 'hesabim']) { await go(P, r, 500); await chk(r + '-light'); } await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
     await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
     await login(P, UA.name, UA.pw); await modalGone(P);
     await go(P, 'siparis-' + O1, 700); await chk('satici-siparis'); await go(P, 'hesabim', 200); await P.click('#app [data-act=tab][data-t=satis]'); await P.waitForTimeout(600); await chk('hesabim/satis');

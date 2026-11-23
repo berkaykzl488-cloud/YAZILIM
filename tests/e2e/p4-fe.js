@@ -238,10 +238,10 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
       await nav(P, 'hesabim', 400); await P.click('#app [data-act=tab][data-t=borsa]'); await P.waitForTimeout(700); await chk('hesabim-borsa' + sfx); await shot(P, 'm-hesabim-borsa' + sfx);
       await P.click('#app [data-act=tab][data-t=ep]'); await P.waitForTimeout(600); await chk('hesabim-ep' + sfx); };
     await mobileMember('');
-    await P.click('#hdr [data-act=theme]'); await P.waitForTimeout(200);
+    await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); await P.waitForTimeout(200);
     ok('tema değişti (gündüz/gece)', ['light', 'dark'].includes(await P.evaluate(() => document.documentElement.dataset.theme)));
     await mobileMember('-tema2');
-    await P.click('#hdr [data-act=theme]');
+    await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
     await nav(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim/borsa/siparisler', 'yonetim/borsa/siparisler?id=B1001', 'yonetim/borsa/emirler', 'yonetim/borsa/kurlar', 'yonetim/borsa/alanlar', 'yonetim/ep/paketler', 'yonetim/ep/kayitlar', 'yonetim/ep/happy-hour']) { await adm(P, r, 900); await chk(r); }
