@@ -35,7 +35,10 @@ function bxStep(n, check) { const f = $('#modal .bx-sheet form[data-form=exoffer
   if (check && n > cur) { const bad = [...f.querySelectorAll(`section[data-step="${cur}"] input, section[data-step="${cur}"] select`)].find(el => !el.checkValidity()); if (bad) { bad.reportValidity(); return false; } }
   f.dataset.step = String(n); f.querySelectorAll('section[data-step]').forEach(s => { s.hidden = s.dataset.step !== String(n); });
   f.querySelectorAll('[data-foot]').forEach(s => { s.hidden = s.dataset.foot !== String(n); }); const t = $('#bx_stp'); if (t) t.textContent = n + '/2';
-  const b = f.querySelector('.md-b'); if (b) b.scrollTop = 0; setTimeout(() => { const i = f.querySelector(`section[data-step="${n}"] input, section[data-step="${n}"] select`); if (i && n > 1) i.focus({ preventScroll: true }); }, 30); return true; }
+  const b = f.querySelector('.md-b'); if (b) b.scrollTop = 0;
+  // gizlenen Devam/Geri düğmesindeki odak adımın kendisine taşınır (eşzamanlı; klavyeyi kendiliğinden açmaz)
+  const a = document.activeElement; if (!a || a === document.body || a.closest('[hidden]') || a.closest('[data-foot]')) { const sec = f.querySelector(`section[data-step="${n}"]`); if (sec) { sec.tabIndex = -1; sec.focus({ preventScroll: true }); } }
+  return true; }
 const bxStepOf = k => /^(ex_qty|ex_price|qty|price)$/.test(k) ? 1 : 2;
 { const f0 = FORM.exorder; FORM.exorder = (f) => { if (!f.closest || !f.closest('.bx-sheet')) return f0(f);
     const bad = [...f.querySelectorAll('input,select')].find(el => !el.checkValidity()); if (bad) { bad.reportValidity(); return; }

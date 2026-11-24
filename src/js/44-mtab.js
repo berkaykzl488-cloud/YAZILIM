@@ -63,9 +63,9 @@ if (MTAB_MQ) { let mt = 0; const ch = () => { clearTimeout(mt); mt = setTimeout(
   if (MTAB_MQ.addEventListener) MTAB_MQ.addEventListener('change', ch); else if (MTAB_MQ.addListener) MTAB_MQ.addListener(ch); }
 
 /* ---------- ortak alt pencere: mobilde alttan, masaüstünde ortalanmış modal ----------
-   sheetWrap(başlık, gövde, {cls, id, label, foot, form}) — form: gövde + alt bölümü saran <form> öznitelikleri (ör. 'data-form="exorder"') */
+   sheetWrap(başlık, gövde, {cls, id, label, foot, form, attrs}) — form: gövde + alt bölümü saran <form> öznitelikleri (ör. 'data-form="exorder"') */
 function sheetWrap(title, body, o) { o = o || {};
-  return `<div class="md sheet${o.cls ? ' ' + o.cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(o.label || String(title).replace(/<[^>]+>/g, ''))}"${o.id ? ` data-sheet="${esc(o.id)}"` : ''}><div class="sheet-grip" aria-hidden="true"></div><div class="md-h"><h3>${title}</h3><button type="button" class="md-x" data-act="close" aria-label="Kapat">×</button></div>${o.form ? `<form class="sh-form" ${o.form}>` : ''}<div class="md-b">${body}</div>${o.foot ? `<div class="sheet-f">${o.foot}</div>` : ''}${o.form ? '</form>' : ''}</div>`; }
+  return `<div class="md sheet${o.cls ? ' ' + o.cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(o.label || String(title).replace(/<[^>]+>/g, ''))}"${o.id ? ` data-sheet="${esc(o.id)}"` : ''}${o.attrs ? ' ' + o.attrs : ''}><div class="sheet-grip" aria-hidden="true"></div><div class="md-h"><h3>${title}</h3><button type="button" class="md-x" data-act="close" aria-label="Kapat">×</button></div>${o.form ? `<form class="sh-form" ${o.form}>` : ''}<div class="md-b">${body}</div>${o.foot ? `<div class="sheet-f">${o.foot}</div>` : ''}${o.form ? '</form>' : ''}</div>`; }
 const SHEET = { opener: null, key: null };
 const sheetFoc = () => { const d = $('#modal .md[aria-modal="true"]'); return d ? [...d.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null || x === document.activeElement) : []; };
 /** Pencereyi açar; kapanınca odak açan öğeye döner (yeniden çizildiyse aynı data-mtab / data-sheet-opener öğesine). */

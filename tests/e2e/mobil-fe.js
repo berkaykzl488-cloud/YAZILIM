@@ -220,7 +220,7 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await MOB.click(C, `#bxGrid .bx-card[data-id="${X1}"] [data-act=bx-sat]`); await C.waitForSelector('#modal form[data-form=exoffer]');
     await C.fill('#ex_qty', '3'); await C.fill('#ex_price', '9.8'); await C.click('#modal [data-foot="1"] [data-act=bx-step]');
     await C.fill('#exf_f1', 'cem_hesap'); await C.fill('#exf_f2', PW); await C.fill('#exf_f3', 'CemKarakter'); await C.selectOption('#exf_f6', 'Hemen'); await C.check('#ex_ok'); await C.click('#modal button.exgo');
-    await toast(C, 'Emriniz yayında'); await modalGone(C); await until(C, () => document.querySelectorAll('#bxMine .bx-f').length === 2);
+    ok('ikinci emir yayında', await toast(C, 'Emriniz yayında') && await modalGone(C) && await until(C, () => document.querySelectorAll('#bxMine .bx-f').length === 2), await C.evaluate(() => document.querySelector('#toasts').textContent + ' | ' + (document.querySelector('#modal').textContent || '').slice(0, 300) + ' | ' + S.exOffers.map(o => o.id + ':' + o.qty + o.status).join(',') + ' V:' + [...document.querySelectorAll('#modal form input, #modal form select')].map(x => x.id + '=' + (x.type === 'checkbox' ? x.checked : x.value) + (x.checkValidity() ? '' : '!')).join(',') + ' A:' + (document.activeElement || {}).className + ' B:' + ((document.querySelector('#modal button.exgo') || {}).outerHTML || '')));
     const OF2 = await C.evaluate(() => [...document.querySelectorAll('#bxMine .bx-f')].map(x => x.dataset.id).find(id => S.exOffers.find(o => o.id === id && o.qty === 3)));
     await MOB.click(C, `#bxMine .bx-f[data-id="${OF2}"] [data-act=of-cancel]`);
     ok('mobil iptal onay soruyor', await C.waitForSelector('#cfm:not([hidden])', { timeout: 5000 }).then(() => true, () => false));
@@ -240,6 +240,59 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await MOB.click(P, '#bxMine .bx-o [data-act=ex-ready]');
     ok('Geldim, hazırım → "Hazır olduğun bildirildi", nokta kalktı', await toast(P, /hazır/i) && await until(P, () => /Hazır olduğun bildirildi/.test(document.querySelector('#bxMine .bx-o').textContent) && !document.querySelector('#mtab .mtab-dot')));
 
+    /* ---------- 9b. Hesabım › Özetim (390 px): Yapılacaklar, kartlar, profil kartı, menü ---------- */
+    const LS = async (t, pr) => { const r = await pcall(C, 'POST', 'listings', { game: 'metin2', server: SV, cat: 'item', title: t, price: pr, stock: 1, del: '15 dk' }); return r && r.listing ? r.listing.id : JSON.stringify(r); };
+    const La = await LS('Mobil kalkan bir', 20), Lb = await LS('Mobil kalkan iki', 15);
+    const Oa = await pcall(P, 'POST', 'orders', { listing: La, qty: 1, info: 'BoraKarakter' }), Ob = await pcall(P, 'POST', 'orders', { listing: Lb, qty: 1, info: 'BoraKarakter' });
+    ok('B iki ilan satın aldı (C satıcı)', Oa && Oa.order && Ob && Ob.order, JSON.stringify([La, Lb, Oa, Ob]));
+    sq(`UPDATE yp_orders SET status='teslim', delivered_at=${Date.now()} WHERE listing_id=${String(La).replace(/\D/g, '')}`);
+    await P.evaluate(() => apiReboot(true)); await nav(P, 'home', 700);
+    const sumB = await pcall(P, 'GET', 'me/summary');
+    b = await bar(P);
+    ok('Hesabım rozeti = summary.todo.total (açılıştan), ekran okuyucu metni', +sumB.todo.total >= 1 && b.items[4].b === String(sumB.todo.total) && b.items[4].sr === `${sumB.todo.total} bekleyen iş`, JSON.stringify([sumB.todo, b.items[4]]));
+    await MOB.click(P, '#mtab [data-mtab=hesabim]'); await P.waitForTimeout(400); await P.evaluate(() => { ui.tab = 'ozet'; render(); }); await until(P, () => !!document.querySelector('#app .hs-kpis b') && !/…/.test(document.querySelector('#app .hs-kpis').textContent));
+    ok('Hesabım etkin + aria-current; sekme şeridi ve .page-h yok; "☰ Menü" görünür', await onK(P) === 'hesabim' && (await bar(P)).items[4].cur === 'page' && await P.evaluate(() => !document.querySelector('#app nav.tabs') && !document.querySelector('#app .page-h')) && await P.isVisible('#app [data-act=hs-menu]'));
+    const oz = await txt(P, '#app .hs-oz');
+    ok('Yapılacaklar en üstte: "1 siparişte onayın bekleniyor" (Siparişlerim\'e gider)', await P.evaluate(() => document.querySelector('#app .hs-oz').firstElementChild.classList.contains('hs-todo')) && /1 siparişte onayın bekleniyor/.test(oz) && await P.locator('#app .hs-todo [data-act=tab][data-t=alis]').count() >= 1, oz.slice(0, 300));
+    ok('Bakiyem: kullanılabilir, çekilebilir, yükle / çek düğmeleri', /Kullanılabilir bakiye/.test(oz) && /Çekilebilir/.test(oz) && await P.locator('#app .hs-wallet [data-act=deposit]').count() === 1 && await P.locator('#app .hs-wallet [data-act=p2-wd]').count() === 1);
+    const kpi = await P.evaluate(() => Object.fromEntries([...document.querySelectorAll('#app .hs-kpi')].map(k => [k.querySelector('span').textContent, k.querySelector('b').textContent])));
+    ok('KPI: havuzdaki alışlarım / borsa havuzu / bu ay harcama = me/summary', kpi['Havuzdaki alışlarım'] === TLs(sumB.buy.escrow) && kpi['Borsa havuzu'] === TLs(sumB.ex.escrowLeft) && kpi['Bu ay harcama'] === TLs(sumB.buy.monthSpend) && sumB.buy.escrow === 35 && sumB.ex.escrowLeft === 62.5, JSON.stringify([kpi, sumB.buy, sumB.ex]));
+    const prof = await P.evaluate(() => { const c = document.querySelector('#app .hs-prof'); return c ? { n: c.dataset.prof, m: [...c.querySelectorAll('.hs-pi')].map(x => x.dataset.k + ':' + ((x.querySelector('[data-t]') || {}).dataset || {}).t) } : null; });
+    ok('profil kartı: 5 madde, eksikler ilgili sekmeye (T.C. → cek, IBAN → banka, 2FA → profil)', prof && /\/5$/.test(prof.n) && prof.m.includes('tc:cek') && prof.m.includes('iban:banka') && prof.m.includes('tfa:profil'), JSON.stringify(prof));
+    ok('Özetim\'de e-Gider / pusula yok', !/e-?Gider|pusula|ETTN|VUK/i.test(oz));
+    const keys = await P.evaluate(() => hsTabs(me()).map(([k]) => k));
+    const inl = await P.evaluate(() => [...document.querySelectorAll('#app [data-hsinline] [data-act=tab]')].map(x => x.dataset.t));
+    const grpI = await P.evaluate(() => [...document.querySelectorAll('#app [data-hsinline] .mn-sec')].map(x => x.textContent).join('|'));
+    ok('satır içi menü: gruplar Genel · Alışlarım · Satışlarım · Cüzdan · Kazan · Hesap; kaybolan sekme yok', grpI === 'Genel|Alışlarım|Satışlarım|Cüzdan|Kazan|Hesap' && keys.every(k => inl.includes(k)) && keys.length >= 12, JSON.stringify({ grpI, keys, inl }));
+    await chk(P, 'hesabim-ozetim'); await shot(P, '14-ozetim', true);
+    await MOB.click(P, '#app [data-act=hs-menu]'); await P.waitForSelector('#modal [data-hsmenu]');
+    const mk_ = await P.evaluate(() => ({ t: [...document.querySelectorAll('#modal [data-hsmenu] [data-act=tab]')].map(x => x.dataset.t + (x.dataset.s ? ':' + x.dataset.s : '')), g: [...document.querySelectorAll('#modal [data-hsmenu] .mn-sec')].map(x => x.textContent), out: !!document.querySelector('#modal [data-hsmenu] .sheet-f [data-act=logout]'), side: !!document.querySelector('#modal .mb.mb-side .md.side[aria-modal=true]') }));
+    ok('☰ Menü: sağdan pencere (aria-modal), tüm sekmeler, Borsa alımlarım + satış emirlerim, altta Çıkış', mk_.side && mk_.out && keys.every(k => mk_.t.some(x => x.split(':')[0] === k)) && mk_.t.includes('borsa:al') && mk_.t.includes('borsa:sat') && mk_.g.includes('Cüzdan'), JSON.stringify(mk_));
+    ok('menü açıkken çubuk gizli', await barHidden(P)); await chk(P, 'hesap-menusu'); await shot(P, '15-hesap-menusu');
+    await P.click('#modal [data-hsmenu] [data-act=tab][data-t=alis]');
+    ok('menü › Siparişlerim: menü kapandı, başlık çubuğu "‹ Özetim · Siparişlerim"', await modalGone(P) && await until(P, () => ui.tab === 'alis' && /Siparişlerim/.test(document.querySelector('#app .hs-bar h1').textContent)) && await P.isVisible('#app .hs-bar [data-act=tab][data-t=ozet]'));
+    await P.evaluate(() => window.scrollTo(0, 400));
+    await MOB.click(P, '#mtab [data-mtab=hesabim]'); await P.waitForTimeout(300);
+    ok('Hesabım\'a ikinci dokunuş: Özetim ve sayfa başı', await P.evaluate(() => ui.tab === 'ozet' && window.scrollY === 0 && !!document.querySelector('#app .hs-top')));
+    await MOB.hsTab(P, 'borsa', 700, 'sat');
+    ok('menü › Borsa satış emirlerim: bölme "Satış emirlerim" seçili', await P.evaluate(() => { const b = document.querySelector('#app .hs-seg [data-s=sat]'); return !!b && b.getAttribute('aria-selected') === 'true'; }));
+    await P.click('#app .hs-seg [data-s=al]'); await P.waitForTimeout(300);
+    ok('Alımlarım: kart #' + O1 + ' "Hazır olduğun bildirildi"', /Hazır olduğun bildirildi/.test(await txt(P, `#app .bx-o[data-id="${O1}"]`)));
+    await chk(P, 'hesabim-borsa'); await shot(P, '16-hesabim-borsa', true);
+    await nav(P, 'hesabim', 300); await P.evaluate(() => { ui.tab = 'ozet'; render(); }); await P.waitForTimeout(300);
+    await MOB.click(P, '#app .hs-prof .hs-pi[data-k=iban] [data-act=tab]');
+    ok('profil kartı › IBAN Ekle → Banka hesaplarım', await until(P, () => ui.tab === 'banka'));
+    { const leak = []; for (const k of keys) { await MOB.hsTab(P, k, 500); const t = await txt(P, '#app'); if (/e-?Gider|pusula|ETTN|VUK/i.test(t)) leak.push(k); await chk(P, 'hesabim/' + k); }
+      ok('tüm Hesabım sekmeleri menüden açılır, e-Gider / pusula metni yok', leak.length === 0, leak.join(',')); }
+    /* satıcı C: Satış özeti, teslimat bekleyen satış */
+    await C.evaluate(() => apiReboot(true)); await nav(C, 'hesabim', 400); await C.evaluate(() => { ui.tab = 'ozet'; render(); });
+    await until(C, () => !!document.querySelector('#app .hs-sec') && !/…/.test(document.querySelector('#app .hs-kpis').textContent));
+    const sumC = await pcall(C, 'GET', 'me/summary'); const ozC = await txt(C, '#app .hs-oz');
+    const kC = await C.evaluate(() => Object.fromEntries([...document.querySelectorAll('#app .hs-kpi')].map(k => [k.querySelector('span').textContent, k.querySelector('b').textContent])));
+    ok('C Özetim: "1 satışta teslimat seni bekliyor", Satış özeti, havuzdaki satışlarım = total − komisyon', /1 satışta teslimat seni bekliyor/.test(ozC) && /Satış özeti/.test(ozC) && sumC.sell.escrowNet > 0 && sumC.sell.escrowNet < 35 && kC['Havuzdaki satışlarım'] === TLs(sumC.sell.escrowNet), JSON.stringify([sumC.sell, kC]));
+    ok('C rozeti = todo (teslimat)', (await bar(C)).items[4].b === String(sumC.todo.total));
+    await shot(C, '17-ozetim-satici', true);
+
     /* ---------- 10. Yönetim ve 1280 px ---------- */
     const A = await mk('yonetici-390'); await A.goto(B + '/'); await A.waitForSelector('#hdr [data-act=login]'); await login(A, 'Yonetici', APW); await A.waitForSelector('.admwrap');
     ok('Yönetim (390 px): alt çubuk DOM\'da yok', await A.evaluate(() => !document.querySelector('#mtab')));
@@ -247,6 +300,10 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     ok('yönetici sitede: çubuk var', !!(await bar(A)));
     await adm(A, 'yonetim/borsa/siparisler', 900);
     ok('Yönetim\'e dönünce çubuk kalkar', await A.evaluate(() => !document.querySelector('#mtab')));
+    await nav(A, 'hesabim', 500);
+    { const t = await txt(A, '#app'); const g = await A.evaluate(() => [...document.querySelectorAll('#app [data-hsinline] .mn-sec')].map(x => x.textContent).join('|'));
+      ok('yönetici Hesabım (390 px): yalnız Yönetim + Hesap, cüzdan / KPI yok, Çıkış var', g === 'Yönetim|Hesap' && !/Bakiyem|Havuzdaki/.test(t) && await A.locator('#app [data-act=logout]').count() >= 1, g + ' ' + t.slice(0, 200)); }
+    await shot(A, '18-yonetici-hesabim');
     await M.evaluate(() => go('borsa')); await M.waitForTimeout(900);
     ok('1280 px: çubuk DOM\'da yok, masaüstü borsa düzeni (yön düğmeleri, form) aynen', await M.evaluate(() => !document.querySelector('#mtab') && !!document.querySelector('#app [data-act=ex-dir]') && !!document.querySelector('#app form[data-form=exorder]') && !document.querySelector('#bxGrid')));
     await M.setViewportSize({ width: 390, height: 844 }); await M.waitForTimeout(500);
@@ -254,10 +311,15 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await M.setViewportSize({ width: 1280, height: 900 }); await M.waitForTimeout(500);
     ok('yeniden genişleyince çubuk kalkar, masaüstü düzen döner', await M.evaluate(() => !document.querySelector('#mtab') && !!document.querySelector('#app [data-act=ex-dir]')));
 
+    await P.setViewportSize({ width: 1280, height: 900 }); await P.waitForTimeout(500); await nav(P, 'hesabim', 500); await P.evaluate(() => { ui.tab = 'ozet'; render(); }); await P.waitForTimeout(500);
+    ok('1280 px Hesabım: sekme şeridi grup başlıklarıyla, "Özetim", Özetim kartları; çubuk yok', await P.evaluate(() => !!document.querySelector('#app nav.tabs .hs-navg') && /Özetim/.test(document.querySelector('#app nav.tabs').textContent) && !!document.querySelector('#app .hs-kpis') && !document.querySelector('#mtab') && !!document.querySelector('#app .page-h [data-act=logout]')));
+    await shot(P, '19-hesabim-1280', true);
+    await P.setViewportSize({ width: 390, height: 844 }); await P.waitForTimeout(500);
     /* ---------- 11. iki tema, 390 px taşma ---------- */
     for (const sfx of ['', '-gunduz']) {
       if (sfx) { await theme(P); await P.waitForTimeout(200); }
-      for (const r of ['home', 'metin2-tr', 'metin2-pvp', 'borsa', 'guvenli']) { await nav(P, r, 700); await chk(P, r + sfx); }
+      for (const r of ['home', 'metin2-tr', 'metin2-pvp', 'borsa', 'guvenli', 'hesabim']) { await nav(P, r, 700); await chk(P, r + sfx); }
+      await P.evaluate(() => { ui.tab = 'ozet'; render(); }); await P.waitForTimeout(400); await chk(P, 'ozetim' + sfx); await shot(P, '20-ozetim' + sfx, true);
       await nav(P, 'borsa', 800); await shot(P, '11-borsa' + sfx, true);
       await MOB.click(P, `#bxGrid .bx-card[data-id="${X2}"] [data-act=bx-al]`); await P.waitForSelector('#modal .bx-sheet'); await chk(P, 'al-penceresi' + sfx); await shot(P, '12-al-penceresi' + sfx); await P.click('#modal [data-act=close]'); await modalGone(P);
       await MOB.click(P, '#mtab [data-mtab=pazar]'); await P.waitForSelector('#modal [data-sheet=pazar]'); await chk(P, 'pazar' + sfx); await shot(P, '13-pazar' + sfx); await P.keyboard.press('Escape'); await modalGone(P);

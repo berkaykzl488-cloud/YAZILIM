@@ -3,7 +3,7 @@
  * Yang Borsası (PLAN §4 P4). Para işlemleri YP\Exchange\Exchange + Ledger üzerinden, satır kilitli.
  *
  * Üye:
- *   GET  exchange                         pazarlar, satış sırası (satıcılar maskeli), stok; girişliyse kendi siparişleri ve emirleri
+ *   GET  exchange                         pazarlar, satış sırası (satıcılar maskeli), stok, net stok (net: satışta − eşlenmemiş açık sipariş); girişliyse kendi siparişleri ve emirleri
  *   GET  exchange/quote?m=&qty=           sunucu exQuote: sabit fiyatla tutar, stok, eksik adet
  *   POST exchange/orders                  {market, qty, f}  alım siparişi (Idempotency-Key ZORUNLU) — tutar ESCROW:EX'e
  *   POST exchange/offers                  {market, qty, price, f, ok}  satış emri (gizli alanlar şifreli)
