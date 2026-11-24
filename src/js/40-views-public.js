@@ -148,10 +148,8 @@ function vM2(sec){
   const q=sqNorm(ui.f.sq);
   let list=S.servers.filter(s=>s.sec===sec);
   list=sec==='pvp'?list.sort((a,b)=>(prem.includes(b.id)-prem.includes(a.id))||a.name.localeCompare(b.name,'tr')):list;
-  const n={tr:S.servers.filter(s=>s.sec==='tr').length,pvp:S.servers.filter(s=>s.sec==='pvp').length};
   const EP=epFor(null).filter(p=>p.on); const epLow=[...EP].sort((a,b)=>a.price-b.price)[0];
   return `<div class="wrap"><div class="page-h"><div><h1>${secName(sec)}</h1><p>${sec==='tr'?'Resmi Metin2 Türkiye sunucuları · Won, item ve karakter':'Private serverlar · Yang, EP, item ve karakter'} — server seçin, kategoriyi seçin, aradığınızı bulun.</p></div>${sec==='pvp'?'<a href="#reklam-ver" class="btn btn-primary" data-act="pick-ad" data-type="premium">Server\'ını Ekle</a>':''}</div>
-  <div class="secsw"><a href="#metin2-tr" class="${sec==='tr'?'on':''}"><b>Metin2 TR</b><span>${n.tr} resmi sunucu · Won ile satış</span></a><a href="#metin2-pvp" class="${sec==='pvp'?'on':''}"><b>Metin2 PVP</b><span>${n.pvp} private server · Yang ile satış</span></a></div>
   <div class="fld" style="max-width:360px;margin-bottom:14px"><label for="f_sq">Server ara</label><input class="inp" id="f_sq" type="search" autocomplete="off" value="${esc(ui.f.sq||'')}" placeholder="Server adı yazın"><span class="muted" style="font-size:12px" id="sq_n" aria-live="polite">${q?list.filter(s=>sqNorm(s.name).includes(q)).length+' server bulundu':''}</span></div>
   <div class="sgrid">${list.map(s=>srvCard(s,prem.includes(s.id)).replace('class="scard"',`class="scard" data-sn="${esc(sqNorm(s.name))}"${q&&!sqNorm(s.name).includes(q)?' hidden':''}`)).join('')}</div><div id="sq_empty" ${list.some(s=>!q||sqNorm(s.name).includes(q))?'hidden':''}>${emptyBox('Server bulunamadı','Aramanızı değiştirin.')}</div></div>`;
 }

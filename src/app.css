@@ -588,12 +588,6 @@ footer a{display:block;padding:3px 0} footer a:hover{color:var(--hdr-accent)}
 .ctabs a.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .ctabs a span{font-family:var(--f-mono);font-size:11px;opacity:.8;margin-left:4px}
 .shero.sm{padding:18px 20px}.shero.sm .slogo{--sz:58px;border-radius:12px}.shero.sm h1{font-size:30px}
-.secsw{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.secsw a{border:2px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
-.secsw a b{font-family:var(--f-display);font-size:22px;text-transform:uppercase}
-.secsw a span{font-size:12.5px;color:var(--muted)}
-.secsw a.on{border-color:var(--accent);background:var(--gold-soft)}
-@media (max-width:520px){.secsw{grid-template-columns:minmax(0,1fr)}}
 .res{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-2);margin-left:6px;vertical-align:2px}
 
 /* kampanyalar */
