@@ -101,7 +101,18 @@ return function (Router $r) {
             $book = array_merge($book, $rows);
             $stock[Exchange::xid($m['id'])] = (int)$db->val("SELECT COALESCE(SUM(left_qty),0) FROM {ex_offers} WHERE market_id=? AND status='aktif' AND left_qty>0", [(int)$m['id']]);
         }
-        $out = ['markets' => array_map([Exchange::class, 'presentMarket'], $mk), 'stock' => (object)$stock, 'set' => Exchange::publicCfg($db),
+        // net: satıştaki adet − açık alım siparişlerinin henüz eşlenmemiş adedi (önce sıradaki siparişler alır). Tek GROUP BY sorgusu.
+        $net = [];
+        $dem = [];
+        foreach ($db->all("SELECT o.market_id AS m, SUM(o.qty - (SELECT COALESCE(SUM(f.qty),0) FROM {ex_fills} f WHERE f.order_id=o.id)) AS d
+            FROM {ex_orders} o WHERE o.status IN ('bekliyor','islemde','bilgi','kismen') GROUP BY o.market_id") as $row) {
+            $dem[(int)$row['m']] = max(0, (int)$row['d']);
+        }
+        foreach ($mk as $m) {
+            $x = Exchange::xid($m['id']);
+            $net[$x] = max(0, $stock[$x] - (isset($dem[(int)$m['id']]) ? $dem[(int)$m['id']] : 0));
+        }
+        $out = ['markets' => array_map([Exchange::class, 'presentMarket'], $mk), 'stock' => (object)$stock, 'net' => (object)$net, 'set' => Exchange::publicCfg($db),
             'book' => Exchange::presentOffers($db, $book, 'public', $u ? $u['id'] : null), 'users' => Exchange::maskedSellers($db, $book, $u ? $u['id'] : null)];
         if ($u) {
             $out['mine'] = $mine($db, $u['id']);

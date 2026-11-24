@@ -198,6 +198,8 @@ chk "sipariş #$O1: 40 × 12,5 = 500; önce kredi 300 + nakit 200 (çekilebilir 
 chk "ESCROW:EX = 500, kayıt satin_alma, patch me" '[ "$(acct ESCROW:EX)" = 50000 ] && [ "$(sq "SELECT kind FROM yp_journal WHERE ref_type='\''exorder'\'' ORDER BY id DESC LIMIT 1")" = satin_alma ] && [ "$(j .patch.me.bal)" = 800 ] && escrow_ok'
 api "$J_B" POST exchange/orders "{\"market\":\"$X1\",\"qty\":40,\"f\":{\"b1\":\"KarakterB\"}}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $KEY"
 chk "aynı anahtar → aynı sipariş, ikinci ödeme yok" '[ "$(j .data.order.id)" = "$O1" ] && [ "$(j .replayed)" = true ] && [ "$(sq "SELECT COUNT(*) FROM yp_ex_orders")" = 1 ] && [ "$(wal $UB)" = "80000/0" ]'
+api "$J_X" GET exchange ""
+chk "borsa kartı: stok 100, net stok (satışta − eşlenmemiş açık sipariş) 60; sıra başı 9,5 kitapta" '[ "$(j ".data.stock[\"$X1\"]")" = 100 ] && [ "$(j ".data.net[\"$X1\"]")" = 60 ] && [ "$(j ".data.book | map(select(.ex==\"$X1\")) | min_by(.price) | .price")" = 9.5 ]'
 api "$J_B" POST exchange/orders "{\"market\":\"$X1\",\"qty\":4000,\"f\":{\"b1\":\"KarakterB\"}}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $(ik)"
 chk "bakiye yetersiz → 409 insufficient" '[ "$CODE" = 409 ] && [ "$(j .code)" = insufficient ]'
 api "$J_B" POST exchange/orders "{\"market\":\"$X1\",\"qty\":1,\"f\":{}}" -H "X-CSRF-Token: $CS_B" -H "Idempotency-Key: $(ik)"
