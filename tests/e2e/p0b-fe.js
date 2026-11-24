@@ -5,6 +5,7 @@
 //   node tests/e2e/p0b-fe.js                 (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
+const MOB = require('./_mobile');
 
 const REPO = path.resolve(__dirname, '../..');
 const RUN = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yp-p0bfe-'));
@@ -262,8 +263,8 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     await P.goto(B + '/'); await P.waitForSelector('#hdr'); await login(P, U2.name, U2.pw); await modalGone(P);
     const over = [];
     for (const r of ['home', 'metin2-tr', 'hesabim', 'bildirimler', 'borsa', 'guvenli', 'rehber']) { await go(P, r); await P.waitForTimeout(150); const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push(r + ':' + w); }
-    await go(P, 'hesabim'); for (const t of ['profil', 'banka']) { await P.click(`#app [data-act=tab][data-t=${t}]`); await P.waitForTimeout(100); const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push('hesabim/' + t + ':' + w); }
-    await P.click('#app button[data-act=logout]'); await toast(P, 'Çıkış yapıldı');
+    await go(P, 'hesabim'); for (const t of ['profil', 'banka']) { await MOB.hsTab(P, t, 100); const w = await P.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push('hesabim/' + t + ':' + w); }
+    await MOB.hsLogout(P); await toast(P, 'Çıkış yapıldı');
     { const vis = await P.isVisible('#cats>.wrap'); await P.click('#hdr .mburger'); await P.waitForTimeout(300);
       const open = await P.evaluate(() => document.querySelector('#mnav').classList.contains('open'));
       const links = await P.$$eval('#mnav .mn-i', a => a.map(x => x.textContent.trim()));

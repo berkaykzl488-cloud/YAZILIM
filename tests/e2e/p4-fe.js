@@ -10,6 +10,7 @@
 //   node tests/e2e/p4-fe.js          (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
+const MOB = require('./_mobile');
 
 const REPO = path.resolve(__dirname, '../..');
 const RUN = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yp-p4fe-'));
@@ -233,16 +234,16 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await P.goto(B + '/'); await P.waitForSelector('#hdr'); await login(P, 'Alici_Bora', 'Bora-Sifre-2026'); await modalGone(P);
     const over = []; const chk = async n => { const w = await overW(P); if (w > 390) over.push(n + ':' + w); };
     const mobileMember = async (sfx) => { await nav(P, 'borsa', 900); await chk('borsa' + sfx); await shot(P, 'm-borsa' + sfx);
-      await P.click('#app [data-act=ex-dir][data-d=sat]'); await P.waitForTimeout(300); await chk('borsa-sat' + sfx);
+      { const closeSat = await MOB.exSat(P); await P.waitForTimeout(300); await chk('borsa-sat' + sfx); await closeSat(); }
       await nav(P, 'metin2-ep', 700); await chk('metin2-ep' + sfx); await shot(P, 'm-metin2-ep' + sfx);
-      await nav(P, 'hesabim', 400); await P.click('#app [data-act=tab][data-t=borsa]'); await P.waitForTimeout(700); await chk('hesabim-borsa' + sfx); await shot(P, 'm-hesabim-borsa' + sfx);
-      await P.click('#app [data-act=tab][data-t=ep]'); await P.waitForTimeout(600); await chk('hesabim-ep' + sfx); };
+      await nav(P, 'hesabim', 400); await MOB.hsTab(P, 'borsa', 700); await chk('hesabim-borsa' + sfx); await shot(P, 'm-hesabim-borsa' + sfx);
+      await MOB.hsTab(P, 'ep', 600); await chk('hesabim-ep' + sfx); };
     await mobileMember('');
     await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); await P.waitForTimeout(200);
     ok('tema değişti (gündüz/gece)', ['light', 'dark'].includes(await P.evaluate(() => document.documentElement.dataset.theme)));
     await mobileMember('-tema2');
     await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
-    await nav(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
+    await nav(P, 'hesabim', 300); await MOB.hsLogout(P); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim/borsa/siparisler', 'yonetim/borsa/siparisler?id=B1001', 'yonetim/borsa/emirler', 'yonetim/borsa/kurlar', 'yonetim/borsa/alanlar', 'yonetim/ep/paketler', 'yonetim/ep/kayitlar', 'yonetim/ep/happy-hour']) { await adm(P, r, 900); await chk(r); }
     await adm(P, 'yonetim/borsa/siparisler?id=B1001', 900); await shot(P, 'm-yonetim-borsa-ayrinti');

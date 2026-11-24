@@ -9,6 +9,7 @@
 //   node tests/e2e/p1-fe.js          (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
+const MOB = require('./_mobile');
 
 const REPO = path.resolve(__dirname, '../..');
 const RUN = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yp-p1fe-'));
@@ -319,11 +320,11 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     await P.goto(B + '/'); await P.waitForSelector('#hdr'); await login(P, UA.name, UA.pw); await modalGone(P);
     const over = [];
     for (const r of ['home', 'metin2-tr', `server-${SV}`, `server-${SV}-item`, `server-${SV2}-item`, 'ilan-' + L1, 'ilan-ver', 'ara', 'uye-u2', 'hesabim']) { await go(P, r, 500); const w = await overW(P); if (w > 390) over.push(r + ':' + w); }
-    await go(P, 'hesabim', 300); await P.click('#app [data-act=tab][data-t=ilan]'); await P.waitForTimeout(700); { const w = await overW(P); if (w > 390) over.push('hesabim/ilan:' + w); }
+    await go(P, 'hesabim', 300); await MOB.hsTab(P, 'ilan', 700); { const w = await overW(P); if (w > 390) over.push('hesabim/ilan:' + w); }
     await go(P, 'ilan-ver', 500); await P.setInputFiles('#s_files', [F2, F3]); await until(P, () => (UPL.s || []).length === 2 && UPL.s.every(x => x.st === 'ok'), null, 20000); { const w = await overW(P); if (w > 390) over.push('ilan-ver+foto:' + w); } await shot(P, 'ilan-ver-390');
-    await go(P, 'ilan-' + L1, 600); await P.click('[data-act=edit-l]'); await P.waitForSelector('form[data-form=editl]'); { const w = await overW(P); if (w > 390) over.push('duzenle:' + w); } await P.click('#modal [data-act=close]');
+    await go(P, 'ilan-' + L1, 600); await MOB.click(P, '[data-act=edit-l]'); await P.waitForSelector('form[data-form=editl]'); { const w = await overW(P); if (w > 390) over.push('duzenle:' + w); } await P.click('#modal [data-act=close]');
     await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); await go(P, 'home', 400); { const w = await overW(P); if (w > 390) over.push('home-light:' + w); } await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
-    await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
+    await go(P, 'hesabim', 300); await MOB.hsLogout(P); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim/ilan/moderasyon', 'yonetim/ilan/ayarlar', 'yonetim/server/tr', 'yonetim/server/pvp?id=new', `yonetim/server/tr?id=${SV}`, 'yonetim/bakim']) { await go(P, r, 700); const w = await overW(P); if (w > 390) over.push(r + ':' + w); }
     await shot(P, 'yonetim-bakim-390');

@@ -10,6 +10,7 @@
 //   node tests/e2e/p5-fe.js          (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
+const MOB = require('./_mobile');
 
 const REPO = path.resolve(__dirname, '../..');
 const RUN = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yp-p5fe-'));
@@ -65,7 +66,7 @@ sh('php', ['-r', '$i=imagecreatetruecolor(300,250); imagefill($i,0,0,imagecolora
   const login = async (p, u, pw) => { await p.click('#hdr [data-act=login]'); await p.fill('#lg_u', u); await p.fill('#lg_p', pw); await p.click('form[data-form=loginf] button.btn-primary'); };
   const pcall = (p, m, a, b) => p.evaluate(([m, a, b]) => call(m, a, b, { quiet: true, silent: true }).then(j => j.data, e => ({ err: e.error || e.code, http: e.http })), [m, a, b]);
   const cfm = async (p) => { await p.waitForSelector('#cfm:not([hidden])', { timeout: 5000 }); await p.click('#cfm_ok'); };
-  const tab = async (p, t) => { await nav(p, 'hesabim', 300); await p.click(`#app nav.tabs [data-act=tab][data-t=${t}]`); await p.waitForTimeout(700); };
+  const tab = async (p, t) => { await nav(p, 'hesabim', 300); await MOB.hsTab(p, t, 700); };
   const uid = n => sq(`SELECT id FROM yp_users WHERE name='${n}'`);
 
   try {
@@ -208,7 +209,7 @@ sh('php', ['-r', '$i=imagecreatetruecolor(300,250); imagefill($i,0,0,imagecolora
     for (const r of ['reklam-ver', 'cekilis']) { await nav(P, r, 700); await chk(r + '-tema2'); }
     await shot(P, 'mobil-reklam-ver-tema2-390'); await tab(P, 'puan'); await chk('puan-tema2'); await shot(P, 'mobil-vip-tema2-390');
     await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
-    await nav(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
+    await nav(P, 'hesabim', 300); await MOB.hsLogout(P); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     const ADM = ['yonetim/reklam/onay', 'yonetim/reklam/tum', 'yonetim/reklam/gorseller', 'yonetim/reklam/fiyatlar', 'yonetim/kampanya/cekilis', 'yonetim/kampanya/cark', 'yonetim/vip/seviyeler', 'yonetim/vip/davet', 'yonetim/uye/geri-kazan'];
     for (const r of ADM) { await nav(P, r, 900); await chk(r); }

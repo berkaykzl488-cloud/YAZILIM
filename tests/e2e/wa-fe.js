@@ -9,6 +9,7 @@
 //   node tests/e2e/wa-fe.js                  (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
 const { chromium, request } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
+const MOB = require('./_mobile');
 
 const REPO = path.resolve(__dirname, '../..');
 const RUN = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yp-wafe-'));
@@ -211,7 +212,7 @@ async function otp(to, ch) {
     await login(P, 'Yonetici', APW); await P.waitForSelector('.admwrap');
     for (const r of ['yonetim/sms/whatsapp', 'yonetim/sms/kayitlar', 'yonetim/sms/eposta', 'yonetim/entegrasyon']) { await go(P, r); await P.waitForTimeout(400); await wide(P, r, over); }
     await go(P, 'yonetim/sms/whatsapp'); await P.waitForTimeout(300); await shot(P, 'yonetim-whatsapp-390');
-    await go(P, 'hesabim'); await P.click('#app [data-act=tab][data-t=profil]'); await P.waitForSelector('.tfaopts'); await wide(P, 'hesabim/profil', over);
+    await go(P, 'hesabim'); await MOB.hsTab(P, 'profil', 200); await P.waitForSelector('.tfaopts'); await wide(P, 'hesabim/profil', over);
     // WhatsApp yeniden açık: 390 px'te kod penceresi
     await go(M, 'yonetim/sms/whatsapp'); await M.waitForSelector('form[data-form=smsset]'); await M.check('#sm_on'); await M.click('form[data-form=smsset] .asave button'); await toast(M, 'WhatsApp ayarları kaydedildi');
     const Q = await mk('uye-390', { width: 390, height: 844 });
@@ -220,7 +221,7 @@ async function otp(to, ch) {
     ok('390 px: kod penceresi WhatsApp', (await txt(Q, '#modal')).includes("Kod WhatsApp'a gönderildi"));
     await shotV(Q, 'uye-giris-kodu-390');
     o = await otp(U.tel, 'sms'); await Q.fill('#tf_code', o.code); await Q.click('form[data-form=tfaf] button.btn-primary'); await modalGone(Q);
-    await go(Q, 'hesabim'); await Q.click('#app [data-act=tab][data-t=profil]'); await Q.waitForSelector('.tfaopts'); await wide(Q, 'hesabim/profil (üye)', over); await shot(Q, 'uye-2fa-390');
+    await go(Q, 'hesabim'); await MOB.hsTab(Q, 'profil', 200); await Q.waitForSelector('.tfaopts'); await wide(Q, 'hesabim/profil (üye)', over); await shot(Q, 'uye-2fa-390');
     ok('390 px: yatay taşma yok', over.length === 0, over.join(', '));
     ok('konsol / sayfa hatası yok', errs.length === 0, errs.slice(0, 8).join('\n      '));
   } catch (e) {

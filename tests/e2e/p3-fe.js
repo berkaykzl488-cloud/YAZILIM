@@ -10,6 +10,7 @@
 //   node tests/e2e/p3-fe.js          (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
+const MOB = require('./_mobile');
 
 const REPO = path.resolve(__dirname, '../..');
 const RUN = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yp-p3fe-'));
@@ -78,7 +79,7 @@ const mock = o => fs.writeFileSync(path.join(SITE, 'storage/test_mock.json'), JS
   const register = async (p, U) => { await p.click('#hdr [data-act=register]'); await p.fill('#rg_ad', U.ad); await p.fill('#rg_sy', U.soyad); await p.fill('#rg_u', U.name); await p.fill('#rg_t', U.tel); await p.fill('#rg_e', U.email); await p.fill('#rg_p', U.pw); await p.check('#rg_k'); await p.click('form[data-form=registerf] button.btn-primary'); return modalGone(p); };
   const pcall = (p, m, path_, body) => p.evaluate(([m, a, b]) => call(m, a, b, { quiet: true, silent: true }).then(j => j.data, e => ({ err: e.error || e.code, http: e.http })), [m, path_, body]);
   const cfm = async (p) => { await p.waitForSelector('#cfm:not([hidden])', { timeout: 5000 }); await p.click('#cfm_ok'); };
-  const cekTab = async p => { await go(p, 'hesabim', 300); await p.click('#app [data-act=tab][data-t=cek]'); await p.waitForTimeout(700); };
+  const cekTab = async p => { await go(p, 'hesabim', 300); await MOB.hsTab(p, 'cek', 700); };
   const banScan = async (p, where) => { const t = await vis(p); const m = t.match(BANNED); return m ? where + ': "' + t.slice(Math.max(0, m.index - 40), m.index + 40) + '"' : null; };
 
   try {
@@ -226,7 +227,7 @@ const mock = o => fs.writeFileSync(path.join(SITE, 'storage/test_mock.json'), JS
     const over = []; const chk = async n => { const w = await overW(P); if (w > 390) over.push(n + ':' + w); };
     await cekTab(P); await chk('hesabim/cek'); await shot(P, 'mobil-para-cek-390');
     await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); await cekTab(P); await chk('hesabim/cek-light'); await shot(P, 'mobil-para-cek-gunduz-390'); await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
-    await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
+    await go(P, 'hesabim', 300); await MOB.hsLogout(P); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim/cekim/talepler?f=tumu', 'yonetim/cekim/ayarlar', 'yonetim/muhasebe/rapor', 'yonetim/muhasebe/egider', 'yonetim/entegrasyon']) { await go(P, r, 900); await chk(r); }
     await go(P, 'yonetim/cekim/talepler?f=tumu', 800); await shot(P, 'mobil-yonetim-cekim-390');

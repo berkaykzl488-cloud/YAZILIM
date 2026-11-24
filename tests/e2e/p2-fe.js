@@ -12,6 +12,7 @@
 //   node tests/e2e/p2-fe.js          (SHOTS=<klasör> ekran görüntüleri; KEEP=1 çalışma klasörü silinmez)
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
+const MOB = require('./_mobile');
 
 const REPO = path.resolve(__dirname, '../..');
 const RUN = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yp-p2fe-'));
@@ -89,7 +90,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
   const hdrBal = p => p.evaluate(() => { const b = document.querySelector('#hdr .bal b'), s = document.querySelector('#hdr .bal span'); return { tot: b ? b.textContent : '', w: s ? s.textContent : '' }; });
   const waitBal = (p, tot, t) => until(p, x => { const b = document.querySelector('#hdr .bal b'); return b && b.textContent.replace(/\s/g, '').includes(x); }, tot, t || 25000);
   const modalTxt = p => txt(p, '#modal');
-  const openDep = async p => { await go(p, 'hesabim', 300); await p.click('#app [data-act=tab][data-t=ozet]'); await p.waitForSelector('#app [data-act=deposit]'); await p.click('#app [data-act=deposit]'); await p.waitForSelector('#modal .md.dep'); };
+  const openDep = async p => { await go(p, 'hesabim', 300); await MOB.hsTab(p, 'ozet', 200); await p.waitForSelector('#app [data-act=deposit]'); await MOB.click(p, '#app [data-act=deposit]'); await p.waitForSelector('#modal .md.dep'); };
   const vtxt = (p, s) => p.locator(s || 'body').first().innerText();
 
   try {
@@ -362,19 +363,19 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     const over = []; const chk = async n => { const w = await overW(P); if (w > 390) over.push(n + ':' + w); };
     for (const r of ['home', 'ilan-' + L1, 'siparis-' + O1, 'siparis-' + O2, 'siparis-' + O3]) { await go(P, r, 600); await chk(r); }
     await shot(P, 'mobil-siparis-390');
-    for (const k of ['ozet', 'alis', 'hareket']) { await go(P, 'hesabim', 200); await P.click(`#app [data-act=tab][data-t=${k}]`); await P.waitForTimeout(600); await chk('hesabim/' + k); }
+    for (const k of ['ozet', 'alis', 'hareket']) { await go(P, 'hesabim', 200); await MOB.hsTab(P, k, 600); await chk('hesabim/' + k); }
     await shot(P, 'mobil-hesabim-hareket-390');
     await openDep(P); await P.waitForSelector('#modal #dep_amt');
     for (const t of ['eft', 'cuzdan', 'kart']) { await P.click(`#modal [data-act=dep-tab][data-t=${t}]`); await P.waitForTimeout(300); await chk('yukleme/' + t); if (t === 'eft') await shot(P, 'mobil-yukleme-390', false); }
     await P.click('#modal [data-act=close]');
-    await go(P, 'ilan-' + fast.listing.id, 700); await P.click('[data-act=buy]'); await P.waitForSelector('#modal form[data-form=p2buy]'); await chk('satin-al'); await shot(P, 'mobil-satin-al-390', false); await P.click('#modal [data-act=close]');
+    await go(P, 'ilan-' + fast.listing.id, 700); await MOB.click(P, '[data-act=buy]'); await P.waitForSelector('#modal form[data-form=p2buy]'); await chk('satin-al'); await shot(P, 'mobil-satin-al-390', false); await P.click('#modal [data-act=close]');
     await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click()); for (const r of ['siparis-' + O1, 'hesabim']) { await go(P, r, 500); await chk(r + '-light'); } await P.evaluate(() => document.querySelector('#hdr [data-act=theme]').click());
-    await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
+    await go(P, 'hesabim', 300); await MOB.hsLogout(P); await toast(P, 'Çıkış yapıldı');
     await login(P, UA.name, UA.pw); await modalGone(P);
-    await go(P, 'siparis-' + O1, 700); await chk('satici-siparis'); await go(P, 'hesabim', 200); await P.click('#app [data-act=tab][data-t=satis]'); await P.waitForTimeout(600); await chk('hesabim/satis');
-    await P.click('#app [data-act=tab][data-t=ilan]'); await P.waitForTimeout(700); await chk('hesabim/ilan'); await P.click(`tr[data-lid=${L1}] [data-act=p2-dopm]`); await P.waitForSelector('#modal .dopbuy'); await chk('doping-penceresi'); await P.click('#modal [data-act=close]');
+    await go(P, 'siparis-' + O1, 700); await chk('satici-siparis'); await go(P, 'hesabim', 200); await MOB.hsTab(P, 'satis', 600); await chk('hesabim/satis');
+    await MOB.hsTab(P, 'ilan', 700); await chk('hesabim/ilan'); await MOB.click(P, `[data-lid=${L1}] [data-act=p2-dopm]`); await P.waitForSelector('#modal .dopbuy'); await chk('doping-penceresi'); await P.click('#modal [data-act=close]');
     await go(P, 'ilan-ver', 600); await chk('ilan-ver');
-    await go(P, 'hesabim', 300); await P.click('#app .page-h [data-act=logout]'); await toast(P, 'Çıkış yapıldı');
+    await go(P, 'hesabim', 300); await MOB.hsLogout(P); await toast(P, 'Çıkış yapıldı');
     await login(P, 'Yonetici', APW); await modalGone(P);
     for (const r of ['yonetim', 'yonetim/odeme/yuklemeler?f=tumu', 'yonetim/odeme/yontemler', 'yonetim/odeme/hesaplar', 'yonetim/siparis', 'yonetim/kampanya/kupon', 'yonetim/uye/bakiye', 'yonetim/ilan/ayarlar', 'siparis-' + O2]) { await go(P, r, 800); await chk(r); }
     await go(P, 'yonetim/odeme/yuklemeler?f=tumu', 600); await shot(P, 'mobil-yonetim-yuklemeler-390');
