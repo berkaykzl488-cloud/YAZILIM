@@ -100,7 +100,10 @@ final class Kernel
         $req->route = $route;
         $opt = $route['opt'];
 
-        self::checkOrigin($req, $db);
+        // xsite: başka siteden gelen üst düzey GET gezinmesi (yalnız Google OAuth dönüşü; state ile korunur, CSRF'siz GET)
+        if (empty($opt['xsite']) || $req->method !== 'GET') {
+            self::checkOrigin($req, $db);
+        }
         Auth::boot($db, $req);
         if ($opt['csrf']) {
             Auth::checkCsrf($req);

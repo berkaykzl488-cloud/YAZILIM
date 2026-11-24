@@ -20,8 +20,11 @@ return [
             // tc_state: '' | 'inceleme' (NVİ'ye ulaşılamadı, ekip elle inceleyecek). tc_by: doğrulayan çalışan (elle onay / tam no girişi)
             'tc_state' => 'str:12=', 'tc_src' => 'str:10=',
             'session_ver' => 'int=1', 'created_at' => 'bigint',
+            // Google ile giriş (app/src/Google.php): sub = Google hesap kimliği (değişmez), google_email yalnız gösterim için.
+            // Şifresiz (yalnız Google) hesapta pass_hash '!' ile başlayan kullanılamaz bir değerdir.
+            'google_sub' => 'str:64?', 'google_email' => 'str:190?',
         ],
-        'unique' => [['name_norm'], ['email'], ['tc_hash']],
+        'unique' => [['name_norm'], ['email'], ['tc_hash'], ['google_sub']],
         'index'  => [['role'], ['last_seen'], ['ref_code']],
         'fk'     => ['ref_by' => ['users', 'id', 'SET NULL']],
     ],

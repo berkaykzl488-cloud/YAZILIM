@@ -143,10 +143,12 @@ return function (Router $r) {
         }
         $row = Tfa::verify($db, $cid, $u['id'], isset($in['code']) && is_scalar($in['code']) ? (string)$in['code'] : '', $purposes);
         if ($row['purpose'] === 'login') {
+            // Google ile girişte bekleyen bağlama (e-posta eşleşmesi) kod doğrulandıktan SONRA yapılır
+            $gmeta = !empty($pending['g']) && is_array($pending['g']) ? \YP\Google::afterTfa($db, (int)$u['id'], $pending['g']) : [];
             $u = $db->one('SELECT * FROM {users} WHERE id=?', [(int)$u['id']]);
             $csrf = Auth::login($db, $u, !empty($pending['rem']));
             Tfa::trust($db, $u);
-            Audit::log($db, $u['id'], 'login', 'user', $u['id'], ['tfa' => $row['channel'], 'staff' => $u['role'] !== 'member']);
+            Audit::log($db, $u['id'], 'login', 'user', $u['id'], ['tfa' => $row['channel'], 'staff' => $u['role'] !== 'member'] + $gmeta);
             return ['msg' => 'Hoş geldin ' . $u['name'] . '!', 'data' => ['me' => Present::me($db, $u), 'csrf' => $csrf]];
         }
         if ($row['purpose'] === 'enable') {
