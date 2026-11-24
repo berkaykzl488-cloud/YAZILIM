@@ -41,7 +41,12 @@ return function (Router $r) {
         $newPass = $v->has('password') && $in['password'] !== '' ? $v->password('password', in_array($u['role'], ['staff', 'admin'], true) ? 10 : 8) : null;
         $v->done();
         $emailChanged = $email !== null && $email !== (string)$u['email'];
-        if ($emailChanged || $newPass !== null) {
+        // Yalnız Google ile açılmış (şifresiz) hesap: ilk şifre mevcut şifre sorulmadan belirlenir; e-posta değişikliği için önce şifre gerekir
+        $noPass = !\YP\Google::hasPassword($u);
+        if ($noPass && $emailChanged && $newPass === null) {
+            throw HttpError::validation(['email' => 'E-posta adresini değiştirmek için önce bir şifre belirleyin.']);
+        }
+        if (!$noPass && ($emailChanged || $newPass !== null)) {
             $cur = isset($in['current_password']) && is_string($in['current_password']) ? $in['current_password'] : '';
             if ($cur === '' || !password_verify($cur, $u['pass_hash'])) {
                 throw HttpError::validation(['current_password' => 'Mevcut şifreniz hatalı.'], $emailChanged && $newPass === null
@@ -69,8 +74,8 @@ return function (Router $r) {
         if ($newPass !== null) {
             $ver = Auth::bumpSessionVer($db, $u['id']); // diğer cihazlardaki oturumlar düşer
             Auth::keepCurrent($ver);
-            Notify::send($db, $u['id'], 'Hesap şifreniz değiştirildi.', '#hesabim', 'pass');
-            Audit::log($db, $u['id'], 'password_change', 'user', $u['id']);
+            Notify::send($db, $u['id'], $noPass ? 'Hesabınıza şifre eklendi. Artık şifrenizle de giriş yapabilirsiniz.' : 'Hesap şifreniz değiştirildi.', '#hesabim', 'pass');
+            Audit::log($db, $u['id'], 'password_change', 'user', $u['id'], $noPass ? ['first' => true] : []);
         }
         if ($emailChanged) {
             Audit::log($db, $u['id'], 'email_change', 'user', $u['id']);

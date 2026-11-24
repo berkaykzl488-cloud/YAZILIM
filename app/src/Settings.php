@@ -10,8 +10,8 @@ final class Settings
 {
     private static $cache = [];
 
-    /** Bütünüyle şifreli saklanan anahtarlar. paytr/parasut/bizimhesap: Yönetim › Entegrasyonlar (P3, tek kaynak) */
-    const SECRET_KEYS = ['mail', 'sms', 'paytr', 'parasut', 'bizimhesap'];
+    /** Bütünüyle şifreli saklanan anahtarlar. paytr/parasut/bizimhesap/google: Yönetim › Entegrasyonlar (P3, tek kaynak) */
+    const SECRET_KEYS = ['mail', 'sms', 'paytr', 'parasut', 'bizimhesap', 'google'];
 
     /** Varsayılan Mal / Hizmet açıklaması (yalnız iç muhasebe; üye görmez). {banka} {iban} {uye} değişkenleri */
     const EGP_DESC = '213 Sayılı VUK Md. 234 kapsamında vergi mükellefi olmayan gerçek kişiden dijital oyun içi varlık / yang / item tedariki ve bakiye ödemesi ({banka} - {iban})';
@@ -110,6 +110,7 @@ final class Settings
         $tc = self::get('tc', $db);
         $out['tc'] = ['req' => !empty($tc['req']), 'url' => ''];
         $out['etbis'] = self::get('etbis', $db);
+        $out['googleOn'] = Google::enabled($db); // "Google ile devam et" düğmesi (Client ID/Secret girilmiş ve açık)
         return $out;
     }
 }

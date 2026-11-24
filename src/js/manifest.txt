@@ -51,4 +51,5 @@ prod/97x-borsa-kart.js
 prod/98x-borsa-kart.js
 prod/97h-hesabim.js
 prod/98h-hesabim.js
+prod/98g-google.js
 99z-start.js

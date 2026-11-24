@@ -39,6 +39,8 @@ final class Present
             'tcAsk' => $u['tc_ask_at'] !== null ? (int)$u['tc_ask_at'] : null,
             'ibans' => array_map([__CLASS__, 'iban'], $ib),
             'created' => (int)$u['created_at'],
+            // Google ile giriş: bağlı mı, bağlı Google e-postası, şifre var mı (yalnız Google ile açılan hesapta false)
+            'gLinked' => !empty($u['google_sub']), 'gEmail' => (string)(isset($u['google_email']) ? $u['google_email'] : ''), 'hasPass' => Google::hasPassword($u),
         ]);
     }
 
