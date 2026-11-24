@@ -67,14 +67,15 @@ function sheetOpen(html, opener) {
   const a = opener || document.activeElement;
   SHEET.opener = a && a !== document.body ? a : null; SHEET.key = a && a.dataset ? (a.dataset.mtab || a.dataset.sheetOpener || null) : null;
   ui.mtabOpen = a && a.dataset && a.dataset.mtab ? a.dataset.mtab : null;
-  modal(html); const mb = $('#modal .mb'); if (mb) mb.classList.add('mb-sheet');
+  modal(html); const mb = $('#modal .mb'); if (mb) { mb.classList.add('mb-sheet'); if (mb.querySelector('.md.side')) mb.classList.add('mb-side'); }
   mtabLinks($('#modal')); if (ui.mtabOpen) document.querySelectorAll(`#mtab [data-mtab="${ui.mtabOpen}"]`).forEach(b => b.setAttribute('aria-expanded', 'true'));
   setTimeout(() => { const f = sheetFoc()[0]; if (f && !$('#modal').contains(document.activeElement)) f.focus({ preventScroll: true }); }, 30); }
 function sheetRestore() { if (!SHEET.opener && !SHEET.key) return; const o = SHEET.opener, k = SHEET.key; SHEET.opener = SHEET.key = null;
   const was = ui.mtabOpen; ui.mtabOpen = null; if (was) document.querySelectorAll(`#mtab [data-mtab="${was}"]`).forEach(b => b.setAttribute('aria-expanded', 'false'));
   const a = document.activeElement; if (a && a !== document.body && a.isConnected && !$('#modal').contains(a)) return;
   const t = o && o.isConnected ? o : (k ? document.querySelector(`#mtab [data-mtab="${k}"], [data-sheet-opener="${k}"]`) : null);
-  if (t) try { t.focus({ preventScroll: true }); } catch (e) { } }
+  // çubuk görünürlük geçişindeyken (visibility) odak alamaz: kısa gecikmeyle
+  if (t) setTimeout(() => { const b = t.isConnected ? t : (k ? document.querySelector(`#mtab [data-mtab="${k}"], [data-sheet-opener="${k}"]`) : null); const c = document.activeElement; if (b && (!c || c === document.body)) try { b.focus({ preventScroll: true }); } catch (e) { } }, 60); }
 { const m = $('#modal'); if (m && window.MutationObserver) new MutationObserver(() => { if (!m.querySelector('.mb')) sheetRestore(); else if (!m.querySelector('.md.sheet')) { SHEET.opener = SHEET.key = null; ui.mtabOpen = null; } }).observe(m, { childList: true }); }
 document.addEventListener('keydown', e => { if (e.key !== 'Tab' || !$('#modal .md[aria-modal="true"]')) return; const F = sheetFoc(); if (!F.length) return;
   const a = F[0], z = F[F.length - 1], cur = document.activeElement;
@@ -100,7 +101,7 @@ function mtabHelpBody() { const u = me(); const wa = String(S.set.whatsapp || ''
 function mtabHelp(btn) { sheetOpen(sheetWrap('Yardım', mtabHelpBody(), { id: 'yardim' }), btn); }
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-mtab]'); if (!t) { if (e.target.closest('#modal .md.sheet a[href]') && !e.target.closest('a[target=_blank]')) closeModal(); return; }
+  const t = e.target.closest('[data-mtab]'); if (!t) { if (e.target.closest('#modal .md.sheet a[href]') && !e.target.closest('a[target=_blank]')) setTimeout(() => { if ($('#modal .md.sheet')) closeModal(); }, 0); return; }
   const k = t.dataset.mtab;
   if (k === 'destek') { e.preventDefault(); return MTAB.destek(t); }
   if (k === 'pazar') { e.preventDefault(); return MTAB.pazar(t); }
