@@ -1888,6 +1888,7 @@ body:has(#modal .mb) #mtab{transform:translateY(110%);visibility:hidden}
 @media (prefers-reduced-motion:reduce){#mtab{transition:none}#mtab .mtab-dot{animation:none}.md.sheet{animation:none!important}}
 /* alt pencere: masaüstünde ortalanmış modal; ≤760 px'te alttan açılır (.md.side: sağdan, hesap menüsü) */
 .sheet-grip{display:none}
+.sh-form{display:contents}
 .sheet-f{position:sticky;bottom:0;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:8px}
 .sh-list{display:flex;flex-direction:column;gap:2px}
 .md.sheet .sh-i{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 10px;border:0;border-radius:12px;background:none;color:var(--fg);font-weight:600;font-size:15px;text-align:left;cursor:pointer}

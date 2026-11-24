@@ -54,12 +54,18 @@ function mtabLinks(root) { if (!root || typeof seoClean !== 'function' || !seoCl
   root.querySelectorAll('a[href^="#"]').forEach(a => { const h = a.getAttribute('href').slice(1); if (!h || isAdmRoute(h)) return; a.dataset.h = h; a.setAttribute('href', routeHref(h)); }); }
 { const rc0 = renderCats; renderCats = function (r) { rc0(r); mtabSync(r); }; }
 { const rh0 = renderHeader; renderHeader = function () { rh0(); if ($('#cats')) mtabSync(); }; }
-if (MTAB_MQ) { const ch = () => { if ($('#modal .md.sheet')) closeModal(); if (document.body) render(); };
+/* genişlik 760 sınırını geçince: borsa ve Hesabım genişliğe göre çizildiği için yeniden çizilir, açık alt pencere kapanır.
+   Geçici değişimler (ör. tam sayfa ekran görüntüsü) yeniden çizim yapmaz: 300 ms bekler, son çizimdeki durumla karşılaştırır. */
+MTAB.lastMob = null;
+{ const rc1 = renderCats; renderCats = function (r) { MTAB.lastMob = mtabMob(); return rc1.apply(this, arguments); }; }
+if (MTAB_MQ) { let mt = 0; const ch = () => { clearTimeout(mt); mt = setTimeout(() => { if (!document.body || mtabMob() === MTAB.lastMob) return;
+    if ($('#modal .md.sheet')) closeModal(); if (/^(borsa|hesabim)$/.test(route())) render(); else { MTAB.lastMob = mtabMob(); mtabSync(); } }, 300); };
   if (MTAB_MQ.addEventListener) MTAB_MQ.addEventListener('change', ch); else if (MTAB_MQ.addListener) MTAB_MQ.addListener(ch); }
 
-/* ---------- ortak alt pencere: mobilde alttan, masaüstünde ortalanmış modal ---------- */
+/* ---------- ortak alt pencere: mobilde alttan, masaüstünde ortalanmış modal ----------
+   sheetWrap(başlık, gövde, {cls, id, label, foot, form}) — form: gövde + alt bölümü saran <form> öznitelikleri (ör. 'data-form="exorder"') */
 function sheetWrap(title, body, o) { o = o || {};
-  return `<div class="md sheet${o.cls ? ' ' + o.cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(o.label || String(title).replace(/<[^>]+>/g, ''))}"${o.id ? ` data-sheet="${esc(o.id)}"` : ''}><div class="sheet-grip" aria-hidden="true"></div><div class="md-h"><h3>${title}</h3><button type="button" class="md-x" data-act="close" aria-label="Kapat">×</button></div><div class="md-b">${body}</div>${o.foot ? `<div class="sheet-f">${o.foot}</div>` : ''}</div>`; }
+  return `<div class="md sheet${o.cls ? ' ' + o.cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(o.label || String(title).replace(/<[^>]+>/g, ''))}"${o.id ? ` data-sheet="${esc(o.id)}"` : ''}><div class="sheet-grip" aria-hidden="true"></div><div class="md-h"><h3>${title}</h3><button type="button" class="md-x" data-act="close" aria-label="Kapat">×</button></div>${o.form ? `<form class="sh-form" ${o.form}>` : ''}<div class="md-b">${body}</div>${o.foot ? `<div class="sheet-f">${o.foot}</div>` : ''}${o.form ? '</form>' : ''}</div>`; }
 const SHEET = { opener: null, key: null };
 const sheetFoc = () => { const d = $('#modal .md[aria-modal="true"]'); return d ? [...d.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null || x === document.activeElement) : []; };
 /** Pencereyi açar; kapanınca odak açan öğeye döner (yeniden çizildiyse aynı data-mtab / data-sheet-opener öğesine). */
@@ -89,7 +95,7 @@ function mtabPazarBody() { const pvp = (S.servers || []).filter(s => s.sec === '
     <button type="button" class="mn-i sh-i" data-mtab="ara"><span class="mn-ic">${mni('ara')}</span><span class="sh-t"><b>İlanlarda ara</b><small>Server, item, won, ilan no</small></span></button></div>
     <a href="#ilan-ver" class="btn btn-primary btn-block sh-cta">+ İlan ver</a>`; }
 /** Yardım (P6 canlı destek gelene kadar): WhatsApp (S.set.whatsapp doluysa), Güvenli Alışveriş & SSS, çalışma saatleri */
-function mtabHelpBody() { const u = me(); const wa = String(S.set.whatsapp || '').replace(/\D/g, ''); const hrs = String(S.set.supportHours || '').trim();
+function mtabHelpBody() { const u = me(); let wa = String(S.set.whatsapp || '').replace(/\D/g, ''); if (/^0\d{10}$/.test(wa)) wa = '90' + wa.slice(1); else if (/^5\d{9}$/.test(wa)) wa = '90' + wa; const hrs = String(S.set.supportHours || '').trim();
   return `<div class="sh-list">
     ${wa ? `<a class="mn-i sh-i sh-wa" href="https://wa.me/${wa}" target="_blank" rel="noopener"><span class="mn-ic">${mni('wa')}</span><span class="sh-t"><b>WhatsApp destek hattı</b><small>Mesajla yazın, ekibimiz yanıtlasın</small></span><span class="sh-go" aria-hidden="true">›</span></a>` : ''}
     ${mtabRow('guvenli', 'guvenli', 'Güvenli Alışveriş & SSS', 'Havuz sistemi, teslimat, iade')}
