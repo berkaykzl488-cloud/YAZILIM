@@ -305,11 +305,11 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
       ok('yönetici Hesabım (390 px): yalnız Yönetim + Hesap, cüzdan / KPI yok, Çıkış var', g === 'Yönetim|Hesap' && !/Bakiyem|Havuzdaki/.test(t) && await A.locator('#app [data-act=logout]').count() >= 1, g + ' ' + t.slice(0, 200)); }
     await shot(A, '18-yonetici-hesabim');
     await M.evaluate(() => go('borsa')); await M.waitForTimeout(900);
-    ok('1280 px: çubuk DOM\'da yok, masaüstü borsa düzeni (yön düğmeleri, form) aynen', await M.evaluate(() => !document.querySelector('#mtab') && !!document.querySelector('#app [data-act=ex-dir]') && !!document.querySelector('#app form[data-form=exorder]') && !document.querySelector('#bxGrid')));
+    ok('1280 px: çubuk DOM\'da yok; borsa yine kart ızgarası (4 sütun), eski yön düğmeleri / sayfa formu yok', await M.evaluate(() => !document.querySelector('#mtab') && !!document.querySelector('#bxGrid') && getComputedStyle(document.querySelector('#bxGrid')).gridTemplateColumns.split(' ').length === 4 && !document.querySelector('#app [data-act=ex-dir]') && !document.querySelector('#app form[data-form=exorder]')));
     await M.setViewportSize({ width: 390, height: 844 }); await M.waitForTimeout(500);
     ok('760 sınırının altına inince çubuk ve ızgara gelir', await M.evaluate(() => !!document.querySelector('#mtab') && !!document.querySelector('#bxGrid')));
     await M.setViewportSize({ width: 1280, height: 900 }); await M.waitForTimeout(500);
-    ok('yeniden genişleyince çubuk kalkar, masaüstü düzen döner', await M.evaluate(() => !document.querySelector('#mtab') && !!document.querySelector('#app [data-act=ex-dir]')));
+    ok('yeniden genişleyince çubuk kalkar, ızgara kalır', await M.evaluate(() => !document.querySelector('#mtab') && !!document.querySelector('#bxGrid') && !document.querySelector('#app [data-act=ex-dir]')));
 
     await P.setViewportSize({ width: 1280, height: 900 }); await P.waitForTimeout(500); await nav(P, 'hesabim', 500); await P.evaluate(() => { ui.tab = 'ozet'; render(); }); await P.waitForTimeout(500);
     ok('1280 px Hesabım: sekme şeridi grup başlıklarıyla, "Özetim", Özetim kartları; çubuk yok', await P.evaluate(() => !!document.querySelector('#app nav.tabs .hs-navg') && /Özetim/.test(document.querySelector('#app nav.tabs').textContent) && !!document.querySelector('#app .hs-kpis') && !document.querySelector('#mtab') && !!document.querySelector('#app .page-h [data-act=logout]')));

@@ -42,8 +42,6 @@ const ACT={
   'srv-del':(d)=>{S.servers=S.servers.filter(s=>s.id!==d.id); save(); render();},
   'srv-save':(d)=>{const s=srv(d.id); s.name=$('#sv_name_'+d.id).value.trim()||s.name; s.sec=$('#sv_sec_'+d.id).value; s.lv=$('#sv_lv_'+d.id).value.trim(); s.type=$('#sv_type_'+d.id).value.trim(); save(); toast('Server güncellendi.'); render();},
   'ex-pick':(d)=>{ui.exId=d.id; if(route()!=='borsa') go('borsa'); else render();},
-  'ex-dir':(d)=>{ui.exDir=d.d; render();},
-  'ex-msec':(d)=>{ const x=S.exchange.find(e=>e.on&&(srv(e.server)||{}).sec===d.s); if(!x) return toast('Bu bölümde borsası açık server yok.',true); ui.exId=x.id; render(); },
   'ex-open':(d)=>{ ui.exOpen=d.id||null; ui.reveal=false; ui.atab='borsa'; if(d.id){ const o=S.exOrders.find(x=>x.id===d.id); if(o){ ui.exSrv=o.server; ui.bkSrv=o.ex; } } else { ui.exSrv='hepsi'; } if(route()!=='yonetim') go('yonetim'); else render(); window.scrollTo(0,0); },
   'ex-srv-filter':(d)=>{ ui.exSrv=d.s; render(); },
   'ex-fix':(d)=>mExFix(d.id),

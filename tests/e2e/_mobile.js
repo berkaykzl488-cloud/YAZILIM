@@ -1,4 +1,4 @@
-// Ortak e2e yardımcıları (390 px ve masaüstü): Hesabım sekmeleri, çıkış, borsa "Siteye sat" ve sabit alt çubuk çevresinde tıklama.
+// Ortak e2e yardımcıları (390 px ve masaüstü): Hesabım sekmeleri, çıkış, borsa SAT penceresi ve sabit alt çubuk çevresinde tıklama.
 // Mobilde (≤760 px) Hesabım sekme şeridi çizilmez; sekmeler "☰ Menü" (data-act=hs-menu) penceresinden açılır.
 // Masaüstünde ya da sekme şeridi görünürken doğrudan şeritteki düğme tıklanır. Böylece aynı çağrı iki genişlikte de çalışır.
 //
@@ -53,9 +53,8 @@ async function hsLogout(p) {
   await click(p, '#modal [data-hsmenu] [data-act=logout]');
 }
 
-/** Borsa "Siteye sat": masaüstünde yön düğmesi, mobilde ilk karttaki SAT penceresi. Pencereyi kapatan işlev döner. */
+/** Borsa "Siteye sat": ilk karttaki SAT penceresi (borsa her genişlikte kart ızgarası). Pencereyi kapatan işlev döner. */
 async function exSat(p) {
-  if (await vis(p, '#app [data-act=ex-dir][data-d=sat]')) { await click(p, '#app [data-act=ex-dir][data-d=sat]'); await p.waitForSelector('form[data-form=exoffer]'); return async () => { }; }
   await click(p, '#app [data-act=bx-sat]');
   await p.waitForSelector('#modal form[data-form=exoffer]');
   return async () => { if (await vis(p, '#modal [data-act=close]')) await p.click('#modal [data-act=close]'); await modalGone(p); };

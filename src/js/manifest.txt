@@ -16,7 +16,9 @@ demo/migrate.js
 42-views-member.js
 43-mnav.js
 44-mtab.js
+45-hesabim.js
 50-exchange.js
+51-borsa-kart.js
 60-admin-shell.js
 61-admin-tabs.js
 62-admin-panels.js
@@ -28,6 +30,8 @@ demo/kits.js
 80-act.js
 81-form.js
 82-chg.js
+83-borsa-kart-act.js
+84-hesabim-act.js
 90-seo.js
 demo/posts.js
 91-seo2-mkt.js

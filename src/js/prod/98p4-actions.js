@@ -19,17 +19,7 @@ function p4Mask(id) { const o = S.exOrders.find(x => x.id === id); const sec = (
   (o ? o.fills || [] : []).forEach(fl => { const of = S.exOffers.find(z => z.id === fl.of); if (of && of.f) sec.forEach(k => { if (of.f[k]) of.f[k] = '••••••'; }); }); }
 
 /* ================= üye: Yang Borsası ================= */
-FORM.exorder = (f) => apiBusy(f, (async () => { const u = me(); if (!u) return mLogin(); if (!S.set.exOn) return toast('Siteden yang alımı şu an kapalı. ' + (S.set.exOffMsg || ''), true);
-  const x = S.exchange.find(e => e.id === (v_('ex_sel') || ui.exId)); if (!x) return toast('Server seçin.', true);
-  const q = parseInt(v_('ex_qty'), 10); if (!(q >= 1)) return toast('Geçerli bir adet girin.', true);
-  const j = await call('POST', 'exchange/orders', { market: x.id, qty: q, f: p4Fx('exb_') }, { key: formKey(f), silent: true });
-  p4After(); toast(j.msg || 'Siparişiniz sıraya alındı.'); ui.tab = 'borsa'; go('hesabim'); })());
-FORM.exoffer = (f) => apiBusy(f, (async () => { const u = me(); if (!u) return mLogin(); if (!S.set.exOn) return toast('Satış emri verme şu an kapalı. ' + (S.set.exOffMsg || ''), true);
-  const x = S.exchange.find(e => e.id === (v_('ex_sel') || ui.exId)); if (!x) return toast('Server seçin.', true);
-  const q = parseInt(v_('ex_qty'), 10), p = p2Num(v_('ex_price'));
-  const fl = (S.exFields || []).reduce((o, z) => { o[z.id] = v_('exf_' + z.id); return o; }, {});
-  const j = await call('POST', 'exchange/offers', { market: x.id, qty: q, price: p, f: fl, ok: !!($('#ex_ok') || {}).checked }, { key: formKey(f), silent: true });
-  p4After(); toast(j.msg || 'Emriniz yayında.'); render(); })());
+/* alım siparişi ve satış emri (AL / SAT pencereleri): 98x-borsa-kart.js BXD.al / BXD.sat (aynı uçlar, form başına tek Idempotency-Key) */
 p4M('of-cancel', async (d) => { const j = await call('POST', 'exchange/offers/' + p4enc(d.id) + '/cancel', {}, { silent: true }); p4Up('exOffers', [j.data.offer]); p4After('adm:ex'); toast(j.msg || 'Emir iptal edildi.'); render(); });
 FORM.exfix = (f) => apiBusy(f, (async () => { const o = S.exOrders.find(x => x.id === f.dataset.id); if (!o) return;
   const v = (exSet(o.dir) || []).reduce((a, z) => { const x = v_('fx_' + z.id); if (x) a[z.id] = x; return a; }, {});

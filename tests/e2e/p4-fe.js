@@ -1,7 +1,7 @@
 // P4 ön yüz uçtan uca testi (Yang Borsası + EP mağazası): CANLI PAKET (--prod --zip) geçici klasöre açılır, php -S + tests/http/router.php,
 // YP_TEST=1 + SQLite. Kurulum sihirbazı arayüzden; üç oturum:
 //   yönetici: Yönetim › Borsa › Kurlar (server ekle, fiyat, aç), EP mağazası (paket + kodlar);
-//   satıcı C: Yang Borsası › Siteye sat (şifre gizli alan); alıcı B: Siteden satın al → Hesabım › Borsa işlemlerim;
+//   satıcı C: Yang Borsası › kart › SAT penceresi (şifre gizli alan); alıcı B: kart › AL penceresi → Hesabım › Borsa işlemlerim (kartlar);
 //   operatör ([borsa]): Siparişler › Aç → İşlemi üstlen → Eşle → Şifreleri göster (kayda geçer) → teslimatı kaydet → Tamamlandı;
 //   B: Metin2 EP › Hemen al → kod ekranda ve EP kodlarım'da. Konsol/sayfa hatası yok, 390 px taşma yok, gece + gündüz teması.
 //   Üye rotalarına uygulamanın go()/route() işlevleriyle gidilir (temiz adres kipi); yönetim rotaları #yonetim/… ile.
@@ -121,15 +121,16 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     const rc = await pcall(C, 'POST', 'auth/register', { name: 'Satici_Cem', email: 'cem@ornek.com', tel: '0555 111 22 13', ad: 'Cem', soyad: 'Satıcı', password: 'Cem-Sifre-2026' });
     ok('C üye oldu', rc && rc.me && rc.me.id, JSON.stringify(rc)); await C.evaluate(() => apiReboot(true));
     await nav(C, 'borsa', 900);
-    ok('Yang Borsası: "Yakında" değil, pazar listede, rota borsa', await rt(C) === 'borsa' && !(await txt(C, '#app')).includes('Yakında') && (await txt(C, '#ex_sel')).includes(SVN) && (await txt(C, '#app .expc')).includes(SVN));
-    await C.click('#app [data-act=ex-dir][data-d=sat]'); await C.waitForSelector('form[data-form=exoffer]');
-    await C.fill('#ex_qty', '20'); await C.fill('#ex_price', '9'); await C.fill('#exf_f1', 'cem_hesap'); await C.fill('#exf_f2', PW); await C.fill('#exf_f3', 'CemKarakter');
+    ok('Yang Borsası: "Yakında" değil, pazar listede, rota borsa', await rt(C) === 'borsa' && !(await txt(C, '#app')).includes('Yakında') && (await txt(C, '#bxGrid')).includes(SVN) && !(await C.locator('#app [data-act=ex-dir], #app form[data-form]').count()));
+    await C.click(`#bxGrid .bx-card[data-id="${X1}"] [data-act=bx-sat]`); await C.waitForSelector('#modal form[data-form=exoffer]');
+    await C.fill('#ex_qty', '20'); await C.fill('#ex_price', '9'); await C.click('#modal [data-foot="1"] [data-act=bx-step]'); await C.waitForSelector('#exf_f1', { state: 'visible' });
+    await C.fill('#exf_f1', 'cem_hesap'); await C.fill('#exf_f2', PW); await C.fill('#exf_f3', 'CemKarakter');
     await C.selectOption('#exf_f6', 'Hemen'); await C.check('#ex_ok');
     await shot(C, '03-satici-siteye-sat');
-    await C.click('form[data-form=exoffer] button.exgo');
+    await C.click('#modal form[data-form=exoffer] button.exgo');
     ok('satış emri yayında (1. sıra)', await toast(C, 'Emriniz yayında') && sq("SELECT COUNT(*) FROM yp_ex_offers WHERE status='aktif'") === '1');
     ok('şifre tarayıcı belleğinde yok (maskeli), veritabanında şifreli', await C.evaluate(pw => !JSON.stringify(S).includes(pw), PW) && sq(`SELECT COUNT(*) FROM yp_ex_offer_fields WHERE value LIKE '%${PW}%' OR value_enc LIKE '%${PW}%'`) === '0');
-    await until(C, () => /Satış emirlerim/.test(document.querySelector('#app').textContent) && document.querySelectorAll('#app .exmine [data-act=of-cancel]').length > 0);
+    await until(C, () => /Satış emirlerim/.test(document.querySelector('#app').textContent) && document.querySelectorAll('#bxMine [data-act=of-cancel]').length > 0);
     await shot(C, '04-satici-emirlerim');
 
     /* ---------- 6. alıcı B: siteden satın al ---------- */
@@ -140,12 +141,13 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     const f2 = await pcall(M, 'POST', 'admin/balance', { user: 'Alici_Bora', amount: 100, w: false, note: 'Kart yüklemesi (test)' });
     ok('B: 300 çekilebilir + 100 alışveriş', !f1.err && !f2.err && wal('Alici_Bora') === '30000/10000');
     await Bp.evaluate(() => apiReboot(true)); await nav(Bp, 'borsa', 900);
-    ok('satış sırası: satıcı maskeli (Sa***), stok 20', (await txt(Bp, '#app')).includes('20 adet') && await Bp.evaluate(() => S.exOffers.every(o => String(o.u).startsWith('xs'))));
+    ok('satış sırası: satıcı maskeli (Sa***), stok 20', (await txt(Bp, `#bxGrid .bx-card[data-id="${X1}"]`)).includes('Satışta 20') && await Bp.evaluate(() => S.exOffers.every(o => String(o.u).startsWith('xs'))));
+    await Bp.click(`#bxGrid .bx-card[data-id="${X1}"] [data-act=bx-al]`); await Bp.waitForSelector('#modal form[data-form=exorder]');
     await Bp.fill('#ex_qty', '20'); await Bp.dispatchEvent('#ex_qty', 'input'); await Bp.fill('#exb_b1', 'BoraKarakter');
     ok('tutar özeti: 20 × 12,50 = 250', (await txt(Bp, '#ex_tot')).replace(/\s/g, '').includes('250,00'));
     await shot(Bp, '05-alici-siteden-al');
-    await Bp.click('form[data-form=exorder] button.exgo');
-    ok('sipariş sıraya alındı → Hesabım › Borsa işlemlerim', await toast(Bp, 'sıraya alındı') && await until(Bp, () => route() === 'hesabim' && /Alım siparişlerim/.test(document.querySelector('#app').textContent) && /B1001/.test(document.querySelector('#app').textContent)));
+    await Bp.click('#modal form[data-form=exorder] button.exgo');
+    ok('sipariş sıraya alındı → Hesabım › Borsa işlemlerim', await toast(Bp, 'sıraya alındı') && await until(Bp, () => route() === 'hesabim' && /Alımlarım/.test(document.querySelector('#app').textContent) && /B1001/.test(document.querySelector('#app').textContent)));
     ok('ödeme: önce 100 kredi, sonra 150 nakit (çekilebilir korunur)', wal('Alici_Bora') === '15000/0' && sq("SELECT paid_credit||'/'||paid_cash FROM yp_ex_orders WHERE id=1") === '10000/15000');
     await shot(Bp, '06-alici-borsa-islemlerim');
 

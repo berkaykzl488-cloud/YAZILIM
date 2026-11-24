@@ -1,5 +1,5 @@
 /* ================== P4: Yang Borsası ve EP mağazası — ekranlar ve veri (yalnız --prod derlemesinde) ==================
-   Demo ekranları (vExchange, exDetail, exAdminList, adminBook, kurlar/alanlar formları, vEp, epCard, epAdmin…) AYNEN kullanılır;
+   Demo ekranları (borsa kartları 51-borsa-kart.js, exDetail, exAdminList, adminBook, kurlar/alanlar formları, vEp, epCard, epAdmin…) AYNEN kullanılır;
    S.exchange / S.exOffers / S.exOrders / S.exFields / S.exFieldsBuy / S.exRules / S.epProducts / S.epOrders sunucudan dolar:
      - açılış (boot): açık pazarlar, bilgi alanları, satış kuralları, EP paketleri (stok adedi; kod yok), borsa ayarları, Happy Hour
      - GET exchange: satış sırası (başka satıcılar maskeli: 'xs<n>' + ilk 2 harf), kendi siparişlerim / emirlerim
@@ -52,9 +52,8 @@ const p4EpPub = () => need('ep:pub', () => call('GET', 'ep/products', null, { qu
 function p4Exchange() { if (S.cur) p4MeEx(); const d = p4ExPub();
   if (!d && !S.exchange.length) return `<div class="wrap">${pLoading('Yang Borsası yükleniyor…')}</div>`;
   if (d && d.err) return `<div class="wrap">${p1Err(d)}</div>`;
-  // destek saatleri (canlı destek P6) yerine sade bilgi
-  return vExchange().replace(/<span class="chip (?:ok|warn)">● Operatörler[^<]*<\/span>/, '<span class="chip ok">● Siparişler sırayla işlenir</span>')
-    .replace(/<div><span>Operatörler<\/span><b>[\s\S]*?<\/b><\/div>/, `<div><span>Teslimat</span><b>${esc(S.set.exPlace || '')}</b></div>`); }
+  // kart ızgarası (51-borsa-kart.js); net stok ve başlık çipi 97x-borsa-kart.js BXD'den
+  return bxView(); }
 
 /* ================= EP ================= */
 function p4EpPage() { p4EpPub(); return vEp(); }

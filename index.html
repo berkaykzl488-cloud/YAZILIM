@@ -592,12 +592,6 @@ footer a{display:block;padding:3px 0} footer a:hover{color:var(--hdr-accent)}
 .ctabs a.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .ctabs a span{font-family:var(--f-mono);font-size:11px;opacity:.8;margin-left:4px}
 .shero.sm{padding:18px 20px}.shero.sm .slogo{--sz:58px;border-radius:12px}.shero.sm h1{font-size:30px}
-.secsw{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.secsw a{border:2px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
-.secsw a b{font-family:var(--f-display);font-size:22px;text-transform:uppercase}
-.secsw a span{font-size:12.5px;color:var(--muted)}
-.secsw a.on{border-color:var(--accent);background:var(--gold-soft)}
-@media (max-width:520px){.secsw{grid-template-columns:minmax(0,1fr)}}
 .res{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-2);margin-left:6px;vertical-align:2px}
 
 /* kampanyalar */
@@ -971,36 +965,8 @@ svg.cover,img.cover{display:block;width:100%;height:100%;object-fit:cover}
 .pairbox-h{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
 .exd-sum small{display:block;font-size:11px}
 
-.sqside .tbl td,.sqside .tbl th{padding:8px 10px}
-.sqside .panel-h .muted{flex-basis:100%}
 
 /* ===== borsa v15 ===== */
-.exboard{overflow:hidden}
-.exboard-h{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
-.exboard-h .muted{font-size:12.5px}
-.exsec{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
-.exsec button{border:0;background:transparent;padding:7px 14px;border-radius:8px;font-weight:700;font-size:13.5px;color:var(--muted);display:inline-flex;gap:8px;align-items:center;cursor:pointer}
-.exsec button span{font-size:11px;background:var(--line);border-radius:999px;padding:1px 7px;color:var(--fg)}
-.exsec button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.exsec button.on span{background:var(--accent);color:var(--accent-ink)}
-.exbt tbody tr{cursor:pointer}
-.exbt tbody tr:hover{background:var(--surface-2)}
-.exbt tbody tr.on{background:var(--gold-soft)}
-.exbt tbody tr.on td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
-.exbt td{vertical-align:middle}
-.exsv{display:inline-flex;gap:10px;align-items:center}
-.exsv span{display:flex;flex-direction:column;line-height:1.2}
-.exsv small{color:var(--muted);font-size:11.5px}
-.segtabs.exdir button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px}
-.segtabs.exdir button b{font-size:15px}
-.segtabs.exdir button span{font-size:11.5px;color:var(--muted);font-weight:500}
-.exform{gap:0!important;padding-top:4px!important}
-.exsect{display:grid;gap:12px;padding:16px 0;border-bottom:1px dashed var(--line)}
-.exsect:last-of-type{border-bottom:0}
-.exh{display:flex;gap:10px;align-items:center}
-.exh i{font-style:normal;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:13px;flex:0 0 auto}
-.exh b{display:block;font-size:14.5px}
-.exh span{display:block;font-size:12px;color:var(--muted)}
 .explace{display:grid;gap:2px;background:var(--surface-2);border-radius:10px;padding:10px 12px;font-size:13px}
 .explace span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .explace small{color:var(--muted);font-size:12px}
@@ -1012,23 +978,11 @@ svg.cover,img.cover{display:block;width:100%;height:100%;object-fit:cover}
 .extotal small{color:var(--muted);font-size:12px}
 .extotal b{font-size:24px;color:var(--accent)}
 .exgo{padding:14px!important;font-size:15.5px!important}
-.expc{padding:16px;display:grid;gap:14px}
-.expc-h{display:flex;gap:10px;align-items:center}
-.expc-h b{display:block;font-size:17px}
-.expc-big{background:var(--gold-soft);border:1px solid var(--accent);border-radius:12px;padding:14px;display:grid;gap:2px}
-.expc-big.sell{background:var(--surface-2);border-color:var(--ok)}
-.expc-big.sell b{color:var(--ok)}
-.expc-big span{font-size:12px;color:var(--muted);font-weight:600}
-.expc-big b{font-size:28px;line-height:1.1;color:var(--accent)}
-.expc-big small{font-size:12px;color:var(--muted)}
-.expc-kv{display:grid;gap:8px;font-size:13px}
-.expc-kv div{display:flex;justify-content:space-between;gap:10px}
-.expc-kv span{color:var(--muted)}
 .exflow{margin:0;padding:0;list-style:none;counter-reset:exf;display:grid;gap:10px}
 .exflow li{counter-increment:exf;display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:10px;font-size:13px}
 .exflow li::before{content:counter(exf);grid-row:span 2;width:24px;height:24px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:12px}
 .exflow li span{color:var(--muted);font-size:12.5px}
-@media (max-width:640px){.exbt .hide-s{display:none}.extotal b{font-size:20px}.exboard-h .muted{display:none}}
+@media (max-width:640px){.extotal b{font-size:20px}}
 
 .exq{font-size:12.5px;line-height:1.5;background:var(--gold-soft);border-left:3px solid var(--accent);border-radius:8px;padding:9px 11px}
 .exq b{display:block;font-size:12.5px;margin-bottom:2px}
@@ -1038,14 +992,8 @@ svg.cover,img.cover{display:block;width:100%;height:100%;object-fit:cover}
 .mitem .mrow{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .mitem .mrow.muted{font-size:12px}
 .mitem .btn{justify-self:start;margin-top:4px}
-@media (max-width:900px){.exv .det{display:flex;flex-direction:column;align-items:stretch;gap:16px}.exv .det>.col>*{min-width:0}.exv .det>.col{display:contents}.exv .exmine{order:9}}
 @media (max-width:640px){.hide-m{display:none}.show-m{display:block}
- .exv .page-h{gap:8px}.exv .page-h h1{font-size:28px}
- .exform .row2{grid-template-columns:minmax(0,1fr)!important}
- .exboard-h{padding:10px 12px}.exsec{width:100%}.exsec button{flex:1;justify-content:center;padding:8px 6px}
- .exbt th,.exbt td{padding:9px 10px}.exsv{gap:8px}
- .segtabs.exdir button{padding:10px 4px}.segtabs.exdir button b{font-size:14px}
- .extotal{padding:12px}.expc-big b{font-size:24px}}
+ .extotal{padding:12px}}
 
 .adkpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--line)}
 .adkpi div{padding:12px 16px;display:grid;gap:2px;border-right:1px solid var(--line)}
@@ -1924,6 +1872,114 @@ body:has(#modal .mb) #mtab{transform:translateY(110%);visibility:hidden}
  .mb.mb-side .md.sheet.side .sheet-grip{display:none}
  .md.sheet .md-x{width:36px;height:36px;font-size:19px}
 }
+
+/* ================== Yang Borsası: kart ızgarası, AL / SAT pencereleri, bekleyen işlem kartları (51-borsa-kart.js) ================== */
+.bx-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:14px 0 10px}
+.bx-h h1{font-size:26px;margin:0}.bx-h p{margin:2px 0 0;color:var(--muted);font-size:13px}.bx-h .chip{flex:0 0 auto;font-size:11.5px}
+.bx-bar{display:flex;gap:8px;margin:10px 0 8px}.bx-bar .inp{height:42px}#bx_q{flex:1 1 auto;min-width:0}.bx-sort{flex:0 0 auto;width:auto;max-width:46%}
+.bx-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:12px}.bx-chips::-webkit-scrollbar{display:none}
+.bx-chip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:7px 12px;font-weight:600;font-size:13px;min-height:36px;cursor:pointer}
+.bx-chip b{color:var(--muted);font-weight:700;margin-left:2px}.bx-chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.bx-chip.on b{color:inherit}
+.bx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:359px){.bx-grid{grid-template-columns:minmax(0,1fr)}}
+.bx-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.bx-art{position:relative;height:112px;padding:10px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;overflow:hidden;background:linear-gradient(135deg,var(--c1),var(--c2))}
+.bx-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.55));pointer-events:none}
+.bx-art>*{position:relative;z-index:1}
+.bx-wm{position:absolute!important;z-index:0!important;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-8deg);font:900 38px/1 var(--f-display);letter-spacing:.04em;opacity:.13;white-space:nowrap}
+.bx-sec{position:absolute!important;top:8px;left:8px;font:800 10.5px/1 var(--f-body);letter-spacing:.06em;background:rgba(0,0,0,.42);padding:4px 7px;border-radius:6px}
+.bx-art .slogo{position:absolute!important;top:8px;right:8px;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+.bx-nm{display:flex;flex-direction:column;min-width:0}.bx-nm b{font:800 17px/1.1 var(--f-display);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bx-nm small{font-size:11px;opacity:.88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-row{display:flex;align-items:center;gap:6px;width:100%;padding:9px 8px 9px 10px;border:0;border-top:1px solid var(--line);background:none;color:var(--fg);text-align:left;cursor:pointer;min-height:64px}
+.bx-row:hover{background:var(--surface-2)}.bx-row:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.bx-row.sat{border-top-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.bx-row:disabled{cursor:not-allowed;opacity:.62}
+.bx-rt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.bx-k{font:700 10.5px/1.2 var(--f-body);letter-spacing:.05em;color:var(--muted);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-pl{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;min-width:0}
+.bx-p{font:800 21px/1.15 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;white-space:nowrap}.bx-p.long{font-size:17px}
+.bx-row.sat .bx-p{color:var(--accent)}.bx-row.al .bx-p{color:var(--ok)}
+.bx-en{font-size:11px;color:var(--muted);font-weight:600}
+.bx-s{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bx-s b{color:var(--fg)}
+.bx-s i{width:7px;height:7px;border-radius:50%;flex:0 0 auto;background:var(--muted)}.bx-ok{color:var(--ok)}.bx-ok i{background:var(--ok)}.bx-no i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted)}
+.bx-b{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;border-radius:12px}.bx-b svg{width:20px;height:20px}
+.bx-row.sat .bx-b{background:var(--accent);color:var(--accent-ink)}.bx-row.al .bx-b{background:var(--ok);color:var(--on-solid)}
+.bx-place{margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:12px;display:flex;flex-direction:column;gap:2px;font-size:13px}.bx-place span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.bx-place small{color:var(--muted)}
+.bx-mine{margin-top:18px}.bx-mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.bx-mh h2{font-size:18px;margin:0;text-transform:uppercase}.bx-mh a{font-weight:600;color:var(--accent-2)}
+.bx-ml{margin-bottom:12px}.bx-ml .eyebrow{margin-bottom:6px}
+.bx-ol{display:flex;flex-direction:column;gap:10px}
+.bx-o,.bx-f{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.bx-oh{display:flex;align-items:center;gap:8px;min-width:0}.bx-oh b{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bx-or{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.bx-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;list-style:none;margin:0;padding:0;font-size:10.5px;color:var(--muted)}
+.bx-steps li{position:relative;padding-top:8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-steps li::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;border-radius:2px;background:var(--line)}
+.bx-steps li.done::before{background:var(--ok)}.bx-steps li.cur::before{background:var(--accent)}.bx-steps li.cur{color:var(--fg);font-weight:700}.bx-steps.off li::before{background:var(--line)}
+.bx-pg{display:flex;flex-direction:column;gap:4px;font-size:12px}
+.bx-msg{font-size:12.5px;background:var(--warn-soft);border-radius:10px;padding:8px 10px}
+.bx-note{font-size:12px}.bx-log summary{cursor:pointer;font-size:12.5px;color:var(--muted)}.bx-log .feed{margin-top:6px}
+.bx-pulse{position:relative}.bx-pulse::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:1px;animation:bxp 1.4s ease-out infinite}
+@keyframes bxp{0%{opacity:1}50%{opacity:.25}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.bx-pulse::before{animation:none}}
+.bx-sheet .bx-sh-h{display:flex;align-items:center;gap:12px}.bx-sh-p{font-size:20px}
+.bx-qty{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:8px}.bx-qty .btn{height:44px;font-size:20px;padding:0}.bx-qty .inp{height:44px;text-align:center;font-size:18px}
+.bx-qc{display:flex;gap:6px;margin-top:6px}.bx-qc .bx-chip{min-width:48px}
+.bx-tot{margin:0}.bx-f2{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px}
+.bx-stp{font:600 12px var(--f-body);color:var(--muted);margin-left:6px;text-transform:none}
+.bx-card.pick{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.bx-how{margin-top:18px}.bx-how h2{font-size:18px;margin:0 0 8px;text-transform:uppercase}
+.bx-how-g{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.bx-how-c{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}.bx-how-c .rules{font-size:12.5px}
+@media (min-width:761px){
+ .bx-h{margin:18px 0 6px}.bx-h h1{font-size:30px}
+ .bx-top{display:flex;align-items:center;gap:12px;margin:12px 0 16px}.bx-top .bx-bar{margin:0;flex:1 1 auto;min-width:0}.bx-top .bx-chips{margin:0;padding:0;flex:0 0 auto}
+ .bx-sort{max-width:220px}
+ .bx-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+ .bx-art{height:128px}.bx-nm b{font-size:18px}
+ .bx-ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+ .bx-mine{margin-top:22px}.bx-how-g{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bx-sheet{width:min(460px,100%)}
+}
+@media (min-width:1100px){.bx-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* ================== Hesabım: Özetim, gruplu hesap menüsü, mobil kabuk (45-hesabim.js) ================== */
+.hsm{padding-top:12px}.hs-body{gap:14px}
+.hs-top{display:flex;align-items:center;gap:12px;margin:4px 0 14px}.hs-top .av{flex:0 0 auto}.hs-hi{flex:1 1 auto;min-width:0}.hs-hi b{font-size:17px}.hs-hi small{display:block;color:var(--muted);font-size:12.5px}
+.hs-mbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;flex:0 0 auto}.hs-mbtn svg{width:16px;height:16px}
+.hs-bar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px;margin:2px 0 14px}.hs-bar h1{font-size:18px;margin:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:uppercase}.hs-back{min-height:40px}
+.hs-oz{display:flex;flex-direction:column;gap:14px}
+.hs-sh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.hs-sh h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;font-family:var(--f-body);font-weight:800}
+.mtab-cnt{min-width:22px;height:22px;border-radius:11px;background:var(--bad);color:var(--on-solid);font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 6px}
+.hs-tl{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.hs-ti{display:flex;align-items:center;gap:10px;width:100%;padding:12px;border:0;border-top:1px solid var(--line);background:none;color:var(--fg);text-align:left;font:inherit;cursor:pointer}.hs-tl>.hs-ti:first-child{border-top:0}
+div.hs-ti{cursor:default}.hs-ti:hover{background:var(--surface-2)}div.hs-ti:hover{background:none}
+.hs-tic{flex:0 0 auto;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--surface-2);font-weight:800}
+.hs-tt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px}.hs-tt small{color:var(--muted)}.hs-tt .btn{align-self:flex-start;margin-top:4px}
+.hs-warn{box-shadow:inset 3px 0 0 var(--warn)}.hs-warn .hs-tic{background:var(--warn-soft);color:var(--warn)}.hs-info .hs-tic{background:var(--info-soft)}
+.hs-wallet{background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.hs-big{font-size:28px;font-weight:800;line-height:1.1}.hs-wr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.hs-wr span{display:block;font-size:12px;color:var(--muted)}
+.hs-wb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.hs-wb .btn{min-height:44px}
+.hs-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}@media (min-width:761px){.hs-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.hs-kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}.hs-kpi span{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.hs-kpi b{font-size:18px}.hs-kpi small{color:var(--muted);font-size:12px}
+.hs-sk{opacity:.5}.hs-err{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hs-prof,.hs-sec{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}.hs-prof .prog{margin-bottom:8px}
+.hs-prof.hs-ok{display:flex;align-items:center;gap:6px;color:var(--ok)}.hs-prof.hs-ok b{color:var(--fg)}
+.hs-pi{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px dashed var(--line)}.hs-pi:first-child{border-top:0}.hs-pt{flex:1 1 auto;min-width:0;font-weight:600}.hs-pt small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.hs-pok{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.hs-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:6px}.hs-strip>div{background:var(--surface-2);border-radius:10px;padding:8px;min-width:0}.hs-strip span{display:block;font-size:11px;color:var(--muted)}.hs-strip b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis}.hs-strip small{color:var(--muted);font-size:11px}
+.hs-r{display:flex;align-items:center;gap:8px;width:100%;padding:12px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--fg);font:inherit;text-align:left;cursor:pointer;min-height:48px}.hs-r>span:first-child{flex:1 1 auto}.hs-r b small{color:var(--muted);font-weight:500}
+.hs-empty p{margin:0 0 10px}
+.hs-inl{margin-top:18px;border-top:1px solid var(--line);padding-top:6px}.hs-inl .mn-sec,.hs-nav .mn-sec{font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:14px 10px 6px}
+.hs-inl .sh-i,.hs-nav .sh-i{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:8px 10px;border:0;border-radius:12px;background:none;color:var(--fg);font-weight:600;font-size:15px;text-align:left;cursor:pointer}
+.hs-inl .sh-i:hover,.hs-inl .sh-i.on{background:var(--surface-2)}.hs-inl .sh-i.on,.hs-nav .sh-i.on{color:var(--accent)}
+.hs-inl .mn-ic,.hs-nav .mn-ic{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--surface-2);flex:0 0 auto}.hs-inl .mn-ic svg,.hs-nav .mn-ic svg{width:19px;height:19px}
+.hs-inl .mn-b,.hs-nav .mn-b{margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bad);color:var(--on-solid);font-style:normal;font-size:12px;font-weight:700;display:grid;place-items:center}
+.hs-adm{border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line))!important;color:var(--accent)!important}
+.hs-out{margin-top:14px;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--bad);border-color:color-mix(in srgb,var(--bad) 55%,var(--line))}.hs-out svg{width:18px;height:18px}
+.hs-who{display:flex;align-items:center;gap:12px;padding:4px 2px 10px}.hs-who b{font-size:15px}.hs-who small{display:block;color:var(--muted);font-size:12.5px}
+.hs-mw{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:4px;display:flex;flex-direction:column}.hs-mw span{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.hs-mw b{font-size:20px}.hs-mw small{color:var(--muted)}
+.hs-seg{margin-bottom:12px}.hs-seg span{font-weight:700}
+.hs-navg{padding:10px 12px 2px}
 </style>
 </head><body>
 <div id="strip"></div>
@@ -2788,10 +2844,8 @@ function vM2(sec){
   const q=sqNorm(ui.f.sq);
   let list=S.servers.filter(s=>s.sec===sec);
   list=sec==='pvp'?list.sort((a,b)=>(prem.includes(b.id)-prem.includes(a.id))||a.name.localeCompare(b.name,'tr')):list;
-  const n={tr:S.servers.filter(s=>s.sec==='tr').length,pvp:S.servers.filter(s=>s.sec==='pvp').length};
   const EP=epFor(null).filter(p=>p.on); const epLow=[...EP].sort((a,b)=>a.price-b.price)[0];
   return `<div class="wrap"><div class="page-h"><div><h1>${secName(sec)}</h1><p>${sec==='tr'?'Resmi Metin2 Türkiye sunucuları · Won, item ve karakter':'Private serverlar · Yang, EP, item ve karakter'} — server seçin, kategoriyi seçin, aradığınızı bulun.</p></div>${sec==='pvp'?'<a href="#reklam-ver" class="btn btn-primary" data-act="pick-ad" data-type="premium">Server\'ını Ekle</a>':''}</div>
-  <div class="secsw"><a href="#metin2-tr" class="${sec==='tr'?'on':''}"><b>Metin2 TR</b><span>${n.tr} resmi sunucu · Won ile satış</span></a><a href="#metin2-pvp" class="${sec==='pvp'?'on':''}"><b>Metin2 PVP</b><span>${n.pvp} private server · Yang ile satış</span></a></div>
   <div class="fld" style="max-width:360px;margin-bottom:14px"><label for="f_sq">Server ara</label><input class="inp" id="f_sq" type="search" autocomplete="off" value="${esc(ui.f.sq||'')}" placeholder="Server adı yazın"><span class="muted" style="font-size:12px" id="sq_n" aria-live="polite">${q?list.filter(s=>sqNorm(s.name).includes(q)).length+' server bulundu':''}</span></div>
   <div class="sgrid">${list.map(s=>srvCard(s,prem.includes(s.id)).replace('class="scard"',`class="scard" data-sn="${esc(sqNorm(s.name))}"${q&&!sqNorm(s.name).includes(q)?' hidden':''}`)).join('')}</div><div id="sq_empty" ${list.some(s=>!q||sqNorm(s.name).includes(q))?'hidden':''}>${emptyBox('Server bulunamadı','Aramanızı değiştirin.')}</div></div>`;
 }
@@ -3530,28 +3584,26 @@ function sellCalc(el){
 function fileToDataURL(file,max){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const sc=Math.min(1,(max||640)/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc); c.getContext('2d').drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/webp',.82)); }; img.onerror=rej; img.src=r.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
 
 /* ================== hesabım ================== */
+/** Hesabım sekmeleri (demo). Masaüstü şeridi ve hesap menüsü (45-hesabim.js) bu listeden gruplanır. */
+function accTabs(u,needB,needS){ if(needB==null){ needB=S.orders.filter(o=>o.buyer===u.id&&o.status==='teslim').length; needS=S.orders.filter(o=>o.seller===u.id&&o.status==='odendi').length; }
+  return [['ozet','Özetim'],['cek','Para çek'],['alis','Aldıklarım',needB],['satis','Sattıklarım',needS],['borsa','Borsa işlemlerim'],['ep','EP kodlarım'],['ilan','İlanlarım'],['reklam','Reklamlarım'],['profil','Profil bilgilerim'],['puan','VIP & Puan'],['davet','Davet et kazan'],['hareket','Bakiye hareketleri']]; }
 function vAccount(){
   const u=me(); if(!u) return `<div class="wrap">${emptyBox('Hesabınızı görmek için giriş yapın','','<button class="btn btn-primary" data-act="login">Giriş Yap</button>')}</div>`;
   const buys=S.orders.filter(o=>o.buyer===u.id), sells=S.orders.filter(o=>o.seller===u.id);
   const needS=sells.filter(o=>o.status==='odendi').length, needB=buys.filter(o=>o.status==='teslim').length;
-  const pending=r2(sells.filter(o=>['odendi','teslim','itiraz'].includes(o.status)).reduce((s,o)=>s+o.total*(1-o.rate/100),0));
-  const wd=S.wd.filter(w=>w.u===u.id), wdp=r2(wd.filter(w=>w.status==='bekliyor').reduce((s,w)=>s+w.amount,0));
-  const my=S.listings.filter(l=>l.seller===u.id), bx=S.exOrders.filter(o=>o.u===u.id);
+  const wd=S.wd.filter(w=>w.u===u.id);
+  const my=S.listings.filter(l=>l.seller===u.id);
   const v=vip(u), nx=vipNext(u);
-  const T=[['ozet','Özet'],['cek','Para çek'],['alis','Aldıklarım',needB],['satis','Sattıklarım',needS],['borsa','Borsa işlemlerim'],['ep','EP kodlarım'],['ilan','İlanlarım'],['reklam','Reklamlarım'],['profil','Profil bilgilerim'],['puan','VIP & Puan'],['davet','Davet et kazan'],['hareket','Bakiye hareketleri']];
+  const T=accTabs(u,needB,needS);
   const otbl=(arr,role)=>arr.length?`<div class="tbl-w"><table class="tbl"><thead><tr><th>Sipariş</th><th>Ürün</th><th>${role==='b'?'Satıcı':'Alıcı'}</th><th>Durum</th><th class="num">Tutar</th><th></th></tr></thead><tbody>${arr.map(o=>`<tr><td class="mono">#${o.id}</td><td>${esc(o.title)}</td><td>${esc(user(role==='b'?o.seller:o.buyer).name)}</td><td><span class="pill p-${o.status}">${ST[o.status]}</span></td><td class="num">${TL(role==='b'?o.total:(o.net??o.total*(1-o.rate/100)))}</td><td><a class="btn btn-sm ${(role==='s'&&o.status==='odendi')||(role==='b'&&o.status==='teslim')?'btn-primary':''}" href="#siparis-${o.id}">${(role==='s'&&o.status==='odendi')?'Teslim et':(role==='b'&&o.status==='teslim')?'Onayla':'Detay'}</a></td></tr>`).join('')}</tbody></table></div>`:emptyBox('Henüz sipariş yok',role==='b'?'Aldığınız ürünler burada listelenir.':'Satışlarınız burada listelenir.');
   const vipCard=`<div class="panel panel-b stack"><div class="hstack" style="justify-content:space-between"><div><div class="eyebrow">Seviyeniz</div><div style="font-family:var(--f-display);font-size:28px;font-weight:800;text-transform:uppercase;color:${v.c}">${v.n}</div></div><div style="text-align:right"><div class="eyebrow">Puanınız</div><div class="mono" style="font-size:22px;font-weight:700">${NUM(u.pts)}</div><span class="muted" style="font-size:12px">= ${TL(u.pts/S.set.ptRate)}</span></div></div>
     <div class="prog"><i style="width:${nx?Math.min(100,(u.vol-v.min)/(nx.min-v.min)*100):100}%"></i></div>
     <div class="muted" style="font-size:12.5px">${nx?`${nx.n} seviyeye ${TL(nx.min-u.vol)} işlem hacmi kaldı.`:'En üst seviyedesiniz.'} İşlem hacminiz: <b class="mono">${TL(u.vol)}</b></div></div>`;
   let body='';
-  if(ui.tab==='ozet') body=`<div class="kpis"><div class="kpi hl"><small>Toplam bakiye</small><b>${TL(avail(u))}</b><span class="muted" style="font-size:12px">Çekilebilir ${TL(u.bal)} · Sadece alışveriş ${TL(u.bonus||0)}</span></div><div class="kpi"><small>Havuzdaki satışlarım</small><b>${TL(pending)}</b></div><div class="kpi"><small>Çekim bekleyen</small><b>${TL(wdp)}</b></div><div class="kpi"><small>Komisyon oranınız</small><b>%${rateFor(u.id)}</b></div></div>
-    <div class="hstack"><button class="btn btn-primary" data-act="deposit">Bakiye Yükle</button><button class="btn" data-act="tab" data-t="cek">Para Çek</button><a class="btn" href="#ilan-ver">İlan Ver</a><a class="btn" href="#borsa">Yang Borsası</a><a class="btn" href="#cekilis">Çarkı çevir</a></div>
-    ${needS?`<div class="note note-warn"><b>${needS} siparişte teslimat sizi bekliyor.</b> <a href="#hesabim" data-act="tab" data-t="satis" style="text-decoration:underline">Sattıklarım</a></div>`:''}
-    ${needB?`<div class="note note-warn"><b>${needB} siparişte onayınız bekleniyor.</b> <a href="#hesabim" data-act="tab" data-t="alis" style="text-decoration:underline">Aldıklarım</a></div>`:''}
-    ${vipCard}`;
+  if(ui.tab==='ozet') body=hsOzet(u); // Özetim: 45-hesabim.js (demo verisi HSD)
   if(ui.tab==='alis') body=`<div class="panel">${otbl(buys,'b')}</div>`;
   if(ui.tab==='satis') body=`<div class="panel">${otbl(sells,'s')}</div>`;
-  if(ui.tab==='borsa'){ const myO=S.exOffers.filter(o=>o.u===u.id); body=`${S.set.exOn?'':`<div class="note note-info"><b>Yang Borsası kısa bir moladır.</b> ${esc(S.set.exOffMsg||'')}</div>`}${myCallNotes()}<div class="panel"><div class="panel-h"><h3>Alım siparişlerim</h3><a class="btn btn-sm btn-primary" href="#borsa">Borsaya git</a></div>${bx.length?exTable(exSortUser(bx),false):emptyBox('Alım siparişiniz yok','')}</div><div class="panel"><div class="panel-h"><h3>Satış emirlerim</h3></div>${myO.length?offerTable(myO,false,true):emptyBox('Satış emriniz yok','Borsada “Siteye sat” sekmesinden emir verebilirsiniz.')}</div>`; }
+  if(ui.tab==='borsa') body=hsBorsa(u); // bekleyen işlem kartları: 51-borsa-kart.js
   if(ui.tab==='ilan') body=`<div class="panel"><div class="panel-h"><h3>İlanlarım</h3><span class="muted" style="font-size:12px">Her ilanı 2 saatte bir ücretsiz olarak listenin en üstüne taşıyabilirsiniz</span></div>${my.length?`<div class="tbl-w"><table class="tbl"><thead><tr><th>İlan no</th><th>İlan</th><th>Durum</th><th class="num">Stok</th><th class="num">Fiyat</th><th></th></tr></thead><tbody>${my.map(l=>`<tr><td class="mono">#${l.no}</td><td><a href="#ilan-${l.id}" style="font-weight:600">${esc(l.title)}</a><div class="muted" style="font-size:12px">${esc(lsub(l))} · ${catName(l)} · ${l.views} görüntülenme${l.bump?' · son taşıma '+ago(l.bump):''}</div></td><td><span class="pill ${l.status==='aktif'?'p-tamam':l.status==='beklemede'?'p-bekliyor':'p-iade'}">${{aktif:'Yayında',beklemede:'Onay bekliyor',satildi:'Satıldı',kaldirildi:'Kaldırıldı'}[l.status]}</span></td><td class="num">${NUM(l.stock)}</td><td class="num">${TL(l.price)}</td><td><div class="hstack" style="flex-wrap:nowrap">${l.status==='aktif'?freeBumpBtn(l):''}<button class="btn btn-sm" data-act="edit-l" data-id="${l.id}">Düzenle</button></div></td></tr>`).join('')}</tbody></table></div>`:emptyBox('Henüz ilanınız yok','İlk ilanınızı verin, alıcılar sizi bulsun.','<a class="btn btn-primary" href="#ilan-ver">İlan Ver</a>')}</div>`;
   if(ui.tab==='ep'){ const E=S.epOrders.filter(o=>o.u===u.id); body=`<div class="panel">${E.length?`<div class="tbl-w"><table class="tbl"><thead><tr><th>Tarih</th><th>Ürün</th><th>Kod</th><th class="num">Tutar</th></tr></thead><tbody>${E.map(o=>`<tr><td style="white-space:nowrap">${dtstr(o.t)}</td><td><b>${NUM(o.epShown)} EP</b> <span class="muted" style="font-size:12px">${esc(epName({srv:o.srv}))}</span>${o.hh?' <span class="chip ok">Happy Hour</span>':''}</td><td><div class="hstack" style="flex-wrap:nowrap"><span class="mono">${esc(o.code)}</span><button class="btn btn-sm" data-act="copy" data-v="${esc(o.code)}">Kopyala</button></div></td><td class="num">${TL(o.price)}</td></tr>`).join('')}</tbody></table></div>`:emptyBox('EP kodunuz yok','Metin2 EP bölümünden anında kod alabilirsiniz.','<a class="btn btn-primary" href="#metin2-ep">EP al</a>')}</div>`; }
   if(ui.tab==='reklam'){ const L=S.ads.filter(a=>a.owner===u.id); const ph=a=>adPhase(a).k; const ord={onay:0,yayin:1,plan:2,dur:3,bitti:4,red:5}; L.sort((x,y)=>ord[ph(x)]-ord[ph(y)]||(y.start||0)-(x.start||0)); const cnt=k=>L.filter(a=>ph(a)===k).length;
@@ -3927,6 +3979,157 @@ document.addEventListener('click', e => {
   document.addEventListener('focusin', e => { if (isInp(e.target)) { clearTimeout(kt); document.documentElement.classList.add('kbd'); } });
   document.addEventListener('focusout', () => { clearTimeout(kt); kt = setTimeout(() => { if (!isInp(document.activeElement)) document.documentElement.classList.remove('kbd'); }, 100); });
   const vv = window.visualViewport; if (vv) vv.addEventListener('resize', () => document.documentElement.classList.toggle('kbd-vv', vv.height < window.innerHeight * 0.75)); }
+/* ================== Hesabım: Özetim, gruplu hesap menüsü, mobil kabuk (demo ve prod ortak) ==================
+   Tek "Özetim" sayfası (Alıcı/Satıcı geçişi yok): en üstte Yapılacaklar, sonra Bakiyem, KPI kartları, "Para çekmeye hazır mısın?"
+   profil kartı, kural tabanlı sıralanan Satış / Alış özetleri, davet kodu. Mobilde (≤760 px) sekme şeridi çizilmez: üstte selamlama
+   ve görünür "☰ Menü" (data-act=hs-menu, sağdan açılan pencere), Özetim'in altında aynı menünün satır içi hâli ve Çıkış. Masaüstünde
+   soldaki sekme şeridi grup başlıklarıyla çizilir. Menü tek kaynaktan: P_ACC_NAV (gruplar); sekme listesinde olup gruplarda olmayan
+   sekmeler "Diğer"e düşer. Veri HSD bağdaştırıcısından: varsayılan demo (tarayıcıdaki durumdan aynı özet sayıları); prod/97h-hesabim.js
+   sekmeleri (p2AccTabs zinciri), yapılacak işleri (boot / me/summary todo) ve özeti (GET me/summary) değiştirir.                    */
+const HSD = {
+  /** sekme listesi [[anahtar, etiket, sayı?], …] */
+  tabs: u => accTabs(u),
+  /** yapılacak işler: {total, buy, sell, disp, exCall, exInfo} */
+  todo(u) { if (!u || u.admin) return {}; const O = S.orders || [], X = (S.exOrders || []).filter(o => o.u === u.id && exOpenSt(o.status));
+    const buy = O.filter(o => o.buyer === u.id && o.status === 'teslim').length, sell = O.filter(o => o.seller === u.id && o.status === 'odendi').length,
+      disp = O.filter(o => (o.buyer === u.id || o.seller === u.id) && o.status === 'itiraz').length,
+      exCall = X.filter(o => o.called && !(o.ready > o.called)).length, exInfo = X.filter(o => o.status === 'bilgi').length;
+    return { total: buy + sell + disp + exCall + exInfo, buy, sell, disp, exCall, exInfo }; },
+  /** özet (GET me/summary ile aynı biçim); undefined: yükleniyor, {err}: yüklenemedi */
+  sum(u) { const O = S.orders || [], B = O.filter(o => o.buyer === u.id), SL = O.filter(o => o.seller === u.id), OPEN = ['odendi', 'teslim', 'itiraz'];
+    const net = o => o.net != null ? +o.net : r2(o.total * (1 - (o.rate || 0) / 100)), sum = (L, f) => r2(L.reduce((s, x) => s + (+f(x) || 0), 0));
+    const t = now(), day = new Date(t); day.setHours(0, 0, 0, 0); const d0 = day.getTime(), m0 = new Date(day.getFullYear(), day.getMonth(), 1).getTime();
+    const per = ms => { const L = SL.filter(o => o.status === 'tamam' && (o.ct || o.t) >= ms); return { n: L.length, net: sum(L, net) }; };
+    const TX = (S.tx || []).filter(x => x.u === u.id && x.t >= m0), sp = TX.filter(x => x.a < 0 && !/para çek/i.test(x.l)), back = sum(TX.filter(x => x.a > 0 && /iade/i.test(x.l)), x => x.a);
+    const X = (S.exOrders || []).filter(o => o.u === u.id && exOpenSt(o.status)), F = (S.exOffers || []).filter(o => o.u === u.id && o.status === 'aktif');
+    const W = (S.wd || []).filter(w => w.u === u.id && w.status === 'bekliyor'), LS = (S.listings || []).filter(l => l.seller === u.id), BO = B.filter(o => OPEN.includes(o.status));
+    return { todo: HSD.todo(u),
+      buy: { open: BO.length, escrow: sum(BO, o => o.total), monthSpend: Math.max(0, r2(-sum(sp, x => x.a) - back)), monthN: sp.length },
+      sell: { deliver: SL.filter(o => o.status === 'odendi').length, escrowNet: sum(SL.filter(o => OPEN.includes(o.status)), net), d1: per(d0), d7: per(t - 7 * 864e5), d30: per(t - 30 * 864e5),
+        activeListings: LS.filter(l => l.status === 'aktif' && l.stock > 0).length, pendingListings: LS.filter(l => l.status === 'beklemede').length },
+      ex: { openOrders: X.length, escrowLeft: sum(X, o => (o.qty - (o.delivered || 0)) * o.price), activeOffers: F.length, offersLeft: F.reduce((s, o) => s + (+o.left || 0), 0) },
+      wd: { pending: sum(W, w => w.amount), n: W.length } }; },
+  /** borsa sipariş ayrıntıları (Yapılacaklar kartı için; prod: me/exchange) */
+  loadEx() { }, exLoaded: () => true,
+  /** T.C. doğrulaması para çekmeye yeterli mi (prod: tam numara sunucuda) */
+  tcFull: u => tcOk(u) && (typeof p3TcFull === 'function' ? p3TcFull(u) : !(typeof tcNeedFull === 'function' && tcNeedFull(u)))
+};
+const hsTabs = u => HSD.tabs(u);
+const hsMob = () => typeof mtabMob === 'function' && mtabMob();
+const hsTodo = () => HSD.todo(me()) || {};
+
+/* ---------- hesap menüsü: gruplar ---------- */
+const P_ACC_NAV = [
+  { g: 'Yönetim', only: () => isPanel(), items: [{ href: 'yonetim', l: 'Yönetim paneli', ic: 'yonetim', cls: 'hs-adm' }] },
+  { g: 'Genel', items: [{ t: 'ozet', l: 'Özetim', ic: 'home' }, { href: 'bildirimler', l: 'Bildirimlerim', ic: 'bildirimler', b: u => S.notifs.filter(n => n.u === u.id && !n.read).length, bl: 'okunmamış bildirim' }] },
+  { g: 'Alışlarım', items: [{ t: 'alis', l: 'Siparişlerim', ic: 'siparis', b: () => hsTodo().buy, bl: 'onay bekleyen sipariş' }, { t: 'borsa', s: 'al', l: 'Borsa alımlarım', ic: 'borsa', b: () => (+hsTodo().exCall || 0) + (+hsTodo().exInfo || 0), bl: 'borsa işi bekliyor' }, { t: 'ep', l: 'EP kodlarım', ic: 'metin2-ep' }] },
+  { g: 'Satışlarım', items: [{ t: 'ilan', l: 'İlanlarım', ic: 'metin2-tr' }, { t: 'satis', l: 'Satışlarım', ic: 'pazar', b: () => hsTodo().sell, bl: 'teslimat bekleyen satış' }, { t: 'borsa', s: 'sat', l: 'Borsa satış emirlerim', ic: 'borsa' }, { href: 'ilan-ver', l: '+ İlan ver', ic: 'ilan-ver' }, { t: 'reklam', l: 'Reklamlarım', ic: 'reklam-ver' }] },
+  { g: 'Cüzdan', items: [{ act: 'deposit', l: 'Bakiye yükle', ic: 'ilan-ver' }, { t: 'cek', l: 'Para çek', ic: 'cikis' }, { t: 'hareket', l: 'Bakiye hareketleri', ic: 'rehber' }, { t: 'banka', l: 'Banka hesaplarım', ic: 'guvenli' }] },
+  { g: 'Kazan', items: [{ t: 'puan', l: 'VIP & Puan', ic: 'cekilis' }, { t: 'davet', l: 'Davet et kazan', ic: 'cekilis' }, { href: 'cekilis', l: 'Çekiliş & Çark', ic: 'cekilis' }] },
+  { g: 'Hesap', items: [{ t: 'profil', l: 'Profil ve güvenlik', ic: 'hesabim' }] }
+];
+/** Görünür gruplar: yalnız sekme listesinde olan sekmeler; listede olup gruplarda olmayanlar "Diğer"e. Yönetici: Yönetim + Hesap. */
+function hsNav(u) { const T = hsTabs(u), keys = T.map(([k]) => k), lab = Object.fromEntries(T.map(([k, l]) => [k, l]));
+  const G = P_ACC_NAV.filter(g => !g.only || g.only()).map(g => ({ g: g.g, items: g.items.filter(it => !it.t || keys.includes(it.t)) })).filter(g => g.items.length);
+  if (u.admin) return G.filter(g => g.g === 'Yönetim' || g.g === 'Hesap');
+  const used = new Set(G.flatMap(g => g.items.map(it => it.t)).filter(Boolean)); const rest = keys.filter(k => !used.has(k));
+  if (rest.length) G.push({ g: 'Diğer', items: rest.map(k => ({ t: k, l: lab[k] || k, ic: 'rehber' })) });
+  return G; }
+function hsNavHtml(u) { const cur = ui.tab, bx = ui.hsBx || 'al';
+  return hsNav(u).map(g => `<div class="hs-g"><div class="mn-sec">${esc(g.g)}</div>${g.items.map(it => {
+    const n = it.b ? +it.b(u) || 0 : 0, bd = n ? `<i class="mn-b" aria-hidden="true">${n > 99 ? '99+' : n}</i><span class="vh">${n} ${esc(it.bl || '')}</span>` : '';
+    const on = route() === 'hesabim' && it.t && it.t === cur && (!it.s || it.s === bx);
+    const inner = `<span class="mn-ic">${mni(it.ic || 'home')}</span><span class="sh-t"><b>${esc(it.l)}</b></span>${bd}`;
+    const c = `mn-i sh-i${on ? ' on' : ''}${it.cls ? ' ' + it.cls : ''}`;
+    if (it.href) return `<a href="#${it.href}" class="${c}">${inner}</a>`;
+    if (it.act) return `<button type="button" class="${c}" data-act="${it.act}">${inner}</button>`;
+    return `<button type="button" class="${c}" data-act="tab" data-t="${it.t}"${it.s ? ` data-s="${it.s}"` : ''}${on ? ' aria-current="page"' : ''}>${inner}</button>`; }).join('')}</div>`).join(''); }
+const hsLogoutBtn = () => `<button type="button" class="btn btn-block hs-out" data-act="logout">${mni('cikis')} Çıkış yap</button>`;
+function hsWho(u) { return `<div class="hs-who">${av(u)}<span><b>${esc(u.name)}</b> ${u.admin ? '' : vipBadge(u)}<small>${esc(fullName(u))} · Üye no #${esc(String(u.id).replace(/\D/g, ''))}</small></span></div>
+  ${u.admin ? '' : `<div class="hs-mw"><span>Bakiyem</span><b class="mono">${TL(avail(u))}</b><small>Çekilebilir ${TL(u.bal || 0)} · Alışveriş ${TL(u.bonus || 0)}</small></div>`}`; }
+function hsMenuSheet(u) { return sheetWrap('Hesabım', `${hsWho(u)}<nav class="hs-nav" aria-label="Hesap menüsü">${hsNavHtml(u)}</nav>`,
+  { cls: 'side hs-menu', id: 'hsmenu', foot: hsLogoutBtn(), attrs: 'data-hsmenu', label: 'Hesap menüsü' }); }
+
+/* ---------- Özetim ---------- */
+const hsTi = (ic, html, attrs, cls) => `<${attrs ? 'button type="button"' : 'div'} class="hs-ti${cls ? ' ' + cls : ''}"${attrs || ''}><span class="hs-tic" aria-hidden="true">${ic}</span><span class="hs-tt">${html}</span>${attrs ? '<span class="sh-go" aria-hidden="true">›</span>' : ''}</${attrs ? 'button' : 'div'}>`;
+function hsTodoHtml(u, d) { const t = hsTodo(), L = [];
+  const X = (S.exOrders || []).filter(o => o.u === u.id && exOpenSt(o.status)), loaded = HSD.exLoaded();
+  if ((+t.exCall || 0) + (+t.exInfo || 0) > 0 || X.length) HSD.loadEx();
+  const call_ = X.filter(o => o.called && !(o.ready > o.called)), info = X.filter(o => o.status === 'bilgi');
+  call_.forEach(o => L.push(`<div class="hs-ti hs-warn"><span class="hs-tic" aria-hidden="true">!</span><span class="hs-tt"><b>Operatör seni bekliyor · #${esc(o.id)}</b><small>${esc(o.callMsg || (typeof callMsg === 'function' ? callMsg(o) : ''))}</small><button type="button" class="btn btn-primary btn-sm" data-act="ex-ready" data-id="${esc(o.id)}">Geldim, hazırım</button></span></div>`));
+  info.forEach(o => L.push(`<div class="hs-ti hs-warn"><span class="hs-tic" aria-hidden="true">?</span><span class="hs-tt"><b>Borsa #${esc(o.id)}: bilgi istendi</b>${o.note ? `<small>${esc(o.note)}</small>` : ''}<button type="button" class="btn btn-primary btn-sm" data-act="ex-fix" data-id="${esc(o.id)}">Bilgileri güncelle</button></span></div>`));
+  if (!loaded) { const n = (+t.exCall || 0) + (+t.exInfo || 0); if (n) L.push(hsTi('!', `<b>${n} borsa siparişinde senden işlem bekleniyor</b>`, ' data-act="tab" data-t="borsa" data-s="al"', 'hs-warn')); }
+  if (+t.sell) L.push(hsTi('📦', `<b>${t.sell} satışta teslimat seni bekliyor</b>`, ' data-act="tab" data-t="satis"'));
+  if (+t.buy) L.push(hsTi('✔', `<b>${t.buy} siparişte onayın bekleniyor</b>`, ' data-act="tab" data-t="alis"'));
+  if (+t.disp) L.push(hsTi('⚖', `<b>${t.disp} siparişte itiraz sürüyor</b>`, ' data-act="tab" data-t="alis"'));
+  if (u.tcAsk) L.push(hsTi('🪪', '<b>Ödemen için T.C. numaranı onayla</b>', ' data-act="tab" data-t="cek"'));
+  if (d && d.sell && +d.sell.pendingListings) L.push(hsTi('⏳', `<b>${d.sell.pendingListings} ilanın onay bekliyor</b><small>Onaylanınca yayına girer.</small>`, '', 'hs-info'));
+  const n = L.length; if (!n) return '';
+  return `<section class="hs-todo" aria-labelledby="hsTodoH"><div class="hs-sh"><h2 id="hsTodoH">Yapılacaklar</h2><span class="mtab-cnt">${n}</span></div><div class="hs-tl">${L.join('')}</div></section>`; }
+function hsKpis(d) { const v = (f, sub) => d && !d.err ? `<b class="mono">${TL(f(d))}</b><small>${sub(d)}</small>` : d && d.err ? '<b class="mono">—</b><small>Yüklenemedi</small>' : '<b class="mono hs-sk">…</b><small>&nbsp;</small>';
+  const k = (l, f, sub, cls) => `<div class="hs-kpi${cls ? ' ' + cls : ''}"><span>${l}</span>${v(f, sub)}</div>`;
+  return `<div class="hs-kpis">${k('Havuzdaki alışlarım', x => x.buy.escrow, x => `${x.buy.open} açık sipariş · teslim alınca satıcıya geçer`)}${k('Borsa havuzu', x => x.ex.escrowLeft, x => `${x.ex.openOrders} açık borsa alımı`)}
+    ${k('Havuzdaki satışlarım', x => x.sell.escrowNet, () => 'Alıcı onaylayınca bakiyene geçer')}${k('Çekim bekleyen', x => x.wd.pending, x => `${x.wd.n} talep`)}
+    ${k('Bu ay harcama', x => x.buy.monthSpend, x => `${x.buy.monthN} işlem`)}${k('Satış · 30 gün', x => x.sell.d30.net, x => `${x.sell.d30.n} satış · net`)}</div>
+    ${d && d.err ? `<div class="hs-err"><span class="muted">Özet şu an yüklenemedi.</span><button type="button" class="btn btn-sm" data-act="hs-sum-retry">Yenile</button></div>` : ''}`; }
+/** "Para çekmeye hazır mısın?": ad soyad, T.C. doğrulama, telefon, 2 adımlı doğrulama, IBAN — her madde ilgili sekmeye */
+function hsProf(u) { if (u.admin || u.staff) return '';
+  const tcF = HSD.tcFull(u), insp = !tcOk(u) && u.tc && u.tc.state === 'inceleme', ibT = hsTabs(u).some(([k]) => k === 'banka') ? 'banka' : 'cek';
+  const I = [['ad', 'Ad soyad', !!(u.ad && u.soyad), 'profil', 'Düzenle', 1], ['tc', 'T.C. kimlik doğrulama', tcF, 'cek', tcOk(u) ? 'Numaranı onayla' : 'Doğrula', 1],
+    ['tel', 'Cep telefonu', !!u.tel, 'profil', 'Ekle', 0], ['tfa', '2 adımlı doğrulama', !!u.tfa, 'profil', 'Aç', 0], ['iban', 'IBAN', (u.ibans || []).length > 0, ibT, 'Ekle', 1]];
+  const done = I.filter(x => x[2]).length;
+  if (done === I.length) return `<div class="hs-prof hs-ok" data-prof="${done}/${I.length}"><span>✔</span> <b>Profilin tamam</b> · para çekmeye hazırsın</div>`;
+  const miss = I.filter(x => !x[2]), ok_ = I.filter(x => x[2]);
+  return `<section class="hs-prof" data-prof="${done}/${I.length}" aria-labelledby="hsProfH"><div class="hs-sh"><h2 id="hsProfH">Para çekmeye hazır mısın?</h2><span class="mono">${done} / ${I.length}</span></div>
+    <div class="prog" role="progressbar" aria-label="Profil tamamlama" aria-valuemin="0" aria-valuemax="${I.length}" aria-valuenow="${done}"><i style="width:${Math.round(done / I.length * 100)}%"></i></div>
+    <div class="hs-pl">${miss.map(([k, l, , t, b, req]) => `<div class="hs-pi" data-k="${k}"><span class="neg" aria-hidden="true">✖</span><span class="hs-pt">${esc(l)}${req ? '<small>Para çekmek için gerekli</small>' : k === 'tfa' ? '<small>Önerilir</small>' : ''}</span>${k === 'tc' && insp ? '<span class="chip">İnceleniyor</span>' : `<button type="button" class="btn btn-sm" data-act="tab" data-t="${t}">${b} ›</button>`}</div>`).join('')}</div>
+    ${ok_.length ? `<div class="hs-pok">${ok_.map(x => `<span class="chip ok">✔ ${esc(x[1])}</span>`).join('')}</div>` : ''}</section>`; }
+function hsSecs(u, d) { if (!d || d.err) return '';
+  const s = d.sell, b = d.buy, x = d.ex, act = (+s.activeListings) + (+s.pendingListings) + (+s.d30.n) + (+s.escrowNet) > 0 || +x.activeOffers > 0;
+  const row = (l, v, attrs) => `<button type="button" class="hs-r"${attrs}><span>${l}</span><b>${v}</b><span class="sh-go" aria-hidden="true">›</span></button>`;
+  const sell = act ? `<section class="hs-sec" aria-labelledby="hsSellH"><div class="hs-sh"><h2 id="hsSellH">Satış özeti</h2><a class="btn btn-sm" href="#ilan-ver">+ İlan ver</a></div>
+      <div class="hs-strip">${[['Bugün', s.d1], ['7 gün', s.d7], ['30 gün', s.d30]].map(([l, z]) => `<div><span>${l}</span><b class="mono">${TL(z.net)}</b><small>${z.n} satış</small></div>`).join('')}</div>
+      ${row('Aktif ilan', `${s.activeListings}${+s.pendingListings ? ` <small>(${s.pendingListings} onay bekliyor)</small>` : ''}`, ' data-act="tab" data-t="ilan"')}
+      ${row('Borsa satış emri', `${x.activeOffers} aktif · ${NUM(x.offersLeft)} adet`, ' data-act="tab" data-t="borsa" data-s="sat"')}</section>`
+    : `<section class="hs-sec hs-empty"><div class="hs-sh"><h2>Satmaya başla</h2></div><p class="muted">İlk ilanını ver ya da borsada yangını kendi fiyatınla sat.</p><div class="hstack"><a class="btn btn-primary btn-sm" href="#ilan-ver">İlan ver</a><a class="btn btn-sm" href="#borsa">Borsada sat</a></div></section>`;
+  const any = +b.open || +x.openOrders || +b.monthN;
+  const buy = `<section class="hs-sec" aria-labelledby="hsBuyH"><div class="hs-sh"><h2 id="hsBuyH">Alış özeti</h2></div>${any ? `${row('Açık sipariş', b.open, ' data-act="tab" data-t="alis"')}${row('Borsa alımı', `${x.openOrders} açık`, ' data-act="tab" data-t="borsa" data-s="al"')}${row('EP kodlarım', '', ' data-act="tab" data-t="ep"')}`
+    : `<p class="muted">Henüz alışverişin yok.</p><div class="hstack"><button type="button" class="btn btn-sm btn-primary" data-mtab="pazar" data-sheet-opener="pazar">Pazara göz at</button><a class="btn btn-sm" href="#borsa">Yang Borsası</a></div>`}</section>`;
+  return (+s.d30.n > +b.monthN ? sell + buy : buy + sell); }
+function hsOzet(u) { const d = u.admin ? null : HSD.sum(u), code = u.refCode || refCode(u), mob = hsMob();
+  if (u.admin) return `${mob ? '' : '<div class="note note-info">Yönetici hesabı: bakiye ve alışveriş özetleri gösterilmez.</div>'}`;
+  return `<div class="hs-oz">${hsTodoHtml(u, d)}
+    <section class="hs-wallet" aria-labelledby="hsWalH"><div class="hs-sh"><h2 id="hsWalH">Bakiyem</h2></div><b class="mono hs-big">${TL(avail(u))}</b><span class="muted">Kullanılabilir bakiye</span>
+      <div class="hs-wr"><div><span>Çekilebilir</span><b class="mono">${TL(u.bal || 0)}</b></div><div><span>Yalnız alışveriş</span><b class="mono">${TL(u.bonus || 0)}</b></div></div>
+      <div class="hs-wb"><button type="button" class="btn btn-primary" data-act="deposit">+ Bakiye yükle</button><button type="button" class="btn" data-act="p2-wd">↑ Para çek</button></div></section>
+    ${hsKpis(d)}${hsProf(u)}${hsSecs(u, d)}
+    <div class="panel panel-b stack hs-ref"><div class="eyebrow">Davet kodun</div><div class="cprow"><span><b class="mono" style="font-size:16px">${esc(code)}</b><br><span class="muted" style="font-size:12px">Arkadaşların üye olurken bu kodu yazabilir.</span></span><button class="btn btn-sm" data-act="copy" data-v="${esc(code)}">Kodu kopyala</button></div></div></div>`; }
+/** Hesabım › Borsa: Alımlarım / Satış emirlerim bölmesi (kartlar 51-borsa-kart.js), her genişlikte */
+function hsBorsa(u) { const O = exSortUser(S.exOrders.filter(o => o.u === u.id)), F = S.exOffers.filter(o => o.u === u.id).sort((a, b) => (a.status === 'aktif' ? 0 : 1) - (b.status === 'aktif' ? 0 : 1) || b.t - a.t), bx = ui.hsBx === 'sat' ? 'sat' : 'al';
+  return `${S.set.exOn ? '' : `<div class="note note-info"><b>Yang Borsası kısa bir moladır.</b> ${esc(S.set.exOffMsg || '')}</div>`}
+    <div class="segtabs hs-seg" role="tablist" aria-label="Borsa işlemlerim"><button role="tab" aria-selected="${bx === 'al'}" class="${bx === 'al' ? 'on' : ''}" data-act="hs-bx" data-s="al"><b>Alımlarım</b><span>${O.length}</span></button><button role="tab" aria-selected="${bx === 'sat'}" class="${bx === 'sat' ? 'on' : ''}" data-act="hs-bx" data-s="sat"><b>Satış emirlerim</b><span>${F.length}</span></button></div>
+    ${bx === 'al' ? (O.length ? bxOrders(O) : emptyBox('Borsa alımın yok', 'Sabit fiyattan yang al, operatör karakterine teslim etsin.', '<a class="btn btn-primary" href="#borsa">Borsaya git</a>'))
+      : (F.length ? bxOffers(F) : emptyBox('Satış emrin yok', 'Yangını kendi fiyatınla siteye sat; satılınca tutar çekilebilir bakiyene geçer.', '<a class="btn btn-primary" href="#borsa">Borsada sat</a>'))}`; }
+
+/* ---------- kabuk: masaüstünde gruplu sekme şeridi; mobilde şerit yok (selamlama + ☰ Menü + satır içi menü) ---------- */
+/** masaüstü: şeritteki düğmeler P_ACC_NAV grup sırasıyla, grup başlıklarıyla (aynı düğmeler, aynı sayaçlar) */
+function hsDeskNav(h, u) { return h.replace(/<nav class="panel tabs">([\s\S]*?)<\/nav>/, (m, inner) => { const B = {}, order = [];
+    inner.replace(/<button data-act="tab" data-t="([^"]+)"[\s\S]*?<\/button>/g, (b, k) => { if (!B[k]) { B[k] = b; order.push(k); } return b; });
+    const used = new Set(); let out = '';
+    hsNav(u).forEach(g => { const ks = g.items.map(it => it.t).filter(k => k && B[k] && !used.has(k)); if (!ks.length) return; ks.forEach(k => used.add(k)); out += `<div class="hs-navg eyebrow">${esc(g.g)}</div>` + ks.map(k => B[k]).join(''); });
+    const rest = order.filter(k => !used.has(k)); if (rest.length) out += '<div class="hs-navg eyebrow">Diğer</div>' + rest.map(k => B[k]).join('');
+    return '<nav class="panel tabs hs-dnav">' + out + '</nav>'; }); }
+function hsShell(h) { const u = me(); if (!u || !/class="acc"/.test(h)) return h;
+  if (!hsMob()) return hsDeskNav(h, u);
+  const T = hsTabs(u); const tl = (T.find(([k]) => k === ui.tab) || [])[1] || 'Hesabım';
+  const t = document.createElement('template'); t.innerHTML = h; const st = t.content.querySelector('.acc > .stack:last-child'); const body = st ? st.innerHTML : '';
+  const menuB = `<button type="button" class="btn btn-sm hs-mbtn" data-act="hs-menu" aria-haspopup="dialog" data-sheet-opener="hs-menu">${mni('burger')} Menü</button>`;
+  const top = ui.tab === 'ozet'
+    ? `<div class="hs-top">${av(u)}<div class="hs-hi"><b>Merhaba ${esc(u.ad || u.name)}</b> ${u.admin ? '' : vipBadge(u)}<small>Üye no #${esc(String(u.id).replace(/\D/g, ''))}</small></div>${menuB}</div>`
+    : `<div class="hs-bar"><button type="button" class="btn btn-sm hs-back" data-act="tab" data-t="ozet">‹ Özetim</button><h1>${esc(tl)}</h1>${menuB}</div>`;
+  const inl = ui.tab === 'ozet' ? `<nav class="hs-inl" aria-label="Hesap menüsü" data-hsinline>${hsNavHtml(u)}</nav>${hsLogoutBtn()}` : '';
+  return `<div class="wrap hsm"><h1 class="vh">Hesabım</h1>${top}<div class="stack hs-body">${body}</div>${inl}</div>`; }
+{ const v0 = vAccount; vAccount = function () { return hsShell(v0.apply(this, arguments)); }; }
 /* ================== yang borsası ================== */
 const EXS={bekliyor:'İşlem bekliyor',islemde:'İşlem bekliyor · üstlenildi',bilgi:'İşlem bekliyor · bilgi istendi',kismen:'Kısmen teslim edildi',tamam:'Tamamlandı',iptal:'İptal edildi'};
 const EXP={bekliyor:'p-bekliyor',islemde:'p-odendi',bilgi:'p-itiraz',kismen:'p-teslim',tamam:'p-tamam',iptal:'p-iade'};
@@ -4014,64 +4217,178 @@ function exFieldsHtml(vals,prefix,set){
     return `<div class="fld"><label for="${id}">${esc(f.label)}${f.req?' *':''}</label>${inp}${f.note?`<span class="muted" style="font-size:11.5px">${esc(f.note)}</span>`:''}</div>`;}).join('');
 }
 const exSet = dir => dir==='al' ? S.exFieldsBuy : S.exFields;
-function exCardsB(arr){ return `<div class="mlist">${arr.map(o=>{const s=srv(o.server)||{name:'?'}; return `<div class="mitem"><div class="mrow"><b class="mono">#${o.id}</b><span class="pill ${EXP[o.status]}">${EXS[o.status]}</span></div><div class="mrow"><span>${esc(s.name)} · ${NUM(o.qty)} adet</span><b class="mono">${TL(o.total)}</b></div><div class="mrow muted"><span>Teslim ${o.delivered||0}/${o.qty}</span><span>${ago(o.t)}</span></div>${o.status==='bilgi'?`<button class="btn btn-sm btn-primary" data-act="ex-fix" data-id="${o.id}">Bilgileri güncelle</button>`:''}</div>`}).join('')}</div>`; }
-function exCardsO(arr){ return `<div class="mlist">${arr.map(o=>{const x=S.exchange.find(e=>e.id===o.ex)||{}; const s=srv(x.server)||{name:'?'}; return `<div class="mitem"><div class="mrow"><b class="mono">#${o.id}</b><span class="pill ${o.status==='aktif'?'p-tamam':o.status==='satildi'?'p-odendi':'p-iade'}">${OFS[o.status]}</span></div><div class="mrow"><span>${esc(s.name)} · ${TL(o.price)} / adet</span><b class="mono">${NUM(o.left)} / ${NUM(o.qty)}</b></div><div class="mrow muted"><span>Kalan / toplam adet</span><span>${ago(o.t)}</span></div>${o.status==='aktif'?`<button class="btn btn-sm btn-bad" data-act="of-cancel" data-id="${o.id}">Emri iptal et</button>`:''}</div>`}).join('')}</div>`; }
-function vExchange(){
-  if(!S.set.exOn) return vExClosed();
-  const u=me(); const dir=ui.exDir||'al';
-  const xs=S.exchange.filter(x=>x.on); const x=xs.find(e=>e.id===ui.exId)||xs[0]; if(!x) return `<div class="wrap">${emptyBox('Borsa şu an kapalı','Yönetim panelinden server ekleyin.')}</div>`;
-  const s=srv(x.server)||{name:'?',c:['#333','#666'],sec:'tr'}; const book=exBook(x), stock=exStock(x), sp=exSellPrice(x);
-  const mineO=u?S.exOffers.filter(o=>o.u===u.id).sort((a,b)=>(a.status==='aktif'?0:1)-(b.status==='aktif'?0:1)||b.t-a.t):[]; const mineB=u?exSortUser(S.exOrders.filter(o=>o.u===u.id)):[];
-  const secX=sec=>xs.filter(e=>(srv(e.server)||{}).sec===sec);
-  const grp=sec=>secX(sec).map(e=>`<option value="${e.id}" ${e.id===x.id?'selected':''}>${esc((srv(e.server)||{}).name)}</option>`).join('');
-  const unit=esc(x.unit||'adet'); const al=dir==='al';
-  const steps = al
-    ? [['Server ve adet','Serverını seç, kaç adet istediğini ve karakter adını yaz.'],['Operatör gelir',`${S.set.exPlace} noktasında karakterine ticaret açar.`],['Teslim alırsın','Ticareti kontrol edip onayla. Hazır olunca bildirim ve SMS gelir.']]
-    : [['Fiyatını belirle',`En fazla ${TL(x.max)} girebilirsin. Ucuz fiyat sırada öne geçer.`],['Emrin sıraya girer','Ekibimiz emirleri fiyata göre sıralı görür, en uygun fiyatlıdan eşler.'],['Paran bakiyende','Operatör hesabından yangı alır, tutar bakiyene geçer, bilgilerin silinir.']];
-  const board = `<div class="panel exboard"><div class="exboard-h"><div class="exsec" role="tablist" aria-label="Bölüm">${['tr','pvp'].map(sc=>`<button role="tab" aria-selected="${s.sec===sc}" class="${s.sec===sc?'on':''}" data-act="ex-msec" data-s="${sc}">${secName(sc)}<span>${secX(sc).length}</span></button>`).join('')}</div><span class="muted">Server seçin · fiyatlar ${unit==='adet'?'adet':'birim'} başına</span></div>
-    <div class="tbl-w"><table class="tbl exbt"><thead><tr><th>Server</th><th class="num">Siteden al</th><th class="num hide-s">Stok</th><th class="num">Siteye sat<span class="hide-s"> · en fazla</span></th><th class="num hide-s">En ucuz emir</th><th class="hide-s"></th></tr></thead><tbody>${secX(s.sec).map(e=>{const sv=srv(e.server)||{name:'?'}; const b0=exBook(e)[0]; const p=exSellPrice(e); const on_=e.id===x.id;
-      return `<tr class="${on_?'on':''}" data-act="ex-pick" data-id="${e.id}"><td><span class="exsv">${logo(sv,30)}<span><b>${esc(sv.name)}</b><small>${esc(e.unit)}</small></span></span></td><td class="num"><b class="mono">${p?TL(p):'—'}</b></td><td class="num hide-s mono">${NUM(exStock(e))}</td><td class="num"><span class="mono pos">${TL(e.max)}</span></td><td class="num hide-s mono">${b0?TL(b0.price):'—'}</td><td class="num hide-s"><button class="btn btn-sm ${on_?'btn-primary':''}" data-act="ex-pick" data-id="${e.id}" aria-pressed="${on_}">${on_?'Seçili':'Seç'}</button></td></tr>`}).join('')}</tbody></table></div></div>`;
-  const stepH=(n,t,sub)=>`<div class="exh"><i>${n}</i><div><b>${t}</b>${sub?`<span>${sub}</span>`:''}</div></div>`;
-  const form = `<form class="panel-b stack exform" data-form="${al?'exorder':'exoffer'}">${exClosed(dir)?`<div class="note note-bad"><b>${al?'Siteden yang alımı':'Siteye satış emri verme'} şu an kapalı.</b> ${esc(S.set.exOffMsg||'')}</div>`:''}
-      <section class="exsect">${stepH(1,'Server','Önce bölümü, sonra serverı seçin')}<div class="row2"><div class="fld"><label for="ex_sec">Bölüm</label><select class="inp" id="ex_sec" data-change="ex-sec"><option value="tr" ${s.sec==='tr'?'selected':''}>Metin2 TR</option><option value="pvp" ${s.sec==='pvp'?'selected':''}>Metin2 PVP</option></select></div><div class="fld"><label for="ex_sel">Server</label><select class="inp" id="ex_sel" data-change="ex-sel">${grp(s.sec)}</select></div></div></section>
-      ${al
-        ? `<section class="exsect">${stepH(2,'Adet ve karakter',`Fiyat sabit: ${sp?TL(sp):'—'} / ${unit}`)}<div class="row2"><div class="fld"><label for="ex_qty">Kaç adet? (${unit})</label><input class="inp mono" id="ex_qty" type="number" min="1" value="1" required data-change="ex-calc" data-x="${x.id}" data-dir="al"></div>${exFieldsHtml(null,'exb_',S.exFieldsBuy)}</div>
-           <div class="explace"><span>Teslimat yeri</span><b>${esc(S.set.exPlace)}</b><small>Operatör bu noktada karakterine ticaret açar. Hesap bilgin istenmez.</small></div>
-           <div id="ex_waitbox" class="note note-info" ${stock>=1?'hidden':''}><span id="ex_waitmsg">Stokta şu an ${NUM(stock)} adet var. Siparişiniz alınır; kalan kısım yeni satış emirleri geldikçe tamamlanır. Fiyat değişmez.</span></div></section>`
-        : `<section class="exsect">${stepH(2,'Adet ve fiyat',`En fazla ${TL(x.max)} / ${unit}`)}<div class="row2"><div class="fld"><label for="ex_qty">Kaç adet satıyorsun? (${unit})</label><input class="inp mono" id="ex_qty" type="number" min="1" value="1" required data-change="ex-calc" data-x="${x.id}" data-dir="sat"></div><div class="fld"><label for="ex_price">Birim fiyatın (TL)</label><input class="inp mono" id="ex_price" type="number" min="0.01" max="${x.max}" step="0.01" value="${book[0]?Math.min(x.max,r2(book[0].price)):x.max}" required data-change="ex-calc" data-x="${x.id}" data-dir="sat"></div></div>
-             <div class="exq"><b>Kuyruk sistemi</b> Satışlar kuyruk sistemine göre işlenir; en düşük birim fiyatı veren satıcılar önceliklidir. Satışınızın daha hızlı tamamlanması için birim fiyatınızı mümkün olduğunca düşük tutmanızı öneririz.</div>
-             <div class="expos" id="ex_pos">${book.length?`Şu an en ucuz emir ${TL(book[0].price)}. Ondan düşük fiyat verirsen ilk sıraya geçersin.`:'Bu serverda henüz emir yok. En düşük fiyatlı emir önce satılır.'}</div></section>
-           <section class="exsect">${stepH(3,'Hesap bilgileri','Emrin eşlenince ekibimiz bu bilgilerle girip yangı alır')}<div class="exfields row2">${exFieldsHtml(null,'exf_',S.exFields)}</div>
-             <details class="exrules"><summary>Satış kuralları</summary><div class="rules">${S.exRules.split('\n').filter(Boolean).map(r=>`<div>• ${esc(r)}</div>`).join('')}</div></details>
-             <label class="chk" for="ex_ok"><input type="checkbox" id="ex_ok" required> Kuralları okudum, emrim eşlendiğinde hesabıma giriş yapılmasını onaylıyorum.</label></section>`}
-      <div class="extotal" id="ex_sum"><div><span>${al?'Ödenecek tutar':'Satılırsa bakiyene geçecek'}</span><small>${al?`${TL(sp||0)} × adet · site bakiyesinden`:'Adet × birim fiyatın'}</small></div><b class="mono" id="ex_tot">${al?(sp?TL(sp):'—'):TL(book[0]?Math.min(x.max,book[0].price):x.max)}</b></div>
-      <button class="btn ${al?'btn-primary':'btn-ok'} btn-block exgo" ${exClosed(dir)?'disabled':''}>${u?(al?'Bakiyemle satın al':'Satış emri ver'):'Giriş yap ve devam et'}</button>
-    </form>`;
-  const card = al
-    ? `<div class="panel expc"><div class="expc-h">${logo(s,40)}<div><span class="eyebrow">${secName(s.sec)}</span><b>${esc(s.name)}</b></div></div>
-       <div class="expc-big"><span>Siteden satın al</span><b class="mono">${sp?TL(sp):'—'}</b><small>/ ${unit} · sabit fiyat</small></div>
-       <div class="expc-kv"><div><span>Stok</span><b class="mono">${NUM(stock)} adet</b></div><div><span>Ödeme</span><b>Site bakiyesi</b></div><div><span>Operatörler</span><b>${supportOpen()?'<span class="pos">Çevrimiçi</span>':esc(nextOpen())+' dönüyor'}</b></div></div></div>`
-    : `<div class="panel expc"><div class="expc-h">${logo(s,40)}<div><span class="eyebrow">${secName(s.sec)}</span><b>${esc(s.name)}</b></div></div>
-       <div class="expc-big sell"><span>En fazla satış fiyatı</span><b class="mono">${TL(x.max)}</b><small>/ ${unit}</small></div>
-       <div class="expc-kv"><div><span>En ucuz emir</span><b class="mono">${book[0]?TL(book[0].price):'—'}</b></div><div><span>Satıştaki emir</span><b class="mono">${book.length} emir · ${NUM(stock)} adet</b></div><div><span>Ödeme</span><b>Satılınca bakiyene</b></div></div></div>`;
-  const queue = al?'':`<div class="panel sqside"><div class="panel-h" style="flex-wrap:wrap"><h3>${esc(s.name)} satış sırası</h3><span class="muted" style="font-size:12px">Ucuzdan pahalıya · ekip bu sırayla eşler</span></div>${book.length?`<div class="tbl-w"><table class="tbl"><thead><tr><th>Sıra</th><th>Satıcı</th><th class="num">Birim fiyat</th><th class="num">Adet</th></tr></thead><tbody>${book.slice(0,10).map((o,i)=>`<tr class="${u&&o.u===u.id?'mine':''}"><td class="mono">${i+1}</td><td>${u&&o.u===u.id?'<b>Sizin emriniz</b>':esc(maskU(user(o.u).name))}</td><td class="num">${TL(o.price)}</td><td class="num">${NUM(o.left)}</td></tr>`).join('')}</tbody></table></div>`:emptyBox('Bu serverda satış emri yok','En düşük fiyatlı emir ilk eşlenir.')}</div>`;
-  return `<div class="wrap exv"><div class="page-h"><div><h1>Yang Borsası</h1><p>Sabit fiyattan güvenle yang al ya da yangını kendi belirlediğin fiyatla siteye sat. Teslimat her serverda ${esc(S.set.exPlace)} noktasında.</p></div><div class="hstack"><span class="chip ${supportOpen()?'ok':'warn'}">● ${supportOpen()?'Operatörler çevrimiçi':'Operatörler '+nextOpen()+' dönüyor'}</span></div></div>
-  ${myCallNotes()}
-  <div class="det" style="margin-top:16px"><div class="col">
-    <div class="panel"><div class="segtabs exdir"><button class="${al?'on':''}" data-act="ex-dir" data-d="al"><b>Siteden satın al</b><span>Sabit fiyat, hızlı teslim</span></button><button class="${!al?'on':''}" data-act="ex-dir" data-d="sat"><b>Siteye sat</b><span>Kendi fiyatınla emir ver</span></button></div>${form}</div>
-    ${al
-      ? (u?`<div class="panel exmine"><div class="panel-h"><h3>Alım siparişlerim</h3>${mineB.length>5?'<a href="#hesabim" data-act="tab" data-t="borsa">Tümü</a>':''}</div>${mineB.length?`<div class="hide-m">${exTable(mineB.slice(0,5),false)}</div><div class="show-m">${exCardsB(mineB.slice(0,5))}</div>`:emptyBox('Henüz alım siparişiniz yok','Yukarıdan ilk siparişinizi verin.')}</div>`:'')
-      : (u?`<div class="panel exmine"><div class="panel-h"><h3>Satış emirlerim</h3><span class="muted" style="font-size:12px">Satıştaki emrini dilediğin an iptal edebilirsin</span></div>${mineO.length?`<div class="hide-m">${offerTable(mineO,false,true)}</div><div class="show-m">${exCardsO(mineO)}</div>`:emptyBox('Henüz satış emriniz yok','Yukarıdan ilk emrinizi verin.')}</div>`:'')}
-  </div>
-  <aside class="col">${card}${queue}
-    <div class="panel panel-b stack"><div class="eyebrow">${al?'Satın alma nasıl işler?':'Satış emri nasıl işler?'}</div><ol class="exflow">${steps.map(s_=>`<li><b>${s_[0]}</b><span>${s_[1]}</span></li>`).join('')}</ol>
-    ${al?'<div class="rules" style="font-size:12.5px"><div>• Hesap şifreni asla istemeyiz; teslimat yalnızca oyun içi ticaretle yapılır.</div><div>• Fiyat sabittir; stok yetmezse kalan kısım yeni satış emirleriyle tamamlanır.</div></div>':''}</div>
-  </aside></div></div>`;
-}
+/* üye kartları (exCardsB / exCardsO) ve borsa sayfası (vExchange): 51-borsa-kart.js */
 
 /* ================== aranıyor ================== */
 (function(){ try{ const q=new URLSearchParams(location.search).get('odeme'); if(q) setTimeout(()=>toast(q==='basarili'?'Ödemeniz alındı, bakiyeniz yüklendi.':'Ödeme tamamlanamadı. Kartınızdan çekim yapıldıysa canlı destekle görüşün.',q!=='basarili'),600); }catch(e){} })();
 
+/* ================== Yang Borsası: kart ızgarası, AL / SAT pencereleri, bekleyen işlem kartları (demo ve prod ortak) ==================
+   Borsa sayfası her genişlikte kart ızgarasıdır (telefon 2, tablet 3, masaüstü ≥1100 px 4 sütun). Her kartta SAT (en fazla x.max +
+   "Sıra başı" en ucuz emir) ve AL (x.buy sabit fiyat + "Satışta N" ya da "Şu an satıcı yok") fiyatları. AL penceresi tek adım
+   (FORM.exorder), SAT penceresi iki adım (FORM.exoffer); formlar yalnız pencerede bulunur. Masaüstünde pencereler ortalanmış modaldır.
+   Bekleyen alım siparişleri ve satış emirleri her genişlikte karttır (Hesabım › Borsa da aynı kartları kullanır).
+   Veri ve gönderim BXD bağdaştırıcısından: varsayılan demo (tarayıcıdaki S.exchange / S.exOffers / S.exOrders); prod/97x ve prod/98x
+   net stoğu, başlık çipini ve gönderimi (API, Idempotency-Key) değiştirir.                                                            */
+const BXD = {
+  /** satıştaki net adet (demo: satış sırasındaki toplam) */
+  net: x => exStock(x),
+  /** başlıktaki durum çipi */
+  chip: () => `<span class="chip ${supportOpen() ? 'ok' : 'warn'}">● ${supportOpen() ? 'Operatörler çevrimiçi' : 'Operatörler ' + esc(nextOpen()) + ' dönüyor'}</span>`,
+  /** gönderim sarmalayıcı (prod: apiBusy) — demo: bağdaştırıcı hataları ({msg}) toast'ta gösterildi, burada yutulur */
+  busy: (f, p) => p.catch(e => { if (e instanceof Error) throw e; }),
+  err: j => (j && j.msg) || 'İşlem tamamlanamadı.',
+  /** AL: alım siparişi. Başarıda {msg}; hata: {msg, code?} fırlatır. */
+  async al(f, x, q) { const u = me(); if (exClosed('al')) throw { msg: 'Siteden yang alımı şu an kapalı. ' + (S.set.exOffMsg || '') };
+    const bp = exSellPrice(x); if (!bp) throw { msg: 'Bu server için satış fiyatı henüz belirlenmedi.' };
+    const stk = exStock(x), miss = Math.max(0, q - stk), total = r2(q * bp);
+    if (avail(u) < total) throw { msg: `Bakiye yetersiz. ${TL(r2(total - avail(u)))} daha yükleyin.`, code: 'insufficient' };
+    const fl = {}; S.exFieldsBuy.forEach(z => { fl[z.id] = v_('exb_' + z.id); });
+    const paid = spend(u, total); addTx(u.id, 'Borsa alımı', -total);
+    const o = { id: 'B' + (1000 + S.exOrders.length + 1), u: u.id, dir: 'al', ex: x.id, server: x.server, qty: q, price: bp, total, reserve: 0, paid, cost: 0, fills: [], delivered: 0, place: S.set.exPlace, status: 'bekliyor', t: now(), f: fl, staff: null,
+      log: [{ t: now(), x: `Sipariş alındı: ${q} adet × ${TL(bp)} = ${TL(total)} bakiyeden çekildi.${miss ? ` Sipariş anında stok ${stk} adetti.` : ''}` }] };
+    S.exOrders.unshift(o); raffleSpend(u.id, total, 'borsa');
+    notify(u.id, `Borsa siparişiniz #${o.id} sıraya alındı.${miss ? ` Stok şu an ${stk} adet; kalan kısım yeni satış emirleriyle tamamlanacak.` : ''} Operatör ${S.set.exPlace} noktasında ${fl.b1 || 'karakterinize'} teslim edecek.`, '#hesabim', 'borsa', { no: o.id, durum: 'Sıraya alındı' });
+    save(); return { msg: `#${o.id} sıraya alındı.` }; },
+  /** SAT: satış emri. Başarıda {msg}; hata: {msg, fields?} fırlatır. */
+  async sat(f, x, q) { const u = me(); if (exClosed('sat')) throw { msg: 'Satış emri verme şu an kapalı. ' + (S.set.exOffMsg || '') };
+    const p = r2(+String(v_('ex_price')).replace(',', '.'));
+    if (!(p > 0)) throw { msg: 'Geçerli bir fiyat girin.', fields: { ex_price: 1 } };
+    if (p > x.max) throw { msg: `Bu server için en fazla ${TL(x.max)} fiyat girebilirsiniz.`, fields: { ex_price: 1 } };
+    const fl = {}; S.exFields.forEach(z => { fl[z.id] = v_('exf_' + z.id); });
+    const of = { id: 'E' + (++S.ofSeq), u: u.id, ex: x.id, qty: q, left: q, price: p, t: now(), status: 'aktif', f: fl }; S.exOffers.unshift(of);
+    const rank = exBook(x).findIndex(z => z.id === of.id) + 1;
+    notify(u.id, `Satış emriniz #${of.id} yayında: ${q} adet × ${TL(p)}.${rank ? ' Sıradaki yeriniz: ' + rank + '.' : ''}`, '#hesabim', 'borsa', { no: of.id, durum: 'Yayında' });
+    save(); return { msg: `Emriniz yayında, fiyat sıralamasında ${rank}. sıradasınız.` }; }
+};
+const bxNet = x => Math.max(0, +BXD.net(x) || 0);
+const bxTop = x => exBook(x)[0] || null;
+const bxSrv = x => srv(x.server) || { name: '?', c: ['#3a4252', '#59627a'], sec: 'tr' };
+const bxWon = x => /won/i.test(x.unit || '');
+const bxP = v => { const t = TL(v); return `<span class="bx-p mono${t.length >= 9 ? ' long' : ''}">${t}</span>`; };
+const BX_SORT = [['oner', 'Önerilen'], ['ad', 'Ada göre A–Z'], ['al', 'Alış: ucuzdan'], ['sat', 'Satış: yüksekten'], ['stok', 'Satışta: çoktan']];
+const BX_IC = {
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>'
+};
+try { const o = JSON.parse(localStorage.getItem('yp_bx') || '{}'); if (o.sort) ui.bxSort = o.sort; if (o.sec) ui.bxSec = o.sec; } catch (e) { }
+const bxSave = () => { try { localStorage.setItem('yp_bx', JSON.stringify({ sort: ui.bxSort || 'oner', sec: ui.bxSec || 'hepsi' })); } catch (e) { } };
+
+function bxList() { const sec = ui.bxSec || 'hepsi', k = ui.bxSort || 'oner';
+  const L = S.exchange.filter(x => x.on).map((x, i) => ({ x, i, s: bxSrv(x) })).filter(o => sec === 'hepsi' || o.s.sec === sec);
+  const by = { ad: (a, b) => a.s.name.localeCompare(b.s.name, 'tr'), al: (a, b) => (a.x.buy == null) - (b.x.buy == null) || (+a.x.buy || 0) - (+b.x.buy || 0),
+    sat: (a, b) => (+b.x.max || 0) - (+a.x.max || 0), stok: (a, b) => bxNet(b.x) - bxNet(a.x) }[k];
+  return by ? L.sort((a, b) => by(a, b) || a.i - b.i) : L; }
+function bxCard({ x, s }) { const unit = x.unit || 'adet', top = bxTop(x), net = bxNet(x), sp = exSellPrice(x);
+  const salOff = S.set.exSellOn === false, alOff = S.set.exBuyOn === false, q = sqNorm(ui.bxQ || '');
+  const satL = `${s.name} siteye sat: birim başına en fazla ${TL(x.max)} bakiyene${top ? '; sıra başı ' + TL(top.price) : ''}`;
+  const alL = sp ? `${s.name} al: birim fiyat ${TL(sp)}, ${net > 0 ? 'satışta ' + NUM(net) + ' adet' : 'şu an satıcı yok, sipariş sıraya alınır'}` : `${s.name} al: fiyat yakında`;
+  return `<article class="bx-card${ui.exPick === x.id ? ' pick' : ''}" data-id="${esc(x.id)}" data-sn="${esc(sqNorm(s.name))}"${q && !sqNorm(s.name).includes(q) ? ' hidden' : ''}>
+    <div class="bx-art" style="--c1:${esc(s.c[0])};--c2:${esc(s.c[1])}"><span class="bx-wm" aria-hidden="true">${bxWon(x) ? 'WON' : 'YANG'}</span><span class="bx-sec">${s.sec === 'tr' ? 'TR' : 'PVP'}</span>${logo(s, 34)}
+      <span class="bx-nm"><b>${esc(s.name)}</b><small>${bxWon(x) ? 'Metin2 Won' : 'Metin2 Yang'} · ${esc(unit)}</small></span></div>
+    <button type="button" class="bx-row sat" data-act="bx-sat" data-id="${esc(x.id)}" aria-label="${esc(salOff ? s.name + ' siteye satış şu an kapalı' : satL)}"${salOff ? ' disabled' : ''}>
+      <span class="bx-rt"><span class="bx-k">SAT · ${esc(unit)}</span><span class="bx-pl">${bxP(x.max)}<span class="bx-en">en fazla</span></span>${salOff ? '<span class="bx-s">Satış şu an kapalı</span>' : top ? `<span class="bx-s">Sıra başı <b class="mono">${TL(top.price)}</b></span>` : '<span class="bx-s">Henüz emir yok</span>'}</span>
+      <span class="bx-b" aria-hidden="true">${BX_IC.up}</span></button>
+    <button type="button" class="bx-row al" data-act="bx-al" data-id="${esc(x.id)}" aria-label="${esc(alOff ? s.name + ' alım şu an kapalı' : alL)}"${alOff || !sp ? ' disabled' : ''}>
+      <span class="bx-rt"><span class="bx-k">AL · ${esc(unit)}</span><span class="bx-pl">${sp ? bxP(sp) : '<span class="bx-p">—</span>'}</span>${alOff ? '<span class="bx-s">Alım şu an kapalı</span>' : !sp ? '<span class="bx-s">Fiyat yakında</span>' : net > 0 ? `<span class="bx-s bx-ok"><i aria-hidden="true"></i>Satışta ${NUM(net)}</span>` : '<span class="bx-s bx-no"><i aria-hidden="true"></i>Şu an satıcı yok</span>'}</span>
+      <span class="bx-b" aria-hidden="true">${BX_IC.down}</span></button></article>`; }
+const bxGridHtml = () => { const L = bxList(); return L.length ? L.map(bxCard).join('') : ''; };
+/** "Nasıl işler?": AL ve SAT adımları (eski iki sekmeli formun yan panelinden) */
+function bxHow() { const st = L => `<ol class="exflow">${L.map(s_ => `<li><b>${s_[0]}</b><span>${s_[1]}</span></li>`).join('')}</ol>`;
+  return `<section class="bx-how" aria-labelledby="bxHowH"><h2 id="bxHowH">Nasıl işler?</h2><div class="bx-how-g">
+    <div class="bx-how-c"><div class="eyebrow">AL · sabit fiyattan satın al</div>${st([['Server ve adet', 'Kartta AL düğmesine bas; kaç adet istediğini ve karakter adını yaz.'], ['Operatör gelir', `${esc(S.set.exPlace || 'Teslimat')} noktasında karakterine ticaret açar.`], ['Teslim alırsın', 'Ticareti kontrol edip onayla. Hazır olunca bildirim gelir.']])}
+      <div class="rules"><div>• Hesap şifreni asla istemeyiz; teslimat yalnızca oyun içi ticaretle yapılır.</div><div>• Fiyat sabittir; satıştaki adet yetmezse kalan kısım yeni satış emirleriyle tamamlanır.</div></div></div>
+    <div class="bx-how-c"><div class="eyebrow">SAT · kendi fiyatınla siteye sat</div>${st([['Fiyatını belirle', 'Kartta SAT düğmesine bas. Kartta yazan en fazla fiyatı geçemezsin; ucuz fiyat sırada öne geçer.'], ['Emrin sıraya girer', 'Ekibimiz emirleri fiyata göre sıralı görür, en uygun fiyatlıdan eşler.'], ['Paran bakiyende', 'Operatör hesabından yangı alır; teslim edilen adet kadar tutar bakiyene geçer, bilgilerin silinir.']])}</div>
+  </div></section>`; }
+function bxView() { if (!S.set.exOn) return vExClosed();
+  const u = me(), xs = S.exchange.filter(x => x.on);
+  if (!xs.length) return `<div class="wrap">${emptyBox('Borsada şu an açık server yok', 'Kısa süre içinde tekrar bakın.', '<a class="btn btn-primary" href="#metin2-tr">Metin2 TR ilanları</a>')}</div>`;
+  const sec = ui.bxSec || 'hepsi', n = sc => xs.filter(x => bxSrv(x).sec === sc).length, k = ui.bxSort || 'oner';
+  const chip = (v, l, c) => `<button type="button" class="bx-chip${sec === v ? ' on' : ''}" data-act="bx-sec" data-s="${v}" aria-pressed="${sec === v}">${l} <b>${c}</b></button>`;
+  const grid = bxGridHtml(), q = sqNorm(ui.bxQ || ''), vis = bxList().filter(o => !q || sqNorm(o.s.name).includes(q)).length;
+  return `<div class="wrap bxv"><div class="bx-h"><div><h1>Yang Borsası</h1><p>Sabit fiyattan al, kendi fiyatınla sat.</p></div>${BXD.chip()}</div>
+    ${myCallNotes()}
+    <div class="bx-top"><div class="bx-bar" role="search"><label class="vh" for="bx_q">Server ara</label><input class="inp" id="bx_q" type="search" autocomplete="off" placeholder="Server ara…" value="${esc(ui.bxQ || '')}">
+      <label class="vh" for="bx_sort">Sırala</label><select class="inp bx-sort" id="bx_sort" data-change="bx-sort" aria-label="Sırala">${BX_SORT.map(([v, l]) => `<option value="${v}"${k === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+    <div class="bx-chips" role="group" aria-label="Bölüm">${chip('hepsi', 'Tümü', xs.length)}${chip('tr', 'Metin2 TR', n('tr'))}${chip('pvp', 'Metin2 PVP', n('pvp'))}</div></div>
+    <div class="bx-grid" id="bxGrid">${grid}</div><div id="bx_empty"${vis ? ' hidden' : ''}>${emptyBox('Bu aramada server yok', 'Aramayı ya da süzgeci değiştir.')}</div>
+    ${u ? bxMine(u) : ''}
+    ${S.set.exPlace ? `<div class="bx-place"><span>Teslimat</span><b>${esc(S.set.exPlace)}</b><small>Operatör bu noktada karakterine ticaret açar. Hesap bilgin istenmez.</small></div>` : ''}
+    ${bxHow()}</div>`; }
+function vExchange() { return bxView(); }
+/** Bekleyen işlemlerim (borsa sayfası): açık siparişler ve aktif emirler, en fazla 5; Tümü → Hesabım › Borsa */
+function bxMine(u) { const O = exSortUser(S.exOrders.filter(o => o.u === u.id && exOpenSt(o.status))), F = S.exOffers.filter(o => o.u === u.id && o.status === 'aktif').sort((a, b) => b.t - a.t);
+  if (!O.length && !F.length) return '';
+  return `<section class="bx-mine" id="bxMine" aria-labelledby="bxMineH"><div class="bx-mh"><h2 id="bxMineH">Bekleyen işlemlerim</h2><a href="#hesabim" data-act="tab" data-t="borsa">Tümü ›</a></div>
+    ${O.length ? `<div class="bx-ml"><div class="eyebrow">Alımlarım · ${O.length}</div>${bxOrders(O.slice(0, 5))}</div>` : ''}${F.length ? `<div class="bx-ml"><div class="eyebrow">Satış emirlerim · ${F.length}</div>${bxOffers(F.slice(0, 5))}</div>` : ''}</section>`; }
+
+/* ---------- bekleyen işlem kartları ---------- */
+/** Üyeye görünen sipariş durumu: [çip, sınıf, adım 1-4 (0: iptal)] — öncelik sırasıyla */
+function hsExChip(o) { const m = exMatched(o);
+  if (o.status === 'tamam') return ['Tamamlandı', 'p-tamam', 4];
+  if (o.status === 'iptal') return ['İptal edildi · iade bakiyende', 'p-iade', 0];
+  if (o.status === 'bilgi') return ['Bilgi istendi', 'p-itiraz', 2];
+  if (o.called && !(o.ready > o.called)) return ['Operatör seni bekliyor', 'chip warn bx-pulse', 3];
+  if (o.called && o.ready > o.called) return ['Hazır olduğun bildirildi', 'chip ok', 3];
+  if (o.status === 'kismen') return [`Kısmen teslim · ${NUM(o.delivered || 0)}/${NUM(o.qty)}`, 'p-teslim', 3];
+  if (o.status === 'islemde' || m > 0) return ['Hazırlanıyor', 'p-odendi', 2];
+  return ['Sırada', 'p-bekliyor', 1]; }
+const bxPill = c => /^chip /.test(c) ? c : 'pill ' + c;
+const BX_STEPS = ['Sırada', 'Hazırlanıyor', 'Teslimat', 'Tamam'];
+function bxOrders(arr) { return `<div class="bx-ol">${arr.map(o => { const s = srv(o.server) || bxSrv({}), x = S.exchange.find(e => e.id === o.ex) || { unit: '' }; const [cl, cc, st] = hsExChip(o);
+    const m = exMatched(o), d = o.delivered || 0, pct = o.qty ? Math.round(d / o.qty * 100) : 0;
+    return `<article class="bx-o" data-id="${esc(o.id)}"><div class="bx-oh">${logo(s, 28)}<b>${esc(s.name)} · AL</b><span class="mono muted">#${esc(o.id)}</span></div>
+      <div class="bx-or"><span>${NUM(o.qty)} × ${esc(x.unit || 'adet')}</span><b class="mono">${TL(o.total)}</b></div>
+      <ol class="bx-steps${st ? '' : ' off'}" aria-label="Sipariş adımları">${BX_STEPS.map((l, i) => `<li class="${st > i + 1 ? 'done' : st === i + 1 ? 'cur' : ''}"${st === i + 1 ? ' aria-current="step"' : ''}>${l}</li>`).join('')}</ol>
+      <div class="bx-or"><span class="${bxPill(cc)}">${cl}</span><span class="muted">${ago(o.t)}</span></div>
+      <div class="bx-pg"><div class="prog" role="progressbar" aria-label="Teslim edilen" aria-valuemin="0" aria-valuemax="${o.qty}" aria-valuenow="${d}"><i style="width:${pct}%"></i></div><span class="muted">Teslim ${NUM(d)}/${NUM(o.qty)}${exOpenSt(o.status) ? ` · Hazırlanan ${NUM(m)}/${NUM(o.qty)}` : ''}</span></div>
+      ${exOpenSt(o.status) && o.called && !(o.ready > o.called) ? `<div class="bx-msg">${esc(o.callMsg || (typeof callMsg === 'function' ? callMsg(o) : ''))}</div><button type="button" class="btn btn-primary btn-block" data-act="ex-ready" data-id="${esc(o.id)}">Geldim, hazırım</button>` : ''}
+      ${o.status === 'bilgi' ? `${o.note ? `<div class="bx-msg">${esc(o.note)}</div>` : ''}<button type="button" class="btn btn-primary btn-block" data-act="ex-fix" data-id="${esc(o.id)}">Bilgileri güncelle</button>` : ''}
+      ${(o.log || []).length ? `<details class="bx-log"><summary>İşlem geçmişi</summary><div class="feed">${o.log.slice().reverse().map(e => `<div><span>${esc(e.x)}</span><time>${dtstr(e.t)}</time></div>`).join('')}</div></details>` : ''}</article>`; }).join('')}</div>`; }
+function hsOfChip(of) { if (of.status === 'iptal') return ['İptal edildi', 'p-iade']; if (of.status === 'satildi') return ['Tamamı eşleşti · ödeme teslimde', 'p-odendi'];
+  return of.left < of.qty ? ['Kısmen eşleşti', 'p-teslim'] : ['Satışta · sırada', 'p-tamam']; }
+function bxOffers(arr) { return `<div class="bx-ol">${arr.map(of => { const x = S.exchange.find(e => e.id === of.ex) || { unit: '' }, s = srv(x.server) || bxSrv({}); const [cl, cc] = hsOfChip(of);
+    const done = of.qty - of.left, pct = of.qty ? Math.round(done / of.qty * 100) : 0; const rk = route() === 'borsa' && of.status === 'aktif' ? exBook(x).findIndex(z => z.id === of.id) + 1 : 0;
+    return `<article class="bx-f" data-id="${esc(of.id)}"><div class="bx-oh">${logo(s, 28)}<b>${esc(s.name)} · SAT</b><span class="mono muted">#${esc(of.id)}</span></div>
+      <div class="bx-or"><span><b class="mono">${TL(of.price)}</b> / ${esc(x.unit || 'adet')}</span><span>Kalan <b class="mono">${NUM(of.left)}</b> / ${NUM(of.qty)}</span></div>
+      <div class="bx-pg"><div class="prog" role="progressbar" aria-label="Eşleşen" aria-valuemin="0" aria-valuemax="${of.qty}" aria-valuenow="${done}"><i style="width:${pct}%"></i></div><span class="muted">${NUM(done)} eşleşti${rk > 0 ? ` · Sıran: ${rk}.` : ''}</span></div>
+      <div class="bx-or"><span class="pill ${cc}">${cl}</span><span class="muted">${ago(of.t)}</span></div>
+      ${of.status === 'aktif' ? `<div class="muted bx-note">Ödeme: yang alıcıya teslim edildikçe, teslim edilen adet kadar bakiyene geçer.</div><button type="button" class="btn btn-bad btn-block" data-act="of-cancel" data-id="${esc(of.id)}" data-bxc="1">Emri iptal et</button>` : ''}</article>`; }).join('')}</div>`; }
+/* üye kart listeleri (Hesabım › Borsa ve eski çağrılar) */
+function exCardsB(arr) { return bxOrders(arr); }
+function exCardsO(arr) { return bxOffers(arr); }
+
+/* ---------- AL / SAT pencereleri ---------- */
+const bxQtyRow = (unit, chips) => `<div class="fld"><label for="ex_qty">Kaç adet? (${esc(unit)})</label><div class="bx-qty"><button type="button" class="btn" data-act="bx-q" data-d="-1" aria-label="Bir azalt">−</button><input class="inp mono" id="ex_qty" type="number" inputmode="numeric" min="1" max="1000000" value="1" required data-change="ex-calc" data-x="__X__" data-dir="__D__"><button type="button" class="btn" data-act="bx-q" data-d="1" aria-label="Bir artır">+</button></div>
+  ${chips ? `<div class="bx-qc" role="group" aria-label="Hızlı adet">${[1, 5, 10, 20].map(v => `<button type="button" class="bx-chip" data-act="bx-qs" data-v="${v}">${v}</button>`).join('')}</div>` : ''}</div>`;
+function bxAlSheet(x) { const s = bxSrv(x), u = me(), unit = x.unit || 'adet', sp = exSellPrice(x) || 0, net = bxNet(x);
+  const body = `<div class="bx-sh-h">${logo(s, 36)}<div><b class="mono bx-sh-p">${TL(sp)}</b> <span class="muted">/ ${esc(unit)} · sabit fiyat</span><div class="bx-s ${net > 0 ? 'bx-ok' : 'bx-no'}"><i aria-hidden="true"></i>${net > 0 ? 'Satışta ' + NUM(net) : 'Şu an satıcı yok'}</div></div></div>
+    ${exClosed('al') ? `<div class="note note-bad"><b>Siteden yang alımı şu an kapalı.</b> ${esc(S.set.exOffMsg || '')}</div>` : ''}
+    ${bxQtyRow(unit, true).replace('__X__', esc(x.id)).replace('__D__', 'al')}
+    ${exFieldsHtml(null, 'exb_', S.exFieldsBuy)}
+    <div class="explace"><span>Teslimat yeri</span><b>${esc(S.set.exPlace || '')}</b><small>Operatör bu noktada karakterine ticaret açar. Hesap bilgin istenmez.</small></div>
+    <div id="ex_waitbox" class="note note-info" ${net >= 1 ? 'hidden' : ''}><span id="ex_waitmsg">${net >= 1 ? '' : 'Şu an satıcı yok. Siparişin alınır ve sıraya girer; satış emirleri geldikçe tamamlanır. Fiyat değişmez.'}</span></div>
+    <div class="muted bx-note">Siparişler sırayla eşlenir ve operatör teslim eder. Önce “yalnız alışveriş” bakiyen kullanılır.</div>`;
+  const foot = `<div class="extotal bx-tot" id="ex_sum"><div><span>Ödenecek</span><small id="bx_bal">Bakiyen ${TL(avail(u))}</small></div><b class="mono" id="ex_tot">${TL(sp)}</b></div>
+    <button class="btn btn-primary btn-block exgo"${exClosed('al') ? ' disabled' : ''}>Bakiyemle satın al</button>
+    <button type="button" class="btn btn-block bx-dep" data-act="deposit" hidden>Bakiye yükle</button>`;
+  return sheetWrap(`${esc(s.name)} · AL`, body, { cls: 'bx-sheet bx-al', id: 'bx-al', foot, form: 'data-form="exorder" novalidate', label: s.name + ' al' }); }
+function bxSatSheet(x) { const s = bxSrv(x), unit = x.unit || 'adet', top = bxTop(x), p0 = top ? Math.min(+x.max, r2(top.price)) : +x.max;
+  const body = `<section data-step="1" class="stack">
+      <div class="bx-sh-h">${logo(s, 36)}<div>En fazla <b class="mono bx-sh-p">${TL(x.max)}</b> <span class="muted">/ ${esc(unit)}</span><div class="bx-s">${top ? 'Sıra başı <b class="mono">' + TL(top.price) + '</b>' : 'Henüz emir yok'}</div></div></div>
+      ${exClosed('sat') ? `<div class="note note-bad"><b>Siteye satış emri verme şu an kapalı.</b> ${esc(S.set.exOffMsg || '')}</div>` : ''}
+      ${bxQtyRow(unit, false).replace('__X__', esc(x.id)).replace('__D__', 'sat').replace('Kaç adet?', 'Kaç adet satıyorsun?')}
+      <div class="fld"><label for="ex_price">Birim fiyatın (TL)</label><input class="inp mono" id="ex_price" type="number" inputmode="decimal" min="0.01" max="${esc(x.max)}" step="0.01" value="${p0}" required data-change="ex-calc" data-x="${esc(x.id)}" data-dir="sat"><span class="muted" style="font-size:12px">En fazla ${TL(x.max)}. Satılırsa birim başına bu tutar bakiyene geçer.</span></div>
+      <div class="expos" id="ex_pos">${top ? `Şu an sıra başı ${TL(top.price)}. Ondan düşük fiyat verirsen ilk sıraya geçersin.` : 'Bu serverda henüz emir yok. En düşük fiyatlı emir önce eşlenir.'}</div>
+      <details class="exq"><summary>Kuyruk sistemi</summary>Satışlar kuyruk sistemine göre işlenir; en düşük birim fiyatı veren satıcılar önceliklidir. Yang alıcıya teslim edildikçe, teslim edilen adet kadar tutar bakiyene geçer.</details></section>
+    <section data-step="2" class="stack" hidden>
+      <div class="note note-info bx-trust">Bilgilerin şifreli saklanır, yalnız yetkili operatör görür ve işlem bitince silinir.</div>
+      <div class="exfields stack">${exFieldsHtml(null, 'exf_', S.exFields)}</div>
+      <details class="exrules"><summary>Satış kuralları</summary><div class="rules">${String(S.exRules || '').split('\n').filter(Boolean).map(r => `<div>• ${esc(r)}</div>`).join('')}</div></details>
+      <label class="chk" for="ex_ok"><input type="checkbox" id="ex_ok" required> Kuralları okudum, emrim eşlendiğinde hesabıma giriş yapılmasını onaylıyorum.</label></section>`;
+  const foot = `<div class="extotal bx-tot" id="ex_sum"><div><span>Satılırsa bakiyene</span><small id="bx_sum">1 × ${TL(p0)} · emrini dilediğin an iptal edebilirsin</small></div><b class="mono" id="ex_tot">${TL(p0)}</b></div>
+    <div data-foot="1"><button type="button" class="btn btn-ok btn-block" data-act="bx-step" data-s="2"${exClosed('sat') ? ' disabled' : ''}>Devam</button></div>
+    <div data-foot="2" class="bx-f2" hidden><button type="button" class="btn" data-act="bx-step" data-s="1">‹ Geri</button><button class="btn btn-ok exgo"${exClosed('sat') ? ' disabled' : ''}>Satış emri ver</button></div>`;
+  return sheetWrap(`${esc(s.name)} · SAT <small class="bx-stp" id="bx_stp">1/2</small>`, body, { cls: 'bx-sheet bx-sat', id: 'bx-sat', foot, form: 'data-form="exoffer" data-step="1" novalidate', label: s.name + ' siteye sat' }); }
 /* ================== yönetim ================== */
 /* ================== Yönetim paneli kabuğu: kayıt defteri, yönlendirme, kuyruklar ================== */
 const ADM_NAV=[
@@ -8193,8 +8510,6 @@ const ACT={
   'srv-del':(d)=>{S.servers=S.servers.filter(s=>s.id!==d.id); save(); render();},
   'srv-save':(d)=>{const s=srv(d.id); s.name=$('#sv_name_'+d.id).value.trim()||s.name; s.sec=$('#sv_sec_'+d.id).value; s.lv=$('#sv_lv_'+d.id).value.trim(); s.type=$('#sv_type_'+d.id).value.trim(); save(); toast('Server güncellendi.'); render();},
   'ex-pick':(d)=>{ui.exId=d.id; if(route()!=='borsa') go('borsa'); else render();},
-  'ex-dir':(d)=>{ui.exDir=d.d; render();},
-  'ex-msec':(d)=>{ const x=S.exchange.find(e=>e.on&&(srv(e.server)||{}).sec===d.s); if(!x) return toast('Bu bölümde borsası açık server yok.',true); ui.exId=x.id; render(); },
   'ex-open':(d)=>{ ui.exOpen=d.id||null; ui.reveal=false; ui.atab='borsa'; if(d.id){ const o=S.exOrders.find(x=>x.id===d.id); if(o){ ui.exSrv=o.server; ui.bkSrv=o.ex; } } else { ui.exSrv='hepsi'; } if(route()!=='yonetim') go('yonetim'); else render(); window.scrollTo(0,0); },
   'ex-srv-filter':(d)=>{ ui.exSrv=d.s; render(); },
   'ex-fix':(d)=>mExFix(d.id),
@@ -8459,18 +8774,7 @@ const FORM={
     S.listings.unshift(l); ui.preset=null; save(); track('ilan',{value:l.price}); toast(`İlan #${l.no} ${S.set.moderation?'onaya gönderildi.':'yayında!'}`); go('ilan-'+l.id);
   },
   editl:async(f)=>{const l=lst(f.dataset.id); l.title=censor(v_('ed_title').trim()).text; l.price=r2(+v_('ed_price')); l.stock=Math.max(0,parseInt(v_('ed_stock'))||0); l.del=v_('ed_del'); const c=censor(v_('ed_desc')); if(c.flagged) logFlag(S.cur,'İlan düzenleme #'+l.no,v_('ed_desc')); l.desc=c.text; if(l.stock>0&&l.status==='satildi') l.status='aktif'; if(UPL.e){ const had=(l.imgs&&l.imgs.length)||(l.img&&/^data:/.test(l.img)); if(UPL.e.length){ l.imgs=UPL.e.slice(0,PUP_MAX); l.img=l.imgs[0]; } else if(had){ l.imgs=[]; l.img=null; } } save(); closeModal(); toast('İlan güncellendi.'); render();},
-  exorder:()=>{const u=me(); if(!u) return mLogin(); if(exClosed('al')) return toast('Siteden yang alımı şu an kapalı. '+(S.set.exOffMsg||''),true); const x=S.exchange.find(e=>e.id===(v_('ex_sel')||ui.exId)); const q=Math.max(1,parseInt(v_('ex_qty'))||1); const bp=exSellPrice(x); if(!bp) return toast('Bu server için satış fiyatı henüz belirlenmedi.',true); const stk=exStock(x), miss=Math.max(0,q-stk);
-    const reserve=0, total=r2(q*bp); if(avail(u)<total) return toast(`Bakiye yetersiz. ${TL(total-avail(u))} daha yükleyin.`,true);
-    const f={}; S.exFieldsBuy.forEach(fl=>{f[fl.id]=v_('exb_'+fl.id);});
-    const paid=spend(u,total); addTx(u.id,'Borsa alımı',-total);
-    const o={id:'B'+(1000+S.exOrders.length+1),u:u.id,dir:'al',ex:x.id,server:x.server,qty:q,price:bp,total,reserve,paid,cost:0,fills:[],delivered:0,place:S.set.exPlace,status:'bekliyor',t:now(),f,staff:null,log:[{t:now(),x:`Sipariş alındı: ${q} adet × ${TL(bp)} = ${TL(total)} bakiyeden çekildi.${miss?` Sipariş anında stok ${stk} adetti.`:''}`}]};
-    S.exOrders.unshift(o); raffleSpend(u.id,total,'borsa'); notify(u.id,`Borsa siparişiniz #${o.id} sıraya alındı.${miss?` Stok şu an ${stk} adet; kalan kısım yeni satış emirleriyle tamamlanacak.`:''} Operatör ${S.set.exPlace} noktasında ${f.b1||'karakterinize'} teslim edecek.`,'#hesabim','borsa',{no:o.id,durum:'Sıraya alındı'}); save(); toast(`#${o.id} sıraya alındı.`); ui.tab='borsa'; go('hesabim');},
-  exoffer:()=>{const u=me(); if(!u) return mLogin(); if(exClosed('sat')) return toast('Satış emri verme şu an kapalı. '+(S.set.exOffMsg||''),true); const x=S.exchange.find(e=>e.id===(v_('ex_sel')||ui.exId)); const q=Math.max(1,parseInt(v_('ex_qty'))||1); const p=r2(+v_('ex_price'));
-    if(!(p>0)) return toast('Geçerli bir fiyat girin.',true); if(p>x.max) return toast(`Bu server için en fazla ${TL(x.max)} fiyat girebilirsiniz.`,true);
-    const f={}; S.exFields.forEach(fl=>{f[fl.id]=v_('exf_'+fl.id);});
-    const of={id:'E'+(++S.ofSeq),u:u.id,ex:x.id,qty:q,left:q,price:p,t:now(),status:'aktif',f}; S.exOffers.unshift(of); const mt=0;
-    const rank=exBook(x).findIndex(z=>z.id===of.id)+1;
-    notify(u.id,`Satış emriniz #${of.id} yayında: ${q} adet × ${TL(p)}.${rank?' Sıradaki yeriniz: '+rank+'.':''}`,'#hesabim','borsa',{no:of.id,durum:'Yayında'}); save(); toast(`Emriniz yayında, fiyat sıralamasında ${rank}. sıradasınız.`); render();},
+  // exorder / exoffer: AL / SAT pencereleri (83-borsa-kart-act.js; demo verisi 51-borsa-kart.js BXD)
   exfix:(f)=>{const o=S.exOrders.find(x=>x.id===f.dataset.id); exSet(o.dir).forEach(fl=>{const v=v_('fx_'+fl.id); if(v) o.f[fl.id]=v;}); o.status='bekliyor'; o.note=''; o.log.push({t:now(),x:'Üye bilgilerini güncelledi.'}); save(); closeModal(); toast('Bilgiler güncellendi, sipariş tekrar sırada.'); render();},
   xlsrange:()=>{ ui.mFrom=v_('m_from'); ui.mTo=v_('m_to'); xlsRange(ui.mFrom,ui.mTo); },
   maintset:()=>{ const u=v_('mt_until'); S.set.maint={on:$('#mt_on').checked,msg:v_('mt_msg').trim()||S.set.maint.msg,until:u?new Date(u).getTime():null}; save(); toast(S.set.maint.on?'Bakım modu açıldı. Ziyaretçiler bakım sayfasını görüyor.':'Bakım modu kapatıldı, site açık.'); render(); },
@@ -8549,7 +8853,6 @@ const CHG={
   adsrv:(el)=>{$('#newSrv').hidden=el.value!=='_new'},
   wheelon:(el)=>{S.set.wheelOn=el.checked; save();},
   mod:(el)=>{S.set.moderation=el.checked; save(); toast(el.checked?'Yeni ilanlar onaydan geçecek.':'İlanlar anında yayına girecek.');},
-  'ex-sel':(el)=>{ui.exId=el.value; render();},
   smsprev:(el)=>{ if(el.id==='sm_h'){ Object.keys(SMSEV).forEach(k=>{const b=$('#spv_'+k); if(b) b.innerHTML=smsPreview(v_('sm_tp_'+k),null,el.value);}); return; } const b=$('#spv_'+el.dataset.k); if(b) b.innerHTML=smsPreview(el.value,null,v_('sm_h'));},
   supv:(el)=>{const b=$('#suPrev'); if(b) b.innerHTML=smsPreviewUser(el.value,el.dataset.id,!!el.dataset.free);},
   canned:(el)=>{const c=S.support.canned[+el.value]; if(c){ const i=$('#tkmsg'); i.value=c[1].split('{temsilci}').join(me().name); i.focus(); } el.value='';},
@@ -8580,7 +8883,6 @@ const CHG={
   srvsec:(el)=>{ const p=el.dataset.p; const t=$('#'+p+'_srv'); if(t){ t.innerHTML=srvOpts(el.value,null,SRVOPT[p]||{}); t.dispatchEvent(new Event('change',{bubbles:true})); } },
   bfsec:(el)=>{ ui.bf={sec:el.value,srv:''}; render(); },
   bfsrv:(el)=>{ ui.bf=Object.assign({},ui.bf,{srv:el.value}); render(); },
-  'ex-sec':(el)=>{ const x=S.exchange.find(e=>e.on&&(srv(e.server)||{}).sec===el.value); if(!x) return toast('Bu bölümde borsası açık server yok.',true); ui.exId=x.id; render(); },
   mday:(el)=>{ if(el.value){ ui.mDay=el.value; render(); } },
   wbdays:(el)=>{ ui.wbDays=+el.value; render(); },
   wball:(el)=>{ document.querySelectorAll('.wbc').forEach(c=>c.checked=el.checked); },
@@ -8602,6 +8904,86 @@ document.addEventListener('keydown',e=>{ if(!e.target||e.target.id!=='q') return
 document.addEventListener('focusin',e=>{ const id=e.target&&e.target.id; if(['tp_ms','tp_mb','tp_sb'].includes(id)) ui.tplf=id; });
 document.addEventListener('input',e=>{const el=e.target; if(el.id==='q') return qSug(el.value); if(el.id==='f_sq') return sqApply(el.value); if(el.id==='egp_q') return egpApply(el.value); if(['wdcalc','tplprev','mailprev','calc','qty','depcalc','ex-calc','smsprev','supv','ccfmt','seoprev','utm','srvq'].includes(el.dataset.change)) CHG[el.dataset.change](el);});
 
+/* ================== Yang Borsası kartları: işleyiciler (demo ve prod ortak) ==================
+   51-borsa-kart.js ekranlarının eylemleri. AL / SAT pencerelerindeki formlar FORM.exorder / FORM.exoffer'dır; gönderim BXD.al / BXD.sat
+   (demo: tarayıcıdaki durum; prod: 98x-borsa-kart.js aynı uç, aynı alanlar, form başına tek Idempotency-Key). Başarıda pencere kapanır,
+   doğrulama hatasında hatalı alanın adımına dönülür. Girişsiz AL/SAT: giriş penceresi açılır (prod girişten sonra aynı pencereyi açar).   */
+const bxX = id => S.exchange.find(e => e.id === id && e.on);
+const BX_AFTER = 'yp_after';
+function bxOpen(dir, id, el) { const x = bxX(id); if (!x) return toast('Bu server şu an borsada değil.', true);
+  if (!me()) { try { sessionStorage.setItem(BX_AFTER, JSON.stringify({ k: 'bx', id, dir, t: Date.now() })); } catch (e) { } mLogin(); return; }
+  ui.exId = x.id; sheetOpen(dir === 'al' ? bxAlSheet(x) : bxSatSheet(x), el);
+  const q = $('#ex_qty'); if (q) q.dispatchEvent(new Event('input', { bubbles: true })); }
+Object.assign(ACT, {
+  'bx-al': (d, e) => bxOpen('al', d.id, e && e.target && e.target.closest('[data-act]')),
+  'bx-sat': (d, e) => bxOpen('sat', d.id, e && e.target && e.target.closest('[data-act]')),
+  'bx-sec': (d) => { ui.bxSec = d.s || 'hepsi'; bxSave(); render(); },
+  'bx-q': (d) => { const i = $('#ex_qty'); if (!i) return; i.value = Math.max(1, (parseInt(i.value, 10) || 1) + (+d.d || 0)); i.dispatchEvent(new Event('input', { bubbles: true })); },
+  'bx-qs': (d) => { const i = $('#ex_qty'); if (!i) return; i.value = +d.v || 1; i.dispatchEvent(new Event('input', { bubbles: true })); },
+  'bx-step': (d) => bxStep(+d.s || 1, true)
+});
+/* ana sayfadaki borsa satırı: kartı vurgulayıp görünür yapar */
+{ const f0 = ACT['ex-pick']; ACT['ex-pick'] = (d, e) => { ui.exPick = d.id; if (ui.bxSec && ui.bxSec !== 'hepsi') { const x = S.exchange.find(z => z.id === d.id); if (x && bxSrv(x).sec !== ui.bxSec) ui.bxSec = 'hepsi'; }
+    const r = f0(d, e); setTimeout(() => { const c = document.querySelector(`#bxGrid .bx-card[data-id="${CSS.escape(String(d.id))}"]`); if (c) try { c.scrollIntoView({ block: 'center' }); } catch (x) { } }, 60); return r; }; }
+CHG['bx-sort'] = (el) => { ui.bxSort = el.value; bxSave(); const g = $('#bxGrid'); if (g) g.innerHTML = bxGridHtml(); else render(); };
+/* arama: yalnız kartların görünürlüğü değişir (odak kaybolmaz) */
+document.addEventListener('input', e => { const el = e.target; if (!el || el.id !== 'bx_q') return; ui.bxQ = el.value; const q = sqNorm(el.value); let n = 0;
+  document.querySelectorAll('#bxGrid .bx-card').forEach(c => { const ok = !q || c.dataset.sn.includes(q); c.hidden = !ok; if (ok) n++; });
+  const em = $('#bx_empty'); if (em) em.hidden = n > 0; });
+/* pencere içi canlı hesap (82-chg ex-calc'tan sonra): AL bakiye / eksik tutar, net stoğa göre sıra notu; SAT özet satırı */
+function bxCalc() { const f = $('#modal .bx-sheet form'); if (!f) return; const x = bxX(ui.exId); if (!x) return; const q = Math.max(1, parseInt(v_('ex_qty'), 10) || 1);
+  if (f.dataset.form === 'exorder') { const u = me(), tot = r2(q * (exSellPrice(x) || 0)), av = avail(u), miss = r2(tot - av), net = bxNet(x);
+    const b = $('#bx_bal'); if (b) b.textContent = miss > 0 ? `Bakiyen ${TL(av)} · ${TL(miss)} eksik` : `Bakiyen ${TL(av)} → kalan ${TL(r2(av - tot))}`;
+    const go = f.querySelector('button.exgo'), dep = f.querySelector('.bx-dep'); if (go && dep) { go.hidden = miss > 0; dep.hidden = !(miss > 0); dep.textContent = `Bakiye yükle · ${TL(miss)} eksik`; }
+    const w = $('#ex_waitbox'), wm = $('#ex_waitmsg'); if (w) { w.hidden = q <= net; if (wm && q > net) wm.textContent = net > 0 ? `Satışta şu an ${NUM(net)} adet var. Siparişin alınır; kalan ${NUM(q - net)} adet yeni satış emirleri geldikçe tamamlanır. Fiyat değişmez.` : 'Şu an satıcı yok. Siparişin alınır ve sıraya girer; satış emirleri geldikçe tamamlanır. Fiyat değişmez.'; } }
+  else { const p = Math.min(+v_('ex_price') || 0, +x.max), s = $('#bx_sum'); if (s) s.textContent = `${NUM(q)} × ${TL(p)} · emrini dilediğin an iptal edebilirsin`; } }
+['input', 'change'].forEach(t => document.addEventListener(t, e => { if (e.target && e.target.closest && e.target.closest('#modal .bx-sheet')) bxCalc(); }));
+/** SAT adımları: ileri giderken o adımın alanları denetlenir; hata alanı hangi adımdaysa oraya dönülür */
+function bxStep(n, check) { const f = $('#modal .bx-sheet form[data-form=exoffer]'); if (!f) return false; const cur = +f.dataset.step || 1;
+  if (check && n > cur) { const bad = [...f.querySelectorAll(`section[data-step="${cur}"] input, section[data-step="${cur}"] select`)].find(el => !el.checkValidity()); if (bad) { bad.reportValidity(); return false; } }
+  f.dataset.step = String(n); f.querySelectorAll('section[data-step]').forEach(s => { s.hidden = s.dataset.step !== String(n); });
+  f.querySelectorAll('[data-foot]').forEach(s => { s.hidden = s.dataset.foot !== String(n); }); const t = $('#bx_stp'); if (t) t.textContent = n + '/2';
+  const b = f.querySelector('.md-b'); if (b) b.scrollTop = 0;
+  // gizlenen Devam/Geri düğmesindeki odak adımın kendisine taşınır (eşzamanlı; klavyeyi kendiliğinden açmaz)
+  const a = document.activeElement; if (!a || a === document.body || a.closest('[hidden]') || a.closest('[data-foot]')) { const sec = f.querySelector(`section[data-step="${n}"]`); if (sec) { sec.tabIndex = -1; sec.focus({ preventScroll: true }); } }
+  return true; }
+const bxStepOf = k => /^(ex_qty|ex_price|qty|price)$/.test(k) ? 1 : 2;
+/** AL penceresi: tek adım */
+function bxFormAl(f) { const bad = [...f.querySelectorAll('input,select')].find(el => !el.checkValidity()); if (bad) { bad.reportValidity(); return; }
+  return BXD.busy(f, (async () => { const u = me(); if (!u) return mLogin(); if (!S.set.exOn) return toast('Siteden yang alımı şu an kapalı. ' + (S.set.exOffMsg || ''), true);
+    const x = bxX(ui.exId); if (!x) return toast('Server seçin.', true);
+    const q = parseInt(v_('ex_qty'), 10); if (!(q >= 1)) return toast('Geçerli bir adet girin.', true);
+    try { const j = await BXD.al(f, x, q); closeModal(); toast(j.msg || 'Siparişiniz sıraya alındı.'); ui.tab = 'borsa'; ui.hsBx = 'al'; go('hesabim'); }
+    catch (j) { toast(BXD.err(j), true); if (j && j.code === 'insufficient') bxCalc(); throw j; } })()); }
+/** SAT penceresi: iki adım (1: adet + fiyat, 2: hesap bilgileri + onay) */
+function bxFormSat(f) { if ((+f.dataset.step || 1) < 2) return bxStep(2, true);
+  const bad = [...f.querySelectorAll('section[data-step="2"] input, section[data-step="2"] select')].find(el => !el.checkValidity()); if (bad) { bad.reportValidity(); return; }
+  return BXD.busy(f, (async () => { const u = me(); if (!u) return mLogin(); if (!S.set.exOn) return toast('Satış emri verme şu an kapalı. ' + (S.set.exOffMsg || ''), true);
+    const x = bxX(ui.exId); if (!x) return toast('Server seçin.', true);
+    const q = parseInt(v_('ex_qty'), 10); if (!(q >= 1)) { bxStep(1); return toast('Geçerli bir adet girin.', true); }
+    try { const j = await BXD.sat(f, x, q); closeModal(); toast(j.msg || 'Emriniz yayında.'); render(); setTimeout(() => { const m = $('#bxMine'); if (m) try { m.scrollIntoView({ block: 'start' }); } catch (e) { } }, 120); }
+    catch (j) { toast(BXD.err(j), true); const k = j && j.fields ? Object.keys(j.fields).find(z => j.fields[z]) : null;
+      if (k) { bxStep(bxStepOf(k)); setTimeout(() => { const el = document.getElementById(k); if (el) el.focus(); }, 60); } throw j; } })()); }
+FORM.exorder = bxFormAl;
+FORM.exoffer = bxFormSat;
+/* karttaki emir iptali: yanlış dokunmaya karşı onay (prod 98x, 98p4'ün API işleyicisini yeniden sarar) */
+function bxWrapCancel() { const f0 = ACT['of-cancel']; ACT['of-cancel'] = (d, e) => { const el = e && e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!el || !el.dataset.bxc || d.ok) return f0(d, e);
+    openConfirm({ t: 'Emri iptal et?', d: 'Satıştaki adetler sıradan çıkar. Eşlenmiş ama teslim edilmemiş adetler operatörde kalır.', ok: 'Emri iptal et', danger: 1,
+      onOk: () => f0(Object.assign({}, d, { ok: 1 }), { target: el, preventDefault() { } }) }); }; }
+bxWrapCancel();
+/* ================== Hesabım: işleyiciler (demo ve prod ortak) ==================
+   hs-menu: sağdan açılan hesap menüsü (görünür "☰ Menü" düğmesi). Menüden sekme ya da çıkış seçilince menü önce kapanır.
+   tab: data-s (al|sat) Hesabım › Borsa bölmesini seçer. hs-bx: bölme değişimi. p2-wd: Para çek (prod 98p2 / 98p3 değiştirir).  */
+Object.assign(ACT, {
+  'hs-menu': (d, e) => { const u = me(); if (!u) return mLogin(); sheetOpen(hsMenuSheet(u), e && e.target && e.target.closest ? e.target.closest('[data-act]') : null); },
+  'hs-bx': (d) => { ui.hsBx = d.s === 'sat' ? 'sat' : 'al'; render(); }
+});
+if (!ACT['p2-wd']) ACT['p2-wd'] = () => { ui.tab = 'cek'; if (route() !== 'hesabim') go('hesabim'); else render(); };
+{ const t0 = ACT.tab; ACT.tab = (d, e) => { if (d.s) ui.hsBx = d.s === 'sat' ? 'sat' : 'al'; const r = t0(d, e || { preventDefault() { } }); if (route() === 'hesabim') window.scrollTo(0, 0); return r; }; }
+/* menüdeki sekme / çıkış / yükleme: önce menü kapanır (yakalama aşaması; eylem kendi yolunda sürer) */
+document.addEventListener('click', e => { const el = e.target.closest && e.target.closest('#modal [data-hsmenu] [data-act]'); if (!el) return;
+  if (['tab', 'logout'].includes(el.dataset.act)) closeModal(); }, true);
 /* ================== yönlendirme ================== */
 /* ================== SEO, rehber ve paylaşım ================== */
 const slugify = s => String(s||'').toLocaleLowerCase('tr-TR').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/İ/g,'i').replace(/i\u0307/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u').replace(/â/g,'a').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||'sayfa';
