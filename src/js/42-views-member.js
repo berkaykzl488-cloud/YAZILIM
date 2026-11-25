@@ -23,7 +23,7 @@ function renderHeader(){
     <div class="hdr-act">
       <button class="icob thm" data-act="theme" aria-label="${curTheme()==='dark'?'Gündüz moduna geç':'Gece moduna geç'}" title="${curTheme()==='dark'?'Gündüz modu':'Gece modu'}">${curTheme()==='dark'?THEME_ICO.sun:THEME_ICO.moon}</button>
       ${u? `${isPanel()?(isAdmRoute(route())?'<a href="#home" class="btn btn-ghost hpanel">Siteye dön</a>':'<a href="#yonetim" class="btn btn-ghost hpanel">Yönetim<span class="hm-hide"> Paneli</span></a>'):''}${u.admin?'':`<details class="balwrap"><summary class="bal" aria-label="Bakiye detayı"><small>Bakiye ▾</small><b>${TL(avail(u))}</b><span>Çekilebilir ${TL(u.bal||0)}</span></summary><div class="baldd balcard"><span class="eyebrow">Toplam bakiye</span><b class="mono">${TL(avail(u))}</b><div class="balsplit"><div><small>Çekilebilir</small><span class="mono">${TL(u.bal||0)}</span></div><div><small>Sadece alışveriş</small><span class="mono">${TL(u.bonus||0)}</span></div></div><div class="balbtns"><button class="btn btn-sm" data-act="deposit">+ Yükle</button><button class="btn btn-sm" data-act="tab" data-t="cek">Para çek</button></div><a href="#hesabim" data-act="tab" data-t="hareket" class="balmore">Bakiye hareketleri →</a></div></details>`}
-        <a href="#mesajlar" class="icob" aria-label="Mesajlar">${ICO.mail}${nm?`<i>${nm}</i>`:''}</a>
+        <a href="#mesajlar" class="icob hmsg" aria-label="Mesajlar">${ICO.mail}${nm?`<i>${nm}</i>`:''}</a>
         <a href="#bildirimler" class="icob" aria-label="Bildirimler">${ICO.bell}${nn?`<i>${nn}</i>`:''}</a>
         <a href="#ilan-ver" class="btn btn-primary hilan">+ İlan<span class="hm-hide"> Ver</span></a>
         <a href="#hesabim" class="me">${av(u)}<span>${esc(u.name)}</span></a>`

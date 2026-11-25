@@ -126,7 +126,7 @@ function p4BorsaFix(html, sub) {
     return v0(P); }; }
 /* nav rozeti ve Bugün: açık borsa siparişi (GET admin/today → queues.borsa), EP stoğu azalan paket (queues.eplow) */
 { const q = admQ('borsa'); if (q) q.L = () => { const c = API.cache['adm:today']; const n = c && c.v && c.v.queues && c.v.queues.borsa != null ? +c.v.queues.borsa || 0 : S.exOrders.filter(o => exOpenSt(o.status)).length; return Array.from({ length: n }, () => ({ t: now(), status: 'bekliyor' })); }; }
-P2_Q.push(['borsa', 'Borsa siparişi', 'borsa', '#yonetim/borsa/siparisler?f=bekliyor'], ['eplow', 'EP stoğu azalan paket', 'ep', '#yonetim/ep/paketler']);
+P2_Q.push(['borsa', 'borsa', 'borsa', '#yonetim/borsa/siparisler?f=bekliyor'], ['eplow', 'ep', 'ep', '#yonetim/ep/paketler']); // [anahtar, ADM_OPEN türü, yetki, adres]
 
 /* ================= Yönetim › EP mağazası ================= */
 const p4AdmEpProd = () => p1AdmLoad('adm:ep:p', 'admin/ep/products', x => { p4EpSet(x.epProducts); if (x.hh) S.set.hh = x.hh; return { p: (x.epProducts || []).map(p => p.id + ':' + p.codes.length + p.on + p.price + p.ep).join(','), h: JSON.stringify(x.hh) }; }, 20000);

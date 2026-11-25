@@ -120,7 +120,7 @@ function p5MktPanel() { const m = P5.mkt || { mail: true, sms: true };
 /* reklam onay rozeti: sayı sunucudan (GET admin/today → queues.ads) */
 { const q = admQ('reklam'); if (q) q.L = () => { const c = API.cache['adm:today']; const n = c && c.v && c.v.queues ? +c.v.queues.ads || 0 : 0; const real = S.ads.filter(a => adSt(a) === 'onay');
     return real.length >= n ? real.slice(0, Math.max(n, real.length)) : Array.from({ length: n }, (_, i) => real[i] || { id: '_q' + i, type: Object.keys(S.packs)[0], price: 0, status: 'onay', bookedAt: now() }); }; }
-if (typeof P2_Q !== 'undefined' && !P2_Q.some(x => x[0] === 'ads')) P2_Q.push(['ads', 'Reklam onayı', 'reklam', '#yonetim/reklam/onay']);
+if (typeof P2_Q !== 'undefined' && !P2_Q.some(x => x[0] === 'ads')) P2_Q.push(['ads', 'reklam', 'reklam', '#yonetim/reklam/onay']);
 const p5AdmAds = () => p1AdmLoad('adm:ads', 'admin/ads', x => { p1UpU(x.users); const ids = (x.ads || []).map(a => a.id); S.ads = S.ads.filter(a => ids.includes(a.id) || a.status === 'onayli');
   p5UpAds(x.ads); p2QSet('ads', x.pending); return { ids, pending: +x.pending || 0, counts: x.counts || {}, escrow: +x.escrow || 0, revenue: +x.revenue || 0 }; }, 15000);
 const p5AdmSlides = () => p1AdmLoad('adm:slides', 'admin/slides', x => { S.slides = (x.slides || []).map(p5AdIn); return { n: S.slides.length }; }, 30000);

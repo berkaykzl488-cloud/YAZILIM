@@ -72,6 +72,10 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
   const barHidden = p => until(p, () => { const n = document.querySelector('#mtab'); return !n || getComputedStyle(n).visibility === 'hidden'; }, null, 2000);
   const over = []; const chk = async (p, n) => { const w = await p.evaluate(() => document.documentElement.scrollWidth); if (w > 390) over.push(n + ':' + w); };
   const theme = p => p.evaluate(() => [...document.querySelectorAll('[data-act=theme]')].find(b => b.offsetParent || b.closest('#mnav')).click());
+  /* 0.6.4: iOS yakınlaştırması yok (görünen her alan ≥ 16 px), üst satırda marka tam görünür */
+  const small16 = p => p.evaluate(() => [...document.querySelectorAll('#modal input, #modal select, #modal textarea, #hdr input')].filter(e => e.offsetParent && !/^(checkbox|radio|range|hidden|button|submit|color|file)$/.test(e.type))
+    .map(e => [(e.id || e.name || e.tagName), parseFloat(getComputedStyle(e).fontSize)]).filter(x => !(x[1] >= 16)).map(x => x.join(':')));
+  const brandOk = p => p.evaluate(() => { const s = document.querySelector('#hdr .brand>span'); return !!s && s.offsetWidth > 40 && s.scrollWidth <= s.clientWidth && /yangpazar|Yang/i.test(s.textContent); });
 
   try {
     /* ---------- 3. kurulum ---------- */
@@ -109,6 +113,7 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     /* ---------- 5. ziyaretçi 390 px: alt çubuk, Pazar / Destek pencereleri ---------- */
     const V = await mk('ziyaretci-390'); await V.goto(B + '/'); await V.waitForSelector('#mtab');
     let b = await bar(V);
+    ok('390 px girişsiz üst satır: "yangpazar.com" tam görünür, Giriş Yap sığar', await brandOk(V) && await V.evaluate(() => { const g = document.querySelector('#hdr [data-act=login]'); const r = g && g.getBoundingClientRect(); return !!r && r.right <= innerWidth && r.top < 120; }));
     ok('girişsiz: 5 öğe Destek · Pazar · Ana sayfa · Borsa · Giriş', b && b.items.map(i => i.l).join('|') === 'Destek|Pazar|Ana sayfa|Borsa|Giriş' && b.vis, JSON.stringify(b));
     ok('Pazar ve Destek düğme (aria-haspopup), Ana sayfa bağlantısı etkin ve aria-current', b.items[0].tag === 'BUTTON' && b.items[1].tag === 'BUTTON' && b.items[2].on && b.items[2].cur === 'page' && b.items.filter(i => i.on).length === 1
       && await V.evaluate(() => [...document.querySelectorAll('#mtab [data-mtab=destek], #mtab [data-mtab=pazar]')].every(x => x.getAttribute('aria-haspopup') === 'dialog' && x.getAttribute('aria-expanded') === 'false')));
@@ -198,6 +203,10 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     ok('C üye oldu', rc && rc.me && rc.me.id); await C.evaluate(() => apiReboot(true)); await nav(C, 'borsa', 900);
     await MOB.click(C, `#bxGrid .bx-card[data-id="${X1}"] [data-act=bx-sat]`); await C.waitForSelector('#modal .bx-sheet form[data-form=exoffer]');
     ok('SAT adım 1/2: adet + fiyat; hesap alanları gizli', await C.isVisible('#ex_price') && !await C.isVisible('#exf_f1') && (await txt(C, '#bx_stp')) === '1/2');
+    { const sm = await small16(C); ok('390 px SAT penceresi ve başlık araması: tüm alanlar ≥ 16 px (iOS yakınlaştırmaz)', sm.length === 0, sm.join(', '));
+      await C.focus('#ex_price'); await C.waitForTimeout(400); await chk(C, 'sat-odak');
+      ok('390 px SAT: "Birim fiyatın" odaktayken yatay taşma yok, alan pencerede görünür', await C.evaluate(() => { const e = document.querySelector('#ex_price'), r = e.getBoundingClientRect(), b = document.querySelector('#modal .md.sheet').getBoundingClientRect();
+        return document.documentElement.scrollWidth <= innerWidth && r.right <= innerWidth && r.left >= 0 && r.bottom <= b.bottom && r.top >= b.top; })); }
     await C.fill('#ex_qty', '20'); await C.fill('#ex_price', '11'); await C.dispatchEvent('#ex_price', 'input');
     await C.click('#modal [data-foot="1"] [data-act=bx-step]'); await C.waitForTimeout(200);
     ok('tavan üstü fiyat (11 > 10): adım 1\'de kalır', (await txt(C, '#bx_stp')) === '1/2' && !await C.isVisible('#exf_f1'));
@@ -321,7 +330,9 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
       for (const r of ['home', 'metin2-tr', 'metin2-pvp', 'borsa', 'guvenli', 'hesabim']) { await nav(P, r, 700); await chk(P, r + sfx); }
       await P.evaluate(() => { ui.tab = 'ozet'; render(); }); await P.waitForTimeout(400); await chk(P, 'ozetim' + sfx); await shot(P, '20-ozetim' + sfx, true);
       await nav(P, 'borsa', 800); await shot(P, '11-borsa' + sfx, true);
-      await MOB.click(P, `#bxGrid .bx-card[data-id="${X2}"] [data-act=bx-al]`); await P.waitForSelector('#modal .bx-sheet'); await chk(P, 'al-penceresi' + sfx); await shot(P, '12-al-penceresi' + sfx); await P.click('#modal [data-act=close]'); await modalGone(P);
+      if (!sfx) ok('390 px üst satır: "yangpazar.com" tam görünür (girişli), Mesajlar simgesi gizli', await brandOk(P) && await P.evaluate(() => { const m = document.querySelector('#hdr a.hmsg'); return !m || !m.offsetParent; }));
+      await MOB.click(P, `#bxGrid .bx-card[data-id="${X2}"] [data-act=bx-al]`); await P.waitForSelector('#modal .bx-sheet'); await chk(P, 'al-penceresi' + sfx);
+      if (!sfx) { const sm = await small16(P); ok('390 px AL penceresi: tüm alanlar ≥ 16 px', sm.length === 0, sm.join(', ')); } await shot(P, '12-al-penceresi' + sfx); await P.click('#modal [data-act=close]'); await modalGone(P);
       await MOB.click(P, '#mtab [data-mtab=pazar]'); await P.waitForSelector('#modal [data-sheet=pazar]'); await chk(P, 'pazar' + sfx); await shot(P, '13-pazar' + sfx); await P.keyboard.press('Escape'); await modalGone(P);
     }
     ok('tema değişti', ['light', 'dark'].includes(await P.evaluate(() => document.documentElement.dataset.theme)));

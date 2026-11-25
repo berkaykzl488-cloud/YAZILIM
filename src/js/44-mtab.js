@@ -121,3 +121,17 @@ document.addEventListener('click', e => {
   document.addEventListener('focusin', e => { if (isInp(e.target)) { clearTimeout(kt); document.documentElement.classList.add('kbd'); } });
   document.addEventListener('focusout', () => { clearTimeout(kt); kt = setTimeout(() => { if (!isInp(document.activeElement)) document.documentElement.classList.remove('kbd'); }, 100); });
   const vv = window.visualViewport; if (vv) vv.addEventListener('resize', () => document.documentElement.classList.toggle('kbd-vv', vv.height < window.innerHeight * 0.75)); }
+/* alt pencere klavyeye karşı güvenli: iOS Safari'de klavye açılınca sabit (fixed) katman yerinde kalır, görünen alan (visualViewport) küçülür.
+   --vvh: görünen yükseklik, --vvt: görünen alanın üst kayması → .mb.mb-sheet bu alana oturur (CSS ≤760 px). Odaklanan alan kaydırılarak görünür kılınır. */
+{ const vv = window.visualViewport, de = document.documentElement; let raf = 0;
+  const sync = () => { raf = 0; if (!vv) return; de.style.setProperty('--vvh', Math.round(vv.height) + 'px'); de.style.setProperty('--vvt', Math.max(0, Math.round(vv.offsetTop)) + 'px'); };
+  const q = () => { if (!raf) raf = requestAnimationFrame(sync); };
+  if (vv) { vv.addEventListener('resize', q); vv.addEventListener('scroll', q); window.addEventListener('orientationchange', q); sync(); }
+  /** en yakın kaydırılabilir üst öğede (pencere gövdesi) alanı görünür kılar; sayfanın kendisini kaydırmaz */
+  const reveal = el => { if (!el || !el.isConnected) return; let box = el.parentElement;
+    while (box && box.id !== 'modal') { const o = getComputedStyle(box).overflowY; if ((o === 'auto' || o === 'scroll') && box.scrollHeight > box.clientHeight) break; box = box.parentElement; }
+    if (!box || box.id === 'modal') return; const r = el.getBoundingClientRect(), b = box.getBoundingClientRect(), pad = 16;
+    const lbl = el.id ? box.querySelector(`label[for="${el.id}"]`) : null; const top = Math.min(r.top, lbl ? lbl.getBoundingClientRect().top : r.top);
+    if (top < b.top + pad) box.scrollTop -= b.top + pad - top; else if (r.bottom > b.bottom - pad) box.scrollTop += r.bottom - (b.bottom - pad); };
+  document.addEventListener('focusin', e => { const el = e.target; if (!el || !el.closest || !el.closest('#modal .md') || !el.matches('input,select,textarea')) return;
+    sync(); reveal(el); setTimeout(() => { sync(); reveal(el); }, 320); }); }

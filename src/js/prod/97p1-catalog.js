@@ -69,10 +69,9 @@ sItem = function (s, prem) {
 srvCard = function (s, prem) {
   const open = s.open > now();
   return `<a href="#server-${s.id}"${prem ? premAttr(s.id) : ''} class="scard" style="--c1:${s.c[0]};--c2:${s.c[1]}"><div class="scard-top">${logo(s, 56)}${prem ? '<span class="sponsor">Premium</span>' : s.sec === 'tr' ? '<span class="sponsor">Resmi</span>' : s.partner ? '<span class="sponsor">Partner</span>' : ''}</div>
-    <div class="scard-b"><h3>${esc(s.name)} ${newTag(s)}</h3>
+    <div class="scard-b"><h3 title="${esc(s.name)}"><span class="scard-nm">${esc(s.name)}</span>${newTag(s)}</h3>
     <div class="chips">${s.sec === 'tr' ? '<span class="chip">Metin2 TR</span>' : `${s.lv ? `<span class="chip">${esc(s.lv)}</span>` : ''}${s.type && s.type !== 'PVP' ? `<span class="chip">${esc(s.type)}</span>` : ''}${open ? `<span class="chip warn">${left(s.open)} sonra açılıyor</span>` : ''}`}</div>
-    <div class="m">${(s.sec === 'tr' || !S.set.pvpEpOn ? ['yang', 'item', 'karakter'] : M2CAT).map(c => `${catLabel(c, s.sec)} ${p1N(s, c)}`).join(' · ')}</div>
-    <div class="m" style="margin-top:auto"><b style="color:var(--fg)">${p1N(s)}</b> aktif ilan</div></div></a>`;
+    ${scardStats(s, c => p1N(s, c), p1N(s))}</div></a>`;
 };
 
 /* ana sayfa: son ilanlar açılış verisinden (ilk 24, en yeni); vitrin ilanları P2'de (97p2-money.js) */

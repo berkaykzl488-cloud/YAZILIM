@@ -3,6 +3,10 @@
    Sunucuya bağlı bölümler: üyelik/giriş/2FA, Hesabım (profil, 2FA, IBAN), bildirimler, Yönetim › Bugün, Arama, Üyeler,
    Çalışanlar & yetkiler, E-posta & WhatsApp (0.6.1: SMS/NetGSM kaldırıldı; iç kanal adı "sms" = WhatsApp).            */
 /* 98-p0b-actions.js ile paylaşılanlar (blok dışında: klasik betikler arası görünür) */
+/* Bugün açık iş listesi: [sunucu anahtarı, ADM_OPEN türü, yetki, adres]; 97p2 (P2_Q takma adı), 97p4 ve 97p5 ekler */
+const P_TODAY_Q=[['deps','odeme','odeme','#yonetim/odeme/yuklemeler?f=bekliyor'],['wd','cekim',['cekim','muhasebe'],'#yonetim/cekim/talepler?f=bekliyor'],
+  ['disputes','siparis','siparis','#yonetim/siparis?f=itiraz'],['orders','teslim','siparis','#yonetim/siparis?f=odendi'],['tickets','destek','destek','#yonetim/destek/talepler?f=aktif'],
+  ['listings','ilan','ilan','#yonetim/ilan/moderasyon?f=beklemede'],['flagged','mesaj','mesaj','#yonetim/mesaj']];
 let P_TFA=null, P_TFAT=null, P_WACHK=null; // P_WACHK: WhatsApp bağlantı testi sonucu
 const P_REF = () => { try{ return (localStorage.getItem('yangpazar_ref')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,40); }catch(e){ return ''; } };
 if(YP_PROD){
@@ -100,18 +104,15 @@ const pErrBox = d => d&&d.err?`<div class="note note-bad">${esc(d.err)}</div>`:'
     let out=v0(P);
     if(it.k==='calisan'&&!(can('uye')||can('ara'))) out=out.replace(/<div class="fld" style="max-width:340px"><label for="sa_ex">[\s\S]*?<\/select>[\s\S]*?<\/span><\/div>/,'');
     return out; }; }
-/* Bugün: iş kuyruğu sayıları ve KPI'lar sunucudan (GET admin/today) */
-admToday=function(){ const dd=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'}); const d=pAdmLoad('adm:today','admin/today',null,20000); const u=me();
-  const desc=dd[0].toLocaleUpperCase('tr-TR')+dd.slice(1)+'.';
-  if(!d) return {desc,actions:'',body:pLoading()}; if(d.err) return {desc,actions:'',body:pErrBox(d)};
-  const Q=d.queues||{}, tot=Object.values(Q).reduce((s,n)=>s+(+n||0),0), K=d.kpi, O=d.outbox||{};
-  let h=`${u&&!u.tfa?`<div class="note note-warn">Hesabınızda <b>2 adımlı doğrulama kapalı</b>. Güvenliğiniz için <a href="#hesabim" data-act="tab" data-t="profil" style="text-decoration:underline">Hesabım › Profil ve güvenlik</a> bölümünden e-posta ile açmanızı öneririz.</div>`:''}
-    <div class="sec-h"><h2>İş kuyruğu</h2><span>Siparişler, ödemeler ve destek talepleri sonraki güncellemelerle burada görünecek</span></div>
-    ${tot?`<div class="kpis">${Object.entries(Q).filter(([,n])=>n).map(([k,n])=>`<div class="kpi"><small>${esc(k)}</small><b>${n}</b></div>`).join('')}</div>`:'<div class="panel empty"><b>Bekleyen iş yok.</b>Yeni talepler geldiğinde burada görünür.</div>'}
-    ${can('sms')?`<div class="sec-h"><h2>E-posta & WhatsApp kuyruğu</h2></div><div class="kpis"><div class="kpi"><small>Gönderim bekleyen</small><b>${NUM(O.queued)}</b></div><div class="kpi ${O.failed?'hl':''}"><small>Gönderilemeyen</small><b>${NUM(O.failed)}</b><a class="muted" style="font-size:12px;text-decoration:underline" href="#yonetim/sms/kayitlar">Gönderim kayıtları</a></div></div>`:''}`;
-  if(K) h+=`<div class="sec-h"><h2>Üyeler</h2><span>Gelir ve sipariş göstergeleri para işlemleriyle (P2) gelecek</span></div>
-    <div class="kpis"><div class="kpi hl"><small>Toplam üye</small><b>${NUM(K.users)}</b></div><div class="kpi"><small>Bugün katılan</small><b>${NUM(K.newToday)}</b></div><div class="kpi"><small>Çevrimiçi (5 dk)</small><b>${NUM(K.online)}</b></div><div class="kpi"><small>Çalışan</small><b>${NUM(K.staff)}</b></div><div class="kpi"><small>Askıda</small><b>${NUM(K.banned)}</b></div></div>`;
-  return {desc:desc+' '+(tot?tot+' iş bekliyor.':'Şu an bekleyen iş yok.'),actions:'',body:h}; };
+/* Bugün: yalnız açık işler (GET admin/today → queues). Sayısı 0 olan ve yetkisi olmayan iş gizlenir; her iş ilgili sayfaya düğmeyle gider.
+   Liste: P_TODAY_Q (dosya başında, blok dışında). */
+const pTodayItems = Q => { const ord=Object.keys(ADM_OPEN); const id=e=>ADM_OPEN[e[1]]?e[1]:e[0]; const oi=e=>{ const i=ord.indexOf(id(e)); return i<0?99:i; };
+  return P_TODAY_Q.filter(e=>admCan(e[2])&&+Q[e[0]]>0).slice().sort((a,b)=>oi(a)-oi(b)).map(e=>({id:id(e),n:+Q[e[0]],h:e[3],l:ADM_OPEN[e[1]]?null:e[1],warn:e[0]==='eplow'})); };
+admToday=function(){ const d=pAdmLoad('adm:today','admin/today',null,20000); const u=me();
+  if(!d) return {desc:admTodayDesc(0,1),actions:'',body:pLoading()}; if(d.err) return {desc:'',actions:'',body:pErrBox(d)};
+  const L=pTodayItems(d.queues||{}), tot=L.filter(x=>!x.warn).reduce((s,x)=>s+x.n,0);
+  const h=`${u&&!u.tfa?`<div class="note note-warn">Hesabınızda <b>2 adımlı doğrulama kapalı</b>. Güvenliğiniz için <a href="#hesabim" data-act="tab" data-t="profil" style="text-decoration:underline">Hesabım › Profil ve güvenlik</a> bölümünden e-posta ile açmanızı öneririz.</div>`:''}${admOpenHtml(L)}`;
+  return {desc:admTodayDesc(tot),actions:'',body:h}; };
 /* Komut araması: üyeler sunucudan da aranır */
 { const f=cmdRender; cmdRender=function(inp){ f(inp); if(!can('ara')) return; const q=inp.value.trim(); if(yp_len(q)<2) return; clearTimeout(inp._st);
     inp._st=setTimeout(()=>{ call('GET','admin/search?q='+encodeURIComponent(q),null,{quiet:true}).then(j=>{ (j.data.users||[]).forEach(apiUpsertUser); if(inp.isConnected&&inp.value.trim()===q) f(inp); }).catch(()=>{}); },250); }; }

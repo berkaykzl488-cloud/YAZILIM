@@ -350,18 +350,9 @@ const p2AdmToday = () => isPanel() ? p1AdmLoad('adm:today', 'admin/today', null,
 const p2QSet = (k, n) => { const c = API.cache['adm:today']; if (c && c.v && c.v.queues && +c.v.queues[k] !== +n) { c.v.queues[k] = +n || 0; setTimeout(() => { if (isAdmRoute(route())) render(); }, 0); } };
 { const qn = k => { const c = API.cache['adm:today']; const n = c && c.v && c.v.queues ? +c.v.queues[k] || 0 : 0; return Array.from({ length: n }, () => ({ t: now(), status: 'bekliyor', gw: 'havale', amount: 0, total: 0 })); };
   const a = admQ('odeme'); if (a) a.L = () => qn('deps'); const b = admQ('siparis'); if (b) b.L = () => qn('disputes'); }
-const P2_Q = [['deps', 'Yükleme onayı', 'odeme', '#yonetim/odeme/yuklemeler?f=bekliyor'], ['disputes', 'İtirazlı sipariş', 'siparis', '#yonetim/siparis?f=itiraz'], ['orders', 'Teslim bekleyen sipariş', 'siparis', '#yonetim/siparis?f=odendi'], ['listings', 'İlan onayı', 'ilan', '#yonetim/ilan/moderasyon?f=beklemede'], ['flagged', 'Engellenen mesaj', 'mesaj', '#yonetim/mesaj']];
-admToday = function () { const dd = new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }); const d = p2AdmToday(); const u = me();
-  const desc = dd[0].toLocaleUpperCase('tr-TR') + dd.slice(1) + '.';
-  if (!d) return { desc, actions: '', body: pLoading() }; if (d.err) return { desc, actions: '', body: p1Err(d) };
-  const Q = d.queues || {}, K = d.kpi, O = d.outbox || {}; const qs = P2_Q.filter(([k, , p]) => can(p) && +Q[k] > 0); const tot = qs.reduce((s, [k]) => s + (+Q[k] || 0), 0);
-  let h = `${u && !u.tfa ? `<div class="note note-warn">Hesabınızda <b>2 adımlı doğrulama kapalı</b>. Güvenliğiniz için <a href="#hesabim" data-act="tab" data-t="profil" style="text-decoration:underline">Hesabım › Profil ve güvenlik</a> bölümünden e-posta ile açmanızı öneririz.</div>` : ''}
-    <div class="sec-h"><h2>İş kuyruğu</h2><span>Yetkili olduğunuz bekleyen işler</span></div>
-    ${qs.length ? `<div class="kpis">${qs.map(([k, l, , href]) => `<a class="kpi" href="${href}"><small>${esc(l)}</small><b>${NUM(Q[k])}</b><span class="muted" style="font-size:12px">İncele →</span></a>`).join('')}</div>` : '<div class="panel empty"><b>Bekleyen iş yok.</b>Yeni talepler geldiğinde burada görünür.</div>'}
-    ${can('sms') ? `<div class="sec-h"><h2>E-posta & WhatsApp kuyruğu</h2></div><div class="kpis"><div class="kpi"><small>Gönderim bekleyen</small><b>${NUM(O.queued)}</b></div><div class="kpi ${O.failed ? 'hl' : ''}"><small>Gönderilemeyen</small><b>${NUM(O.failed)}</b><a class="muted" style="font-size:12px;text-decoration:underline" href="#yonetim/sms/kayitlar">Gönderim kayıtları</a></div></div>` : ''}`;
-  if (K) h += `<div class="sec-h"><h2>Üyeler</h2></div>
-    <div class="kpis"><div class="kpi hl"><small>Toplam üye</small><b>${NUM(K.users)}</b></div><div class="kpi"><small>Bugün katılan</small><b>${NUM(K.newToday)}</b></div><div class="kpi"><small>Çevrimiçi (5 dk)</small><b>${NUM(K.online)}</b></div><div class="kpi"><small>Çalışan</small><b>${NUM(K.staff)}</b></div><div class="kpi"><small>Askıda</small><b>${NUM(K.banned)}</b></div></div>`;
-  return { desc: desc + ' ' + (tot ? tot + ' iş bekliyor.' : 'Şu an bekleyen iş yok.'), actions: '', body: h }; };
+/* Bugün listesi 97-p0b-views.js'te (admToday + P_TODAY_Q); P4 / P5 buraya ekler */
+const P2_Q = P_TODAY_Q;
+{ const q = admQ('teslim'); if (q) q.L = () => { const c = API.cache['adm:today']; const n = c && c.v && c.v.queues ? +c.v.queues.orders || 0 : 0; return Array.from({ length: n }, () => ({ t: now(), status: 'odendi', total: 0 })); }; }
 
 /* Ödemeler › Yükleme onayları / Ödeme yöntemleri / Banka & kripto hesapları */
 function p2AdmDeps(P) { const F = P.f || 'bekliyor'; const st = F === 'tumu' ? 'tumu' : F;

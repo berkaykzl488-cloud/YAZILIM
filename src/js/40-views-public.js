@@ -165,14 +165,16 @@ function mEpBuy(id){ const u=me(); if(!u) return mLogin(); const p=S.epProducts.
   modal(mWrap('EP satın al',`<div class="sum"><div><span>Ürün</span><b>${hh?`<s class="muted">${NUM(p.ep)} EP</s> `:''}${NUM(epAmt(p))} EP</b></div>${hh?`<div><span class="muted">Happy Hour bonusu</span><span class="pos">+%${S.set.hh.pct} EP</span></div>`:''}<div class="tot"><span>Ödenecek</span><span class="mono">${TL(p.price)}</span></div><div><span class="muted">Bakiyeniz</span><span class="mono">${TL(avail(u))}</span></div></div>
     ${avail(u)>=p.price?`<form data-form="epbuy" data-id="${p.id}" class="stack"><div class="note note-info">Kod ödemeden hemen sonra ekranda gösterilir. Kodu ${p.srv?esc(epName(p))+' için oyunda':'oyunda Nesne Market › Kupon bölümünden'} kullanın.</div><button class="btn btn-primary">Öde ve kodu al · ${TL(p.price)}</button></form>`:`<div class="note note-bad">Bakiyeniz yetersiz. <b>${TL(p.price-avail(u))}</b> daha yükleyin.</div><button class="btn btn-primary" data-act="deposit">Bakiye Yükle</button>`}`)); }
 function mEpCode(o){ modal(mWrap('Kodunuz hazır',`<div class="note note-ok"><b>${NUM(o.epShown)} EP</b> kodunuz teslim edildi${o.hh?' (Happy Hour)':''}.</div><div class="cprow"><span class="mono" style="font-size:17px;font-weight:700">${esc(o.code)}</span><button class="btn btn-sm" data-act="copy" data-v="${esc(o.code)}">Kopyala</button></div><span class="muted" style="font-size:12.5px">Kodunuz Hesabım › EP kodlarım bölümünde de saklanır.${o.hh?' Happy Hour bitmeden kullanırsanız fazladan EP hesabınıza geçer.':''}</span><button class="btn btn-primary" data-act="close">Tamam</button>`)); }
+/** server kartı alt bölümü: kategori sayıları küçük kutucuklarda, aktif ilan sayısı vurgulu (demo ve canlı paket aynı çizer) */
+function scardStats(s,cnt,tot){ return `<div class="sstats">${(s.sec==='tr'||!S.set.pvpEpOn?['yang','item','karakter']:M2CAT).map(c=>{ const n=+cnt(c)||0; return `<span class="sst${n?'':' z'}">${catLabel(c,s.sec)} <b>${NUM(n)}</b></span>`; }).join('')}</div>
+    <div class="scard-f"><span class="sact${tot?'':' z'}"><b>${NUM(tot)}</b> aktif ilan</span><span class="sgo" aria-hidden="true">İncele ›</span></div>`; }
 function srvCard(s,prem){
   const open=s.open>now(); const L=active().filter(l=>l.server===s.id);
   const won=L.filter(l=>l.cat==='yang').sort((a,b)=>a.price-b.price)[0];
   return `<a href="#server-${s.id}"${prem?premAttr(s.id):''} class="scard" style="--c1:${s.c[0]};--c2:${s.c[1]}"><div class="scard-top">${logo(s,56)}${prem?'<span class="sponsor">Premium</span>':s.sec==='tr'?'<span class="sponsor">Resmi</span>':s.partner?'<span class="sponsor">Partner</span>':''}</div>
-    <div class="scard-b"><h3>${esc(s.name)} ${newTag(s)}</h3>
+    <div class="scard-b"><h3 title="${esc(s.name)}"><span class="scard-nm">${esc(s.name)}</span>${newTag(s)}</h3>
     <div class="chips">${s.sec==='tr'?'<span class="chip">Metin2 TR</span>':`${s.lv?`<span class="chip">${esc(s.lv)}</span>`:''}${s.type&&s.type!=='PVP'?`<span class="chip">${esc(s.type)}</span>`:''}${open?`<span class="chip warn">${left(s.open)} sonra açılıyor</span>`:''}`}</div>
-    <div class="m">${(s.sec==='tr'||!S.set.pvpEpOn?['yang','item','karakter']:M2CAT).map(c=>`${catLabel(c,s.sec)} ${L.filter(l=>l.cat===c).length}`).join(' · ')}</div>
-    <div class="m" style="margin-top:auto"><b style="color:var(--fg)">${L.length}</b> aktif ilan</div></div></a>`;
+    ${scardStats(s,c=>L.filter(l=>l.cat===c).length,L.length)}</div></a>`;
 }
 function vServer(id,cat){
   const s=srv(id); if(!s) return vNotFound();

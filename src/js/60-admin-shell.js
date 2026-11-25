@@ -66,6 +66,7 @@ const dispT = o => { const L=(o.log||[]).filter(x=>/itiraz/i.test(x.x||'')); ret
 const ADM_QUEUES=[
   {id:'cekim',l:'Para çekme',g:'Finans',p:'cekim',sla:6*H,h:'#yonetim/cekim/talepler?f=bekliyor',L:()=>S.wd.filter(w=>w.status==='bekliyor'),t:w=>w.t,meta:L=>`Gönderilecek <b>${TL(r2(L.reduce((s,w)=>s+(w.net!=null?w.net:w.amount),0)))}</b>`},
   {id:'siparis',l:'İtirazlı sipariş',g:'Siparişler',p:'siparis',sla:24*H,h:'#yonetim/siparis?f=itiraz',L:()=>S.orders.filter(o=>o.status==='itiraz'),t:dispT,meta:L=>`Havuzda <b>${TL(r2(L.reduce((s,o)=>s+(o.total||0),0)))}</b>`},
+  {id:'teslim',l:'Teslim bekleyen sipariş',g:'Siparişler',p:'siparis',sla:24*H,h:'#yonetim/siparis?f=odendi',L:()=>S.orders.filter(o=>o.status==='odendi'),t:o=>o.t,meta:L=>`Havuzda <b>${TL(r2(L.reduce((s,o)=>s+(o.total||0),0)))}</b>`},
   {id:'odeme',l:'Yükleme onayı',g:'Finans',p:'odeme',sla:2*H,h:'#yonetim/odeme/yuklemeler?f=bekliyor',L:()=>S.deps.filter(d=>d.status==='bekliyor'),t:d=>d.t,meta:L=>{ const m={}; L.forEach(d=>{ const n=(S.gws.find(g=>g.id===d.gw)||{}).n||d.gw; m[n]=(m[n]||0)+1; }); return Object.entries(m).map(([k,v])=>esc(k)+' '+v).join(', ')+`, toplam <b>${TL(r2(L.reduce((s,d)=>s+(+d.amount||0),0)))}</b>`; }},
   {id:'borsa',l:'Borsa siparişi',g:'Teslimat',p:'borsa',sla:2*H,h:'#yonetim/borsa/siparisler?f=bekliyor',L:()=>S.exOrders.filter(o=>exOpenSt(o.status)),t:o=>o.t,meta:L=>{ const m={}; L.forEach(o=>{ const n=EXS[o.status]||o.status; m[n]=(m[n]||0)+1; }); return Object.entries(m).map(([k,v])=>v+' '+esc(String(k).toLocaleLowerCase('tr-TR'))).join(', '); }},
   {id:'destek',l:'Canlı destek',g:'Destek',p:'destek',sla:15*60000,h:'#yonetim/destek/talepler?f=aktif',L:()=>S.tickets.filter(x=>x.status==='bekliyor'),t:x=>x.queuedAt||x.t,meta:()=>'Temsilci bekliyor'},
@@ -89,13 +90,48 @@ const ADM_ICO={chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
   sep:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>'};
+/* menü ve Bugün simgeleri (24×24, çizgi). Anahtar: bölüm (ADM_NAV k), grup adı ya da Bugün iş türü (ADM_OPEN). Bilinmeyen anahtar: nokta. */
+const ADM_NI={
+  panel:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 13l2 2 4-4"/>',
+  ara:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  siparis:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
+  borsa:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/>',
+  odeme:'<path d="M3 7a2 2 0 0 1 2-2h13v3"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h2"/>',
+  cekim:'<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 21h18"/>',
+  muhasebe:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 17v-3M12 17v-6M16 17v-2"/>',
+  destek:'<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="7" rx="1.5"/><rect x="17" y="13" width="4" height="7" rx="1.5"/>',
+  uye:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.8c2 .7 3.2 2.5 3.5 5.2"/>',
+  mesaj:'<path d="M21 12a8 8 0 0 1-11.5 7.2L4 20.5l1.3-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 8.5l7 7"/>',
+  vip:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+  ilan:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  server:'<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+  ep:'<path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/>',
+  reklam:'<path d="M3 11v2a1 1 0 0 0 1 1h3l6 5V5L7 10H4a1 1 0 0 0-1 1z"/><path d="M17 8a5 5 0 0 1 0 8"/>',
+  kampanya:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2-3-6-3-6 0s4 0 6 0c2 0 6 3 6 0s-4-3-6 0z"/>',
+  seo:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  entegrasyon:'<path d="M9 2v5M15 2v5"/><path d="M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v5"/>',
+  calisan:'<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8 17c.6-1.8 2.1-3 4-3s3.4 1.2 4 3"/>',
+  sms:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  bakim:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  ayar:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+  teslim:'<path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  itiraz:'<path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+  ok:'<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  'Siparişler & teslimat':'<path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  'Finans':'<ellipse cx="9" cy="6" rx="6" ry="3"/><path d="M3 6v5c0 1.7 2.7 3 6 3"/><path d="M3 11v5c0 1.7 2.7 3 6 3"/><ellipse cx="15" cy="13" rx="6" ry="3"/><path d="M9 13v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>',
+  'Üyeler & destek':'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.8c2 .7 3.2 2.5 3.5 5.2"/>',
+  'Katalog':'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  'Reklam & büyüme':'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  'Sistem':'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'};
+const admIco = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ADM_NI[k]||'<circle cx="12" cy="12" r="3"/>'}</svg>`;
 function admGrpState(){ try{ return JSON.parse(localStorage.getItem('yp_admgrp')||'{}')||{}; }catch(e){ return {}; } }
 function admNavHtml(P){ const G=admGrpState();
   return ADM_NAV.map(g=>{ const its=g.items.filter(admVis); if(!its.length) return '';
-    const li=it=>`<a class="${it.k==='panel'?'asb-top':'asb-i'} ${P.k===it.k?'on':''}" href="#${admHash(it.k)}" data-act="atab" data-t="${it.k}" ${P.k===it.k?'aria-current="page"':''}><span>${esc(it.l)}</span>${admBadge(it)}</a>`;
+    const li=it=>`<a class="${it.k==='panel'?'asb-top':'asb-i'} ${P.k===it.k?'on':''}" href="#${admHash(it.k)}" data-act="atab" data-t="${it.k}" ${P.k===it.k?'aria-current="page"':''}><span class="asb-ic">${admIco(it.k)}</span><span class="asb-t">${esc(it.l)}</span>${admBadge(it)}</a>`;
     if(!g.g) return its.map(li).join('');
-    const open=its.some(i=>i.k===P.k)||(G[g.g]!=null?!!G[g.g]:!g.shut); const sum=its.reduce((s,i)=>s+admWork(i),0);
-    return `<div class="asb-g ${open?'':'shut'}" data-g="${esc(g.g)}"><button type="button" class="asb-gh" data-act="adm-grp" data-g="${esc(g.g)}" aria-expanded="${open}">${ADM_ICO.chev}<span>${esc(g.g)}</span>${sum?`<span class="nb">${sum}</span>`:''}</button><div class="asb-l">${its.map(li).join('')}</div></div>`; }).join(''); }
+    const open=its.some(i=>i.k===P.k)||(G[g.g]!=null?!!G[g.g]:!g.shut); const sum=its.reduce((s,i)=>s+admWork(i),0); const cur=its.some(i=>i.k===P.k);
+    return `<div class="asb-g ${open?'':'shut'} ${cur?'cur':''}" data-g="${esc(g.g)}"><button type="button" class="asb-gh" data-act="adm-grp" data-g="${esc(g.g)}" aria-expanded="${open}"><span class="asb-gic">${admIco(g.g)}</span><span class="asb-gt">${esc(g.g)}</span>${sum?`<span class="nb">${sum}</span>`:''}<span class="asb-chev">${ADM_ICO.chev}</span></button><div class="asb-l">${its.map(li).join('')}</div></div>`; }).join(''); }
 const admCmdBox = (id,mob) => `<div class="acmd" data-cmd><span class="acmd-ic">${ADM_ICO.q}</span><input class="acmd-in" id="${id}" type="search" placeholder="Bölüm, üye, sipariş no, borsa no, e-Gider no…" aria-label="Komut araması: bölüm, üye, sipariş, borsa veya e-Gider no" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="${id}_pop" aria-autocomplete="list">${mob?'':'<kbd>Ctrl K</kbd>'}<div class="acmd-pop" id="${id}_pop" role="listbox"></div></div>`;
 function aSubs(it,cur){ const L=admSubs(it); if(L.length<2) return '';
   return `<nav class="asub" aria-label="${esc(it.l)} alt bölümleri">${L.map(s=>{ const on=s.s===cur; const extra=it.k==='server'?` data-act="sv-sec" data-s="${s.s}"`:it.k==='sms'?` data-act="ntab" data-t="${({sablonlar:'tpl',eposta:'mail',sms:'sms',kayitlar:'log'})[s.s]}"`:''; const cnt=it.k==='server'?`<span class="chip">${S.servers.filter(x=>x.sec===s.s).length}</span>`:admBadge(it,s); return `<a href="#${admHash(it.k,s.s)}" class="${on?'on':''}" ${on?'aria-current="page"':''}${extra}>${esc(s.l)}${cnt}</a>`; }).join('')}</nav>`; }
@@ -110,7 +146,7 @@ const aSw = '<span class="asw-n">Anında uygulanır</span>';
 function admShell(o){ const u=me(), P=o.P, it=o.it, sub=o.sub; const tot=admTotal(); const subL=sub?(admSubs(it).find(s=>s.s===sub)||{}).l:'';
   const crumb=`<nav class="acrumb" aria-label="Konum"><span>Yönetim</span>${it.grp?ADM_ICO.sep+'<span>'+esc(it.grp)+'</span>':''}${ADM_ICO.sep}<b>${esc(it.l)}${subL&&admSubs(it).length>1?' › '+esc(subL):''}</b></nav>`;
   const sw=S.set.demoMode===false&&!(u&&u.admin)?'':`<label class="asb-sw" for="admUser"><span>Hesap değiştir</span><select class="inp" id="admUser" data-change="switch"><option value="">Çıkış yapmış</option>${S.users.map(x=>`<option value="${x.id}" ${S.cur===x.id?'selected':''}>${x.admin?'Yönetici':x.staff?esc(x.name)+' (çalışan)':esc(x.name)}</option>`).join('')}</select></label>`;
-  const who=`<div class="asb-who">${av(u)}<div><b>${esc(u.name)}</b><span>${u.admin?'Yönetici · tüm yetkiler':'Çalışan · '+(u.perms||[]).length+' yetki'}</span></div></div>`;
+  const who=`<div class="asb-who">${av(u)}<div class="asb-wt"><b>${esc(u.name)}</b><span><i class="asb-role ${u.admin?'adm':''}">${u.admin?'Yönetici':'Çalışan'}</i>${u.admin?'<span class="vh">tüm yetkiler</span>':(u.perms||[]).length+' yetki'}</span></div>${tot?`<a class="asb-wq" href="#yonetim" data-act="atab" data-t="panel" title="Bugün: ${tot} açık iş" aria-label="${tot} açık iş"><b>${tot}</b><small>açık iş</small></a>`:''}</div>`;
   const nav=admNavHtml(P);
   const mt=maintOn()?`<div class="maintbar"><b>Bakım modu açık.</b> Ziyaretçiler bakım sayfasını görüyor, siz siteyi normal kullanıyorsunuz. <a href="#yonetim/bakim">Bakım ayarları</a></div>`:'';
   return `<div class="ash admwrap"><aside class="asb" aria-label="Yönetim menüsü">${who}<nav class="asb-nav">${nav}</nav>${sw}</aside>
@@ -119,31 +155,30 @@ function admShell(o){ const u=me(), P=o.P, it=o.it, sub=o.sub; const tot=admTota
     ${mt}${o.page}</div></div>
   <div class="adrawer-bg" data-act="adm-menu-close"></div>
   <aside class="adrawer" id="admDrawer" role="dialog" aria-modal="true" aria-label="Yönetim menüsü"><div class="adrawer-h"><b class="adrawer-brand">${esc(S.set.siteName)}</b><button type="button" class="ibtn adrawer-x" data-act="adm-menu-close" aria-label="Menüyü kapat">${ADM_ICO.x}</button></div>
-    <div class="adrawer-q">${admCmdBox('acmdM',1)}</div><nav class="adrawer-n">${nav}</nav>${sw?`<div class="adrawer-sw">${sw.replace(/admUser/g,'admUserM')}</div>`:''}<div class="adrawer-f"><button type="button" class="btn" data-act="theme">${curTheme()==='dark'?'Açık tema':'Koyu tema'}</button><a class="btn" href="#home">Siteye dön</a></div></aside>${o.over||''}`; }
-/* --- Bugün --- */
+    <div class="adrawer-q">${admCmdBox('acmdM',1)}</div><div class="adrawer-who">${who}</div><nav class="adrawer-n">${nav}</nav>${sw?`<div class="adrawer-sw">${sw.replace(/admUser/g,'admUserM')}</div>`:''}<div class="adrawer-f"><button type="button" class="btn" data-act="theme">${curTheme()==='dark'?'Açık tema':'Koyu tema'}</button><a class="btn" href="#home">Siteye dön</a></div></aside>${o.over||''}`; }
+/* --- Bugün: yalnız açık işler ---
+   Her iş türü: sayı, kısa etiket ve ilgili yönetim sayfasına doğrudan düğme. Sayısı 0 olan gizlenir; hiç açık iş yoksa tek boş durum.
+   ADM_OPEN: [etiket, düğme, simge]. Demo (ADM_QUEUES) ve canlı paket (GET admin/today → queues) aynı çiziciyi (admOpenHtml) kullanır. */
+const ADM_OPEN={odeme:['Bakiye yükleme onayı','Onayla','odeme'],cekim:['Para çekme talebi','Gönder','cekim'],siparis:['İtirazlı sipariş','Karar ver','itiraz'],teslim:['Teslim bekleyen sipariş','Takip et','teslim'],
+  borsa:['Borsa siparişi','Teslim et','borsa'],destek:['Destek talebi','Yanıtla','destek'],reklam:['Reklam onayı','Onayla','reklam'],ilan:['İlan onayı','Onayla','ilan'],
+  mesaj:['Engellenen mesaj','İncele','mesaj'],seo:['Ortaklık başvurusu','İncele','link'],ep:['EP stoğu azalan paket','Kod ekle','ep']};
+/** L: [{id, n, h, meta?, age?, cls?: 'bad'|'warn', warn?}] — sıralı gelir; n>0 olanlar çizilir */
+function admOpenHtml(L){ const A=(L||[]).filter(x=>+x.n>0);
+  if(!A.length) return `<div class="aop-empty" data-open="0"><span class="aop-eic">${admIco('ok')}</span><b>Her şey yolunda, açık iş yok</b><span>Yeni yükleme, çekim, sipariş ya da onay talebi geldiğinde burada sayısıyla görünür.</span></div>`;
+  return `<div class="aop-list" data-open="${A.length}">${A.map(x=>{ const m=ADM_OPEN[x.id]||[x.l||x.id,'Aç',x.id];
+    return `<a class="aop${x.cls?' '+x.cls:''}${x.warn?' alert':''}" href="${x.h}" data-q="${esc(x.id)}"><span class="aop-ic">${admIco(m[2])}</span><span class="aop-n">${NUM(+x.n)}</span><span class="aop-t"><b>${esc(x.l||m[0])}</b>${x.meta?`<small>${x.meta}</small>`:''}${x.age?`<small class="aop-age">${x.age}</small>`:''}</span><span class="aop-go">${esc(m[1])}${ADM_ICO.sep}</span></a>`; }).join('')}</div>`; }
+const admTodayDesc = (n,load) => { const dd=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'}); return `${dd[0].toLocaleUpperCase('tr-TR')+dd.slice(1)}.`+(load?'':n?` ${n} açık iş var; en acil olanlar üstte.`:' Şu an açık iş yok.'); };
 function admToday(){ const Q=ADM_QUEUES.filter(x=>can(x.p)).map(x=>{ const L=x.L(); let old=null, r=0, cls='';
     if(!x.warn&&L.length&&x.t){ old=Math.min(...L.map(x.t)); r=Math.min(1,(now()-old)/x.sla); cls=r>=1?'bad':r>=.6?'warn':''; }
-    if(x.warn&&L.length){ const mn=Math.min(...L.map(p=>p.codes.length)); r=1-mn/3; cls='warn'; }
+    if(x.warn&&L.length) cls='warn';
     return {x,L,n:L.length,old,r,cls}; });
-  const pri={bad:0,warn:1,'':2}; const act=Q.filter(q=>q.n).sort((a,b)=>(!!a.x.warn-!!b.x.warn)||pri[a.cls]-pri[b.cls]||ADM_QUEUES.indexOf(a.x)-ADM_QUEUES.indexOf(b.x)); const zero=Q.filter(q=>!q.n);
-  const tot=admTotal(); const dd=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
-  const card=q=>`<a class="qcard ${q.cls==='bad'?'hot':''} ${q.x.warn?'alert':''}" href="${q.x.h}"><span class="lbl">${esc(q.x.l)} <small>${esc(q.x.g)}</small></span><span class="n">${q.n}</span><span class="meta">${q.x.meta(q.L)}</span><span class="qsla ${q.cls}"><span class="qsla-t"><i style="width:${Math.max(4,Math.round(q.r*100))}%"></i></span><span class="qsla-x">${q.x.warn?'<span>Stok uyarısı</span><span>3 kodun altında</span>':`<span>En eski <b>${ageTxt(now()-q.old)}</b></span><span>hedef ${ADM_SLA_TXT(q.x.sla)}</span>`}</span></span></a>`;
+  const pri={bad:0,warn:1,'':2}; const act=Q.filter(q=>q.n).sort((a,b)=>(!!a.x.warn-!!b.x.warn)||pri[a.cls]-pri[b.cls]||ADM_QUEUES.indexOf(a.x)-ADM_QUEUES.indexOf(b.x));
+  const tot=admTotal();
   const st=(on,l,h,p)=>{ const c=`<i></i>${l}`; return h&&can(p)?`<a class="state ${on?'':'off'}" href="${h}">${c}</a>`:`<span class="state ${on?'':'off'}">${c}</span>`; };
   const chips=st(S.set.exOn,S.set.exOn?'Borsa açık':'Borsa kapalı','#yonetim/borsa','borsa')+st(supportOpen(),supportOpen()?'Destek açık · '+esc(hoursTxt()):'Destek kapalı','#yonetim/destek/ayarlar','destek')+st(!maintOn(),maintOn()?'Bakım açık':'Bakım kapalı','#yonetim/bakim','bakim');
-  let h=`<div class="sec-h"><h2>İş kuyruğu</h2><span>Kartlar yalnızca yetkiniz olan bölümleri gösterir</span></div>
-    ${act.length?`<div class="qgrid">${act.map(card).join('')}</div>`:`<div class="panel empty"><b>Bekleyen iş yok.</b>Yeni talepler geldiğinde burada görünür.</div>`}
-    ${zero.length?`<div class="qclean"><span class="chip ok">Bekleyen yok</span>${zero.map(q=>`<span>${esc(q.x.l)}</span>`).join('<span aria-hidden="true">·</span>')}</div>`:''}`;
-  h+=entTodayCard();
-  if(can('panel')){ const wdp=S.wd.filter(w=>w.status==='bekliyor'), exq=S.exOrders.filter(o=>exOpenSt(o.status));
-    const days=[...Array(7)].map((_,i)=>{const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-(6-i)); return d.getTime();});
-    const vals=days.map(d=>r2(S.revLog.filter(e=>e.t>=d&&e.t<d+D).reduce((s,e)=>s+e.a,0))); const mx=Math.max(...vals,1);
-    h+=`<div class="sec-h"><h2>Gelir</h2><span>Toplam, açılıştan bu yana</span></div>
-    <div class="kpis"><div class="kpi hl"><small>Komisyon geliri</small><b>${TL(S.rev.commission)}</b></div><div class="kpi hl"><small>Reklam geliri</small><b>${TL(S.rev.ads)}</b></div><div class="kpi hl"><small>Borsa kârı</small><b>${TL(S.rev.borsa)}</b></div><div class="kpi hl"><small>EP satışı</small><b>${TL(S.rev.ep||0)}</b></div><div class="kpi hl"><small>Doping + SMS</small><b>${TL(S.rev.doping+S.rev.sms)}</b></div></div>
-    <div class="dash2"><div class="panel"><div class="panel-h"><h3>Son 7 gün toplam gelir</h3><span class="muted" style="font-size:12px">Komisyon, reklam, borsa, EP, doping, SMS</span></div>
-        <div class="bars">${vals.map(v=>`<div class="bar"><em>${v>=1000?(v/1000).toFixed(1)+'B':Math.round(v)}</em><i style="height:${Math.max(2,v/mx*120)}px"></i></div>`).join('')}</div>
-        <div class="bars-x">${days.map(d=>`<span>${new Date(d).toLocaleDateString('tr-TR',{weekday:'short'})}</span>`).join('')}</div></div>
-      <div class="panel"><div class="panel-h"><h3>Şu an</h3></div><div class="dkpis"><div class="kpi"><small>Havuzdaki para</small><b>${TL(escrowSum())}</b></div><div class="kpi"><small>Bekleyen çekim</small><b>${TL(wdp.reduce((s,w)=>s+w.amount,0))}</b></div><div class="kpi"><small>Borsa kuyruğu</small><b>${exq.length}</b></div><div class="kpi"><small>Çevrimiçi üye</small><b>${S.users.filter(isOnline).length}</b></div></div></div></div>`; }
-  return {desc:`${dd[0].toLocaleUpperCase('tr-TR')+dd.slice(1)}. ${tot?tot+' iş bekliyor; en acil olanlar üstte.':'Şu an bekleyen iş yok.'}`, actions:chips, body:h}; }
+  const h=admOpenHtml(act.map(q=>({id:q.x.id,n:q.n,h:q.x.h,warn:q.x.warn,cls:q.cls,meta:q.x.meta(q.L),
+    age:q.x.warn?'3 kodun altında':`En eski <b>${ageTxt(now()-q.old)}</b> · hedef ${ADM_SLA_TXT(q.x.sla)}`})))+entTodayCard();
+  return {desc:admTodayDesc(tot), actions:chips, body:h}; }
 /* --- Komut araması --- */
 function cmdResults(raw){ const q=sqNorm(raw), ql=String(raw||'').toLocaleLowerCase('tr-TR').trim(); if(!q) return [];
   const G=[]; const add=(t,rows)=>{ if(rows.length) G.push([t,rows.slice(0,5)]); };

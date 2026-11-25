@@ -186,7 +186,10 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     const M = await mk('yonetici');
     await M.goto(B + '/'); await M.waitForSelector('#hdr [data-act=login]'); await login(M, 'Yonetici', APW);
     await M.waitForSelector('.admwrap'); ok('yönetici girişi → Yönetim paneli', /#yonetim/.test(M.url()));
-    await M.waitForSelector('.apage .kpis'); ok('Bugün: üye sayıları sunucudan (3 üye)', /Toplam üye\s*3/.test(await tc(M, '.apage')), await tc(M, '.apage'));
+    await M.waitForSelector('.apage .aop-list, .apage .aop-empty');
+    { const b = await tc(M, '.apage'); const n = await M.evaluate(() => [...document.querySelectorAll('.apage .aop')].map(a => +a.querySelector('.aop-n').textContent.replace(/\D/g, '')));
+      ok('Bugün (0.6.4): yalnız açık işler; e-posta / WhatsApp kuyruğu ve Üyeler bölümü yok', !/Toplam üye|Bugün katılan|Çevrimiçi \(5 dk\)|Askıda|E-posta & WhatsApp kuyruğu|Gönderim bekleyen/.test(b) && !(await M.locator('.apage .kpis').count()), b);
+      ok('Bugün: sayısı 0 olan iş yok; hiç açık iş yoksa tek boş durum', n.every(x => x > 0) && (n.length > 0 || await M.locator('.apage .aop-empty').count() === 1), n.join(',')); }
     ok('Bugün: 2FA kapalı uyarısı', (await txt(M, '.apage')).includes('2 adımlı doğrulama kapalı'));
     ok('panel: hesap değiştirici yok, Çıkış yap var', await M.locator('#admUser, #admUserM').count() === 0 && await M.locator('.asb [data-act=logout]').count() === 1);
     await go(M, 'yonetim/calisan/ekle'); await M.waitForSelector('form[data-form=staffadd]');
@@ -235,7 +238,7 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     ok('çalışan: yetkisiz bölüm adresi açılmaz', !(await txt(T, '.apage')).includes('Çalışan ekle') && !/calisan/.test(await T.evaluate(() => location.hash)));
     const st403 = await T.evaluate(async () => (await fetch('api/v1/admin/staff', { credentials: 'same-origin' })).status);
     ok('çalışan: API yetki denetimi (admin/staff → 403)', st403 === 403);
-    ok('çalışan: Bugün KPI yok (panel yetkisi yok)', !(await (async () => { await go(T, 'yonetim'); await T.waitForTimeout(500); return txt(T, '.apage'); })()).includes('Toplam üye'));
+    ok('çalışan: Bugün yalnız açık işler (KPI / üye bölümü yok)', await (async () => { await go(T, 'yonetim'); await T.waitForTimeout(500); const b = await txt(T, '.apage'); return !b.includes('Toplam üye') && await T.locator('.apage .aop-list, .apage .aop-empty').count() === 1; })());
 
     /* ---------- 14. üye arama, doğrulama, yasaklama → oturum düşer ---------- */
     await go(A, 'hesabim'); await A.click('#app [data-act=tab][data-t=ozet]');
