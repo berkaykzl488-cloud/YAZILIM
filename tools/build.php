@@ -125,6 +125,7 @@ function prod(bool $demo, string $out, bool $zip, bool $upd = false): void {
   $n = copyTree(ROOT . '/app', "$out/app");
   $n += copyTree(ROOT . '/api', "$out/api", fn($r) => preg_match('~^(data/.+|[^/]+\.(md|txt))$~', $r) && !in_array($r, ['data/.htaccess', 'data/index.php'], true));
   $n += copyTree(ROOT . '/kurulum', "$out/kurulum");
+  $n += copyTree(ROOT . '/widget', "$out/widget"); // P7: gömülebilir fiyat widget'ı (/widget/yang/, çerçeveye açık tek bölüm)
   foreach (['storage', 'uploads'] as $d) foreach (['.htaccess', 'index.php'] as $g) { wr("$out/$d/$g", rd(ROOT . "/$d/$g")); $n++; }
   wr("$out/.htaccess", rd(ROOT . '/.htaccess')); $n++;
   $v = appVersion();
@@ -148,7 +149,7 @@ function makeUpdateZip(string $out, string $v): void {
   $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($out, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
   foreach ($it as $f) {
     $rel = str_replace('\\', '/', substr($f->getPathname(), $base));
-    if (!preg_match('~^(index\.php|\.htaccess|assets(/.*)?|app(/.*)?|api(/.*)?|kurulum(/.*)?|uploads(/(\.htaccess|index\.php))?)$~', $rel)) continue;
+    if (!preg_match('~^(index\.php|\.htaccess|assets(/.*)?|app(/.*)?|api(/.*)?|kurulum(/.*)?|widget(/.*)?|uploads(/(\.htaccess|index\.php))?)$~', $rel)) continue;
     if ($rel === 'app/routes/90_test.php') continue;
     if (preg_match('~^api/data/(?!\.htaccess$|index\.php$)~', $rel)) continue;
     if ($f->isDir()) { $z->addEmptyDir($rel); continue; }

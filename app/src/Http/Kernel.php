@@ -105,6 +105,7 @@ final class Kernel
             self::checkOrigin($req, $db);
         }
         Auth::boot($db, $req);
+        \YP\Admin\Maint::guard($req, $db); // P7 bakım modu: üye/ziyaretçi POST'ları 503 (çalışanlar etkilenmez)
         if ($opt['csrf']) {
             Auth::checkCsrf($req);
         }

@@ -1,0 +1,8 @@
+# yangpazar.com · gömülebilir fiyat widget'ı (/widget/yang/?server=<slug>)
+# Sitenin başka sitelerde <iframe> içinde açılabilen TEK bölümü: kök .htaccess'teki X-Frame-Options: DENY burada kaldırılır,
+# yerine Content-Security-Policy frame-ancestors * (PHP gönderir) geçer. Bu klasörde başka çalışan dosya yoktur.
+Options -Indexes
+DirectoryIndex index.php
+<IfModule mod_headers.c>
+  Header always unset X-Frame-Options
+</IfModule>

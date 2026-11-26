@@ -35,6 +35,9 @@ final class Media
             'dispute' => ['private', ['image', 'video'], 60, self::MAX_SIDE, null],
             'support' => ['private', ['image'], 10, self::MAX_SIDE, null],
             'receipt' => ['private', ['image'], 10, self::MAX_SIDE, null],
+            // P7: rehber kapak görseli [seo], ETBİS karekodu [ayar]
+            'post'    => ['public', ['image'], 10, self::MAX_SIDE, 'seo'],
+            'etbis'   => ['public', ['image'], 2, 600, 'ayar'],
         ];
     }
 
