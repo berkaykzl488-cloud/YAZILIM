@@ -232,8 +232,9 @@ return function (Router $r) {
         $rows = $db->all('SELECT o.*, u.name AS uname FROM {outbox} o LEFT JOIN {users} u ON u.id=o.user_id WHERE o.channel=? ORDER BY o.id DESC LIMIT 100', [$ch]);
         $st = ['queued' => 'Kuyrukta', 'sending' => 'Gönderiliyor', 'sent' => 'Gönderildi', 'failed' => 'Gönderilemedi'];
         return ['data' => ['log' => array_map(function ($o) use ($st) {
-            $x = $o['ev'] === 'tfa' ? preg_replace('/\b\d{6}\b/', '••••••', $o['body']) : $o['body'];
-            $sub = $o['ev'] === 'tfa' ? preg_replace('/\b\d{6}\b/', '••••••', $o['subject']) : $o['subject'];
+            $otp = in_array($o['ev'], ['tfa', 'reset'], true); // P6: şifre sıfırlama kodu ve bağlantısı da gizlenir
+            $x = $otp ? preg_replace(['/\b\d{6}\b/', '/[a-f0-9]{64}/'], ['••••••', '••••'], $o['body']) : $o['body'];
+            $sub = $otp ? preg_replace('/\b\d{6}\b/', '••••••', $o['subject']) : $o['subject'];
             return ['id' => 'm' . (int)$o['id'], 'u' => $o['user_id'] ? 'u' . (int)$o['user_id'] : null, 'uname' => $o['uname'], 'to' => $o['to_addr'],
                     'sub' => $sub, 'x' => $x, 't' => (int)$o['created_at'], 'ev' => $o['ev'],
                     'status' => $st[$o['status']] . ($o['last_error'] && $o['status'] !== 'sent' ? ' · ' . $o['last_error'] : ''),

@@ -18,7 +18,7 @@ final class Sms
     public static $factory = null;
 
     const LABEL = 'WhatsApp';
-    const OTP_EVS = ['tfa', 'test'];
+    const OTP_EVS = ['tfa', 'test', 'reset']; // reset: şifre sıfırlama kodu (P6) — kimlik doğrulama şablonuyla
     const MKT_EVS = ['winback'];
 
     public static function providers()

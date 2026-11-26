@@ -5,7 +5,7 @@ if (!defined('YP_APP')) { http_response_code(404); exit; }
 
 /**
  * Bildirim şablonları (ön yüzdeki MAILSUB / MAILBODY / SMSDEF ile aynı metinler; P0b'de gerekenler).
- * Sahip, şablonları P6'da Yönetim › E-posta & WhatsApp › Mesaj şablonları'ndan değiştirebilecek (settings.tpl).
+ * Sahip, şablonları Yönetim › E-posta & WhatsApp › Mesaj şablonları'ndan değiştirir (settings.tpl; P6, routes/37_templates.php).
  * SMS = telefon kanalı (WhatsApp) metinleri: doğrulama kodunda yalnız kod Meta'daki kimlik doğrulama şablonuna geçer;
  * diğerleri WhatsApp bildirim şablonunun {{1}} değişkenine yazılır (baştaki "{site}:" şablonda olduğu için atılır).
  */
@@ -63,15 +63,31 @@ final class Templates
     public static function mail($ev, array $vars)
     {
         $tpl = Settings::get('tpl') ?: [];
-        $sub = isset($tpl['mail'][$ev]['s']) ? $tpl['mail'][$ev]['s'] : (isset(self::MAIL_SUB[$ev]) ? self::MAIL_SUB[$ev] : '{site}');
-        $body = isset($tpl['mail'][$ev]['b']) ? $tpl['mail'][$ev]['b'] : (isset(self::MAIL_BODY[$ev]) ? self::MAIL_BODY[$ev] : "Merhaba {ad},\n\n{mesaj}\n\nİyi oyunlar,\n{site} ekibi");
+        $sub = isset($tpl['mail'][$ev]['s']) ? $tpl['mail'][$ev]['s'] : self::defSub($ev);
+        $body = isset($tpl['mail'][$ev]['b']) ? $tpl['mail'][$ev]['b'] : self::defBody($ev);
         return [self::fill($sub, $vars), self::fill($body, $vars)];
     }
 
     public static function sms($ev, array $vars)
     {
         $tpl = Settings::get('tpl') ?: [];
-        $t = isset($tpl['sms'][$ev]) ? $tpl['sms'][$ev] : (isset(self::SMS[$ev]) ? self::SMS[$ev] : '{site}: {mesaj}');
+        $t = isset($tpl['sms'][$ev]) && !in_array($ev, TplDefaults::WA_FIXED, true) ? $tpl['sms'][$ev] : self::defSms($ev);
         return self::fill($t, $vars);
+    }
+
+    /* P6: varsayılanlar — önce bu sınıfın sabitleri (P0b metinleri), sonra TplDefaults (ön yüz kataloğu) */
+    public static function defSub($ev)
+    {
+        return isset(self::MAIL_SUB[$ev]) ? self::MAIL_SUB[$ev] : (isset(TplDefaults::MAIL_SUB[$ev]) ? TplDefaults::MAIL_SUB[$ev] : '{site}');
+    }
+
+    public static function defBody($ev)
+    {
+        return isset(self::MAIL_BODY[$ev]) ? self::MAIL_BODY[$ev] : (isset(TplDefaults::MAIL_BODY[$ev]) ? TplDefaults::MAIL_BODY[$ev] : "Merhaba {ad},\n\n{mesaj}\n\nİyi oyunlar,\n{site} ekibi");
+    }
+
+    public static function defSms($ev)
+    {
+        return isset(self::SMS[$ev]) ? self::SMS[$ev] : (isset(TplDefaults::SMS[$ev]) ? TplDefaults::SMS[$ev] : '{site}: {mesaj}');
     }
 }
