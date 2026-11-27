@@ -131,7 +131,8 @@ async function otp(to) {
     await openLogin(A);
     let st = await btnStyle(A);
     ok('giriş penceresi: beyaz "Google ile devam et" düğmesi + G logosu + "veya"', st && st.text === 'Google ile devam et' && st.bg === 'rgb(255, 255, 255)' && st.logo && (await txt(A, '#modal')).includes('veya'), JSON.stringify(st));
-    ok('düğme formun en üstünde (şifre alanlarından önce)', await A.evaluate(() => { const f = document.querySelector('#modal form[data-form=loginf]'); return f.firstElementChild.classList.contains('gbtn'); }));
+    ok('düğme "Giriş Yap"ın altında, "veya hesabınla devam et" ayırıcısıyla (P6 giriş penceresi yuvası)', await A.evaluate(() => { const f = document.querySelector('#modal form[data-form=loginf]'); const g = f.querySelector('[data-galt] .gbtn'), s = f.querySelector('button.btn-primary');
+      return !!g && !!s && !!(s.compareDocumentPosition(g) & Node.DOCUMENT_POSITION_FOLLOWING) && /veya hesabınla devam et/i.test(f.querySelector('[data-galt] .gor').textContent); }));
     ok('koyu tema', (await theme(A, 'dark')) === 'dark'); await shotV(A, 'giris-google-koyu');
     ok('gündüz teması: düğme yine beyaz, kenarlıklı', (await theme(A, 'light')) === 'light' && (st = await btnStyle(A)) && st.bg === 'rgb(255, 255, 255)' && st.fg === 'rgb(31, 31, 31)', JSON.stringify(st));
     await shotV(A, 'giris-google-gunduz');

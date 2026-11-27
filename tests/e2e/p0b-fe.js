@@ -100,7 +100,7 @@ async function otp(to) { for (let i = 0; i < 20; i++) { const j = await (await f
     ok('ziyaretçi: site adı sunucudan (Yang Test)', (await txt(G, '#hdr')).includes('Yang Test'));
     const routes = ['home', 'metin2-tr', 'metin2-pvp', 'serverler', 'rehber', 'guvenli', 'borsa', 'metin2-ep', 'cekilis', 'reklam-ver', 'ilan-ver', 'mesajlar', 'hesabim', 'bildirimler', 'yonetim', 'ortaklik', 'yang-fiyatlari', 'ara', 'siparis-S100001', 'ilan-l1', 'yok-boyle-sayfa'];
     for (const r of routes) await go(G, r);
-    await go(G, 'mesajlar'); ok('yakında sayfası (mesajlar; borsa P4\'te açıldı)', (await txt(G, '#app')).includes('Yakında'));
+    await go(G, 'mesajlar'); ok('mesajlar canlı (P6): ziyaretçiye giriş çağrısı, "yakında" yok', (await txt(G, '#app')).includes('giriş yapın') && !(await txt(G, '#app')).includes('Yakında'));
 
     /* ---------- 5. üyelik: Deniz (davet eden) ---------- */
     const A = await mk('deniz');

@@ -208,7 +208,7 @@ api "$J_ADM" PUT admin/settings/sms '{"wa_note_on":true,"wa_note_tpl":"yangpazar
 api "$J_A3" GET boot ""; CS_A3="$(j .data.csrf)"
 api "$J_A3" PUT me/profile '{"password":"Wa-Uye-Sifre-3","current_password":"Wa-Uye-Sifre-2"}' -H "X-CSRF-Token: $CS_A3"
 sleep 1
-chk "bildirim şablonu açık → WhatsApp (Utility: yangpazar_bildirim, tek parametre, site adı tekrarlanmaz)" '[ "$(sq "SELECT status||'\''|'\''||provider FROM yp_outbox WHERE ev='\''pass'\'' AND channel='\''sms'\'' ORDER BY id DESC LIMIT 1")" = "sent|whatsapp" ] && walast | jq -e ".json.template.name==\"yangpazar_bildirim\" and (.json.template.components|length)==1 and .json.template.components[0].parameters[0].text==\"Hesap şifreniz değiştirildi.\"" >/dev/null'
+chk "bildirim şablonu açık → WhatsApp (Utility: yangpazar_bildirim, tek parametre, site adı tekrarlanmaz)" '[ "$(sq "SELECT status||'\''|'\''||provider FROM yp_outbox WHERE ev='\''pass'\'' AND channel='\''sms'\'' ORDER BY id DESC LIMIT 1")" = "sent|whatsapp" ] && walast | jq -e ".json.template.name==\"yangpazar_bildirim\" and (.json.template.components|length)==1 and .json.template.components[0].parameters[0].text==\"Hesap şifreniz değiştirildi. Siz yapmadıysanız hemen bize ulaşın.\"" >/dev/null'
 api "$J_ADM" POST admin/winback '{"ids":["u2"],"tpl":"Seni özledik {ad}","sms":true}' -H "X-CSRF-Token: $CS_ADM"
 chk "geri kazanım WhatsApp'tan: pazarlama şablonu yok → 422 (bildirim şablonu kampanyada kullanılmaz)" '[ "$CODE" = 422 ] && echo "$BODY" | grep -q "pazarlama şablonu"'
 api "$J_ADM" GET "admin/winback?days=30" ""

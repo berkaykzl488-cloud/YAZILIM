@@ -248,8 +248,9 @@ sh('php', ['-r', '$i=imagecreatetruecolor(320,200); imagefill($i,0,0,imagecolora
     ok('yönetici: tüm günler kapalı (saat dışı)', r10 && r10.support && r10.support.open === false);
     await P.reload(); await P.waitForSelector('#mtab [data-mtab=destek]');
     await P.click('#mtab [data-mtab=destek]');
-    ok('saat dışında Destek → Yardım penceresi: WhatsApp hattı ve "şu an kapalı" notu', await until(P, () => !!document.querySelector('#modal #yardim, #modal [id=yardim]') || /Yardım/.test((document.querySelector('#modal') || {}).innerText || ''))
-      && await P.locator('#modal a.sh-wa[href^="https://wa.me/90555"]').count() === 1 && (await txt(P, '#modal')).includes('Canlı destek şu an kapalı') && !(await P.locator('#ls .ls-p').count()));
+    ok('saat dışında Destek → Yardım penceresi: WhatsApp hattı ve "şu an kapalı" notu', await until(P, () => !!document.querySelector('#modal .md.sheet .sh-list'))
+      && await P.locator('#modal a.sh-wa[href^="https://wa.me/90555"]').count() === 1 && (await txt(P, '#modal')).includes('Canlı destek şu an kapalı') && !(await P.locator('#ls .ls-p').count()),
+      await P.evaluate(() => JSON.stringify({ wa: [...document.querySelectorAll('#modal a.sh-wa')].map(a => a.href), ls: document.querySelectorAll('#ls .ls-p').length })));
     await shot(P, 'destek-yardim-390-gece');
     await P.click('#modal [data-act=close]').catch(() => {}); await modalGone(P);
     await pcall(M, 'PUT', 'admin/settings/support', { mode: 'closed' });

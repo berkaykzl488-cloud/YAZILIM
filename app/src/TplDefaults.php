@@ -194,12 +194,6 @@ final class TplDefaults
     1 => 'alışverişten bilet kazandığında',
     2 => 'üyeye',
   ),
-  'direct' => 
-  array (
-    0 => 'Üyeden üyeye ücretli SMS',
-    1 => 'bir üye “SMS ile ulaş” kullandığında',
-    2 => 'mesaj gönderilen üyeye',
-  ),
   'reset' => 
   array (
     0 => 'Şifre sıfırlama kodu',
@@ -267,7 +261,6 @@ final class TplDefaults
   19 => 'pass',
   20 => 'borsa',
   21 => 'call',
-  22 => 'direct',
   23 => 'ad',
   24 => 'raffle',
   25 => 'ticket',
@@ -503,7 +496,6 @@ Bu isteği siz yapmadıysanız bu e-postayı dikkate almayın; şifreniz değiş
   'pass' => '{site}: Hesap şifreniz değiştirildi. Siz yapmadıysanız hemen bize ulaşın.',
   'borsa' => '{site}: Borsa siparişiniz #{no}: {durum}.',
   'call' => '{site} borsa #{no}: {mesaj}',
-  'direct' => '{site} üyesi {gonderen}: {mesaj}',
   'ad' => '{site}: Reklam başvurunuz hakkında: {mesaj}',
   'raffle' => '{site}: Tebrikler! Çekilişi kazandınız. Ayrıntılar hesabınızda.',
   'ticket' => '{site}: Çekiliş biletiniz hesabınıza eklendi.',

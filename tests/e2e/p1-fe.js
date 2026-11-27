@@ -304,7 +304,7 @@ const rlReset = () => { const d = path.join(SITE, 'storage/rl'); if (fs.existsSy
     /* ---------- 14. yakında bölümleri, hatasız gezinme, R9 ---------- */
     const routes = ['home', 'metin2-tr', 'metin2-pvp', `server-${SV}`, `server-${SV}-hepsi`, `server-${SV2}-ep`, 'ilan-' + L1, 'ilan-' + L2, 'ilan-l99999', 'uye-u2', 'uye-u999', 'ara', 'ilan-ver', 'borsa', 'metin2-ep', 'cekilis', 'reklam-ver', 'mesajlar', 'siparis-S100001', 'guvenli', 'rehber', 'hesabim', 'bildirimler'];
     for (const r of routes) await go(Bp, r, 350);
-    await go(Bp, 'mesajlar'); ok('yakında: mesajlar (borsa P4\'te açıldı)', (await txt(Bp, '#app')).includes('Yakında'));
+    await go(Bp, 'mesajlar'); await Bp.waitForTimeout(800); ok('mesajlar canlı (P6): gelen kutusu, "yakında" yok', await Bp.locator('#app .dm-list').count() === 1 && !(await txt(Bp, '#app')).includes('Yakında'));
     const items = await M.evaluate(() => admItems().filter(admVis).flatMap(it => [it.k, ...admSubs(it).map(s => it.k + '/' + s.s)]));
     for (const k of items) await go(M, 'yonetim/' + k, 250);
     let r9 = []; for (const r of ['home', `server-${SV}-item`, 'ilan-' + L1, 'ilan-ver', 'hesabim', 'uye-u2']) { await go(A, r, 400); if (/e-?gider|pusula|VUK|ETTN/i.test(await txt(A))) r9.push(r); }

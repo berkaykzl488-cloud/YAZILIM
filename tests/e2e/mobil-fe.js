@@ -96,6 +96,8 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     await K.context().close();
     /* destek ayarları (herkese açık S.set.whatsapp / S.set.supportHours) */
     sq(`UPDATE yp_settings SET v=json_set(v,'$.whatsapp','0555 123 45 67','$.supportHours','Her gün 09:00 – 24:00') WHERE k='site'`);
+    // P6: canlı destek ayarı "kapalı" → alt çubuktaki Destek Yardım penceresini açar (saat içinde sohbet açılması tests/e2e/p6-fe.js'te)
+    sq(`INSERT INTO yp_settings (k,v,secret,updated_at) VALUES ('support','{"mode":"closed"}',0,0)`);
     ok('site ayarı: WhatsApp ve destek saatleri', sq(`SELECT json_extract(v,'$.supportHours') FROM yp_settings WHERE k='site'`) === 'Her gün 09:00 – 24:00');
 
     /* ---------- 4. yönetici: iki borsa pazarı (PVP 100M, TR 1 Won), operatör ---------- */
@@ -137,7 +139,7 @@ const srv = cp.spawn('php', ['-d', 'display_errors=0', '-d', 'log_errors=1', '-d
     ok('odak çıkınca çubuk geri gelir', (await bar(V)).vis && !await V.evaluate(() => document.documentElement.classList.contains('kbd')));
     await MOB.click(V, '#mtab [data-mtab=destek]'); await V.waitForSelector('#modal [data-sheet=yardim]');
     { const h = await V.evaluate(() => { const a = document.querySelector('#modal a[href^="https://wa.me/"]'); return a ? [a.getAttribute('href'), a.getAttribute('rel'), a.getAttribute('target')] : null; }); const t = await txt(V, '#modal');
-      ok('Destek (P6 öncesi): Yardım penceresi — WhatsApp wa.me/905551234567 (noopener), Güvenli Alışveriş & SSS, destek saatleri, şifre uyarısı', h && h[0] === 'https://wa.me/905551234567' && /noopener/.test(h[1]) && t.includes('Güvenli Alışveriş & SSS') && t.includes('Her gün 09:00 – 24:00') && /asla şifre veya doğrulama kodu istemez/.test(t), JSON.stringify(h) + ' ' + t);
+      ok('Destek (canlı destek kapalı): Yardım penceresi — WhatsApp wa.me/905551234567 (noopener), Güvenli Alışveriş & SSS, destek saatleri, şifre uyarısı', h && h[0] === 'https://wa.me/905551234567' && /noopener/.test(h[1]) && t.includes('Güvenli Alışveriş & SSS') && t.includes('Her gün 09:00 – 24:00') && /asla şifre veya doğrulama kodu istemez/.test(t), JSON.stringify(h) + ' ' + t);
       ok('Yardım penceresinde e-Gider / pusula ifadesi yok', !/e-Gider|pusula/i.test(t)); }
     await shot(V, '03-destek-yardim');
     await V.click('#modal a.sh-i:has-text("Güvenli Alışveriş")'); await modalGone(V); await V.waitForTimeout(500);

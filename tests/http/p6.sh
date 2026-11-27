@@ -155,7 +155,7 @@ chk "aynı görsel ikinci kez eklenemez → 422" '[ "$CODE" = 422 ]'
 
 echo "=== 5. Temsilci sırası, yetkiler, üstlenme, yanıt, not, aktarma ==="
 api "$J_A" POST support/escalate '{}' -H "X-CSRF-Token: $CS_A"
-chk "temsilciye bağlan (asistan bilmediği konuda zaten aktarmıştı): sırada (1.), sıra mesajı" '[ "$(j .data.ticket.status)" = bekliyor ] && [ "$(j .data.ticket.pos)" = 1 ] && j ".data.ticket.msgs[] | select(.f==\"s\") | .x" | grep -q "sıra"'
+chk "temsilciye bağlan (asistan bilmediği konuda zaten aktarmıştı): sırada (1.), sıra mesajı" '[ "$(j .data.ticket.status)" = bekliyor ] && [ "$(j .data.ticket.pos)" = 1 ] && j ".data.ticket.msgs[] | select(.f==\"s\") | .x" | grep -qi "sıra"'
 api "$J_A" POST support/escalate '{}' -H "X-CSRF-Token: $CS_A"
 chk "ikinci kez: sırada kalır, yeni sistem mesajı yok" '[ "$(j .data.ticket.status)" = bekliyor ] && [ "$(sq "SELECT COUNT(*) FROM yp_ticket_messages WHERE ticket_id=${TK#tk} AND f='\''s'\''")" = 1 ]'
 api "$J_DS" GET admin/today ""; Q1="$(j .data.queues.tickets)"; api "$J_IL" GET admin/today ""; Q2="$(j .data.queues.tickets)"

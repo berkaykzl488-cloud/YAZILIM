@@ -67,7 +67,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) retur
 { const q = admQ('mesaj'); if (q) { q.L = () => Array.from({ length: p6Q('flagged') }, () => ({ t: now(), u: '', seen: false })); q.meta = L => `${L.length} mesaj incelenmedi`; } }
 
 /* ================= canlı destek (üye) ================= */
-const p6TkSigOf = t => t ? JSON.stringify([t.id, t.status, t.pos, t.rated, t.agent, t.msgs.length, (t.msgs[t.msgs.length - 1] || {}).id]) : String(t);
+var p6TkSigOf = t => t ? JSON.stringify([t.id, t.status, t.pos, t.rated, t.agent, t.msgs.length, (t.msgs[t.msgs.length - 1] || {}).id]) : String(t);
 function p6TkApply(d, delta) { if (!d) return; if (d.support) p6SupSet(d.support); (d.agents || []).forEach(apiUpsertUser);
   const t = d.ticket;
   if (!t) P6.tk = null;
@@ -83,7 +83,7 @@ function p6TkLoop() { clearTimeout(P6.tkPoll); P6.tkPoll = null; if (!ui.ls || !
   P6.tkPoll = setTimeout(async () => { P6.tkPoll = null; try { await p6TkFetch(false); P6.tkBo = 0; } catch (e) { if (e && e.http === 429) P6.tkBo = Math.min(60000, (P6.tkBo || 5000) * 2); if (e && e.http === 401) return; } p6TkLoop(); }, p6Iv() + (P6.tkBo || 0)); }
 function p6TkStart() { if (!me()) return; P6.tkLoading = P6.tk === undefined; if (P6.tkLoading) renderLS();
   p6TkFetch(true).catch(() => { }).finally(() => { P6.tkLoading = false; p6Keep(renderLS); p6TkLoop(); }); }
-const p6Wa = () => { let wa = String(S.set.whatsapp || '').replace(/\D/g, ''); if (/^0\d{10}$/.test(wa)) wa = '90' + wa.slice(1); else if (/^5\d{9}$/.test(wa)) wa = '90' + wa; return wa; };
+var p6Wa = () => { let wa = String(S.set.whatsapp || '').replace(/\D/g, ''); if (/^0\d{10}$/.test(wa)) wa = '90' + wa.slice(1); else if (/^5\d{9}$/.test(wa)) wa = '90' + wa; return wa; };
 function p6LsHead(t) { const open = supportOpen(), s = S.support;
   return `<div class="ls-h"><span class="av" style="background:var(--accent);color:var(--accent-ink)">${ICO.han.replace('<svg', '<svg style="width:20px"')}</span><div style="min-width:0"><b>Canlı Destek</b><small class="${open ? '' : 'off'}">${open ? `Temsilciler çevrimiçi · ort. yanıt ${esc(s.wait || '2 dk')}` : `Temsilciler ${nextOpen()} dönüyor · asistan yanıtlıyor`}</small><small class="hrs">${hoursTxt()}${t ? ' · Talep #DST-' + t.no : ''}</small></div><button class="md-x" data-act="ls-close" aria-label="Kapat">×</button></div>
     <div class="ls-trust">${ICO.shield}<span>Görüşmeniz kayıt altındadır. Ekibimiz sizden asla şifre, doğrulama kodu veya kart bilgisi istemez.</span></div>`; }
@@ -168,7 +168,7 @@ setTimeout(function w(n) { if (API.booting && n < 200) return setTimeout(() => w
     return o; }; }
 
 /* ================= yönetim: canlı destek [destek] ================= */
-const p6AdmF = P => ['aktif', 'kapali', 'hepsi'].includes(P.f) ? P.f : (ui.tkf && ['aktif', 'kapali', 'hepsi'].includes(ui.tkf) ? ui.tkf : 'aktif');
+var p6AdmF = P => ['aktif', 'kapali', 'hepsi'].includes(P.f) ? P.f : (ui.tkf && ['aktif', 'kapali', 'hepsi'].includes(ui.tkf) ? ui.tkf : 'aktif');
 function p6AdmListLoad(F, quiet) { if (P6.adm.loading['l:' + F]) return P6.adm.loading['l:' + F];
   return (P6.adm.loading['l:' + F] = call('GET', 'admin/tickets?f=' + F, null, { quiet: true }).then(j => { const d = j.data || {}; (d.users || []).forEach(apiUpsertUser);
     if (d.support) p6SupSet(d.support); p2QSet('tickets', d.waiting || 0);
@@ -209,7 +209,7 @@ function p6AdmTalepler(P) { const F = p6AdmF(P); ui.tkf = F; if (P.id && !ui.tk)
       <div class="chat" id="tkChat" style="flex:1">${D && D.ticket ? sel.msgs.map(m => msgHtml(m, U, true)).join('') : '<div class="msg sys">Yükleniyor…</div>'}</div>
       <form class="stack" data-form="tkreply" data-id="${esc(sel.id)}" style="padding:10px 14px;border-top:1px solid var(--line);gap:8px"><div class="hstack"><select class="inp" style="width:auto;flex:1;min-width:140px" data-change="canned" aria-label="Hazır yanıt"><option value="">Hazır yanıt seç…</option>${(S.support.canned || []).map((c, i) => `<option value="${i}">${esc(c[0])}</option>`).join('')}</select><label class="chk" for="tknote"><input type="checkbox" id="tknote"> İç not</label></div><div class="hstack" style="flex-wrap:nowrap"><input class="inp" id="tkmsg" placeholder="${sel.status === 'kapandı' ? 'Görüşme kapalı · yalnız iç not' : 'Yanıt yazın…'}" autocomplete="off" style="flex:1;min-width:0" maxlength="2000"><button class="btn btn-primary">Gönder</button></div></form>`
     : emptyBox('Destek talebi yok', 'Canlı destekten gelen mesajlar burada görünür.')}</div>`;
-  const ctx = `<aside class="ctxp">${U ? `<div class="eyebrow">Üye bilgisi</div><div class="sum"><div><span class="muted">Ad soyad</span><b>${esc(fullName(U) || '-')}</b></div><div><span class="muted">Telefon</span><b class="mono">${esc(U.tel || '-')}</b></div><div><span class="muted">Bakiye</span><b class="mono">${U.bal != null ? TL(avail(U)) : '-'}</b></div><div><span class="muted">Seviye</span>${vipBadge(U)}</div></div>
+  const ctx = `<aside class="ctxp">${U ? `<div class="eyebrow">Üye bilgisi</div>${can('uye') ? `<div class="sum"><div><span class="muted">Ad soyad</span><b>${esc(fullName(U) || '-')}</b></div><div><span class="muted">Telefon</span><b class="mono">${esc(U.tel || '-')}</b></div><div><span class="muted">Bakiye</span><b class="mono">${TL(avail(U))}</b></div><div><span class="muted">Seviye</span>${vipBadge(U)}</div></div>` : `<div class="sum"><div><span class="muted">Üyelik</span><b>${esc(U.joined || '-')}</b></div><div><span class="muted">Seviye</span>${vipBadge(U)}</div></div><span class="muted" style="font-size:12px">Ad, telefon ve bakiye için "Üyeler" yetkisi gerekir.</span>`}
       <div class="eyebrow">Son siparişleri</div>${(D && D.orders || []).map(o => `<a href="#siparis-${esc(o.id)}" class="ctxrow"><span>#${esc(o.id)} · ${esc(o.mine)}</span><span class="pill p-${esc(o.status)}">${esc(ST[o.status] || o.status)}</span></a>`).join('') || '<span class="muted" style="font-size:12px">Yok</span>'}
       <div class="hstack">${can('uye') ? `<button class="btn btn-sm" data-act="user-open" data-id="${esc(U.id)}">Üye kartı</button>` : ''}</div>` : ''}</aside>`;
   return { actions, body: `${rateBox}<div class="panel tk3 ${ui.tk && sel ? 'tk-open' : ''}">${list}${main}${ctx}</div>` }; }
@@ -234,7 +234,7 @@ function p6TplLoad() { if (P6.tplLoad) return; P6.tplLoad = true;
 function p6WaPrev(x, fixed) { const ch = (P6.tpl && P6.tpl.channels) || {};
   if (fixed) return `<div class="phone wa"><small>WhatsApp · ${esc(ch.waOtpTpl || 'yangpazar_kod')} (kimlik doğrulama)</small><p><b>482913</b> doğrulama kodunuzdur. Güvenliğiniz için bu kodu kimseyle paylaşmayın.</p><small>[ Kodu kopyala ]</small></div><div class="muted" style="font-size:11.5px;margin-top:4px">Metni Meta belirler; yalnız kod değişir.</div>`;
   const m = smsFill(x || ''); return `<div class="phone wa"><small>WhatsApp · ${esc(ch.waNoteTpl || 'yangpazar_bildirim')} (bildirim)</small><p>${esc(m) || '<span class="muted">Mesaj boş</span>'}</p></div><div class="muted" style="font-size:11.5px;margin-top:4px">${m.length} / 900 karakter · Meta şablonunun {{1}} değişkeni</div>`; }
-const p6MailVars = { link: (S && S.set && S.set.siteUrl ? String(S.set.siteUrl).replace(/\/$/, '') : location.origin) + '/#sifre-…' };
+var p6MailVars = { link: (S && S.set && S.set.siteUrl ? String(S.set.siteUrl).replace(/\/$/, '') : location.origin) + '/#sifre-…' };
 function p6TplPage() { const d = P6.tpl; if (!d) { p6TplLoad(); return { body: pLoading() }; } if (d.err) return { body: p6ErrBox(d) };
   const L = d.templates || []; if (!L.length) return { body: emptyBox('Şablon yok', '') };
   const k = L.some(t => t.k === ui.tplk) ? ui.tplk : L[0].k; const T = L.find(t => t.k === k), ch = d.channels || {};
