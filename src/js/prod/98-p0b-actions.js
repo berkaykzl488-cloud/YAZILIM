@@ -11,10 +11,10 @@ const pAfterAuth = async (j) => { if(j&&j.data&&j.data.csrf) API.csrf=j.data.csr
 
 /* ---- giriş, üyelik, 2FA, çıkış ---- */
 pF('loginf',async()=>{ const login=v_('lg_u').trim(), password=v_('lg_p');
-  try{ const j=await call('POST','auth/login',{login,password,remember:true},{quiet:true,silent:true});
+  try{ const rem=$('#lg_rem'); const j=await call('POST','auth/login',{login,password,remember:rem?!!rem.checked:true},{quiet:true,silent:true}); // P6: Beni hatırla
     if(j.tfa){ j.tfa.purpose='login'; return pTfa(j.tfa); }
     toast(j.msg||'Hoş geldiniz!'); await pAfterAuth(j); }
-  catch(e){ mLogin(apiErr(e)); const i=$('#lg_u'); if(i) i.value=login; } });
+  catch(e){ const rem=$('#lg_rem'), rv=rem?rem.checked:true; mLogin(apiErr(e)); const i=$('#lg_u'); if(i) i.value=login; const r2=$('#lg_rem'); if(r2) r2.checked=rv; } });
 pF('registerf',async()=>{ const b={name:v_('rg_u').trim(),email:v_('rg_e').trim(),tel:v_('rg_t').trim(),ad:v_('rg_ad').trim(),soyad:v_('rg_sy').trim(),password:v_('rg_p'),ref:(v_('rg_ref').trim()||P_REF()).toUpperCase(),remember:true};
   const keep=()=>{ [['rg_u',b.name],['rg_e',b.email],['rg_t',b.tel],['rg_ad',b.ad],['rg_sy',b.soyad]].forEach(([id,v])=>{ const i=$('#'+id); if(i) i.value=v; }); const r=$('#rg_ref'); if(r) r.value=b.ref||''; const k=$('#rg_k'); if(k) k.checked=true; };
   if(!b.ref) delete b.ref;

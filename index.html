@@ -452,6 +452,38 @@ footer a{display:block;padding:3px 0} footer a:hover{color:var(--hdr-accent)}
 .md-h h3{font-size:21px;text-transform:uppercase}
 .md-x{border:0;background:var(--surface-2);width:30px;height:30px;border-radius:50%;font-size:17px;line-height:1}
 .md-b{padding:16px;display:flex;flex-direction:column;gap:12px}
+/* P6: Giriş Yap / Kayıt Ol — tek pencere, iki sekme (71-modals.js authShell) */
+.md.auth{width:min(460px,100%)}
+.auth-h{display:flex;align-items:stretch;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:14px 14px 0 0}
+.auth-tabs{display:flex;flex:1;justify-content:center;gap:2px;padding-left:42px;min-width:0}
+.auth-tabs button{border:0;background:none;padding:16px 14px 12px;font-family:var(--f-display);font-size:19px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.auth-tabs button.on{color:var(--fg);border-bottom-color:var(--accent)}
+.auth-tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.auth-h .md-x{align-self:center;margin:0 12px 0 0;flex:none}
+.md.auth .md-b{padding:18px 18px 20px}
+.auth-f{gap:14px}
+.auth-f .fld>label{font-weight:600}
+.inp-ic,.pw{position:relative}
+.inp-ic .inp,.pw .inp{padding-right:48px;min-height:46px}
+.inp-ic .ic{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;pointer-events:none}
+.inp-ic .ic svg,.pw-eye svg{width:20px;height:20px}
+.pw-eye{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:var(--surface-2);color:var(--accent);display:grid;place-items:center;cursor:pointer;padding:0}
+.pw-eye[aria-pressed="true"]{color:var(--fg)}
+.pw-eye:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.auth-row{display:flex;justify-content:flex-end;margin-top:-6px}
+.lnk{border:0;background:none;padding:2px 0;color:var(--accent);font-weight:700;cursor:pointer;font-size:inherit}
+.lnk:hover{text-decoration:underline}
+.auth-rem{font-size:14px;flex-wrap:wrap}
+.auth-go{min-height:48px;font-size:17px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--f-display);font-weight:700}
+.authalt{display:grid;gap:12px}.authalt:empty{display:none}
+.authalt .gor{text-transform:uppercase;letter-spacing:.04em;font-size:11.5px}
+.auth-sw{text-align:center;font-size:13px}
+.auth-legal{margin:0;text-align:center;font-size:12px;color:var(--muted);line-height:1.55}
+.auth-legal a{text-decoration:underline}
+.auth-back{margin-bottom:-4px}
+.auth-t{font-size:20px;margin:0;text-transform:none}
+.auth-p{margin:0;font-size:13px;line-height:1.5}
+@media (max-width:520px){.auth-tabs button{font-size:17px;padding:14px 10px 11px}.auth-tabs{padding-left:34px}.md.auth .md-b{padding:16px 14px 18px}}
 .pmeth{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .pmeth label{border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer;font-size:12px;color:var(--muted)}
 .pmeth label b{display:block;color:var(--fg);font-size:13.5px}
@@ -4189,7 +4221,7 @@ const hsTodo = () => HSD.todo(me()) || {};
 /* ---------- hesap menüsü: gruplar ---------- */
 const P_ACC_NAV = [
   { g: 'Yönetim', only: () => isPanel(), items: [{ href: 'yonetim', l: 'Yönetim paneli', ic: 'yonetim', cls: 'hs-adm' }] },
-  { g: 'Genel', items: [{ t: 'ozet', l: 'Özetim', ic: 'home' }, { href: 'bildirimler', l: 'Bildirimlerim', ic: 'bildirimler', b: u => S.notifs.filter(n => n.u === u.id && !n.read).length, bl: 'okunmamış bildirim' }] },
+  { g: 'Genel', items: [{ t: 'ozet', l: 'Özetim', ic: 'home' }, { href: 'bildirimler', l: 'Bildirimlerim', ic: 'bildirimler', b: u => S.notifs.filter(n => n.u === u.id && !n.read).length, bl: 'okunmamış bildirim' }, { href: 'mesajlar', l: 'Mesajlarım', ic: 'mesajlar', b: u => unreadDM(u.id), bl: 'okunmamış konuşma' }] },
   { g: 'Alışlarım', items: [{ t: 'alis', l: 'Siparişlerim', ic: 'siparis', b: () => hsTodo().buy, bl: 'onay bekleyen sipariş' }, { t: 'borsa', s: 'al', l: 'Borsa alımlarım', ic: 'borsa', b: () => (+hsTodo().exCall || 0) + (+hsTodo().exInfo || 0), bl: 'borsa işi bekliyor' }, { t: 'ep', l: 'EP kodlarım', ic: 'metin2-ep' }] },
   { g: 'Satışlarım', items: [{ t: 'ilan', l: 'İlanlarım', ic: 'metin2-tr' }, { t: 'satis', l: 'Satışlarım', ic: 'pazar', b: () => hsTodo().sell, bl: 'teslimat bekleyen satış' }, { t: 'borsa', s: 'sat', l: 'Borsa satış emirlerim', ic: 'borsa' }, { href: 'ilan-ver', l: '+ İlan ver', ic: 'ilan-ver' }, { t: 'reklam', l: 'Reklamlarım', ic: 'reklam-ver' }] },
   { g: 'Cüzdan', items: [{ act: 'deposit', l: 'Bakiye yükle', ic: 'ilan-ver' }, { t: 'cek', l: 'Para çek', ic: 'cikis' }, { t: 'hareket', l: 'Bakiye hareketleri', ic: 'rehber' }, { t: 'banka', l: 'Banka hesaplarım', ic: 'guvenli' }] },
@@ -5473,16 +5505,46 @@ let popTimer=null;
 function modal(html,locked){ $('#modal').innerHTML=`<div class="mb" data-lock="${locked?1:0}">${html}</div>`; hydrateMedia(); }
 function closeModal(){ $('#modal').innerHTML=''; if(popTimer){clearInterval(popTimer);popTimer=null;} }
 function mWrap(title,body){return `<div class="md" role="dialog" aria-label="${esc(title)}"><div class="md-h"><h3>${title}</h3><button class="md-x" data-act="close" aria-label="Kapat">×</button></div><div class="md-b">${body}</div></div>`}
+/* ---- Giriş Yap / Kayıt Ol: tek pencere, iki sekme (P6). Alan kimlikleri ve kurallar aynı (lg_*, rg_*); "Google ile devam et"
+   düğmesi formdaki [data-galt] yerine eklenir (prod/98g-google.js). Şifre göz düğmesi: data-act="pw-eye" (85-auth-act.js). ---- */
+const AUTH_ICO={eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  off:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.9 9.9 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+  at:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>'};
+const pwFld = (id,label,ac,extra) => `<div class="fld"><label for="${id}">${label}</label><div class="pw"><input class="inp" id="${id}" type="password" autocomplete="${ac}" required ${extra||''}><button type="button" class="pw-eye" data-act="pw-eye" data-for="${id}" aria-label="Şifreyi göster" aria-pressed="false" title="Şifreyi göster">${AUTH_ICO.eye}</button></div></div>`;
+const authLegal = () => `<p class="auth-legal">Devam ederek <a href="#sayfa-mesafeli" data-act="close">Mesafeli Satış Sözleşmesi</a>'ni ve kişisel verilerinin <a href="#sayfa-kvkk" data-act="close">KVKK Aydınlatma Metni</a>'ne göre işlenmesini kabul etmiş olursun.</p>`;
+function authShell(tab,body){ return `<div class="md auth" role="dialog" aria-label="${tab==='register'?'Kayıt Ol':'Giriş Yap'}"><div class="auth-h"><div class="auth-tabs" role="tablist">
+  <button type="button" role="tab" class="${tab==='login'?'on':''}" aria-selected="${tab==='login'}" data-act="login">Giriş Yap</button><button type="button" role="tab" class="${tab==='register'?'on':''}" aria-selected="${tab==='register'}" data-act="register">Kayıt Ol</button></div>
+  <button class="md-x" data-act="close" aria-label="Kapat">×</button></div><div class="md-b">${body}</div></div>`; }
 function mLogin(err){ const desc={u1:'Satıcı · teslim etmesi gereken siparişi var',u2:'Alıcı · teslim onayı bekleyen siparişi var',u3:'Satıcı · Elmas VIP',u4:'Satıcı · itiraz açmış alıcı',u5:'EP ve Won satıcısı',st1:'Çalışan · sipariş, borsa, destek, ilan yetkisi',admin:'Yönetici · tüm yetkiler'};
-  modal(mWrap('Giriş Yap',`<form class="stack" data-form="loginf"><div class="fld"><label for="lg_u">Kullanıcı adı veya e-posta</label><input class="inp" id="lg_u" autocomplete="username" required></div><div class="fld"><label for="lg_p">Şifre</label><input class="inp" id="lg_p" type="password" autocomplete="current-password" required></div>${err?`<div class="note note-bad">${esc(err)}</div>`:''}<button class="btn btn-primary">Giriş Yap</button><button type="button" class="btn btn-sm" data-act="register">Hesabın yok mu? Üye ol</button></form>
+  modal(authShell('login',`<form class="stack auth-f" data-form="loginf"><div class="fld"><label for="lg_u">Kullanıcı adı veya e-posta</label><div class="inp-ic"><input class="inp" id="lg_u" autocomplete="username" required placeholder="ornek@eposta.com" autocapitalize="none" spellcheck="false"><span class="ic">${AUTH_ICO.at}</span></div></div>
+  ${pwFld('lg_p','Şifre','current-password')}
+  <div class="auth-row"><button type="button" class="lnk" data-act="auth-forgot">Şifremi unuttum</button></div>
+  <label class="chk auth-rem" for="lg_rem"><input type="checkbox" id="lg_rem" checked> Beni hatırla <span class="muted">· 30 gün açık kalsın</span></label>
+  ${err?`<div class="note note-bad">${esc(err)}</div>`:''}<button class="btn btn-primary btn-block auth-go">Giriş Yap</button><div class="authalt" data-galt></div>
+  <span class="muted auth-sw">Hesabın yok mu? <button type="button" class="lnk" data-act="register">Hemen kayıt ol</button></span>${authLegal()}</form>
   ${S.set.demoMode===false?'':`<div class="eyebrow">Demo hesaplar (şifre: 1234)</div>`}<div class="acclist" ${S.set.demoMode===false?'hidden':''}>${S.users.map(u=>`<button data-act="as" data-id="${u.id}">${av(u)}<span><b>${esc(u.name)}</b><small>${desc[u.id]||esc(fullName(u))}</small></span></button>`).join('')}</div>`)); }
-function mRegister(err){ modal(mWrap('Üye Ol',`<form class="stack" data-form="registerf"><div class="row2"><div class="fld"><label for="rg_ad">Ad</label><input class="inp" id="rg_ad" required></div><div class="fld"><label for="rg_sy">Soyad</label><input class="inp" id="rg_sy" required></div></div>
-  <div class="fld"><label for="rg_u">Kullanıcı adı (sitede görünür)</label><input class="inp" id="rg_u" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_ÇĞİÖŞÜçğıöşü]+"></div>
-  <div class="row2"><div class="fld"><label for="rg_t">Cep telefonu</label><input class="inp mono" id="rg_t" required placeholder="05xx xxx xx xx"></div><div class="fld"><label for="rg_e">E-posta</label><input class="inp" id="rg_e" type="email" required></div></div>
-  <div class="fld"><label for="rg_p">Şifre</label><input class="inp" id="rg_p" type="password" required minlength="4" autocomplete="new-password"></div>
+function mRegister(err){ modal(authShell('register',`<form class="stack auth-f" data-form="registerf"><div class="row2"><div class="fld"><label for="rg_ad">Ad</label><input class="inp" id="rg_ad" required autocomplete="given-name"></div><div class="fld"><label for="rg_sy">Soyad</label><input class="inp" id="rg_sy" required autocomplete="family-name"></div></div>
+  <div class="fld"><label for="rg_u">Kullanıcı adı (sitede görünür)</label><input class="inp" id="rg_u" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_ÇĞİÖŞÜçğıöşü]+" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+  <div class="row2"><div class="fld"><label for="rg_t">Cep telefonu</label><input class="inp mono" id="rg_t" required placeholder="05xx xxx xx xx" inputmode="tel" autocomplete="tel"></div><div class="fld"><label for="rg_e">E-posta</label><input class="inp" id="rg_e" type="email" required autocomplete="email" placeholder="ornek@eposta.com"></div></div>
+  ${pwFld('rg_p','Şifre','new-password','minlength="4"')}
   ${S.set.refOn?(refPending()?`<div class="note note-ok refnote">🎁 <span><b>${esc(refUser(refPending()).name)}</b> seni davet etti. Davet kodun otomatik eklendi; ilk alışverişinde ${TL(S.set.refFriend)} hediye bakiye kazanırsın.</span><input type="hidden" id="rg_ref" value="${refPending()}"></div>`:`<div class="fld"><label for="rg_ref">Davet kodu (isteğe bağlı)</label><input class="inp mono" id="rg_ref" placeholder="ARKADAS26" style="text-transform:uppercase"></div>`):''}
   <label class="chk" for="rg_k"><input type="checkbox" id="rg_k" required> KVKK aydınlatma metnini ve üyelik sözleşmesini okudum.</label>
-  ${err?`<div class="note note-bad">${esc(err)}</div>`:''}<button class="btn btn-primary">Üye ol</button><span class="muted" style="font-size:12px">Ad, soyad ve telefonunuz diğer üyelere gösterilmez; para çekme ve SMS bildirimleri için kullanılır.</span></form>`)); }
+  ${err?`<div class="note note-bad">${esc(err)}</div>`:''}<button class="btn btn-primary btn-block auth-go">Kayıt Ol</button><div class="authalt" data-galt></div><span class="muted" style="font-size:12px">Ad, soyad ve telefonunuz diğer üyelere gösterilmez; para çekme ve SMS bildirimleri için kullanılır.</span>
+  <span class="muted auth-sw">Zaten üye misin? <button type="button" class="lnk" data-act="login">Giriş yap</button></span></form>`)); }
+/* Şifremi unuttum: 1) kullanıcı adı / e-posta → kod gönder (yanıt her zaman aynı) 2) kod + yeni şifre. Bağlantıyla gelinirse (token) yalnız yeni şifre. */
+function mForgot(o){ o=o||{}; const st=o.step||1;
+  const body = st===1 ? `<form class="stack auth-f" data-form="forgotf"><div class="auth-back"><button type="button" class="lnk" data-act="login">← Girişe dön</button></div><h3 class="auth-t">Şifremi unuttum</h3>
+    <p class="muted auth-p">Kullanıcı adınızı veya e-posta adresinizi yazın. Hesabınız varsa e-postanıza (e-posta yoksa WhatsApp'ınıza) 6 haneli bir kod ve sıfırlama bağlantısı göndereceğiz.</p>
+    <div class="fld"><label for="fg_u">Kullanıcı adı veya e-posta</label><div class="inp-ic"><input class="inp" id="fg_u" autocomplete="username" required value="${esc(o.login||'')}" autocapitalize="none" spellcheck="false" placeholder="ornek@eposta.com"><span class="ic">${AUTH_ICO.at}</span></div></div>
+    ${o.err?`<div class="note note-bad">${esc(o.err)}</div>`:''}<button class="btn btn-primary btn-block auth-go">Kod gönder</button>
+    <p class="auth-legal">Ekibimiz sizden asla şifre veya doğrulama kodu istemez. Kodu kimseyle paylaşmayın.</p></form>`
+    : `<form class="stack auth-f" data-form="resetf"${o.token?` data-token="${esc(o.token)}"`:''}><div class="auth-back"><button type="button" class="lnk" data-act="${o.token?'login':'auth-forgot'}">← ${o.token?'Girişe dön':'Geri'}</button></div><h3 class="auth-t">Yeni şifre belirleyin</h3>
+    ${o.msg?`<div class="note note-ok">${esc(o.msg)}</div>`:''}
+    ${o.token?'<p class="muted auth-p">Bağlantı doğrulandı. Yeni şifrenizi yazın; tüm cihazlardaki oturumlarınız kapanır.</p>':`<input type="hidden" id="rs_u" value="${esc(o.login||'')}"><div class="fld"><label for="rs_c">6 haneli kod</label><input class="inp mono tfacode" id="rs_c" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div>`}
+    ${pwFld('rs_p','Yeni şifre','new-password','minlength="8"')}<span class="muted" style="font-size:12px;margin-top:-6px">En az 8 karakter. Şifre değişince tüm cihazlardaki oturumlarınız kapanır.</span>
+    ${o.err?`<div class="note note-bad">${esc(o.err)}</div>`:''}<button class="btn btn-primary btn-block auth-go">Şifremi değiştir</button>
+    ${o.token?'':`<span class="muted auth-sw">Kod gelmedi mi? <button type="button" class="lnk" data-act="auth-forgot" data-login="${esc(o.login||'')}">Yeniden iste</button></span>`}</form>`;
+  modal(authShell('login',body)); setTimeout(()=>{ const i=$(st===1?'#fg_u':(o.token?'#rs_p':'#rs_c')); if(i&&!isTouchUI()) i.focus(); },50); }
 const DEPTABS=[['kart','Kredi / Banka Kartı'],['eft','Havale / EFT'],['cuzdan','Cüzdan & Kripto']];
 const EFTBANKS=[['ziraat','Ziraat Bankası'],['isbank','İş Bankası'],['akbank','Akbank'],['yapikredi','Yapı Kredi'],['vakifbank','VakıfBank'],['halkbank','Halkbank'],['denizbank','DenizBank'],['teb','TEB'],['ptt','PTT']];
 function mDeposit(tab){ const u=me(); if(!u) return mLogin(); if(typeof tab==='string') ui.depTab=tab;
@@ -9187,6 +9249,26 @@ if (!ACT['p2-wd']) ACT['p2-wd'] = () => { ui.tab = 'cek'; if (route() !== 'hesab
 /* menüdeki sekme / çıkış / yükleme: önce menü kapanır (yakalama aşaması; eylem kendi yolunda sürer) */
 document.addEventListener('click', e => { const el = e.target.closest && e.target.closest('#modal [data-hsmenu] [data-act]'); if (!el) return;
   if (['tab', 'logout'].includes(el.dataset.act)) closeModal(); }, true);
+/* ================== Giriş penceresi: şifre göz düğmesi, Şifremi unuttum (demo ve prod ortak; P6) ==================
+   pw-eye: şifre alanını göster/gizle (aria-pressed). auth-forgot: pencerede "Şifremi unuttum" adımına geçer.
+   Demo: kod e-postayla gitmez; ekranda demo kodu (123456) yazar ve yerel hesabın şifresini değiştirir.
+   Canlı sitede forgotf / resetf prod/98p6-actions.js'te sunucuya (auth/forgot, auth/reset) bağlanır.                    */
+Object.assign(ACT, {
+  'pw-eye': (d, e) => { const i = $('#' + d.for); const b = e && e.target && e.target.closest ? e.target.closest('.pw-eye') : null; if (!i || !b) return;
+    const show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.setAttribute('aria-pressed', show ? 'true' : 'false');
+    const l = show ? 'Şifreyi gizle' : 'Şifreyi göster'; b.setAttribute('aria-label', l); b.title = l; b.innerHTML = show ? AUTH_ICO.off : AUTH_ICO.eye;
+    try { i.focus({ preventScroll: true }); const n = i.value.length; i.setSelectionRange(n, n); } catch (x) { } },
+  'auth-forgot': (d) => { const v = (d && d.login) || (($('#lg_u') || {}).value || '').trim(); mForgot({ step: 1, login: v }); }
+});
+Object.assign(FORM, {
+  forgotf: () => { const login = v_('fg_u').trim(); if (!login) return mForgot({ step: 1, err: 'Kullanıcı adınızı veya e-posta adresinizi yazın.' });
+    mForgot({ step: 2, login, msg: 'Bu bilgilerle kayıtlı bir hesap varsa şifre sıfırlama kodu gönderildi. (Demo: kod 123456)' }); },
+  resetf: (f) => { const login = v_('rs_u').trim().toLocaleLowerCase('tr-TR'), code = v_('rs_c').replace(/\D/g, ''), p = v_('rs_p');
+    if (p.length < 8) return mForgot({ step: 2, login, err: 'Şifre en az 8 karakter olmalı.' });
+    const u = S.users.find(x => x.name.toLocaleLowerCase('tr-TR') === login || (x.email || '').toLowerCase() === login);
+    if (!u || code !== '123456') return mForgot({ step: 2, login, err: 'Kod geçersiz veya süresi dolmuş. Lütfen yeni kod isteyin.' });
+    u.pass = p; save(); toast('Şifreniz değiştirildi. Yeni şifrenizle giriş yapabilirsiniz.'); mLogin(); const i = $('#lg_u'); if (i) i.value = u.name; }
+});
 /* ================== yönlendirme ================== */
 /* ================== SEO, rehber ve paylaşım ================== */
 const slugify = s => String(s||'').toLocaleLowerCase('tr-TR').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/İ/g,'i').replace(/i\u0307/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u').replace(/â/g,'a').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||'sayfa';

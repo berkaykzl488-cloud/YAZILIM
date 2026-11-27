@@ -448,6 +448,38 @@ footer a{display:block;padding:3px 0} footer a:hover{color:var(--hdr-accent)}
 .md-h h3{font-size:21px;text-transform:uppercase}
 .md-x{border:0;background:var(--surface-2);width:30px;height:30px;border-radius:50%;font-size:17px;line-height:1}
 .md-b{padding:16px;display:flex;flex-direction:column;gap:12px}
+/* P6: Giriş Yap / Kayıt Ol — tek pencere, iki sekme (71-modals.js authShell) */
+.md.auth{width:min(460px,100%)}
+.auth-h{display:flex;align-items:stretch;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:14px 14px 0 0}
+.auth-tabs{display:flex;flex:1;justify-content:center;gap:2px;padding-left:42px;min-width:0}
+.auth-tabs button{border:0;background:none;padding:16px 14px 12px;font-family:var(--f-display);font-size:19px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.auth-tabs button.on{color:var(--fg);border-bottom-color:var(--accent)}
+.auth-tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.auth-h .md-x{align-self:center;margin:0 12px 0 0;flex:none}
+.md.auth .md-b{padding:18px 18px 20px}
+.auth-f{gap:14px}
+.auth-f .fld>label{font-weight:600}
+.inp-ic,.pw{position:relative}
+.inp-ic .inp,.pw .inp{padding-right:48px;min-height:46px}
+.inp-ic .ic{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;pointer-events:none}
+.inp-ic .ic svg,.pw-eye svg{width:20px;height:20px}
+.pw-eye{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:var(--surface-2);color:var(--accent);display:grid;place-items:center;cursor:pointer;padding:0}
+.pw-eye[aria-pressed="true"]{color:var(--fg)}
+.pw-eye:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.auth-row{display:flex;justify-content:flex-end;margin-top:-6px}
+.lnk{border:0;background:none;padding:2px 0;color:var(--accent);font-weight:700;cursor:pointer;font-size:inherit}
+.lnk:hover{text-decoration:underline}
+.auth-rem{font-size:14px;flex-wrap:wrap}
+.auth-go{min-height:48px;font-size:17px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--f-display);font-weight:700}
+.authalt{display:grid;gap:12px}.authalt:empty{display:none}
+.authalt .gor{text-transform:uppercase;letter-spacing:.04em;font-size:11.5px}
+.auth-sw{text-align:center;font-size:13px}
+.auth-legal{margin:0;text-align:center;font-size:12px;color:var(--muted);line-height:1.55}
+.auth-legal a{text-decoration:underline}
+.auth-back{margin-bottom:-4px}
+.auth-t{font-size:20px;margin:0;text-transform:none}
+.auth-p{margin:0;font-size:13px;line-height:1.5}
+@media (max-width:520px){.auth-tabs button{font-size:17px;padding:14px 10px 11px}.auth-tabs{padding-left:34px}.md.auth .md-b{padding:16px 14px 18px}}
 .pmeth{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .pmeth label{border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer;font-size:12px;color:var(--muted)}
 .pmeth label b{display:block;color:var(--fg);font-size:13.5px}

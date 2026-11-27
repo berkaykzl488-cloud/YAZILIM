@@ -40,7 +40,7 @@ const hsTodo = () => HSD.todo(me()) || {};
 /* ---------- hesap menüsü: gruplar ---------- */
 const P_ACC_NAV = [
   { g: 'Yönetim', only: () => isPanel(), items: [{ href: 'yonetim', l: 'Yönetim paneli', ic: 'yonetim', cls: 'hs-adm' }] },
-  { g: 'Genel', items: [{ t: 'ozet', l: 'Özetim', ic: 'home' }, { href: 'bildirimler', l: 'Bildirimlerim', ic: 'bildirimler', b: u => S.notifs.filter(n => n.u === u.id && !n.read).length, bl: 'okunmamış bildirim' }] },
+  { g: 'Genel', items: [{ t: 'ozet', l: 'Özetim', ic: 'home' }, { href: 'bildirimler', l: 'Bildirimlerim', ic: 'bildirimler', b: u => S.notifs.filter(n => n.u === u.id && !n.read).length, bl: 'okunmamış bildirim' }, { href: 'mesajlar', l: 'Mesajlarım', ic: 'mesajlar', b: u => unreadDM(u.id), bl: 'okunmamış konuşma' }] },
   { g: 'Alışlarım', items: [{ t: 'alis', l: 'Siparişlerim', ic: 'siparis', b: () => hsTodo().buy, bl: 'onay bekleyen sipariş' }, { t: 'borsa', s: 'al', l: 'Borsa alımlarım', ic: 'borsa', b: () => (+hsTodo().exCall || 0) + (+hsTodo().exInfo || 0), bl: 'borsa işi bekliyor' }, { t: 'ep', l: 'EP kodlarım', ic: 'metin2-ep' }] },
   { g: 'Satışlarım', items: [{ t: 'ilan', l: 'İlanlarım', ic: 'metin2-tr' }, { t: 'satis', l: 'Satışlarım', ic: 'pazar', b: () => hsTodo().sell, bl: 'teslimat bekleyen satış' }, { t: 'borsa', s: 'sat', l: 'Borsa satış emirlerim', ic: 'borsa' }, { href: 'ilan-ver', l: '+ İlan ver', ic: 'ilan-ver' }, { t: 'reklam', l: 'Reklamlarım', ic: 'reklam-ver' }] },
   { g: 'Cüzdan', items: [{ act: 'deposit', l: 'Bakiye yükle', ic: 'ilan-ver' }, { t: 'cek', l: 'Para çek', ic: 'cikis' }, { t: 'hareket', l: 'Bakiye hareketleri', ic: 'rehber' }, { t: 'banka', l: 'Banka hesaplarım', ic: 'guvenli' }] },

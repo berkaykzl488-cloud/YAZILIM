@@ -41,7 +41,8 @@ return function (Router $r) {
     Hooks::on('poll', function (array $data, Db $db, $u) {
         $t = Support::current($db, $u['id']);
         $data['unread']['tk'] = $t ? (int)$t['unread_u'] : 0;
-        $data['support'] = ['open' => Support::isOpen(Support::cfg($db)), 'on' => Support::cfg($db)['mode'] !== 'closed'];
+        $sc = Support::cfg($db);
+        $data['support'] = ['mode' => $sc['mode'], 'open' => Support::isOpen($sc), 'on' => $sc['mode'] !== 'closed'];
         if (Perm::has($u, 'destek')) {
             $data['queues']['tickets'] = (int)$db->val("SELECT COUNT(*) FROM {tickets} WHERE status='bekliyor'");
         }

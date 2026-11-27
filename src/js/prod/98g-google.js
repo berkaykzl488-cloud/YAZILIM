@@ -1,6 +1,7 @@
 /* ================== "Google ile devam et" (yalnız --prod derlemesinde) ==================
    Sunucu: app/routes/12_google.php, app/src/Google.php (OAuth 2.0 yetki kodu + PKCE; Google JS SDK yok).
-   - Giriş ve Üye Ol pencerelerine beyaz "Google ile devam et" düğmesi + "veya" ayırıcı (yalnız S.set.googleOn iken).
+   - Giriş ve Kayıt Ol sekmelerine beyaz "Google ile devam et" düğmesi + "veya hesabınla devam et" ayırıcı (yalnız S.set.googleOn iken;
+     P6: formdaki [data-galt] yerine, gönder düğmesinin altına).
      Düğme tam sayfa gezinmesiyle /api/v1/index.php?r=auth/google/start&mode=…&ret=<rota> adresine gider.
    - Dönüş: <site>/?gauth=<sonuç>#<rota>. gauth adresten silinir (temiz ve ?p= kiplerinde), sonuca göre: giriş tamam (toast),
      "Google ile kaydı tamamla" formu, şifreyle bağlama penceresi, 2 adımlı doğrulama kodu (pTfa, aynı uç noktalar) ya da
@@ -31,8 +32,11 @@ ACT['g-start']=(d)=>{ const m=['login','register','link'].includes(d.m)?d.m:'log
   location.href=apiUrl('auth/google/start?mode='+m+'&ret='+encodeURIComponent(gRet())); };
 
 /* ---- giriş / üyelik pencereleri ---- */
+/* P6: giriş/kayıt penceresinde düğme formdaki [data-galt] yerine (gönder düğmesinin altı, "veya hesabınla devam et"); yer yoksa formun en üstü */
 function gInject(form, m){ if(!gOn()||me()) return; const f=$('#modal form[data-form='+form+']'); if(!f||f.querySelector('.gbtn')) return;
-  f.insertAdjacentHTML('afterbegin', gBtn(m)+'<div class="gor" role="separator"><span>veya</span></div>'); }
+  const slot=f.querySelector('[data-galt]');
+  if(slot) slot.innerHTML='<div class="gor" role="separator"><span>veya hesabınla devam et</span></div>'+gBtn(m);
+  else f.insertAdjacentHTML('afterbegin', gBtn(m)+'<div class="gor" role="separator"><span>veya</span></div>'); }
 { const f=mLogin; mLogin=function(){ const o=f.apply(this,arguments); try{ gInject('loginf','login'); }catch(e){} return o; }; }
 { const f=mRegister; mRegister=function(){ const o=f.apply(this,arguments); try{ gInject('registerf','register'); }catch(e){} return o; }; }
 

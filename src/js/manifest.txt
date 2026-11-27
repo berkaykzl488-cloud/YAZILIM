@@ -32,6 +32,7 @@ demo/kits.js
 82-chg.js
 83-borsa-kart-act.js
 84-hesabim-act.js
+85-auth-act.js
 90-seo.js
 demo/posts.js
 91-seo2-mkt.js
@@ -50,6 +51,8 @@ prod/97p4-ex.js
 prod/98p4-actions.js
 prod/97p5-growth.js
 prod/98p5-actions.js
+prod/97p6-comm.js
+prod/98p6-actions.js
 prod/98w-whatsapp.js
 prod/97x-borsa-kart.js
 prod/98x-borsa-kart.js

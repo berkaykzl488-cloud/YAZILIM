@@ -83,7 +83,7 @@ vAccount=function(){ const u=me(); if(!u) return `<div class="wrap">${emptyBox('
   <div class="acc"><div class="stack" style="gap:12px"><nav class="panel tabs">${TABS.map(([k,t,c])=>`<button data-act="tab" data-t="${k}" class="${ui.tab===k?'on':''}">${t}${c?`<span class="cnt">${c}</span>`:''}</button>`).join('')}</nav></div><div class="stack">${body}</div></div></div>`; };
 
 /* ---- Yönetim ---- */
-const P_ADM = {panel:1, ara:1, uye:['uyeler'], calisan:1, sms:1, ilan:1, server:1, bakim:1, cekim:1, borsa:1, ep:1}; // cekim: demo tablosu, veri 97p3-wd.js
+const P_ADM = {panel:1, ara:1, uye:['uyeler'], calisan:1, sms:1, ilan:1, server:1, bakim:1, cekim:1, borsa:1, ep:1, destek:1, mesaj:1}; // destek, mesaj: P6 (97p6-comm.js) // cekim: demo tablosu, veri 97p3-wd.js
 function pAdmPage(P,it,fn){ const SB=admSubs(it); const sub=P.sub&&SB.some(s=>s.s===P.sub)?P.sub:(SB[0]||{}).s||null; if(sub) (ui.asub=ui.asub||{})[it.k]=sub; ui.atab=it.k; ui.admDirty=false;
   const r=fn(sub)||{}; return admShell({P:Object.assign({},P,{k:it.k}),it,sub,page:aPage({title:it.l,desc:r.desc!=null?r.desc:it.desc,actions:r.actions||'',subs:aSubs(it,sub),body:`<div class="stack">${r.body||''}</div>`}),over:''}); }
 const pAdmLoad = (k,path,fn,ttl) => need(k, ()=>call('GET',path,null,{quiet:true}).then(j=>fn?fn(j.data):j.data), ttl);
