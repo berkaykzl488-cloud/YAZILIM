@@ -8,10 +8,11 @@
 if (YP_PROD) {
 const PS = { probing: false, auto: false, q: null };
 
-/* noindex (sunucudaki Seo::head ile aynı): "Yakında" bölümleri, rehber (yazılar henüz sunucuda değil), satıcı profili,
+/* noindex (sunucudaki Seo::head ile aynı): "Yakında" bölümleri, rehber (yayında yazı yokken), satıcı profili,
    kategori takma adları, server EP (yakında) / tüm ilanlar / ilanı olmayan kategori */
 seoNoidxX = function (r) {
-  if (/^(ortaklik|yang-fiyatlari|rehber)$/.test(r) || /^uye-/.test(r) || (/^kategori-/.test(r) && r !== 'kategori-metin2')) return true;
+  // P7: ortaklık canlı; rehber yalnız yayında yazı yokken noindex (sunucudaki Seo::head ile aynı)
+  if (r === 'yang-fiyatlari' || (r === 'rehber' && !posts().length) || /^uye-/.test(r) || (/^kategori-/.test(r) && r !== 'kategori-metin2')) return true;
   const m = r.match(/^server-([^-]+)-(.+)$/); if (m) { const s = srv(m[1]); return m[2] === 'ep' || m[2] === 'hepsi' || !s || !p1N(s, m[2]); }
   return false; };
 

@@ -534,7 +534,7 @@ final class Seo
             } else {
                 $noidx = true;
                 $status = 404;
-                $t = 'Yazı bulunamadı';
+                $t = 'Sayfa bulunamadı';
             }
         }
         // satıcı profili: herkese açık ama ince içerik (ilanlar zaten kendi sayfalarında) → noindex, follow

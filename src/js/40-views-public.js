@@ -58,7 +58,7 @@ function renderFooter(){
     <div><h4>Popüler serverlar</h4>${S.servers.map(x=>[x,active().filter(l=>l.server===x.id).length]).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([x])=>`<a href="#server-${x.id}">${esc(x.name)}</a>`).join('')}</div>
     <div><h4>Rehber</h4>${posts().slice(0,4).map(p=>`<a href="#rehber-${p.slug}">${esc(cut(p.title,38))}</a>`).join('')}<a href="#rehber">Tüm rehberler →</a></div>
     <div><h4>Kazan</h4><a href="#cekilis">Haftalık Çekiliş</a><a href="#cekilis">Günlük Şans Çarkı</a><a href="#hesabim" data-act="tab" data-t="puan">VIP & Puan</a><a href="#hesabim" data-act="tab" data-t="davet">Davet Et Kazan</a></div>
-    <div><h4>Yardım</h4><a href="#guvenli">Güvenli Alışveriş & SSS</a><a href="#home" data-act="ls-open">Canlı Destek</a><a href="#sayfa-kvkk">KVKK Aydınlatma Metni</a><a href="#sayfa-mesafeli">Mesafeli Satış Sözleşmesi</a><a href="#sayfa-iletisim">İletişim</a></div>
+    <div><h4>Yardım</h4><a href="#guvenli">Güvenli Alışveriş & SSS</a><a href="#home" data-act="ls-open">Canlı Destek</a><a href="#sayfa-kvkk">KVKK Aydınlatma Metni</a><a href="#sayfa-mesafeli">Mesafeli Satış Sözleşmesi</a><a href="#sayfa-iade">İade ve İptal</a><a href="#sayfa-gizlilik">Gizlilik & Çerez</a><a href="#sayfa-hakkimizda">Hakkımızda</a><a href="#sayfa-iletisim">İletişim</a></div>
   </div><div class="fbot"><span>© 2026 ${esc(S.set.siteName)} · Tüm hakları saklıdır.</span><span>Altyapı: Lisay Yazılım</span></div></div>`;
 }
 
