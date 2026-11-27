@@ -44,7 +44,8 @@ final class Cron
         ];
         // P2 para görevleri: autoconfirm, deposit_expiry, ledger_check, proof_retention (YP\Money\Jobs)
         // P4: borsa gizli bilgi güvenlik ağı (YP\Exchange\Jobs)
-        return array_merge($t, Money\Jobs::tasks(), Exchange\Jobs::tasks());
+        // P7: otomatik veritabanı yedeği (YP\Admin\Jobs)
+        return array_merge($t, Money\Jobs::tasks(), Exchange\Jobs::tasks(), Admin\Jobs::tasks());
     }
 
     public static function lock(Db $db, $task, $ttlMs)
@@ -78,6 +79,9 @@ final class Cron
             return ['ok' => false, 'msg' => 'Başka bir cron çalışması sürüyor.'];
         }
         $out = ['ok' => true, 'via' => $via, 'tasks' => []];
+        if ($via !== 'lazy') {
+            @file_put_contents(YP_STORAGE . '/cache/cron_last.txt', yp_now_ms() . "\n"); // P7 yayına alma kontrolü: gerçek cron çalışıyor mu
+        }
         try {
             foreach (self::tasks() as $name => $t) {
                 if (microtime(true) > $deadline) {

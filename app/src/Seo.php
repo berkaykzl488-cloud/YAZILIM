@@ -36,7 +36,7 @@ final class Seo
     const CAT_SLUGS = ['yang' => 'yang', 'won' => 'yang', 'item' => 'item', 'karakter' => 'karakter', 'ep' => 'ep', 'hepsi' => 'hepsi'];
     /** Canlı sitede henüz "Yakında" olan sayfalar (ön yüzdeki P_SOON_R, src/js/prod/97-p0b-views.js): noindex, site haritasında yok.
      *  Bölüm açıldığında buradan da çıkarın. */
-    const SOON = ['ortaklik', 'yang-fiyatlari']; // P4: borsa, metin2-ep; P5: cekilis, reklam-ver açıldı
+    const SOON = ['yang-fiyatlari']; // P4: borsa, metin2-ep; P5: cekilis, reklam-ver; P7: ortaklik açıldı
     /** Özel sayfalar (ön yüzdeki PRIV_R): noindex, robots.txt'de kapalı */
     const PRIV_RX = '/^(hesabim|yonetim|mesajlar|bildirimler|siparis-|ilan-ver$|ara$|davet-|widget-)/';
     /** Bilinen tek parça rotalar; bunlar ve server/ilan/sayfa/rehber/üye dışındaki her adres gerçek 404 döner */
@@ -298,7 +298,7 @@ final class Seo
             return $set($r, $ls, $l);
         }
         if (in_array($a0, ['rehber', 'sayfa', 'uye'], true)) {
-            return $n === 2 ? $set($a0 . '-' . $a[1]) : $set('yok');
+            return $n === 2 ? $set($a0 . '-' . $a[1]) : ($n === 1 && $a0 === 'rehber' ? $set('rehber') : $set('yok'));
         }
         if ($a0 === 'yonetim') {
             return $set(implode('/', $a));
@@ -420,8 +420,8 @@ final class Seo
         } elseif (isset($P[$canon])) {
             list($t, $d) = $P[$canon];
             $cr[] = [$t, '/' . $canon];
-            if (in_array($canon, self::SOON, true) || $canon === 'rehber') {
-                $noidx = true; // canlıda "Yakında" ya da (rehber yazıları sunucuda değil) boş sayfa
+            if (in_array($canon, self::SOON, true) || ($canon === 'rehber' && !Admin\Content::publishedCount($db))) {
+                $noidx = true; // canlıda "Yakında" ya da (henüz yayında yazı yok) boş rehber
             }
         }
         if (preg_match('/^server-([^-]+)(?:-(.+))?$/', $r, $m)) {
@@ -494,14 +494,47 @@ final class Seo
             }
         }
         if (strpos($r, 'sayfa-') === 0) {
+            // P7: kurumsal / yasal sayfalar veritabanından (Yönetim › Site ayarları › Şirket & yasal sayfalar)
             $k = substr($r, 6);
-            if (isset(self::STATIC_PAGES[$k])) {
-                $t = self::STATIC_PAGES[$k];
+            $pg = Admin\Content::pageRow($db, $k);
+            if ($pg) {
+                $t = $pg['title'];
+                $d = Text::cut(trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace('<', ' <', Admin\Content::renderPage($db, $pg)['html'])), ENT_QUOTES, 'UTF-8'))), 158);
                 $cr[] = [$t, '/sayfa/' . $k];
                 $status = 200;
             } else {
                 $noidx = true;
                 $status = 404;
+            }
+        }
+        $post = null;
+        if (strpos($r, 'rehber-') === 0) {
+            // P7: rehber yazısı (yalnız yayındakiler; taslak 404)
+            $post = Admin\Content::postBySlug($db, substr($r, 7));
+            if ($post) {
+                $t = $post['seo_title'] !== '' ? $post['seo_title'] : $post['title'];
+                $d = $post['seo_desc'] !== '' ? $post['seo_desc'] : ($post['excerpt'] !== '' ? $post['excerpt'] : Admin\Markdown::text($post['body'], 158));
+                $type = 'article';
+                $cv = $post['cover_id'] ? $db->one('SELECT * FROM {media} WHERE id=?', [(int)$post['cover_id']]) : null;
+                if ($cv && $cv['vis'] === 'public') {
+                    $img = $base . '/' . $cv['path'];
+                }
+                $canonPath = '/rehber/' . $post['slug'];
+                $cr[] = ['Rehber', '/rehber'];
+                $cr[] = [Text::cut($post['title'], 40), $canonPath];
+                $art = ['@type' => 'Article', 'headline' => Text::cut($post['title'], 110), 'description' => Text::cut($d, 300),
+                    'datePublished' => gmdate('c', (int)floor(((int)$post['published_at'] ?: (int)$post['created_at']) / 1000)),
+                    'dateModified' => gmdate('c', (int)floor(max((int)$post['updated_at'], (int)$post['created_at']) / 1000)),
+                    'mainEntityOfPage' => $u($canonPath), 'publisher' => ['@type' => 'Organization', 'name' => $nm, 'url' => $base . '/'], 'inLanguage' => 'tr-TR'];
+                if ($img !== '') {
+                    $art['image'] = $img;
+                }
+                $ld[] = $art;
+                $status = 200;
+            } else {
+                $noidx = true;
+                $status = 404;
+                $t = 'Sayfa bulunamadı';
             }
         }
         // satıcı profili: herkese açık ama ince içerik (ilanlar zaten kendi sayfalarında) → noindex, follow
@@ -556,7 +589,8 @@ final class Seo
         $out = ['title' => $title, 'desc' => Text::cut($d, 160), 'canonical' => $noidx ? '' : $url, 'url' => $url,
             'robots' => $noidx ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'type' => $type, 'img' => $img, 'ld' => $ld,
             'status' => $status, 'route' => $r, 'site' => $nm, 'verify' => ['gsc' => $SE['gsc'], 'bing' => $SE['bing'], 'yandex' => $SE['yandex']],
-            'redirect' => $redir, 'mode' => $mode, 'path' => $want, 'h1' => $t, 'intro' => $d, 'crumbs' => $crumbs, 'srv' => $s, 'lst' => $l, 'cat' => $cat, 'cnt' => $cnt, 'priv' => $priv];
+            'redirect' => $redir, 'mode' => $mode, 'path' => $want, 'h1' => $t, 'intro' => $d, 'crumbs' => $crumbs, 'srv' => $s, 'lst' => $l, 'cat' => $cat, 'cnt' => $cnt, 'priv' => $priv,
+            'post' => $post];
         $out['html'] = self::html($out);
         return $out;
     }
@@ -643,7 +677,7 @@ final class Seo
         if ($h['status'] === 404) {
             return '<div class="wrap ssr" data-ssr>' . $html . '<p>Aradığınız sayfa kaldırılmış veya bağlantı hatalı olabilir.</p><p>' . $a('/', 'Ana sayfaya dön') . '</p></div>';
         }
-        if (!$isL) {
+        if (!$isL && strpos((string)$h['route'], 'sayfa-') !== 0) {
             $html .= '<p>' . $e($h['intro']) . '</p>';
         }
         $r = $h['route'];
@@ -688,6 +722,8 @@ final class Seo
             if ($ls !== '') {
                 $html .= '<h2>' . ($c === '' ? 'Son eklenen ilanlar' : $e($h1) . ' ilanları') . '</h2>' . $ls;
             }
+        } elseif (($x = Admin\Content::ssrBody($db, $h, $a)) !== null) {
+            $html .= $x; // P7: rehber listesi, rehber yazısı, kurumsal / yasal sayfa
         } elseif ($h['lst'] && strpos($r, 'ilan-') === 0 && $h['canonical'] !== '') {
             $l = $h['lst'];
             $seller = $db->one('SELECT name FROM {users} WHERE id=?', [(int)$l['seller_id']]);
@@ -777,8 +813,9 @@ final class Seo
                 $add('/' . $r, $day, '0.5', 'monthly');
             }
         }
-        foreach (array_keys(self::STATIC_PAGES) as $k) {
-            $add('/sayfa/' . $k, $day, '0.3', 'yearly');
+        // P7: rehber (yayında yazı varsa) + yazılar; kurumsal / yasal sayfalar veritabanından
+        foreach (Admin\Content::sitemapRows($db) as $x) {
+            $add($x[0], $iso($x[1] ?: yp_now_ms()), $x[2], $x[3]);
         }
         $byId = [];
         foreach ($srvs as $s) {
@@ -821,7 +858,7 @@ final class Seo
         } else {
             // özel sayfalar hem temiz (/hesabim) hem ?p= (/?p=hesabim) biçimiyle kapalı
             $out .= "Allow: /\n";
-            foreach (['hesabim', 'yonetim', 'mesajlar', 'bildirimler', 'siparis-', 'ilan-ver', 'ara$', 'davet-', 'widget-'] as $k) {
+            foreach (['hesabim', 'yonetim', 'mesajlar', 'bildirimler', 'siparis-', 'ilan-ver', 'ara$', 'davet-', 'widget-', 'widget/'] as $k) {
                 $out .= 'Disallow: /' . $k . "\nDisallow: /*?p=" . $k . "\n";
             }
             $out .= "Disallow: /*yp_probe=\nDisallow: /api/\nDisallow: /kurulum/\nAllow: /uploads/\n";

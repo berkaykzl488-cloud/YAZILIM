@@ -76,6 +76,12 @@ if ($ypSeo && !headers_sent()) {
     }
     header('X-YP-Page: ' . preg_replace('/[^A-Za-z0-9_\/?=&.-]/', '', (string)$ypSeo['route']));
 }
+// P7 bakım modu: ziyaretçiye 503 + Retry-After (arama motorları sayfayı "geçici kapalı" bilir); çalışanlar siteyi normal açar
+if (is_array($ypBoot) && !empty($ypBoot['set']['maint']['on']) && !headers_sent()
+    && !(isset($ypBoot['me']) && is_array($ypBoot['me']) && (!empty($ypBoot['me']['staff']) || !empty($ypBoot['me']['admin'])))) {
+    http_response_code(503);
+    header('Retry-After: 600');
+}
 // ilk temiz adres isteği rewrite'ı doğrulamış olabilir: açılış verisindeki adres kipi güncel olsun
 if ($ypSeo && is_array($ypBoot) && isset($ypBoot['set']) && is_array($ypBoot['set'])) {
     try {
