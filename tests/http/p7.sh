@@ -306,6 +306,9 @@ api "$J_SE" POST admin/backlinks '{"url":"https://bakimda.example/x","k":"diger"
 chk "çalışan bakımda işlem yapar (bypass)" '[ "$CODE" = 200 ]'
 J_SE2="$RUN/se2.jar"; CS_SE2=$(login "$J_SE2" SeoCalisan)
 chk "bakımda çalışan girişi açık" '[ -n "$CS_SE2" ] && [ "$CS_SE2" != null ]'
+api "$J_Y" POST auth/forgot '{"login":"a@ornek.com"}' -H "X-CSRF-Token: $CS_Y"; C1="$CODE"
+api "$J_Y" POST auth/reset '{"token":"x","password":"Yeni-Sifre-123"}' -H "X-CSRF-Token: $CS_Y"
+chk "bakımda hesap kurtarma (auth/forgot, auth/reset) bakım kapısına takılmaz (P6)" '[ "$C1" != 503 ] && [ "$CODE" != 503 ]'
 api "$J_UY" POST "admin/users/$UB/verify" '{}' -H "X-CSRF-Token: $CS_UY"
 chk "çalışan yönetim POST'u bakımda 503 değil" '[ "$CODE" != 503 ]'
 

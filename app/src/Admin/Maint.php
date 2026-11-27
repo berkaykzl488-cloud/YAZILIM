@@ -21,8 +21,8 @@ use YP\Settings;
 final class Maint
 {
     const MSG = 'Sitemiz kısa bir bakımda. Lütfen biraz sonra tekrar deneyin.';
-    /** Bakımda da açık uçlar (giriş yapabilmek için) */
-    const OPEN = ['auth/login', 'auth/logout', 'auth/tfa/verify', 'auth/tfa/resend', 'auth/tfa/switch'];
+    /** Bakımda da açık uçlar: giriş ve hesap kurtarma (P6: şifremi unuttum / sıfırla) */
+    const OPEN = ['auth/login', 'auth/logout', 'auth/tfa/verify', 'auth/tfa/resend', 'auth/tfa/switch', 'auth/forgot', 'auth/reset'];
 
     public static function get(Db $db)
     {
