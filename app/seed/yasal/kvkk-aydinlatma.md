@@ -26,7 +26,7 @@
 - Para yükleme ve para çekme işlemlerinin yürütülmesi, ilgili mali belgelerin düzenlenmesi,
 - Dolandırıcılığın önlenmesi, hesap ve işlem güvenliğinin sağlanması, uyuşmazlık ve itirazların çözülmesi,
 - Yasal yükümlülüklerin (vergi mevzuatı, 6563 sayılı Kanun, 5651 sayılı Kanun vb.) yerine getirilmesi,
-- Canlı destek ve bilgilendirme (işlemsel e-posta/SMS) hizmetlerinin sunulması,
+- Canlı destek ve bilgilendirme (işlemsel e-posta/WhatsApp) hizmetlerinin sunulması,
 - Açık rızanız olması halinde kampanya ve tanıtım iletileri gönderilmesi.
 
 ## 4. Hukuki sebepler (KVKK md.5)
@@ -40,7 +40,7 @@
 Kişisel verileriniz, yukarıdaki amaçlarla sınırlı olarak:
 - Ödeme hizmeti sağlayıcılarına (PayTR Ödeme ve Elektronik Para Kuruluşu A.Ş.) ve bankalara,
 - Barındırma (hosting) hizmeti sağlayıcımıza ([HOSTING FİRMASI], sunucular Türkiye'de),
-- İşlemsel e-posta (Brevo – Sendinblue SAS, AB) ve SMS ([SMS FİRMASI]) hizmet sağlayıcılarına,
+- İşlemsel e-posta (Brevo – Sendinblue SAS, AB) ve WhatsApp mesajı ([SMS FİRMASI]) hizmet sağlayıcılarına,
 - Ön muhasebe hizmet sağlayıcılarına (kullanılıyorsa Paraşüt / Bizim Hesap),
 - Yetkili kamu kurum ve kuruluşlarına (talep halinde, mevzuat gereği)
 

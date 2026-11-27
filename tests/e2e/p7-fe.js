@@ -164,7 +164,7 @@ sh('php', ['-r', '$i=imagecreatetruecolor(1200,630); imagefill($i,0,0,imagecolor
 
     /* ---------- 7. bakım modu ---------- */
     await nav(M, 'yonetim/bakim/bakim', 1000);
-    ok('Bakım modu: sürüm ve güncelleme paneli', await until(M, () => !!document.querySelector('form[data-form=maintset]')) && /sürüm ve güncelleme/i.test(await M.evaluate(() => document.querySelector('.admwrap').textContent)));
+    ok('Bakım modu: sistem güncellemesi (P1) ve güvenli güncelleme panelleri', await until(M, () => !!document.querySelector('form[data-form=maintset]')) && /güvenli güncelleme/i.test(await M.evaluate(() => document.querySelector('.admwrap').textContent)) && await M.locator('[data-act=p1-update]').count() === 1);
     await M.fill('#mt_msg', 'Kısa bir bakım yapıyoruz, 10 dakikaya döneceğiz.'); await M.check('#mt_on');
     await M.click('form[data-form=maintset] button.btn-primary');
     ok('bakım açıldı (toast)', await toast(M, 'Bakım modu açıldı'));

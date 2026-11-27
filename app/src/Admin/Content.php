@@ -32,7 +32,7 @@ final class Content
         'unvan' => ['Şirket unvanı', 160], 'adres' => ['Adres', 300], 'vd' => ['Vergi dairesi', 80], 'vkn' => ['VKN / TCKN', 11],
         'mersis' => ['MERSİS no', 16], 'sicil' => ['Ticaret sicil no', 40], 'tel' => ['Telefon', 30], 'email' => ['E-posta', 120],
         'kep' => ['KEP adresi', 120], 'oda' => ['Meslek odası', 120], 'verbis' => ['VERBİS kaydı', 120],
-        'hosting' => ['Barındırma (hosting) firması', 120], 'msg' => ['Mesaj (SMS / WhatsApp) sağlayıcısı', 120],
+        'hosting' => ['Barındırma (hosting) firması', 120], 'msg' => ['Mesaj (WhatsApp) sağlayıcısı', 120],
     ];
     /** Yer tutucu → şirket alanı */
     const PH = [
